@@ -139,8 +139,8 @@ function Burger() {
   const [open, setOpen] = useState(false);
   return (
     <>
-      <button onClick={() => setOpen(true)} style={{ background: "rgba(28,15,0,0.12)", border: `1px solid ${INK}44`, borderRadius: 4, width: 40, height: 40, cursor: "pointer", display: "flex", flexDirection: "column", gap: 5, justifyContent: "center", alignItems: "center", flexShrink: 0, padding: 0, boxSizing: "border-box" }}>
-        {[0,1,2].map(i => <span key={i} style={{ display: "block", width: 18, height: 2, background: INK, borderRadius: 1 }} />)}
+      <button onClick={() => setOpen(true)} style={{ background: "rgba(28,15,0,0.12)", border: `1px solid ${INK}44`, borderRadius: 4, width: 72, height: 72, cursor: "pointer", display: "flex", flexDirection: "column", gap: 6, justifyContent: "center", alignItems: "center", flexShrink: 0, padding: 0, boxSizing: "border-box" }}>
+        {[0,1,2].map(i => <span key={i} style={{ display: "block", width: 24, height: 3, background: INK, borderRadius: 2 }} />)}
       </button>
       {open && (
         <>
@@ -968,10 +968,10 @@ export default function Home() {
         <div style={{ background: PAPER, padding: "14px 14px 8px" }}>
           {/* Top row: palm | title (centered) | burger */}
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-            {/* Left: realistic palm tree cluster */}
-            <div style={{ flexShrink: 0, width: 68, height: 72, display: "flex", alignItems: "flex-end", justifyContent: "center" }}>
+            {/* Left: user palm tree image */}
+            <div style={{ flexShrink: 0, width: 72, height: 72, display: "flex", alignItems: "flex-end", justifyContent: "center" }}>
               <img
-                src="https://base44.app/api/apps/69d062aca815ce8e697894b1/files/mp/public/69d062aca815ce8e697894b1/eec112014_palm_transparent2.png"
+                src="https://base44.app/api/apps/69d062aca815ce8e697894b1/files/mp/public/69d062aca815ce8e697894b1/db767c521_palm_user_raw.png"
                 alt="Palm trees"
                 style={{
                   width: 72, height: 72,
