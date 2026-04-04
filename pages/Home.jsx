@@ -166,7 +166,7 @@ export default function Home() {
             textShadow: "none",
             lineHeight: 1,
             fontStyle: "italic",
-          }}><span style={{ fontStyle: "normal", fontWeight: 900, fontFamily: "'Great Vibes', cursive", fontSize: "1.35em", letterSpacing: 1, fontStyle: "italic", WebkitTextFillColor: "transparent", background: "linear-gradient(180deg, #C8860A 0%, #7A4820 40%, #3A1800 100%)", WebkitBackgroundClip: "text", backgroundClip: "text" }}>V</span><span style={{ fontStyle: "normal" }}>&#8209;Hub</span></span>
+          }}><span style={{ fontStyle: "italic", fontWeight: 400, fontFamily: "'Great Vibes', cursive", fontSize: "1.4em", letterSpacing: 1, color: "#7A4820", WebkitTextFillColor: "#7A4820", background: "none" }}>V</span><span style={{ fontStyle: "normal" }}>&#8209;Hub</span></span>
         </div>
 
         {/* Tagline */}
@@ -279,7 +279,7 @@ export default function Home() {
               {/* Service dropdown */}
               <div style={{ borderRight: `1px solid ${INK}`, position: "relative" }}>
                 <button onClick={e => { e.stopPropagation(); setSOpen(!sOpen); setVOpen(false); }}
-                  style={{ width: "100%", background: PAPER, border: "3px solid #FFDB00", boxShadow: "0 0 0 2px #FFE800, 0 0 8px 1px rgba(255,224,0,0.3)", padding: "8px 10px", fontSize: 12, fontFamily: "'Times New Roman', serif", color: selCat ? INK : INK_FADE, cursor: "pointer", display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: 0 }}>
+                  style={{ width: "100%", background: PAPER, border: "3px solid #FFDB00", boxShadow: "0 0 0 2px #FFE800, 0 0 8px 1px rgba(255,224,0,0.3)", padding: "8px 10px", fontSize: 12, fontFamily: "'Times New Roman', serif", color: selCat ? INK : INK_FADE, cursor: "pointer", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                   <span>{selCat ? (cats.find(c => c.id === selCat)?.name || "Select a Service") : "Select a Service"}</span>
                   <span style={{ fontSize: 9, color: INK_FADE, flexShrink: 0 }}>▼</span>
                 </button>
