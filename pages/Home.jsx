@@ -403,23 +403,31 @@ export default function Home() {
       }}>
 
         {/* ── MASTHEAD ── */}
-        <div style={{ background: PAPER, padding: "14px 14px 8px", position: "relative", textAlign: "center" }}>
-          <div style={{ position: "absolute", top: 14, right: 14 }}><Burger /></div>
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 10, marginBottom: 4 }}>
-            <span style={{ fontSize: 38, lineHeight: 1 }}>🌴🌴</span>
-            <span style={{ fontSize: 52, fontWeight: 900, color: INK, fontFamily: "'Times New Roman', serif", letterSpacing: -1, lineHeight: 1 }}>
+        <div style={{ background: PAPER, padding: "14px 14px 8px" }}>
+          {/* Top row: palm | title (centered) | burger */}
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+            {/* Left: palm tree */}
+            <span style={{ fontSize: 48, lineHeight: 1, flexShrink: 0 }}>🌴</span>
+            {/* Center: V-Hub title */}
+            <span style={{ flex: 1, textAlign: "center", fontSize: 52, fontWeight: 900, color: INK, fontFamily: "'Times New Roman', serif", letterSpacing: -1, lineHeight: 1 }}>
               <span style={{ fontStyle: "italic", fontWeight: 400, fontFamily: "'Great Vibes', cursive", fontSize: "1.2em", color: BROWN_BTN }}>V</span>
               <span>-Hub</span>
             </span>
+            {/* Right: burger — same size as palm */}
+            <div style={{ flexShrink: 0 }}><Burger /></div>
           </div>
-          <div style={{ fontSize: 13, fontStyle: "italic", color: INK_FADE, marginBottom: 10 }}>
+          {/* Tagline */}
+          <div style={{ fontSize: 13, fontStyle: "italic", color: INK_FADE, textAlign: "center", margin: "6px 0 10px" }}>
             Connecting You to Local Services in The Villages!
           </div>
-          <a href="/list-service" style={{ textDecoration: "none" }}>
-            <button style={{ background: `linear-gradient(180deg,#9A6030,${BROWN_BTN} 60%,#5A3010)`, color: "#F5E8CC", border: "none", borderRadius: 5, padding: "9px 28px", fontSize: 13, fontWeight: 700, fontFamily: "'Times New Roman', serif", letterSpacing: 2, cursor: "pointer", boxShadow: "0 2px 8px rgba(0,0,0,0.3)" }}>
-              List Your Service
-            </button>
-          </a>
+          {/* List Your Service button */}
+          <div style={{ textAlign: "center" }}>
+            <a href="/list-service" style={{ textDecoration: "none" }}>
+              <button style={{ background: `linear-gradient(180deg,#9A6030,${BROWN_BTN} 60%,#5A3010)`, color: "#F5E8CC", border: "none", borderRadius: 5, padding: "9px 28px", fontSize: 13, fontWeight: 700, fontFamily: "'Times New Roman', serif", letterSpacing: 2, cursor: "pointer", boxShadow: "0 2px 8px rgba(0,0,0,0.3)" }}>
+                List Your Service
+              </button>
+            </a>
+          </div>
         </div>
 
         <Rule thick />
