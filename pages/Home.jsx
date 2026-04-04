@@ -7,6 +7,7 @@ const PAPER     = "#F0E6C8";
 const PAPER_MID = "#E4D5A8";
 const PAPER_DK  = "#C8B07A";
 const BROWN_BTN = "#7A4820";
+const BROWN_HL  = "#6B3010";
 const YELLOW    = "#FFDB00";
 
 const FILLER = [
@@ -19,11 +20,11 @@ const FILLER = [
 ];
 
 const SECTIONS = [
-  { key: "Historic Side | Spanish Springs",         label: "Historic Side",        color: "#5C2E0E" },
-  { key: "Established Villages | North of SR-466A", label: "Established Villages", color: "#2E4E1A" },
-  { key: "Newer Villages | South of SR-44",         label: "Newer Villages",       color: "#1E4E1E" },
-  { key: "Eastport | Newest Development Area",      label: "Eastport",             color: "#1A3060" },
-  { key: "Family & Non-Age-Restricted Villages",    label: "Family Villages",      color: "#3A1E5C" },
+  { key: "Historic Side | Spanish Springs",         label: "Historic Side" },
+  { key: "Established Villages | North of SR-466A", label: "Established Villages" },
+  { key: "Newer Villages | South of SR-44",         label: "Newer Villages" },
+  { key: "Eastport | Newest Development Area",      label: "Eastport" },
+  { key: "Family & Non-Age-Restricted Villages",    label: "Family Villages" },
 ];
 
 function isVillage(a) { return a.name && a.name.includes("—"); }
@@ -87,7 +88,7 @@ function Burger() {
   );
 }
 
-// ── Provider Detail view ──────────────────────────────────────────────────────
+// ── Provider Detail ───────────────────────────────────────────────────────────
 function ProvDetail({ prov, areas, cats, onBack }) {
   const pAreas = areas.filter(a => prov.service_areas?.includes(a.id));
   const cat = cats.find(c => c.id === prov.category_id);
@@ -127,33 +128,43 @@ function ProvDetail({ prov, areas, cats, onBack }) {
   );
 }
 
-// ── Results view ──────────────────────────────────────────────────────────────
-function Results({ results, areas, cats, onReset, onSel, selArea }) {
+// ── Results ───────────────────────────────────────────────────────────────────
+function Results({ results, areas, cats, onReset, onSel, selArea, selCatId }) {
+  const cat = cats.find(c => c.id === selCatId);
   return (
     <div style={{ minHeight: "100vh", background: PAPER, fontFamily: "'Times New Roman', serif", maxWidth: 860, margin: "0 auto", boxShadow: "0 2px 40px rgba(0,0,0,0.28)" }}>
+      {/* Header */}
       <div style={{ background: INK, padding: "10px 14px", display: "flex", alignItems: "center", gap: 10 }}>
         <button onClick={onReset} style={{ background: "rgba(255,255,255,0.15)", border: "none", color: PAPER, borderRadius: 3, padding: "4px 10px", fontSize: 12, cursor: "pointer" }}>← Back</button>
         <span style={{ color: PAPER, fontWeight: 700, fontSize: 13, letterSpacing: 1 }}>
-          Results {selArea ? `· ${vName(selArea)}` : ""}
+          {cat ? cat.name : "All Services"}{selArea ? ` · ${vName(selArea)}` : ""}
         </span>
       </div>
+      {/* Results */}
       <div style={{ padding: "14px" }}>
+        <div style={{ fontSize: 11, color: INK_FADE, marginBottom: 10, fontStyle: "italic" }}>
+          {results.length} provider{results.length !== 1 ? "s" : ""} found
+        </div>
         {results.length === 0 ? (
           <div style={{ textAlign: "center", padding: "40px 20px", color: INK_FADE, fontSize: 14 }}>
             No providers found for this search. Try a different village or service.
           </div>
         ) : results.map(p => {
-          const cat = cats.find(c => c.id === p.category_id);
+          const pCat = cats.find(c => c.id === p.category_id);
           return (
             <div key={p.id} onClick={() => onSel(p)}
-              style={{ background: PAPER, border: `1px solid ${PAPER_DK}`, borderRadius: 5, padding: "12px", marginBottom: 10, cursor: "pointer", display: "flex", gap: 12, alignItems: "center" }}>
-              {p.logo_url && <img src={p.logo_url} alt="logo" style={{ width: 48, height: 48, borderRadius: 5, objectFit: "cover", flexShrink: 0 }} />}
-              <div style={{ flex: 1 }}>
-                <div style={{ fontSize: 15, fontWeight: 900, color: INK }}>{p.business_name}</div>
-                {cat && <div style={{ fontSize: 11, color: INK_FADE }}>{cat.icon} {cat.name}</div>}
+              style={{ background: PAPER, border: `1px solid ${PAPER_DK}`, borderRadius: 5, padding: "12px 14px", marginBottom: 10, cursor: "pointer", display: "flex", gap: 12, alignItems: "center", boxShadow: "0 1px 4px rgba(0,0,0,0.1)" }}>
+              {p.logo_url
+                ? <img src={p.logo_url} alt="logo" style={{ width: 52, height: 52, borderRadius: 5, objectFit: "cover", flexShrink: 0, border: `1px solid ${PAPER_DK}` }} />
+                : <div style={{ width: 52, height: 52, borderRadius: 5, background: PAPER_MID, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22 }}>{pCat?.icon || "🏠"}</div>
+              }
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontSize: 15, fontWeight: 900, color: INK, marginBottom: 2 }}>{p.business_name}</div>
+                {pCat && <div style={{ fontSize: 11, color: INK_FADE }}>{pCat.icon} {pCat.name}</div>}
                 {p.rating && <div style={{ fontSize: 12, color: "#B8860B" }}>{"★".repeat(Math.round(p.rating))} {p.rating}/5</div>}
+                {p.phone && <div style={{ fontSize: 11, color: INK_FADE, marginTop: 2 }}>📞 {p.phone}</div>}
               </div>
-              <span style={{ fontSize: 18, color: INK_FADE }}>›</span>
+              <span style={{ fontSize: 20, color: PAPER_DK, flexShrink: 0 }}>›</span>
             </div>
           );
         })}
@@ -162,18 +173,43 @@ function Results({ results, areas, cats, onReset, onSel, selArea }) {
   );
 }
 
-// ── Main Home ─────────────────────────────────────────────────────────────────
+// ── Dropdown button (yellow border, burnt brown) ──────────────────────────────
+function DropBtn({ label, isOpen, onClick }) {
+  return (
+    <button
+      onClick={onClick}
+      style={{
+        width: "100%",
+        background: PAPER,
+        border: `3px solid ${YELLOW}`,
+        boxShadow: `0 0 0 1.5px ${YELLOW}, 0 0 10px 2px rgba(255,220,0,0.35)`,
+        borderRadius: 5,
+        padding: "10px 12px",
+        fontSize: 13,
+        fontFamily: "'Times New Roman', serif",
+        color: label.startsWith("Select") ? INK_FADE : INK,
+        fontWeight: label.startsWith("Select") ? 400 : 700,
+        cursor: "pointer",
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "center",
+        textAlign: "left",
+      }}>
+      <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "85%" }}>{label}</span>
+      <span style={{ fontSize: 10, flexShrink: 0, marginLeft: 4 }}>{isOpen ? "▲" : "▼"}</span>
+    </button>
+  );
+}
+
+// ── Main ──────────────────────────────────────────────────────────────────────
 export default function Home() {
   const [areas,    setAreas]    = useState([]);
   const [cats,     setCats]     = useState([]);
   const [svcs,     setSvcs]     = useState([]);
-  const [selArea,  setSelArea]  = useState(null);
-  const [selCat,   setSelCat]   = useState("");
-  const [selSvc,   setSelSvc]   = useState("");
+  const [selArea,  setSelArea]  = useState(null);   // ServiceArea object
+  const [selCat,   setSelCat]   = useState(null);   // Category object
   const [sOpen,    setSOpen]    = useState(false);
   const [vOpen,    setVOpen]    = useState(false);
-  const [openSec,  setOpenSec]  = useState(null);
-  const [openCat,  setOpenCat]  = useState(null);
   const [results,  setResults]  = useState([]);
   const [searched, setSearched] = useState(false);
   const [selProv,  setSelProv]  = useState(null);
@@ -186,43 +222,48 @@ export default function Home() {
 
   const grouped = groupAreas(areas);
 
+  // Flat village list for display (all villages across all sections)
+  const allVillages = areas.filter(isVillage).sort((a, b) => vName(a).localeCompare(vName(b)));
+
+  const closeAll = () => { setSOpen(false); setVOpen(false); };
+
   const doSearch = async () => {
+    closeAll();
     const all = await Provider.filter({ is_visible: true });
-    const out = all.filter(p =>
-      (!selArea || p.service_areas?.includes(selArea.id)) &&
-      (!selCat  || p.category_id === selCat) &&
-      (!selSvc  || p.services?.includes(selSvc)) &&
-      (p.subscription_status === "active" || p.subscription_status === "trial")
-    );
-    out.sort((a,b) => ({premium:0,featured:1,basic:2}[a.subscription_tier]??3) - ({premium:0,featured:1,basic:2}[b.subscription_tier]??3));
+    const out = all.filter(p => {
+      const areaMatch = !selArea || p.service_areas?.includes(selArea.id);
+      const catMatch  = !selCat  || p.category_id === selCat.id;
+      return areaMatch && catMatch;
+    });
+    out.sort((a, b) => {
+      const tier = { premium: 0, featured: 1, basic: 2 };
+      return (tier[a.subscription_tier] ?? 3) - (tier[b.subscription_tier] ?? 3);
+    });
     setResults(out);
     setSearched(true);
   };
 
   const reset = () => {
-    setSelArea(null); setSelCat(""); setSelSvc("");
+    setSelArea(null); setSelCat(null);
     setResults([]); setSearched(false); setSelProv(null);
-    setSOpen(false); setVOpen(false); setOpenSec(null); setOpenCat(null); setOpenCat(null);
+    closeAll();
   };
 
   if (selProv)  return <ProvDetail prov={selProv} areas={areas} cats={cats} onBack={() => setSelProv(null)} />;
-  if (searched) return <Results results={results} areas={areas} cats={cats} onReset={reset} onSel={setSelProv} selArea={selArea} />;
+  if (searched) return <Results results={results} areas={areas} cats={cats} onReset={reset} onSel={setSelProv} selArea={selArea} selCatId={selCat?.id} />;
 
   return (
     <>
       <link rel="preconnect" href="https://fonts.googleapis.com" />
       <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet" />
 
-      {/* Full page wrapper — clicking closes dropdowns */}
       <div
-        onClick={() => { setSOpen(false); setVOpen(false); }}
+        onClick={closeAll}
         style={{ minHeight: "100vh", background: PAPER, backgroundImage: `repeating-linear-gradient(0deg,transparent,transparent 27px,rgba(28,15,0,0.04) 27px,rgba(28,15,0,0.04) 28px)`, fontFamily: "'Times New Roman', Georgia, serif", maxWidth: 860, margin: "0 auto", boxShadow: "0 2px 40px rgba(0,0,0,0.28)" }}>
 
         {/* ── MASTHEAD ── */}
         <div style={{ background: PAPER, padding: "14px 14px 8px", position: "relative", textAlign: "center" }}>
           <div style={{ position: "absolute", top: 14, right: 14 }}><Burger /></div>
-
-          {/* Palm trees + title */}
           <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 10, marginBottom: 4 }}>
             <span style={{ fontSize: 38, lineHeight: 1 }}>🌴🌴</span>
             <span style={{ fontSize: 52, fontWeight: 900, color: INK, fontFamily: "'Times New Roman', serif", letterSpacing: -1, lineHeight: 1 }}>
@@ -230,13 +271,11 @@ export default function Home() {
               <span>-Hub</span>
             </span>
           </div>
-
-          <div style={{ fontSize: 13, fontStyle: "italic", color: INK_FADE, marginBottom: 10, fontFamily: "'Times New Roman', serif" }}>
+          <div style={{ fontSize: 13, fontStyle: "italic", color: INK_FADE, marginBottom: 10 }}>
             Connecting You to Local Services in The Villages!
           </div>
-
           <a href="/list-service" style={{ textDecoration: "none" }}>
-            <button style={{ background: `linear-gradient(180deg, #9A6030 0%, ${BROWN_BTN} 60%, #5A3010 100%)`, color: "#F5E8CC", border: "none", borderRadius: 5, padding: "9px 28px", fontSize: 13, fontWeight: 700, fontFamily: "'Times New Roman', serif", letterSpacing: 2, cursor: "pointer", boxShadow: "0 2px 8px rgba(0,0,0,0.3)" }}>
+            <button style={{ background: `linear-gradient(180deg,#9A6030,${BROWN_BTN} 60%,#5A3010)`, color: "#F5E8CC", border: "none", borderRadius: 5, padding: "9px 28px", fontSize: 13, fontWeight: 700, fontFamily: "'Times New Roman', serif", letterSpacing: 2, cursor: "pointer", boxShadow: "0 2px 8px rgba(0,0,0,0.3)" }}>
               List Your Service
             </button>
           </a>
@@ -244,7 +283,7 @@ export default function Home() {
 
         <Rule thick />
 
-        {/* ── NAV BAR ── */}
+        {/* NAV */}
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", background: PAPER }}>
           <div style={{ padding: "8px", textAlign: "center", borderRight: `1px solid ${INK}`, fontSize: 11, fontWeight: 700, letterSpacing: 2, color: INK, textTransform: "uppercase" }}>Local Services</div>
           <div style={{ padding: "8px", textAlign: "center", fontSize: 11, fontWeight: 700, letterSpacing: 2, color: INK, textTransform: "uppercase" }}>Classifieds</div>
@@ -252,109 +291,171 @@ export default function Home() {
 
         <Rule />
 
-        {/* ── PHOTO BANNER ── */}
+        {/* PHOTO */}
         <img src="https://media.base44.com/images/public/69d062aca815ce8e697894b1/2b4566a86_lakesum.jpg" alt="Lake Sumter Landing"
-          style={{ width: "100%", height: 180, objectFit: "cover", display: "block" }}
+          style={{ width: "100%", height: 160, objectFit: "cover", display: "block" }}
           onError={e => { e.target.style.display = "none"; }} />
 
         <Rule />
 
         {/* ── THREE COLUMN BODY ── */}
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1.6fr 1fr", gap: 0 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1.8fr 1fr", gap: 0 }}>
 
-          {/* Left column */}
+          {/* Left */}
           <div style={{ padding: "12px 10px", borderRight: `1px solid ${INK}` }}>
             <NewsCol idx={0} lines={2} />
           </div>
 
-          {/* Centre column — search */}
+          {/* Centre — search */}
           <div style={{ padding: "12px 14px", borderRight: `1px solid ${INK}` }}>
             <NewsCol idx={2} lines={1} style={{ marginBottom: 12, fontSize: 8 }} />
 
-            {/* ════ SEARCH PANEL ════ */}
-            <div onClick={e => e.stopPropagation()} style={{ border: `2px solid ${INK}`, borderRadius: 6, background: PAPER_MID, padding: "8px 8px 10px" }}>
+            {/* ══ SEARCH PANEL ══ */}
+            <div onClick={e => e.stopPropagation()} style={{ border: `2px solid ${INK}`, borderRadius: 5, background: PAPER_MID, padding: "8px 8px 10px" }}>
 
-              {/* FIND SERVICES button */}
-              <button onClick={doSearch} style={{ display: "block", width: "100%", background: `linear-gradient(180deg,#9A6030,${BROWN_BTN} 55%,#5A3010)`, color: "#F5E8CC", border: `4px solid ${YELLOW}`, boxShadow: `0 0 0 2px ${YELLOW},0 0 14px 4px rgba(255,220,0,0.55)`, borderRadius: 6, padding: "13px 10px", fontSize: 15, fontWeight: 900, fontFamily:"'Times New Roman',serif", letterSpacing: 4, textTransform: "uppercase", cursor: "pointer", marginBottom: 10 }}>
-                Find Services
-              </button>
-
-              {/* SERVICE selector — full width */}
-              <div style={{ fontSize: 9, fontWeight: 700, color: INK_FADE, textTransform: "uppercase", letterSpacing: 1, marginBottom: 3 }}>What service do you need?</div>
-              <div style={{ position: "relative", marginBottom: 8 }}>
-                <button onClick={e => { e.stopPropagation(); setSOpen(o => !o); setVOpen(false); }}
-                  style={{ display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%", background: PAPER, border: `4px solid ${YELLOW}`, boxShadow: `0 0 0 2px ${YELLOW},0 0 10px 2px rgba(255,220,0,0.4)`, borderRadius: 6, padding: "12px 14px", fontSize: 15, fontFamily:"'Times New Roman',serif", color: selSvc ? INK : INK_FADE, cursor: "pointer", textAlign: "left" }}>
-                  <span>{selSvc ? (svcs.find(s=>s.id===selSvc)?.name || "Select a Service") : "Select a Service"}</span>
-                  <span style={{ fontSize: 12 }}>{sOpen ? "▲" : "▼"}</span>
-                </button>
-                {sOpen && (
-                  <div onClick={e => e.stopPropagation()} style={{ position: "absolute", top: "calc(100% + 3px)", left: 0, right: 0, background: PAPER, border: `2px solid ${INK}`, borderRadius: 5, zIndex: 9999, boxShadow: "0 10px 30px rgba(0,0,0,0.45)", maxHeight: 360, overflowY: "auto" }}>
-                    <div onClick={() => { setSelCat(""); setSelSvc(""); setSOpen(false); setOpenCat(null); }} style={{ padding: "10px 14px", fontSize: 13, color: INK_FADE, fontStyle: "italic", borderBottom: `1px solid ${PAPER_DK}`, cursor: "pointer" }}>— All Services —</div>
-                    {cats.map(c => {
-                      const catSvcs = svcs.filter(s => s.category_id === c.id);
-                      const isCatOpen = openCat === c.id;
-                      return (
-                        <div key={c.id}>
-                          <div
-                            onClick={e => { e.stopPropagation(); setOpenCat(isCatOpen ? null : c.id); }}
-                            style={{ padding: "11px 14px", fontSize: 13, fontWeight: 700, color: "#fff", background: "#5C2E0E", display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer", borderBottom: "1px solid rgba(255,255,255,0.15)" }}>
-                            <span>{c.icon} {c.name}</span>
-                            <span style={{ fontSize: 11 }}>{isCatOpen ? "▲" : "▼"}</span>
-                          </div>
-                          {isCatOpen && catSvcs.map(s => (
-                            <div key={s.id}
-                              onClick={e => { e.stopPropagation(); setSelCat(c.id); setSelSvc(s.id); setSOpen(false); setOpenCat(null); }}
-                              style={{ padding: "10px 14px 10px 28px", fontSize: 14, color: INK, background: selSvc===s.id ? PAPER_MID : PAPER, borderBottom: `1px solid ${PAPER_DK}`, cursor: "pointer" }}>
-                              {s.name}
-                            </div>
-                          ))}
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
+              {/* Labels row */}
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 4 }}>
+                <div style={{ fontSize: 9, fontWeight: 700, color: INK, fontFamily: "'Times New Roman', serif" }}>What service do you need?</div>
+                <div style={{ fontSize: 9, fontWeight: 700, color: INK, fontFamily: "'Times New Roman', serif" }}>Where do you need it?</div>
               </div>
 
-              {/* VILLAGE selector — full width */}
-              <div style={{ fontSize: 9, fontWeight: 700, color: INK_FADE, textTransform: "uppercase", letterSpacing: 1, marginBottom: 3 }}>Where do you need it?</div>
-              <div style={{ position: "relative" }}>
-                <button onClick={e => { e.stopPropagation(); setVOpen(o => !o); setSOpen(false); setOpenSec(null); setOpenCat(null); }}
-                  style={{ display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%", background: PAPER, border: `4px solid ${YELLOW}`, boxShadow: `0 0 0 2px ${YELLOW},0 0 10px 2px rgba(255,220,0,0.4)`, borderRadius: 6, padding: "12px 14px", fontSize: 15, fontFamily:"'Times New Roman',serif", color: selArea ? INK : INK_FADE, cursor: "pointer", textAlign: "left" }}>
-                  <span>{selArea ? vName(selArea) : "Select a Village"}</span>
-                  <span style={{ fontSize: 12 }}>{vOpen ? "▲" : "▼"}</span>
-                </button>
-                {vOpen && (
-                  <div onClick={e => e.stopPropagation()} style={{ position: "absolute", top: "calc(100% + 3px)", left: 0, right: 0, background: PAPER, border: `2px solid ${INK}`, borderRadius: 5, zIndex: 9999, boxShadow: "0 10px 30px rgba(0,0,0,0.45)", maxHeight: 340, overflowY: "auto" }}>
-                    {SECTIONS.map(sec => {
-                      const vils = grouped[sec.key] || [];
-                      const isExpanded = openSec === sec.key;
-                      return (
-                        <div key={sec.key}>
-                          <div onClick={e => { e.stopPropagation(); setOpenSec(isExpanded ? null : sec.key); }}
-                            style={{ padding: "11px 14px", fontSize: 13, fontWeight: 700, color: "#fff", background: sec.color, display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer" }}>
-                            <span>{sec.label}</span>
-                            <span>{isExpanded ? "▲" : "▼"}</span>
-                          </div>
-                          {isExpanded && vils.map(v => (
-                            <div key={v.id} onClick={e => { e.stopPropagation(); setSelArea(v); setVOpen(false); setOpenSec(null); }}
-                              style={{ padding: "10px 14px 10px 28px", fontSize: 14, color: INK, background: selArea?.id===v.id ? PAPER_MID : PAPER, borderBottom: `1px solid ${PAPER_DK}`, cursor: "pointer" }}>
-                              {vName(v)}
-                            </div>
-                          ))}
+              {/* Buttons + open dropdowns row */}
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, position: "relative" }}>
+
+                {/* ── SERVICE column ── */}
+                <div style={{ position: "relative" }}>
+                  <DropBtn
+                    label={selCat ? selCat.name : "Select a Service"}
+                    isOpen={sOpen}
+                    onClick={e => { e.stopPropagation(); setSOpen(o => !o); setVOpen(false); }}
+                  />
+                  {sOpen && (
+                    <div
+                      onClick={e => e.stopPropagation()}
+                      style={{
+                        position: "absolute",
+                        top: "calc(100% + 3px)",
+                        left: 0,
+                        right: 0,
+                        background: PAPER,
+                        border: `2px solid ${INK}`,
+                        borderRadius: 4,
+                        zIndex: 9999,
+                        boxShadow: "0 8px 28px rgba(0,0,0,0.4)",
+                        maxHeight: 280,
+                        overflowY: "auto",
+                      }}>
+                      {/* All option */}
+                      <div
+                        onClick={() => { setSelCat(null); setSOpen(false); }}
+                        style={{ padding: "9px 12px", fontSize: 12, color: INK_FADE, fontStyle: "italic", borderBottom: `1px solid ${PAPER_DK}`, cursor: "pointer", background: !selCat ? PAPER_MID : PAPER }}>
+                        — All Services —
+                      </div>
+                      {cats.map(c => (
+                        <div
+                          key={c.id}
+                          onClick={() => { setSelCat(c); setSOpen(false); }}
+                          style={{
+                            padding: "10px 12px",
+                            fontSize: 13,
+                            fontWeight: selCat?.id === c.id ? 700 : 400,
+                            color: selCat?.id === c.id ? "#fff" : INK,
+                            background: selCat?.id === c.id ? BROWN_HL : PAPER,
+                            borderBottom: `1px solid ${PAPER_DK}`,
+                            cursor: "pointer",
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 6,
+                          }}>
+                          <span>{c.icon}</span>
+                          <span>{c.name}</span>
                         </div>
-                      );
-                    })}
-                  </div>
-                )}
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* ── VILLAGE column ── */}
+                <div style={{ position: "relative" }}>
+                  <DropBtn
+                    label={selArea ? vName(selArea) : "Select a Village"}
+                    isOpen={vOpen}
+                    onClick={e => { e.stopPropagation(); setVOpen(o => !o); setSOpen(false); }}
+                  />
+                  {vOpen && (
+                    <div
+                      onClick={e => e.stopPropagation()}
+                      style={{
+                        position: "absolute",
+                        top: "calc(100% + 3px)",
+                        left: 0,
+                        right: 0,
+                        background: PAPER,
+                        border: `2px solid ${INK}`,
+                        borderRadius: 4,
+                        zIndex: 9999,
+                        boxShadow: "0 8px 28px rgba(0,0,0,0.4)",
+                        maxHeight: 280,
+                        overflowY: "auto",
+                      }}>
+                      {/* All option */}
+                      <div
+                        onClick={() => { setSelArea(null); setVOpen(false); }}
+                        style={{ padding: "9px 12px", fontSize: 12, color: INK_FADE, fontStyle: "italic", borderBottom: `1px solid ${PAPER_DK}`, cursor: "pointer", background: !selArea ? PAPER_MID : PAPER }}>
+                        — All Villages —
+                      </div>
+                      {allVillages.map(v => (
+                        <div
+                          key={v.id}
+                          onClick={() => { setSelArea(v); setVOpen(false); }}
+                          style={{
+                            padding: "10px 12px",
+                            fontSize: 13,
+                            fontWeight: selArea?.id === v.id ? 700 : 400,
+                            color: selArea?.id === v.id ? "#fff" : INK,
+                            background: selArea?.id === v.id ? BROWN_HL : PAPER,
+                            borderBottom: `1px solid ${PAPER_DK}`,
+                            cursor: "pointer",
+                          }}>
+                          {vName(v)}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+              </div>
+
+              {/* FIND SERVICES button — below dropdowns */}
+              <div style={{ marginTop: 10 }}>
+                <button
+                  onClick={doSearch}
+                  style={{
+                    width: "100%",
+                    background: `linear-gradient(180deg,#9A6030,${BROWN_BTN} 55%,#5A3010)`,
+                    color: "#F5E8CC",
+                    border: `3px solid ${YELLOW}`,
+                    boxShadow: `0 0 0 1.5px ${YELLOW}, 0 0 12px 3px rgba(255,220,0,0.5)`,
+                    borderRadius: 5,
+                    padding: "12px 10px",
+                    fontSize: 14,
+                    fontWeight: 900,
+                    fontFamily: "'Times New Roman', serif",
+                    letterSpacing: 4,
+                    textTransform: "uppercase",
+                    cursor: "pointer",
+                  }}>
+                  Find Services
+                </button>
               </div>
 
             </div>
-            {/* ════ END SEARCH PANEL ════ */}
+            {/* ══ END SEARCH PANEL ══ */}
 
             <NewsCol idx={5} lines={1} style={{ marginTop: 12, fontSize: 8 }} />
           </div>
 
-          {/* Right column */}
+          {/* Right */}
           <div style={{ padding: "12px 10px" }}>
             <NewsCol idx={3} lines={2} />
           </div>
@@ -363,7 +464,7 @@ export default function Home() {
 
         <Rule thick style={{ marginTop: 0 }} />
 
-        {/* ── FOOTER ── */}
+        {/* FOOTER */}
         <div style={{ padding: "10px", textAlign: "center", fontSize: 9, color: INK_FADE, letterSpacing: 1, textTransform: "uppercase" }}>
           V-HUB · The Villages, FL · Connecting Residents with Trusted Local Providers · All Rights Reserved
         </div>
