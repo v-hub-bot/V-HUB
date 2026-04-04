@@ -98,19 +98,26 @@ export default function Admin() {
 
   const [reviews, setReviews] = useState([]);
 
+  // Get PIN from sessionStorage (set by Home.jsx when unlocking admin)
+  const adminPin = sessionStorage.getItem("vhub_admin_pin") || "";
+
   const loadAll = async () => {
-    const [p, c, s, a, rv] = await Promise.all([
-      Provider.list(),
-      Category.list(),
-      Service.list(),
-      ServiceArea.list(),
-      ProviderReview.list(),
-    ]);
-    setProviders(p);
-    setCategories(c);
-    setServices(s);
-    setAreas(a);
-    setReviews(rv);
+    try {
+      const res = await fetch("/functions/adminData", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ pin: adminPin }),
+      });
+      if (!res.ok) { console.error("Admin data load failed"); return; }
+      const data = await res.json();
+      setProviders(data.providers || []);
+      setCategories(data.categories || []);
+      setServices(data.services || []);
+      setAreas(data.areas || []);
+      setReviews(data.reviews || []);
+    } catch (e) {
+      console.error("loadAll error", e);
+    }
   };
 
   useEffect(() => { loadAll(); }, []);

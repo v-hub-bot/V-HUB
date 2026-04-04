@@ -148,6 +148,7 @@ function Burger() {
     setPinError(false);
     if (next.length === 4) {
       if (next === "6185" || next === "1357") {
+        sessionStorage.setItem("vhub_admin_pin", next);
         setAdminUnlocked(true);
         setPinMode(false);
         setPin("");
