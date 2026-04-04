@@ -96,8 +96,10 @@ function Burger() {
 export default function Home() {
   const [areas, setAreas]     = useState([]);
   const [cats, setCats]       = useState([]);
+  const [svcs, setSvcs]       = useState([]);
   const [selArea, setSelArea] = useState(null);
   const [selCat, setSelCat]   = useState("");
+  const [selSvc, setSelSvc]   = useState("");
   const [vOpen, setVOpen]     = useState(false);
   const [sOpen, setSOpen]     = useState(false);
   const [openSec, setOpenSec] = useState(null);
@@ -108,6 +110,7 @@ export default function Home() {
   useEffect(() => {
     ServiceArea.filter({ is_active: true }).then(setAreas);
     Category.filter({ is_active: true }).then(setCats);
+    Service.filter({ is_active: true }).then(setSvcs);
   }, []);
 
   const grouped = groupAreas(areas);
@@ -119,13 +122,14 @@ export default function Home() {
     const out = all.filter(p =>
       p.service_areas?.includes(selArea.id) &&
       (!selCat || p.category_id === selCat) &&
+      (!selSvc || p.services?.includes(selSvc)) &&
       (p.subscription_status === "active" || p.subscription_status === "trial")
     );
     out.sort((a, b) => ({premium:0,featured:1,basic:2}[a.subscription_tier]??3) - ({premium:0,featured:1,basic:2}[b.subscription_tier]??3));
     setResults(out); setSearched(true);
   };
 
-  const reset = () => { setSelArea(null); setSelCat(""); setResults([]); setSearched(false); setSelProv(null); setVOpen(false); setSOpen(false); setOpenSec(null); };
+  const reset = () => { setSelArea(null); setSelCat(""); setSelSvc(""); setResults([]); setSearched(false); setSelProv(null); setVOpen(false); setSOpen(false); setOpenSec(null); };
 
   if (selProv)  return <ProvDetail prov={selProv} areas={areas} cats={cats} onBack={() => setSelProv(null)} />;
   if (searched) return <Results results={results} areas={areas} cats={cats} onReset={reset} onSel={setSelProv} selArea={selArea} />;
@@ -279,21 +283,33 @@ export default function Home() {
               {/* Service dropdown */}
               <div style={{ position: "relative", border: "3px solid #FFDB00", boxShadow: "0 0 0 2px #FFE800, 0 0 8px 2px rgba(255,224,0,0.35)", borderRadius: 4 }}>
                 <button onClick={e => { e.stopPropagation(); setSOpen(!sOpen); setVOpen(false); }}
-                  style={{ width: "100%", background: PAPER, border: "none", padding: "8px 10px", fontSize: 12, fontFamily: "'Times New Roman', serif", color: selCat ? INK : INK_FADE, cursor: "pointer", display: "flex", justifyContent: "space-between", alignItems: "center", borderRadius: 2 }}>
-                  <span>{selCat ? (cats.find(c => c.id === selCat)?.name || "Select a Service") : "Select a Service"}</span>
+                  style={{ width: "100%", background: PAPER, border: "none", padding: "8px 10px", fontSize: 12, fontFamily: "'Times New Roman', serif", color: (selCat || selSvc) ? INK : INK_FADE, cursor: "pointer", display: "flex", justifyContent: "space-between", alignItems: "center", borderRadius: 2 }}>
+                  <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                    {selSvc ? svcs.find(s => s.id === selSvc)?.name : selCat ? cats.find(c => c.id === selCat)?.name : "Select a Service"}
+                  </span>
                   <span style={{ fontSize: 9, color: INK_FADE, flexShrink: 0 }}>▼</span>
                 </button>
                 {sOpen && (
-                  <div style={{ position: "absolute", top: "100%", left: 0, right: 0, background: PAPER, border: `1.5px solid ${INK}`, borderTop: "none", zIndex: 100, boxShadow: "0 5px 16px rgba(0,0,0,0.25)", maxHeight: 220, overflowY: "auto" }}>
-                    <div onClick={() => { setSelCat(""); setSOpen(false); }} style={{ padding: "7px 10px", cursor: "pointer", fontSize: 11, color: INK_FADE, fontStyle: "italic", borderBottom: `1px solid ${PAPER_DK}` }}>All Services</div>
-                    {cats.map(c => (
-                      <div key={c.id} onClick={() => { setSelCat(c.id); setSOpen(false); }}
-                        style={{ padding: "7px 10px", cursor: "pointer", fontSize: 12, color: INK, background: selCat === c.id ? PAPER_MID : PAPER, borderBottom: `1px solid ${PAPER_DK}` }}
-                        onMouseEnter={e => e.currentTarget.style.background = PAPER_MID}
-                        onMouseLeave={e => e.currentTarget.style.background = selCat === c.id ? PAPER_MID : PAPER}>
-                        {c.icon} {c.name}
-                      </div>
-                    ))}
+                  <div style={{ position: "absolute", top: "100%", left: 0, right: 0, background: PAPER, border: `1.5px solid ${INK}`, borderTop: "none", zIndex: 100, boxShadow: "0 5px 16px rgba(0,0,0,0.25)", maxHeight: 260, overflowY: "auto" }}>
+                    <div onClick={() => { setSelCat(""); setSelSvc(""); setSOpen(false); }} style={{ padding: "7px 10px", cursor: "pointer", fontSize: 10, color: INK_FADE, fontStyle: "italic", borderBottom: `1px solid ${PAPER_DK}` }}>All Services</div>
+                    {cats.map(c => {
+                      const catSvcs = svcs.filter(s => s.category_id === c.id);
+                      return (
+                        <div key={c.id}>
+                          <div style={{ padding: "5px 10px", fontSize: 10, fontWeight: 700, color: "#fff", background: "#5C2E0E", letterSpacing: 0.5, textTransform: "uppercase" }}>
+                            {c.icon} {c.name}
+                          </div>
+                          {catSvcs.map(s => (
+                            <div key={s.id} onClick={() => { setSelCat(c.id); setSelSvc(s.id); setSOpen(false); }}
+                              style={{ padding: "6px 10px 6px 18px", cursor: "pointer", fontSize: 11.5, color: INK, background: selSvc === s.id ? PAPER_MID : PAPER, borderBottom: `1px solid ${PAPER_DK}` }}
+                              onMouseEnter={e => e.currentTarget.style.background = PAPER_MID}
+                              onMouseLeave={e => e.currentTarget.style.background = selSvc === s.id ? PAPER_MID : PAPER}>
+                              {s.name}
+                            </div>
+                          ))}
+                        </div>
+                      );
+                    })}
                   </div>
                 )}
               </div>
