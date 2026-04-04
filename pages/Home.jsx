@@ -21,9 +21,9 @@ const SECTIONS = [
   { key: "Family & Non-Age-Restricted Villages", label: "Family Villages", sub: "Non-Age-Restricted", emoji: "🏠", color: BRAND.yellow },
 ];
 
-function isVillageRecord(area) { return area.name.includes("\u2014"); }
+function isVillageRecord(area) { return area.name.includes("—"); }
 function getVillageName(area) {
-  const parts = area.name.split("\u2014");
+  const parts = area.name.split("—");
   return parts.length > 1 ? parts[1].trim() : area.name;
 }
 function groupAreas(areas) {
