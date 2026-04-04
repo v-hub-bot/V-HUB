@@ -13,6 +13,38 @@ const BRAND = {
 
 const TABS = ["Providers", "Categories", "Services", "Service Areas"];
 
+const SECTION_ORDER = [
+  "Historic Side | Spanish Springs",
+  "Established Villages | North of SR-466A",
+  "Newer Villages | South of SR-44",
+  "Eastport | Newest Development Area",
+  "Family & Non-Age-Restricted Villages",
+];
+
+const SECTION_LABELS = {
+  "Historic Side | Spanish Springs": "🌴 Historic Side (Spanish Springs)",
+  "Established Villages | North of SR-466A": "🏡 Established Villages (North of SR-466A)",
+  "Newer Villages | South of SR-44": "🌿 Newer Villages (South of SR-44)",
+  "Eastport | Newest Development Area": "🌊 Eastport / Newest",
+  "Family & Non-Age-Restricted Villages": "🏠 Family / Non-Age-Restricted",
+};
+
+function groupAreas(areas) {
+  const groups = {};
+  SECTION_ORDER.forEach(s => groups[s] = []);
+  areas.forEach(a => {
+    const key = a.description;
+    if (groups[key]) groups[key].push(a);
+    else groups[key] = [a];
+  });
+  return groups;
+}
+
+function getVillageName(area) {
+  const parts = area.name.split("—");
+  return parts.length > 1 ? parts[1].trim() : area.name;
+}
+
 export default function Admin() {
   const [activeTab, setActiveTab] = useState("Providers");
   const [providers, setProviders] = useState([]);
@@ -21,7 +53,6 @@ export default function Admin() {
   const [areas, setAreas] = useState([]);
   const [showForm, setShowForm] = useState(false);
   const [editItem, setEditItem] = useState(null);
-  const [loading, setLoading] = useState(false);
 
   const loadAll = async () => {
     const [p, c, s, a] = await Promise.all([
@@ -64,7 +95,7 @@ export default function Admin() {
             style={{ height: 48, width: 48, borderRadius: 8 }} alt="V-Hub" />
           <div>
             <div style={{ color: "#fff", fontSize: 22, fontWeight: 800 }}>V-HUB Admin</div>
-            <div style={{ color: "rgba(255,255,255,0.85)", fontSize: 13 }}>Manage providers & listings</div>
+            <div style={{ color: "rgba(255,255,255,0.85)", fontSize: 13 }}>William Evans · Manage Providers & Listings</div>
           </div>
         </div>
         <a href="/" style={{ color: "#fff", textDecoration: "none", background: "rgba(255,255,255,0.2)", borderRadius: 10, padding: "8px 16px", fontSize: 14, fontWeight: 600 }}>
@@ -77,10 +108,10 @@ export default function Admin() {
         {[
           { label: "Providers", count: providers.length, icon: "🏢", color: BRAND.orange },
           { label: "Active", count: providers.filter(p => p.subscription_status === "active").length, icon: "✅", color: BRAND.teal },
-          { label: "Categories", count: categories.length, icon: "📂", color: BRAND.blue },
-          { label: "Areas", count: areas.length, icon: "📍", color: "#7C3AED" },
+          { label: "Trial", count: providers.filter(p => p.subscription_status === "trial").length, icon: "🕐", color: BRAND.blue },
+          { label: "Villages", count: areas.length, icon: "📍", color: "#7C3AED" },
         ].map((stat) => (
-          <div key={stat.label} style={{ background: "#fff", borderRadius: 14, padding: "16px 20px", boxShadow: "0 3px 12px rgba(0,0,0,0.08)", minWidth: 120, flex: 1 }}>
+          <div key={stat.label} style={{ background: "#fff", borderRadius: 14, padding: "16px 20px", boxShadow: "0 3px 12px rgba(0,0,0,0.08)", minWidth: 110, flex: 1 }}>
             <div style={{ fontSize: 24 }}>{stat.icon}</div>
             <div style={{ fontSize: 28, fontWeight: 800, color: stat.color }}>{stat.count}</div>
             <div style={{ fontSize: 14, color: BRAND.subtext }}>{stat.label}</div>
@@ -148,7 +179,7 @@ export default function Admin() {
             entity={Service}
             fields={[
               { key: "name", label: "Service Name", type: "text" },
-              { key: "category_id", label: "Category", type: "select", options: categories.map(c => ({ value: c.id, label: c.name })) },
+              { key: "category_id", label: "Category", type: "select", options: categories.map(c => ({ value: c.id, label: `${c.icon || ""} ${c.name}` })) },
               { key: "is_active", label: "Active", type: "checkbox" },
             ]}
             onSaved={loadAll}
@@ -160,7 +191,7 @@ export default function Admin() {
             entity={ServiceArea}
             fields={[
               { key: "name", label: "Area Name", type: "text" },
-              { key: "description", label: "Description", type: "text" },
+              { key: "description", label: "Section", type: "text" },
               { key: "is_active", label: "Active", type: "checkbox" },
             ]}
             onSaved={loadAll}
@@ -171,7 +202,7 @@ export default function Admin() {
   );
 }
 
-// ─── Providers Tab ───────────────────────────────────────────────────────────
+// ─── Providers Tab ────────────────────────────────────────────────────────────
 function ProvidersTab({ providers, categories, services, areas, onAdd, onEdit, onDelete, showForm, editItem, onClose, onSaved }) {
   return (
     <div>
@@ -206,7 +237,7 @@ function ProvidersTab({ providers, categories, services, areas, onAdd, onEdit, o
                   {p.is_visible === false && <span style={{ background: "#ff000020", color: "red", borderRadius: 20, padding: "3px 10px", fontSize: 12, fontWeight: 700 }}>Hidden</span>}
                 </div>
                 {cat && <div style={{ fontSize: 13, color: BRAND.teal, fontWeight: 600 }}>{cat.icon} {cat.name}</div>}
-                <div style={{ fontSize: 14, color: BRAND.subtext }}>{p.phone} {p.email ? `· ${p.email}` : ""}</div>
+                <div style={{ fontSize: 14, color: BRAND.subtext }}>{p.phone}{p.email ? ` · ${p.email}` : ""}</div>
               </div>
               <div style={{ display: "flex", gap: 8 }}>
                 <button onClick={() => onEdit(p)} style={editBtnStyle}>Edit</button>
@@ -216,7 +247,7 @@ function ProvidersTab({ providers, categories, services, areas, onAdd, onEdit, o
           );
         })}
         {providers.length === 0 && (
-          <div style={{ textAlign: "center", padding: "40px", color: BRAND.subtext, fontSize: 17 }}>
+          <div style={{ textAlign: "center", padding: "50px", color: BRAND.subtext, fontSize: 17 }}>
             No providers yet. Click "+ Add Provider" to get started.
           </div>
         )}
@@ -225,7 +256,7 @@ function ProvidersTab({ providers, categories, services, areas, onAdd, onEdit, o
   );
 }
 
-// ─── Provider Form ───────────────────────────────────────────────────────────
+// ─── Provider Form ────────────────────────────────────────────────────────────
 function ProviderForm({ provider, categories, services, areas, onClose, onSaved }) {
   const [form, setForm] = useState(provider || {
     business_name: "", owner_name: "", email: "", phone: "", website: "",
@@ -234,6 +265,8 @@ function ProviderForm({ provider, categories, services, areas, onClose, onSaved 
     is_visible: true, years_in_business: "", license_number: "",
   });
   const [saving, setSaving] = useState(false);
+
+  const groupedAreas = groupAreas(areas);
 
   const filteredServices = form.category_id
     ? services.filter(s => s.category_id === form.category_id)
@@ -261,7 +294,7 @@ function ProviderForm({ provider, categories, services, areas, onClose, onSaved 
   return (
     <div style={{ background: "#fff", borderRadius: 20, padding: "28px", boxShadow: "0 6px 24px rgba(0,0,0,0.12)", marginBottom: 24, border: `2px solid ${BRAND.teal}40` }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
-        <div style={{ fontSize: 20, fontWeight: 700, color: BRAND.text }}>{provider ? "Edit Provider" : "Add New Provider"}</div>
+        <div style={{ fontSize: 20, fontWeight: 700, color: BRAND.text }}>{provider ? "✏️ Edit Provider" : "➕ Add New Provider"}</div>
         <button onClick={onClose} style={{ background: "none", border: "none", fontSize: 22, cursor: "pointer", color: BRAND.subtext }}>✕</button>
       </div>
 
@@ -278,21 +311,16 @@ function ProviderForm({ provider, categories, services, areas, onClose, onSaved 
 
       <div style={{ marginTop: 16 }}>
         <label style={labelStyle}>Description</label>
-        <textarea
-          value={form.description || ""}
-          onChange={e => setForm({ ...form, description: e.target.value })}
-          rows={3}
-          style={{ ...inputStyle, resize: "vertical" }}
-          placeholder="Brief description of the business..."
-        />
+        <textarea value={form.description || ""} onChange={e => setForm({ ...form, description: e.target.value })}
+          rows={3} style={{ ...inputStyle, resize: "vertical" }} placeholder="Brief description of the business..." />
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginTop: 4 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginTop: 12 }}>
         <div>
           <label style={labelStyle}>Subscription Status</label>
           <select value={form.subscription_status || "trial"} onChange={e => setForm({ ...form, subscription_status: e.target.value })} style={inputStyle}>
             <option value="trial">Trial</option>
-            <option value="active">Active</option>
+            <option value="active">Active (Paid)</option>
             <option value="inactive">Inactive</option>
             <option value="pending">Pending</option>
           </select>
@@ -315,41 +343,46 @@ function ProviderForm({ provider, categories, services, areas, onClose, onSaved 
         </select>
       </div>
 
-      {/* Service Areas */}
-      <div style={{ marginTop: 16 }}>
+      {/* Service Areas — grouped */}
+      <div style={{ marginTop: 20 }}>
         <label style={labelStyle}>📍 Service Areas (select all that apply)</label>
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-          {areas.map(a => (
-            <div
-              key={a.id}
-              onClick={() => toggleArr("service_areas", a.id)}
-              style={{
-                background: form.service_areas?.includes(a.id) ? BRAND.orange : "#f0f0f0",
-                color: form.service_areas?.includes(a.id) ? "#fff" : BRAND.text,
-                borderRadius: 20, padding: "8px 16px", cursor: "pointer", fontSize: 14, fontWeight: 600
-              }}
-            >
-              {a.name}
+        {SECTION_ORDER.map(section => {
+          const sectionAreas = groupedAreas[section] || [];
+          if (sectionAreas.length === 0) return null;
+          return (
+            <div key={section} style={{ marginBottom: 14 }}>
+              <div style={{ fontSize: 13, fontWeight: 700, color: BRAND.subtext, marginBottom: 8, textTransform: "uppercase", letterSpacing: 0.5 }}>
+                {SECTION_LABELS[section]}
+              </div>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                {sectionAreas.map(a => (
+                  <div key={a.id} onClick={() => toggleArr("service_areas", a.id)}
+                    style={{
+                      background: form.service_areas?.includes(a.id) ? BRAND.orange : "#f0f0f0",
+                      color: form.service_areas?.includes(a.id) ? "#fff" : BRAND.text,
+                      borderRadius: 20, padding: "7px 14px", cursor: "pointer", fontSize: 13, fontWeight: 600
+                    }}>
+                    {getVillageName(a)}
+                  </div>
+                ))}
+              </div>
             </div>
-          ))}
-        </div>
+          );
+        })}
       </div>
 
       {/* Services */}
       {filteredServices.length > 0 && (
         <div style={{ marginTop: 16 }}>
-          <label style={labelStyle}>🛠️ Services (select all that apply)</label>
+          <label style={labelStyle}>🛠️ Services Offered (select all that apply)</label>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
             {filteredServices.map(s => (
-              <div
-                key={s.id}
-                onClick={() => toggleArr("services", s.id)}
+              <div key={s.id} onClick={() => toggleArr("services", s.id)}
                 style={{
                   background: form.services?.includes(s.id) ? BRAND.teal : "#f0f0f0",
                   color: form.services?.includes(s.id) ? "#fff" : BRAND.text,
                   borderRadius: 20, padding: "8px 16px", cursor: "pointer", fontSize: 14, fontWeight: 600
-                }}
-              >
+                }}>
                 {s.name}
               </div>
             ))}
@@ -358,28 +391,16 @@ function ProviderForm({ provider, categories, services, areas, onClose, onSaved 
       )}
 
       {/* Visibility */}
-      <div style={{ marginTop: 16, display: "flex", alignItems: "center", gap: 10 }}>
-        <input
-          type="checkbox"
-          id="visible"
-          checked={form.is_visible !== false}
+      <div style={{ marginTop: 18, display: "flex", alignItems: "center", gap: 10 }}>
+        <input type="checkbox" id="visible" checked={form.is_visible !== false}
           onChange={e => setForm({ ...form, is_visible: e.target.checked })}
-          style={{ width: 20, height: 20, cursor: "pointer" }}
-        />
+          style={{ width: 22, height: 22, cursor: "pointer" }} />
         <label htmlFor="visible" style={{ fontSize: 16, fontWeight: 600, cursor: "pointer" }}>Visible to customers</label>
       </div>
 
       <div style={{ display: "flex", gap: 12, marginTop: 24 }}>
-        <button
-          onClick={handleSave}
-          disabled={saving || !form.business_name}
-          style={{
-            background: `linear-gradient(135deg, ${BRAND.orange}, ${BRAND.teal})`,
-            color: "#fff", border: "none", borderRadius: 12,
-            padding: "14px 32px", fontSize: 17, fontWeight: 700, cursor: "pointer",
-            opacity: saving || !form.business_name ? 0.6 : 1
-          }}
-        >
+        <button onClick={handleSave} disabled={saving || !form.business_name}
+          style={{ background: `linear-gradient(135deg, ${BRAND.orange}, ${BRAND.teal})`, color: "#fff", border: "none", borderRadius: 12, padding: "14px 32px", fontSize: 17, fontWeight: 700, cursor: "pointer", opacity: saving || !form.business_name ? 0.6 : 1 }}>
           {saving ? "Saving..." : provider ? "Save Changes" : "Add Provider"}
         </button>
         <button onClick={onClose} style={{ background: "#f0f0f0", color: BRAND.text, border: "none", borderRadius: 12, padding: "14px 24px", fontSize: 17, fontWeight: 600, cursor: "pointer" }}>
@@ -403,11 +424,8 @@ function SimpleTab({ items, entity, fields, onSaved }) {
 
   const handleSave = async () => {
     setSaving(true);
-    if (editItem?.id) {
-      await entity.update(editItem.id, form);
-    } else {
-      await entity.create(form);
-    }
+    if (editItem?.id) { await entity.update(editItem.id, form); }
+    else { await entity.create(form); }
     setSaving(false);
     onSaved();
     closeForm();
@@ -456,8 +474,8 @@ function SimpleTab({ items, entity, fields, onSaved }) {
       {items.map((item) => (
         <div key={item.id} style={{ background: "#fff", borderRadius: 14, padding: "16px 18px", marginBottom: 10, boxShadow: "0 2px 10px rgba(0,0,0,0.07)", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <div>
-            <div style={{ fontSize: 17, fontWeight: 600, color: BRAND.text }}>{item.icon ? `${item.icon} ` : ""}{item.name}</div>
-            {item.description && <div style={{ fontSize: 14, color: BRAND.subtext }}>{item.description}</div>}
+            <div style={{ fontSize: 16, fontWeight: 600, color: BRAND.text }}>{item.icon ? `${item.icon} ` : ""}{getVillageName(item)}</div>
+            {item.description && <div style={{ fontSize: 13, color: BRAND.subtext }}>{item.description}</div>}
             {item.is_active === false && <span style={{ color: "#999", fontSize: 12 }}>Inactive</span>}
           </div>
           <div style={{ display: "flex", gap: 8 }}>
