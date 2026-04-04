@@ -208,9 +208,9 @@ export default function Home() {
       ════════════════════════════════════════════════════════ */}
       <div style={{ height: 220, overflow: "hidden", lineHeight: 0 }}>
         <img
-          src="https://media.base44.com/images/public/69d062aca815ce8e697894b1/392f3af96_generated_image.png"
+          src="https://media.base44.com/images/public/69d062aca815ce8e697894b1/9a0f45b08_generated_image.png"
           alt=""
-          style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center 35%", display: "block", filter: "sepia(50%) contrast(0.9) brightness(0.92) saturate(1.1)" }}
+          style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center 40%", display: "block", filter: "saturate(1.2) brightness(1.05)" }}
         />
       </div>
 
