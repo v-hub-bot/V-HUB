@@ -470,32 +470,28 @@ function ProviderForm({ provider, categories, services, areas, onClose, onSaved 
         </select>
       </div>
 
-      {/* Service Areas — grouped */}
+      {/* Service Areas — macro keys, consistent with filter logic */}
       <div style={{ marginTop: 20 }}>
-        <label style={labelStyle}>📍 Service Areas (select all that apply)</label>
-        {SECTION_ORDER.map(section => {
-          const sectionAreas = groupedAreas[section] || [];
-          if (sectionAreas.length === 0) return null;
-          return (
-            <div key={section} style={{ marginBottom: 14 }}>
-              <div style={{ fontSize: 13, fontWeight: 700, color: BRAND.subtext, marginBottom: 8, textTransform: "uppercase", letterSpacing: 0.5 }}>
-                {SECTION_LABELS[section]}
-              </div>
-              <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-                {sectionAreas.map(a => (
-                  <div key={a.id} onClick={() => toggleArr("service_areas", a.id)}
-                    style={{
-                      background: form.service_areas?.includes(a.id) ? BRAND.orange : "#f0f0f0",
-                      color: form.service_areas?.includes(a.id) ? "#fff" : BRAND.text,
-                      borderRadius: 20, padding: "7px 14px", cursor: "pointer", fontSize: 13, fontWeight: 600
-                    }}>
-                    {getVillageName(a)}
-                  </div>
-                ))}
-              </div>
+        <label style={labelStyle}>📍 Service Areas (select all that apply — each covers all villages within)</label>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+          {[
+            { key: "historic",     label: "🌴 Historic Side" },
+            { key: "established",  label: "🏡 Established Villages" },
+            { key: "newer",        label: "🌿 Newer Villages" },
+            { key: "eastport",     label: "🌊 Eastport" },
+            { key: "family",       label: "🏠 Family Villages" },
+            { key: "all villages", label: "🗺️ All Villages" },
+          ].map(area => (
+            <div key={area.key} onClick={() => toggleArr("service_areas", area.key)}
+              style={{
+                background: (form.service_areas || []).includes(area.key) ? BRAND.orange : "#f0f0f0",
+                color: (form.service_areas || []).includes(area.key) ? "#fff" : BRAND.text,
+                borderRadius: 20, padding: "9px 18px", cursor: "pointer", fontSize: 13, fontWeight: 600
+              }}>
+              {area.label}
             </div>
-          );
-        })}
+          ))}
+        </div>
       </div>
 
       {/* Services */}
@@ -504,10 +500,10 @@ function ProviderForm({ provider, categories, services, areas, onClose, onSaved 
           <label style={labelStyle}>🛠️ Services Offered (select all that apply)</label>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
             {filteredServices.map(s => (
-              <div key={s.id} onClick={() => toggleArr("services", s.id)}
+              <div key={s.id} onClick={() => toggleArr("services", s.name)}
                 style={{
-                  background: form.services?.includes(s.id) ? BRAND.teal : "#f0f0f0",
-                  color: form.services?.includes(s.id) ? "#fff" : BRAND.text,
+                  background: (form.services || []).includes(s.name) ? BRAND.teal : "#f0f0f0",
+                  color: (form.services || []).includes(s.name) ? "#fff" : BRAND.text,
                   borderRadius: 20, padding: "8px 16px", cursor: "pointer", fontSize: 14, fontWeight: 600
                 }}>
                 {s.name}

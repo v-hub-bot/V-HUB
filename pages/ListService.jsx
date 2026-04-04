@@ -81,12 +81,12 @@ const CATS = [
 
 // ── Macro service areas ────────────────────────────────────────────────────
 const MACRO_AREAS = [
-  { key: "Historic Side",        label: "Historic Side" },
-  { key: "Established Villages", label: "Established Villages" },
-  { key: "Newer Villages",       label: "Newer Villages" },
-  { key: "Eastport",             label: "Eastport" },
-  { key: "Family Villages",      label: "Family & Non-Age-Restricted Villages" },
-  { key: "All Villages",         label: "All Villages (Entire Community)" },
+  { key: "historic",    label: "Historic Side" },
+  { key: "established", label: "Established Villages" },
+  { key: "newer",       label: "Newer Villages" },
+  { key: "eastport",    label: "Eastport" },
+  { key: "family",      label: "Family & Non-Age-Restricted Villages" },
+  { key: "all villages",label: "All Villages (Entire Community)" },
 ];
 
 // ── Sidebar stories ────────────────────────────────────────────────────────

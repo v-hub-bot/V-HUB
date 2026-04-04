@@ -952,12 +952,21 @@ export default function Home() {
       "Family & Non-Age-Restricted Villages":    "family",
     };
     const macroKey = selArea ? SECTION_TO_MACRO[selArea.description] || null : null;
+    // All possible stored variants for each macro key (lowercase for comparison)
+    const MACRO_ALIASES = {
+      "historic":    ["historic", "historic side"],
+      "established": ["established", "established villages"],
+      "newer":       ["newer", "newer villages"],
+      "eastport":    ["eastport"],
+      "family":      ["family", "family villages", "family & non-age-restricted villages"],
+    };
     const out = all.filter(p => {
       if (p.is_visible === false) return false;
-      // Area match: provider serves this macro area OR no area filter
-      const areaMatch = !selArea || !macroKey ||
-        (p.service_areas || []).some(a => a.toLowerCase() === macroKey) ||
-        (p.service_areas || []).some(a => a.toLowerCase() === "all villages");
+      // Area match: normalize stored keys to lowercase, match against all known aliases
+      const provAreas = (p.service_areas || []).map(a => a.toLowerCase());
+      const allVillages = provAreas.some(a => a === "all villages");
+      const areaMatch = !selArea || !macroKey || allVillages ||
+        provAreas.some(a => (MACRO_ALIASES[macroKey] || [macroKey]).includes(a));
       // Service match: by sub-service name OR by category_id (when category selected)
       const provCatId = selSvc?.category_id || selSvc?.id;
       const svcMatch = !selSvc || (
