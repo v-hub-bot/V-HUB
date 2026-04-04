@@ -241,7 +241,7 @@ export default function Home() {
           <div style={{ border: `1.5px solid ${INK}`, background: PAPER_MID }}>
             {/* FIND SERVICES button — TOP */}
             <button onClick={doSearch} disabled={!selArea || !selCat}
-              style={{ width: "100%", background: (selArea && selCat) ? `linear-gradient(180deg, #9A6030 0%, ${FIND_BTN} 50%, #5A3010 100%)` : `linear-gradient(180deg, #9A603066 0%, ${FIND_BTN}66 50%, #5A301066 100%)`, color: "#F5E8CC", border: (selArea && selCat) ? `1px solid #3A1800` : `1px solid #3A180066`, borderBottom: `1.5px solid ${INK}`, padding: "11px", fontSize: 13, fontWeight: 900, fontFamily: "'Times New Roman', serif", letterSpacing: 4, boxShadow: (selArea && selCat) ? "0 2px 6px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.15)" : "none", textTransform: "uppercase", cursor: (selArea && selCat) ? "pointer" : "not-allowed", boxShadow: (selArea && selCat) ? "inset 0 1px 0 rgba(255,255,255,0.08)" : "none" }}>
+              style={{ width: "100%", background: `linear-gradient(180deg, #9A6030 0%, ${BROWN_BTN} 50%, #5A3010 100%)`, color: "#F5E8CC", border: `1px solid #3A1800`, borderRadius: 5, padding: "9px 20px", fontSize: 13, fontWeight: 900, fontFamily: "'Times New Roman', serif", letterSpacing: 4, boxShadow: "0 2px 6px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.15), 0 0 0 3px #FFE135, 0 0 0 5px #F5C200, 0 0 8px 6px rgba(255,210,0,0.55)", outline: "none", textTransform: "uppercase", cursor: (selArea && selCat) ? "pointer" : "not-allowed", boxShadow: (selArea && selCat) ? "inset 0 1px 0 rgba(255,255,255,0.08)" : "none" }}>
               Find Services
             </button>
 
