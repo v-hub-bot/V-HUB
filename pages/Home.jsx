@@ -208,7 +208,7 @@ export default function Home() {
       ════════════════════════════════════════════════════════ */}
       <div style={{ height: 220, overflow: "hidden", lineHeight: 0 }}>
         <img
-          src="https://media.base44.com/images/public/69d062aca815ce8e697894b1/9a0f45b08_generated_image.png"
+          src="https://media.base44.com/images/public/69d062aca815ce8e697894b1/a3c8839d1_generated_image.png"
           alt=""
           style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center 40%", display: "block", filter: "saturate(1.2) brightness(1.05)" }}
         />
