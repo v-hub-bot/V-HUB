@@ -197,6 +197,50 @@ function SvcCategory({ cat, openCat, setOpenCat, selSvcs, toggleSvc }) {
   );
 }
 
+
+// ── Burger menu for ListService page ──────────────────────────────────────────
+function ListBurger() {
+  const [open, setOpen] = useState(false);
+  const INK       = "#1C0F00";
+  const PAPER     = "#F0E6C8";
+  const PAPER_MID = "#E4D5A8";
+  const PAPER_DK  = "#C8B07A";
+  const BROWN_BTN = "#7A4820";
+  return (
+    <>
+      <button onClick={() => setOpen(true)} style={{ background: "rgba(255,255,255,0.10)", border: `1px solid rgba(240,230,200,0.3)`, borderRadius: 4, width: 40, height: 40, cursor: "pointer", display: "flex", flexDirection: "column", gap: 5, justifyContent: "center", alignItems: "center", flexShrink: 0, padding: 0 }}>
+        {[0,1,2].map(i => <span key={i} style={{ display: "block", width: 18, height: 2, background: PAPER, borderRadius: 1 }} />)}
+      </button>
+      {open && (
+        <>
+          <div onClick={() => setOpen(false)} style={{ position: "fixed", inset: 0, zIndex: 299, background: "rgba(0,0,0,0.55)" }} />
+          <div style={{ position: "fixed", top: 0, right: 0, bottom: 0, width: 235, background: PAPER, zIndex: 300, boxShadow: "-3px 0 20px rgba(0,0,0,0.3)", fontFamily: "'Times New Roman', serif" }}>
+            <div style={{ background: INK, padding: "13px 12px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+              <span style={{ color: PAPER, fontWeight: 900, fontSize: 14, letterSpacing: 2 }}>🌴 V-HUB</span>
+              <button onClick={() => setOpen(false)} style={{ background: "rgba(255,255,255,0.1)", border: "none", color: "#fff", borderRadius: 3, width: 22, height: 22, fontSize: 12, cursor: "pointer" }}>✕</button>
+            </div>
+            <div style={{ padding: "8px 7px" }}>
+              {[
+                { label: "🏠 Home",               href: "/",                   highlight: false },
+                { label: "📋 List Your Business",  href: "/ListService",        highlight: false },
+                { label: "🗂 Provider Hub",         href: "/ProviderDashboard",  highlight: true  },
+              ].map((l, i) => (
+                <a key={i} href={l.href} style={{ textDecoration: "none" }}>
+                  <div style={{ padding: "10px 12px", borderRadius: 3, fontSize: 13, fontWeight: 700, color: l.highlight ? PAPER : INK, marginBottom: 4, background: l.highlight ? BROWN_BTN : PAPER_MID, borderLeft: `4px solid ${BROWN_BTN}` }}>{l.label}</div>
+                </a>
+              ))}
+              <div style={{ margin: "12px 5px 4px", height: 1, background: PAPER_DK }} />
+              <div style={{ padding: "6px 10px", fontSize: 10, color: INK_FADE, fontStyle: "italic", fontFamily: "Georgia, serif", lineHeight: 1.5 }}>
+                Already listed? Visit the <strong>Provider Hub</strong> to manage your profile, view your stats, and read your reviews.
+              </div>
+            </div>
+          </div>
+        </>
+      )}
+    </>
+  );
+}
+
 // ── Main Page ──────────────────────────────────────────────────────────────
 export default function ListService() {
   // Form state
@@ -320,7 +364,8 @@ export default function ListService() {
         }}>
           🌴 <span style={{ fontSize: 26 }}>V</span>-Hub
         </div>
-        <div style={{ width: 80 }} />
+        {/* Burger menu */}
+        <ListBurger />
       </div>
 
       {/* ── Newspaper Masthead ───────────────────────────────────────────── */}

@@ -1,0 +1,23 @@
+{
+  "type": "object",
+  "properties": {
+    "service_name": {
+      "type": "string"
+    },
+    "category_name": {
+      "type": "string"
+    },
+    "area_key": {
+      "type": "string"
+    },
+    "search_count": {
+      "type": "number"
+    },
+    "date_key": {
+      "type": "string",
+      "description": "YYYY-MM-DD for daily aggregation"
+    }
+  },
+  "required": [],
+  "name": "ServiceSearchStat"
+}

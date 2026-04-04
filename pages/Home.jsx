@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react"; // v2
-import { ServiceArea, Category, Service, Provider } from "@/api/entities";
+import { ServiceArea, Category, Service, Provider, ProviderReview } from "@/api/entities";
 
 const INK       = "#1C0F00";
 const INK_FADE  = "#5C3A10";
@@ -118,12 +118,17 @@ function Burger() {
             <div style={{ padding: "8px 7px" }}>
               {[
                 { label: "🏠 Home", href: "/" },
-                { label: "📋 List Your Service", href: "/ListService" },
+                { label: "📋 List Your Business", href: "/ListService" },
+                { label: "🗂 Provider Hub", href: "/ProviderDashboard", highlight: true },
               ].map((l, i) => (
                 <a key={i} href={l.href} style={{ textDecoration: "none" }}>
-                  <div style={{ padding: "10px 12px", borderRadius: 3, fontSize: 13, fontWeight: 700, color: INK, marginBottom: 4, background: PAPER_MID, borderLeft: `4px solid ${BROWN_BTN}` }}>{l.label}</div>
+                  <div style={{ padding: "10px 12px", borderRadius: 3, fontSize: 13, fontWeight: 700, color: l.highlight ? PAPER : INK, marginBottom: 4, background: l.highlight ? BROWN_BTN : PAPER_MID, borderLeft: `4px solid ${BROWN_BTN}` }}>{l.label}</div>
                 </a>
               ))}
+              <div style={{ margin: "12px 7px 4px", height: 1, background: PAPER_DK }} />
+              <div style={{ padding: "6px 12px", fontSize: 10, color: INK_FADE, fontStyle: "italic", fontFamily: "Georgia, serif", lineHeight: 1.5 }}>
+                Already listed? Visit the <strong>Provider Hub</strong> to manage your profile, view your stats, and read your reviews.
+              </div>
             </div>
           </div>
         </>
@@ -133,44 +138,196 @@ function Burger() {
 }
 
 // ── Provider Detail ───────────────────────────────────────────────────────────
+const MACRO_AREAS_MAP = {
+  "Historic Side": "Historic Side",
+  "Established Villages": "Established Villages",
+  "Newer Villages": "Newer Villages",
+  "Eastport": "Eastport",
+  "Family Villages": "Family & Non-Age-Restricted",
+  "All Villages": "All Villages",
+};
+
+function Stars({ rating, size = 14 }) {
+  const full = Math.floor(rating || 0);
+  const half = (rating || 0) - full >= 0.5;
+  return (
+    <span style={{ fontSize: size, color: "#B8860B", letterSpacing: 1 }}>
+      {"★".repeat(full)}{half ? "½" : ""}{"☆".repeat(5 - full - (half ? 1 : 0))}
+    </span>
+  );
+}
+
 function ProvDetail({ prov, areas, cats, onBack }) {
-  const pAreas = areas.filter(a => prov.service_areas?.includes(a.id));
+  const [reviews, setReviews] = useState([]);
+  const [showReviewForm, setShowReviewForm] = useState(false);
+  const [reviewSaved, setReviewSaved] = useState(false);
+  const [reviewForm, setReviewForm] = useState({ customer_name: "", customer_village: "", rating: 5, review_text: "", service_used: "" });
   const cat = cats.find(c => c.id === prov.category_id);
+  const GREEN = "#1A6B3C";
+  const RED_RULE = "#8B1A1A";
+  const TEAL = "#00836B";
+
+  useEffect(() => {
+    ProviderReview.filter({ provider_id: prov.id })
+      .then(all => setReviews((all || []).filter(r => r.is_approved)))
+      .catch(() => setReviews([]));
+    // increment profile view count
+    Provider.update(prov.id, { profile_views: (prov.profile_views || 0) + 1 }).catch(() => {});
+  }, [prov.id]);
+
+  const avgRating = reviews.length > 0
+    ? (reviews.reduce((s, r) => s + (r.rating || 0), 0) / reviews.length).toFixed(1)
+    : null;
+
+  const handleReviewSubmit = async () => {
+    if (!reviewForm.customer_name || !reviewForm.review_text) return;
+    await ProviderReview.create({ ...reviewForm, provider_id: prov.id, is_approved: false, helpful_count: 0 });
+    setReviewSaved(true);
+    setShowReviewForm(false);
+  };
+
+  const inputS = { width: "100%", boxSizing: "border-box", background: PAPER, border: `1.5px solid ${PAPER_DK}`, borderRadius: 4, color: INK, fontFamily: "'Times New Roman', serif", fontSize: 13, padding: "8px 11px", outline: "none" };
+  const lblS = { fontSize: 10, fontWeight: 700, color: INK_FADE, textTransform: "uppercase", letterSpacing: 1, marginBottom: 3, display: "block", fontFamily: "'Times New Roman', serif" };
+
   return (
     <div style={{ minHeight: "100vh", background: PAPER, fontFamily: "'Times New Roman', serif", maxWidth: 860, margin: "0 auto", boxShadow: "0 2px 40px rgba(0,0,0,0.28)" }}>
       <div style={{ background: INK, padding: "10px 14px", display: "flex", alignItems: "center", gap: 10 }}>
         <button onClick={onBack} style={{ background: "rgba(255,255,255,0.15)", border: "none", color: PAPER, borderRadius: 3, padding: "4px 10px", fontSize: 12, cursor: "pointer" }}>← Back</button>
         <span style={{ color: PAPER, fontWeight: 700, fontSize: 13, letterSpacing: 1 }}>Provider Detail</span>
+        {prov.provider_id && <span style={{ marginLeft: "auto", background: "rgba(255,255,255,0.12)", color: PAPER, fontSize: 11, padding: "2px 10px", borderRadius: 10, letterSpacing: 1 }}>ID: {prov.provider_id}</span>}
       </div>
       <div style={{ padding: "16px" }}>
-        <div style={{ display: "flex", gap: 14, alignItems: "flex-start", marginBottom: 14 }}>
+        {/* Header */}
+        <div style={{ display: "flex", gap: 14, alignItems: "flex-start", marginBottom: 10 }}>
           {prov.logo_url && <img src={prov.logo_url} alt="logo" style={{ width: 64, height: 64, borderRadius: 6, objectFit: "cover", border: `1px solid ${PAPER_DK}` }} />}
-          <div>
-            <div style={{ fontSize: 20, fontWeight: 900, color: INK }}>{prov.business_name}</div>
+          <div style={{ flex: 1 }}>
+            <div style={{ fontSize: 22, fontWeight: 900, color: INK, lineHeight: 1.1 }}>{prov.business_name}</div>
             {cat && <div style={{ fontSize: 12, color: INK_FADE, marginTop: 2 }}>{cat.icon} {cat.name}</div>}
-            {prov.rating && <div style={{ fontSize: 13, color: "#B8860B", marginTop: 2 }}>{"★".repeat(Math.round(prov.rating))} {prov.rating}/5</div>}
+            {avgRating && (
+              <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 4 }}>
+                <Stars rating={parseFloat(avgRating)} size={15} />
+                <span style={{ fontSize: 12, color: INK_FADE }}>{avgRating}/5 · {reviews.length} V-Hub review{reviews.length !== 1 ? "s" : ""}</span>
+              </div>
+            )}
           </div>
         </div>
+
         <Rule thick style={{ marginBottom: 10 }} />
+
+        {/* Description */}
         {prov.description && <p style={{ fontSize: 13, color: INK, lineHeight: 1.7, marginBottom: 12 }}>{prov.description}</p>}
+
+        {/* Contact grid */}
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 12 }}>
-          {prov.phone && <div style={{ fontSize: 12, color: INK }}><b>📞 Phone:</b> {prov.phone}</div>}
-          {prov.email && <div style={{ fontSize: 12, color: INK }}><b>✉️ Email:</b> {prov.email}</div>}
-          {prov.website && <div style={{ fontSize: 12, color: INK }}><b>🌐 Website:</b> <a href={prov.website} target="_blank" rel="noreferrer" style={{ color: "#1A3F70" }}>{prov.website}</a></div>}
+          {prov.phone && <div style={{ fontSize: 12, color: INK }}><b>📞 Phone:</b> <a href={"tel:" + prov.phone} style={{ color: INK }}>{prov.phone}</a></div>}
+          {prov.email && <div style={{ fontSize: 12, color: INK }}><b>✉️ Email:</b> <a href={"mailto:" + prov.email} style={{ color: BROWN_BTN }}>{prov.email}</a></div>}
+          {prov.website && <div style={{ fontSize: 12, color: INK }}><b>🌐 Website:</b> <a href={prov.website} target="_blank" rel="noreferrer" style={{ color: "#1A3F70" }}>{prov.website.replace(/^https?:\/\//, "")}</a></div>}
           {prov.years_in_business && <div style={{ fontSize: 12, color: INK }}><b>📅 Years:</b> {prov.years_in_business}</div>}
+          {prov.address && <div style={{ fontSize: 12, color: INK, gridColumn: "1/-1" }}><b>📍 Address:</b> {prov.address}</div>}
         </div>
-        {pAreas.length > 0 && (
+
+        {/* Service areas */}
+        {(prov.service_areas || []).length > 0 && (
           <div style={{ marginBottom: 12 }}>
-            <div style={{ fontSize: 11, fontWeight: 700, color: INK_FADE, textTransform: "uppercase", letterSpacing: 1, marginBottom: 5 }}>Service Areas</div>
+            <div style={{ fontSize: 11, fontWeight: 700, color: INK_FADE, textTransform: "uppercase", letterSpacing: 1, marginBottom: 5 }}>Areas Served</div>
             <div style={{ display: "flex", flexWrap: "wrap", gap: 5 }}>
-              {pAreas.map(a => <span key={a.id} style={{ background: PAPER_MID, border: `1px solid ${PAPER_DK}`, borderRadius: 3, padding: "2px 8px", fontSize: 11, color: INK }}>{vName(a)}</span>)}
+              {(prov.service_areas || []).map(a => (
+                <span key={a} style={{ background: PAPER_MID, border: `1px solid ${PAPER_DK}`, borderRadius: 3, padding: "2px 8px", fontSize: 11, color: INK }}>
+                  📍 {MACRO_AREAS_MAP[a] || a}
+                </span>
+              ))}
             </div>
           </div>
         )}
+
+        {/* Services */}
+        {(prov.services || []).length > 0 && (
+          <div style={{ marginBottom: 14 }}>
+            <div style={{ fontSize: 11, fontWeight: 700, color: INK_FADE, textTransform: "uppercase", letterSpacing: 1, marginBottom: 5 }}>Services Offered</div>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 5 }}>
+              {(prov.services || []).map(s => (
+                <span key={s} style={{ background: BROWN_BTN, color: PAPER, borderRadius: 10, padding: "3px 10px", fontSize: 11, fontFamily: "'Times New Roman', serif" }}>{s}</span>
+              ))}
+            </div>
+          </div>
+        )}
+
+        <Rule style={{ marginBottom: 14 }} />
+
+        {/* ── V-Hub Community Reviews ── */}
+        <div style={{ marginBottom: 6, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <div style={{ fontSize: 12, fontWeight: 900, color: INK, textTransform: "uppercase", letterSpacing: 2 }}>
+            ⭐ V-Hub Community Reviews
+          </div>
+          {!showReviewForm && !reviewSaved && (
+            <button onClick={() => setShowReviewForm(true)} style={{ background: BROWN_BTN, color: PAPER, border: "none", borderRadius: 4, padding: "4px 12px", fontSize: 11, cursor: "pointer", fontFamily: "'Times New Roman', serif", fontWeight: 700, letterSpacing: 1 }}>
+              + Write a Review
+            </button>
+          )}
+        </div>
+
+        {/* Review form */}
+        {showReviewForm && (
+          <div style={{ background: PAPER_MID, border: `1.5px solid ${PAPER_DK}`, borderRadius: 6, padding: "14px 16px", marginBottom: 12 }}>
+            <div style={{ fontSize: 13, fontWeight: 900, color: INK, marginBottom: 10, textTransform: "uppercase", letterSpacing: 1 }}>Write a V-Hub Review</div>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px 14px", marginBottom: 8 }}>
+              <div><label style={lblS}>Your Name *</label><input style={inputS} value={reviewForm.customer_name} onChange={e => setReviewForm(p => ({ ...p, customer_name: e.target.value }))} placeholder="First & Last" /></div>
+              <div><label style={lblS}>Your Village</label><input style={inputS} value={reviewForm.customer_village} onChange={e => setReviewForm(p => ({ ...p, customer_village: e.target.value }))} placeholder="e.g. Buttonwood" /></div>
+              <div><label style={lblS}>Service Used</label><input style={inputS} value={reviewForm.service_used} onChange={e => setReviewForm(p => ({ ...p, service_used: e.target.value }))} placeholder="e.g. Lawn Mowing" /></div>
+              <div><label style={lblS}>Rating</label><select style={inputS} value={reviewForm.rating} onChange={e => setReviewForm(p => ({ ...p, rating: parseInt(e.target.value) }))}>{[5,4,3,2,1].map(n => <option key={n} value={n}>{n} Star{n > 1 ? "s" : ""} — {"★".repeat(n)}</option>)}</select></div>
+            </div>
+            <div style={{ marginBottom: 10 }}><label style={lblS}>Your Review *</label><textarea style={{ ...inputS, minHeight: 70, resize: "vertical", lineHeight: 1.6 }} value={reviewForm.review_text} onChange={e => setReviewForm(p => ({ ...p, review_text: e.target.value }))} placeholder="Tell other residents about your experience..." /></div>
+            <div style={{ display: "flex", gap: 8 }}>
+              <button onClick={handleReviewSubmit} style={{ background: `linear-gradient(180deg,#9A6030,${BROWN_BTN})`, color: PAPER, border: `2px solid ${YELLOW}`, borderRadius: 5, padding: "8px 20px", fontSize: 12, fontWeight: 700, cursor: "pointer", fontFamily: "'Times New Roman', serif" }}>Submit</button>
+              <button onClick={() => setShowReviewForm(false)} style={{ background: PAPER, border: `1.5px solid ${PAPER_DK}`, color: INK_FADE, borderRadius: 5, padding: "8px 14px", fontSize: 12, cursor: "pointer", fontFamily: "'Times New Roman', serif" }}>Cancel</button>
+            </div>
+            <div style={{ fontSize: 10, color: INK_FADE, fontStyle: "italic", marginTop: 6 }}>Reviews are approved by William Evans before appearing publicly.</div>
+          </div>
+        )}
+
+        {reviewSaved && <div style={{ background: "#E8F5E9", border: `1.5px solid ${GREEN}`, borderRadius: 6, padding: "10px 14px", marginBottom: 12, fontSize: 12, color: GREEN, fontStyle: "italic" }}>✓ Thank you! Your review will appear after approval.</div>}
+
+        {reviews.length === 0 && !showReviewForm && !reviewSaved && (
+          <div style={{ fontSize: 12, color: INK_FADE, fontStyle: "italic", padding: "8px 0 14px" }}>No V-Hub reviews yet — be the first Villages resident to leave one!</div>
+        )}
+
+        {reviews.map(r => (
+          <div key={r.id} style={{ background: PAPER_MID, border: `1.5px solid ${PAPER_DK}`, borderRadius: 6, padding: "12px 14px", marginBottom: 8 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 4 }}>
+              <div>
+                <span style={{ fontSize: 13, fontWeight: 900, color: INK }}>{r.customer_name}</span>
+                {r.customer_village && <span style={{ fontSize: 11, color: INK_FADE, fontStyle: "italic", marginLeft: 7 }}>📍 {r.customer_village}</span>}
+              </div>
+              <Stars rating={r.rating} size={13} />
+            </div>
+            {r.service_used && <div style={{ fontSize: 10, color: TEAL, fontWeight: 700, marginBottom: 4, textTransform: "uppercase", letterSpacing: 1 }}>Service: {r.service_used}</div>}
+            <div style={{ fontSize: 12, color: INK_FADE, fontStyle: "italic", lineHeight: 1.65 }}>&ldquo;{r.review_text}&rdquo;</div>
+            <div style={{ fontSize: 10, color: INK_FADE, marginTop: 5 }}>{new Date(r.created_date).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })} · V-Hub Verified Review</div>
+          </div>
+        ))}
+
+        {/* ── Google Reviews section ── */}
+        {prov.google_review_url && (
+          <div style={{ marginTop: 16, paddingTop: 14, borderTop: `1px dashed ${PAPER_DK}` }}>
+            <div style={{ fontSize: 11, fontWeight: 700, color: INK_FADE, textTransform: "uppercase", letterSpacing: 2, marginBottom: 8 }}>Google Reviews</div>
+            <a href={prov.google_review_url} target="_blank" rel="noreferrer" style={{ textDecoration: "none" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 12, background: "#fff", border: "1.5px solid #DADCE0", borderRadius: 8, padding: "11px 14px", cursor: "pointer" }}>
+                <svg width="22" height="22" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+                <div>
+                  <div style={{ fontSize: 13, fontWeight: 700, color: "#1C0F00" }}>See {prov.business_name} on Google</div>
+                  <div style={{ fontSize: 11, color: "#5C3A10", fontStyle: "italic" }}>Read Google reviews from across the web →</div>
+                </div>
+              </div>
+            </a>
+          </div>
+        )}
+
       </div>
     </div>
   );
 }
+
+
 
 // ── Results ───────────────────────────────────────────────────────────────────
 function StarRating({ n = 5 }) {

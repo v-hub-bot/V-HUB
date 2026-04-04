@@ -10,6 +10,9 @@
     },
     "ListService": {
       "title": "ListService"
+    },
+    "ProviderDashboard": {
+      "title": "ProviderDashboard"
     }
   }
 }

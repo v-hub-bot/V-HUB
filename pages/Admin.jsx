@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { ServiceArea, Category, Service, Provider } from "@/api/entities";
+import { ServiceArea, Category, Service, Provider, ProviderReview } from "@/api/entities";
 
 const BRAND = {
   orange: "#E8431A",
@@ -11,7 +11,7 @@ const BRAND = {
   subtext: "#555",
 };
 
-const TABS = ["Providers", "Categories", "Services", "Service Areas"];
+const TABS = ["Providers", "Reviews", "Categories", "Services", "Service Areas"];
 
 const SECTION_ORDER = [
   "Historic Side | Spanish Springs",
@@ -54,17 +54,21 @@ export default function Admin() {
   const [showForm, setShowForm] = useState(false);
   const [editItem, setEditItem] = useState(null);
 
+  const [reviews, setReviews] = useState([]);
+
   const loadAll = async () => {
-    const [p, c, s, a] = await Promise.all([
+    const [p, c, s, a, rv] = await Promise.all([
       Provider.list(),
       Category.list(),
       Service.list(),
       ServiceArea.list(),
+      ProviderReview.list(),
     ]);
     setProviders(p);
     setCategories(c);
     setServices(s);
     setAreas(a);
+    setReviews(rv);
   };
 
   useEffect(() => { loadAll(); }, []);
@@ -197,7 +201,80 @@ export default function Admin() {
             onSaved={loadAll}
           />
         )}
+        {activeTab === "Reviews" && (
+          <ReviewsTab reviews={reviews} providers={providers} onSaved={loadAll} />
+        )}
       </div>
+    </div>
+  );
+}
+
+
+// ── Reviews Tab ───────────────────────────────────────────────────────────────
+function ReviewsTab({ reviews, providers, onSaved }) {
+  const [filter, setFilter] = useState("pending"); // pending | approved | all
+
+  const filtered = reviews.filter(r => {
+    if (filter === "pending") return !r.is_approved;
+    if (filter === "approved") return r.is_approved;
+    return true;
+  });
+
+  const handleApprove = async (r) => {
+    await ProviderReview.update(r.id, { is_approved: true });
+    onSaved();
+  };
+  const handleDelete = async (r) => {
+    if (!window.confirm("Delete this review?")) return;
+    await ProviderReview.delete(r.id);
+    onSaved();
+  };
+
+  return (
+    <div>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+        <div style={{ fontSize: 20, fontWeight: 700, color: BRAND.text }}>
+          Reviews ({reviews.length} total · {reviews.filter(r => !r.is_approved).length} pending)
+        </div>
+        <div style={{ display: "flex", gap: 8 }}>
+          {["pending","approved","all"].map(f => (
+            <button key={f} onClick={() => setFilter(f)} style={{ background: filter === f ? BRAND.orange : "#fff", color: filter === f ? "#fff" : BRAND.text, border: "none", borderRadius: 8, padding: "8px 16px", fontSize: 13, fontWeight: 600, cursor: "pointer", textTransform: "capitalize" }}>{f}</button>
+          ))}
+        </div>
+      </div>
+      {filtered.length === 0 && (
+        <div style={{ textAlign: "center", padding: 40, color: BRAND.subtext, fontStyle: "italic" }}>No {filter} reviews.</div>
+      )}
+      {filtered.map(r => {
+        const prov = providers.find(p => p.id === r.provider_id);
+        return (
+          <div key={r.id} style={{ background: "#fff", borderRadius: 14, padding: "16px 20px", marginBottom: 10, boxShadow: "0 2px 10px rgba(0,0,0,0.07)", borderLeft: r.is_approved ? "4px solid " + BRAND.teal : "4px solid " + BRAND.orange }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 8 }}>
+              <div>
+                <div style={{ fontSize: 15, fontWeight: 700, color: BRAND.text }}>{r.customer_name}
+                  {r.customer_village && <span style={{ fontSize: 12, color: BRAND.subtext, marginLeft: 8 }}>· 📍 {r.customer_village}</span>}
+                </div>
+                <div style={{ fontSize: 12, color: BRAND.teal, marginTop: 2 }}>
+                  For: <strong>{prov ? prov.business_name : r.provider_id}</strong>
+                  {prov?.provider_id && <span style={{ marginLeft: 6, color: "#999", fontSize: 11 }}>({prov.provider_id})</span>}
+                </div>
+                {r.service_used && <div style={{ fontSize: 12, color: BRAND.subtext, marginTop: 1 }}>Service: {r.service_used}</div>}
+                <div style={{ fontSize: 13, color: "#B8860B", marginTop: 3 }}>{"★".repeat(r.rating || 0)} {r.rating}/5</div>
+              </div>
+              <span style={{ background: r.is_approved ? BRAND.teal + "20" : BRAND.orange + "20", color: r.is_approved ? BRAND.teal : BRAND.orange, borderRadius: 20, padding: "3px 12px", fontSize: 12, fontWeight: 700, textTransform: "uppercase" }}>
+                {r.is_approved ? "✅ Approved" : "⏳ Pending"}
+              </span>
+            </div>
+            <div style={{ fontSize: 13, color: BRAND.subtext, fontStyle: "italic", margin: "10px 0 10px", lineHeight: 1.6, borderLeft: "3px solid #eee", paddingLeft: 10 }}>"{r.review_text}"</div>
+            <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+              {!r.is_approved && (
+                <button onClick={() => handleApprove(r)} style={{ background: BRAND.teal, color: "#fff", border: "none", borderRadius: 8, padding: "8px 18px", fontSize: 13, fontWeight: 600, cursor: "pointer" }}>✓ Approve & Publish</button>
+              )}
+              <button onClick={() => handleDelete(r)} style={{ background: "#ffeeee", color: "#c00", border: "none", borderRadius: 8, padding: "8px 16px", fontSize: 13, fontWeight: 600, cursor: "pointer" }}>Delete</button>
+            </div>
+          </div>
+        );
+      })}
     </div>
   );
 }
@@ -231,6 +308,7 @@ function ProvidersTab({ providers, categories, services, areas, onAdd, onEdit, o
               <div style={{ flex: 1 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
                   <div style={{ fontSize: 18, fontWeight: 700, color: BRAND.text }}>{p.business_name}</div>
+                  {p.provider_id && <span style={{ background: "#f0f0f0", color: "#555", borderRadius: 10, padding: "2px 8px", fontSize: 11, fontWeight: 600 }}>ID: {p.provider_id}</span>}
                   <span style={{ background: `${statusColor}20`, color: statusColor, borderRadius: 20, padding: "3px 10px", fontSize: 12, fontWeight: 700, textTransform: "uppercase" }}>
                     {p.subscription_status || "pending"}
                   </span>

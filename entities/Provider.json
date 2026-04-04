@@ -1,6 +1,10 @@
 {
   "type": "object",
   "properties": {
+    "provider_id": {
+      "type": "string",
+      "description": "Auto-generated unique provider ID e.g. VH-00142"
+    },
     "business_name": {
       "type": "string"
     },
@@ -27,7 +31,7 @@
       "items": {
         "type": "string"
       },
-      "description": "Array of ServiceArea IDs"
+      "description": "Array of macro area keys"
     },
     "category_id": {
       "type": "string"
@@ -37,7 +41,7 @@
       "items": {
         "type": "string"
       },
-      "description": "Array of Service IDs"
+      "description": "Array of service name strings"
     },
     "subscription_status": {
       "type": "string",
@@ -67,6 +71,21 @@
     },
     "rating": {
       "type": "number"
+    },
+    "google_review_url": {
+      "type": "string",
+      "description": "URL to Google Business review page"
+    },
+    "address": {
+      "type": "string"
+    },
+    "profile_views": {
+      "type": "number",
+      "description": "Total profile clicks"
+    },
+    "search_appearances": {
+      "type": "number",
+      "description": "Total times appeared in search results"
     }
   },
   "required": [],
