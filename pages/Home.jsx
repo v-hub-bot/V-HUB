@@ -146,26 +146,19 @@ export default function Home() {
       {/* ════════════════════════════════════════════════════════
           HEADER — Palm tree, V-Hub, tagline, nav
       ════════════════════════════════════════════════════════ */}
-      <div style={{ padding: "16px 18px 10px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, borderBottom: `2px solid ${INK}` }}>
-        {/* Left spacer column text */}
-        <div style={{ width: 140, flexShrink: 0 }}>
-          <NewsCol idx={0} lines={1} />
+      <div style={{ position: "relative", padding: "16px 18px 12px", borderBottom: `2px solid ${INK}`, textAlign: "center" }}>
+        {/* Centered title + tagline */}
+        <div style={{ fontSize: 58, fontWeight: 900, color: INK, letterSpacing: -1, lineHeight: 1, fontFamily: "'Times New Roman', serif", display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
+          <span style={{ fontSize: 50 }}>🌴</span>
+          <span>V-Hub</span>
+        </div>
+        <div style={{ fontSize: 12, fontStyle: "italic", color: INK_FADE, marginTop: 5, letterSpacing: 0.3 }}>
+          Connecting You to Local Services in The Villages!
         </div>
 
-        {/* Center — big palm + V-Hub + tagline */}
-        <div style={{ flex: 1, textAlign: "center" }}>
-          <div style={{ fontSize: 58, fontWeight: 900, color: INK, letterSpacing: -1, lineHeight: 1, fontFamily: "'Times New Roman', serif", display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
-            <span style={{ fontSize: 50 }}>🌴</span>
-            <span>V-Hub</span>
-          </div>
-          <div style={{ fontSize: 12, fontStyle: "italic", color: INK_FADE, marginTop: 5, letterSpacing: 0.3 }}>
-            Connecting You to Local Services in The Villages!
-          </div>
-        </div>
-
-        {/* Right — List Your Service button + burger */}
-        <div style={{ width: 140, flexShrink: 0, display: "flex", justifyContent: "flex-end", alignItems: "center", gap: 8 }}>
-          <a href="/list-service" style={{ textDecoration: "none" }} onClick={e => e.stopPropagation()}>
+        {/* Absolutely positioned right — List button + burger */}
+        <div style={{ position: "absolute", top: "50%", right: 18, transform: "translateY(-50%)", display: "flex", alignItems: "center", gap: 8 }} onClick={e => e.stopPropagation()}>
+          <a href="/list-service" style={{ textDecoration: "none" }}>
             <button style={{
               background: `linear-gradient(180deg, #9A6030 0%, ${BROWN_BTN} 50%, #5A3010 100%)`,
               color: "#F5E8CC",
