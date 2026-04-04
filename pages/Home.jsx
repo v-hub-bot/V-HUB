@@ -250,6 +250,26 @@ export default function Home() {
           <NewsCol idx={2} lines={1} style={{ marginBottom: 12, fontSize: 8 }} />
 
           {/* ── Search panel ── */}
+          <div style={{ position: "relative" }}>
+          {/* Freehand highlighter circle around entire search section */}
+          <svg viewBox="0 0 320 240" preserveAspectRatio="none"
+            style={{ position: "absolute", top: -14, left: -14, width: "calc(100% + 28px)", height: "calc(100% + 28px)", pointerEvents: "none", zIndex: 10, overflow: "visible" }}>
+            <defs>
+              <filter id="hlt" x="-10%" y="-10%" width="120%" height="120%">
+                <feTurbulence type="turbulence" baseFrequency="0.025 0.06" numOctaves="4" seed="8" result="noise"/>
+                <feDisplacementMap in="SourceGraphic" in2="noise" scale="3.5" xChannelSelector="R" yChannelSelector="G"/>
+              </filter>
+            </defs>
+            {/* Yellow highlight fill */}
+            <path d="M 22,18 C 40,7 90,2 160,4 C 230,5 288,9 305,18 C 316,25 318,50 316,100 C 315,140 318,185 310,210 C 300,228 250,235 160,236 C 75,237 28,230 14,215 C 4,202 2,165 3,115 C 2,70 6,30 22,18 Z"
+              fill="rgba(255,218,0,0.18)" filter="url(#hlt)" />
+            {/* Main stroke — thick marker */}
+            <path d="M 18,22 C 35,8 88,1 158,3 C 228,4 290,8 308,19 C 320,27 321,55 319,105 C 318,148 320,188 311,213 C 301,232 248,239 158,240 C 72,241 24,233 11,217 C 0,202 -1,162 1,112 C 0,67 3,36 18,22 Z"
+              fill="none" stroke="#F5C200" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" filter="url(#hlt)" opacity="0.85"/>
+            {/* Second pass — slightly offset, thinner, gives double-stroke hand drawn feel */}
+            <path d="M 24,16 C 44,5 92,-1 162,2 C 234,4 292,10 309,21 C 319,29 317,58 315,108 C 314,150 317,190 308,214 C 297,234 244,240 160,241 C 74,242 26,234 13,218 C 3,204 1,163 2,113 C 2,65 8,28 24,16 Z"
+              fill="none" stroke="#FFE44D" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" strokeDasharray="18 6 10 4" filter="url(#hlt)" opacity="0.6"/>
+          </svg>
           <div style={{ border: `1.5px solid ${INK}`, background: PAPER_MID }}>
             {/* FIND SERVICES button — TOP */}
             <div style={{ position: "relative", display: "block" }}>
@@ -257,32 +277,7 @@ export default function Home() {
                 style={{ width: "100%", background: `linear-gradient(180deg, #9A6030 0%, ${BROWN_BTN} 50%, #5A3010 100%)`, color: "#F5E8CC", border: `1px solid #3A1800`, borderRadius: 5, padding: "9px 20px", fontSize: 13, fontWeight: 900, fontFamily: "'Times New Roman', serif", letterSpacing: 4, boxShadow: "0 2px 6px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.15)", outline: "none", textTransform: "uppercase", cursor: (selArea && selCat) ? "pointer" : "not-allowed", position: "relative", zIndex: 1 }}>
                 Find Services
               </button>
-              {/* Hand-drawn highlighter circle */}
-              <svg viewBox="0 0 300 52" preserveAspectRatio="none" style={{ position: "absolute", top: -7, left: -8, width: "calc(100% + 16px)", height: "calc(100% + 14px)", pointerEvents: "none", zIndex: 2 }}>
-                <ellipse cx="150" cy="26" rx="140" ry="22"
-                  fill="rgba(255, 210, 0, 0.22)"
-                  stroke="#F5C200"
-                  strokeWidth="3.5"
-                  strokeLinecap="round"
-                  style={{ filter: "url(#squiggle)" }}
-                />
-                <ellipse cx="150" cy="26" rx="143" ry="24"
-                  fill="none"
-                  stroke="#FFE135"
-                  strokeWidth="2"
-                  strokeDasharray="6 3"
-                  strokeLinecap="round"
-                  opacity="0.7"
-                />
-                <defs>
-                  <feTurbulence type="turbulence" baseFrequency="0.04" numOctaves="3" result="noise" id="squiggleFe" />
-                  <feDisplacementMap in="SourceGraphic" in2="noise" scale="2.5" xChannelSelector="R" yChannelSelector="G" />
-                  <filter id="squiggle" x="-20%" y="-20%" width="140%" height="140%">
-                    <feTurbulence type="turbulence" baseFrequency="0.04" numOctaves="3" result="noise" />
-                    <feDisplacementMap in="SourceGraphic" in2="noise" scale="2.5" xChannelSelector="R" yChannelSelector="G" />
-                  </filter>
-                </defs>
-              </svg>
+
             </div>
 
             {/* Labels row */}
@@ -356,6 +351,7 @@ export default function Home() {
 
 
           </div>
+          </div>{/* end highlighter wrapper */}
 
           {/* Filler below */}
           <NewsCol idx={5} lines={1} style={{ marginTop: 10, fontSize: 8 }} />
