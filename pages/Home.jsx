@@ -11,11 +11,43 @@ const BRAND = {
   subtext: "#555",
 };
 
+const SECTION_ORDER = [
+  "Historic Side | Spanish Springs",
+  "Established Villages | North of SR-466A",
+  "Newer Villages | South of SR-44",
+  "Eastport | Newest Development Area",
+  "Family & Non-Age-Restricted Villages",
+];
+
+const SECTION_LABELS = {
+  "Historic Side | Spanish Springs": "🌴 Historic Side (Spanish Springs)",
+  "Established Villages | North of SR-466A": "🏡 Established Villages (North of SR-466A)",
+  "Newer Villages | South of SR-44": "🌿 Newer Villages (South of SR-44)",
+  "Eastport | Newest Development Area": "🌊 Eastport / Newest",
+  "Family & Non-Age-Restricted Villages": "🏠 Family / Non-Age-Restricted",
+};
+
+function groupAreas(areas) {
+  const groups = {};
+  SECTION_ORDER.forEach(s => groups[s] = []);
+  areas.forEach(a => {
+    const key = a.description;
+    if (groups[key]) groups[key].push(a);
+    else groups[key] = [a];
+  });
+  return groups;
+}
+
+function getVillageName(area) {
+  // Extract just the village name after the "—"
+  const parts = area.name.split("—");
+  return parts.length > 1 ? parts[1].trim() : area.name;
+}
+
 export default function Home() {
   const [areas, setAreas] = useState([]);
   const [categories, setCategories] = useState([]);
   const [services, setServices] = useState([]);
-  const [providers, setProviders] = useState([]);
 
   const [selectedArea, setSelectedArea] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
@@ -34,6 +66,8 @@ export default function Home() {
     ? services.filter((s) => s.category_id === selectedCategory)
     : services;
 
+  const groupedAreas = groupAreas(areas);
+
   const handleSearch = async () => {
     if (!selectedArea) return;
     const all = await Provider.filter({ is_visible: true });
@@ -45,6 +79,11 @@ export default function Home() {
       const statusMatch =
         p.subscription_status === "active" || p.subscription_status === "trial";
       return areaMatch && serviceMatch && statusMatch;
+    });
+    // Sort: premium first, then featured, then basic
+    filtered.sort((a, b) => {
+      const tierOrder = { premium: 0, featured: 1, basic: 2 };
+      return (tierOrder[a.subscription_tier] ?? 3) - (tierOrder[b.subscription_tier] ?? 3);
     });
     setResults(filtered);
     setSearched(true);
@@ -86,7 +125,7 @@ export default function Home() {
           <img src="https://media.base44.com/images/public/69d062aca815ce8e697894b1/a9af95bc3_V-Hublogo.png"
             style={{ height: 54, width: 54, borderRadius: 8 }} alt="V-Hub Logo" />
           <div>
-            <div style={{ color: "#fff", fontSize: 26, fontWeight: 800, letterSpacing: 1 }}>V-HUB</div>
+            <div style={{ color: "#fff", fontSize: 28, fontWeight: 800, letterSpacing: 1 }}>V-HUB</div>
             <div style={{ color: "rgba(255,255,255,0.88)", fontSize: 13 }}>The Villages Local Services</div>
           </div>
         </div>
@@ -115,17 +154,25 @@ export default function Home() {
             🔍 Search for a Service
           </div>
 
-          {/* Area */}
-          <label style={labelStyle}>📍 Your Area *</label>
+          {/* Area grouped dropdown */}
+          <label style={labelStyle}>📍 Your Village *</label>
           <select
             value={selectedArea}
             onChange={(e) => setSelectedArea(e.target.value)}
             style={selectStyle}
           >
-            <option value="">— Select your area —</option>
-            {areas.map((a) => (
-              <option key={a.id} value={a.id}>{a.name}</option>
-            ))}
+            <option value="">— Select your village —</option>
+            {SECTION_ORDER.map(section => {
+              const sectionAreas = groupedAreas[section] || [];
+              if (sectionAreas.length === 0) return null;
+              return (
+                <optgroup key={section} label={SECTION_LABELS[section]}>
+                  {sectionAreas.map(a => (
+                    <option key={a.id} value={a.id}>{getVillageName(a)}</option>
+                  ))}
+                </optgroup>
+              );
+            })}
           </select>
 
           {/* Category */}
@@ -167,7 +214,7 @@ export default function Home() {
               fontSize: 20,
               fontWeight: 700,
               cursor: selectedArea ? "pointer" : "not-allowed",
-              marginTop: 8,
+              marginTop: 16,
               letterSpacing: 0.5,
               boxShadow: selectedArea ? "0 4px 16px rgba(232,67,26,0.35)" : "none"
             }}
@@ -255,32 +302,31 @@ function ProviderCard({ provider, categories, services, onClick }) {
         marginBottom: 16,
         boxShadow: "0 4px 18px rgba(0,0,0,0.08)",
         cursor: "pointer",
-        borderLeft: `5px solid ${BRAND.orange}`,
-        transition: "transform 0.1s",
+        borderLeft: `5px solid ${provider.subscription_tier === "premium" || provider.subscription_tier === "featured" ? BRAND.orange : BRAND.teal}`,
       }}
     >
       <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 10 }}>
         {provider.logo_url ? (
-          <img src={provider.logo_url} style={{ width: 52, height: 52, borderRadius: 12, objectFit: "cover" }} alt="" />
+          <img src={provider.logo_url} style={{ width: 56, height: 56, borderRadius: 12, objectFit: "cover" }} alt="" />
         ) : (
-          <div style={{ width: 52, height: 52, borderRadius: 12, background: `linear-gradient(135deg, ${BRAND.orange}, ${BRAND.teal})`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22, color: "#fff", fontWeight: 700 }}>
+          <div style={{ width: 56, height: 56, borderRadius: 12, background: `linear-gradient(135deg, ${BRAND.orange}, ${BRAND.teal})`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 24, color: "#fff", fontWeight: 700 }}>
             {provider.business_name?.[0] || "?"}
           </div>
         )}
-        <div>
+        <div style={{ flex: 1 }}>
           <div style={{ fontSize: 20, fontWeight: 700, color: BRAND.text }}>{provider.business_name}</div>
           {cat && <div style={{ fontSize: 14, color: BRAND.teal, fontWeight: 600 }}>{cat.icon} {cat.name}</div>}
         </div>
-        {provider.subscription_tier === "featured" || provider.subscription_tier === "premium" ? (
-          <div style={{ marginLeft: "auto", background: BRAND.orange, color: "#fff", borderRadius: 20, padding: "4px 12px", fontSize: 12, fontWeight: 700 }}>
+        {(provider.subscription_tier === "featured" || provider.subscription_tier === "premium") && (
+          <div style={{ background: BRAND.orange, color: "#fff", borderRadius: 20, padding: "4px 12px", fontSize: 12, fontWeight: 700 }}>
             ⭐ Featured
           </div>
-        ) : null}
+        )}
       </div>
 
       {provider.description && (
         <div style={{ fontSize: 15, color: BRAND.subtext, marginBottom: 10, lineHeight: 1.5 }}>
-          {provider.description.slice(0, 100)}{provider.description.length > 100 ? "..." : ""}
+          {provider.description.slice(0, 110)}{provider.description.length > 110 ? "..." : ""}
         </div>
       )}
 
@@ -309,7 +355,6 @@ function ProviderProfile({ provider, areas, categories, services, onBack }) {
 
   return (
     <div style={{ minHeight: "100vh", background: BRAND.lightBg, fontFamily: "'Segoe UI', sans-serif" }}>
-      {/* Header */}
       <div style={{
         background: `linear-gradient(135deg, ${BRAND.orange}, ${BRAND.teal})`,
         padding: "20px 24px",
@@ -321,11 +366,12 @@ function ProviderProfile({ provider, areas, categories, services, onBack }) {
         <button onClick={onBack} style={{ background: "rgba(255,255,255,0.2)", border: "none", color: "#fff", borderRadius: 10, padding: "8px 14px", fontSize: 16, cursor: "pointer", fontWeight: 600 }}>
           ← Back
         </button>
+        <img src="https://media.base44.com/images/public/69d062aca815ce8e697894b1/a9af95bc3_V-Hublogo.png"
+          style={{ height: 40, width: 40, borderRadius: 6 }} alt="V-Hub" />
         <div style={{ color: "#fff", fontSize: 20, fontWeight: 700 }}>Provider Profile</div>
       </div>
 
       <div style={{ maxWidth: 720, margin: "0 auto", padding: "24px 20px" }}>
-        {/* Profile Card */}
         <div style={{ background: "#fff", borderRadius: 20, padding: "28px", boxShadow: "0 6px 24px rgba(0,0,0,0.10)", marginBottom: 20 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 16 }}>
             {provider.logo_url ? (
@@ -343,36 +389,26 @@ function ProviderProfile({ provider, areas, categories, services, onBack }) {
               )}
             </div>
           </div>
-
           {provider.description && (
-            <div style={{ fontSize: 17, color: BRAND.subtext, lineHeight: 1.7, marginBottom: 16 }}>
-              {provider.description}
-            </div>
-          )}
-
-          {provider.rating && (
-            <div style={{ fontSize: 18, marginBottom: 8 }}>
-              {"⭐".repeat(Math.round(provider.rating))} <span style={{ color: BRAND.subtext, fontSize: 15 }}>({provider.rating}/5)</span>
-            </div>
+            <div style={{ fontSize: 17, color: BRAND.subtext, lineHeight: 1.7 }}>{provider.description}</div>
           )}
         </div>
 
-        {/* Contact Card */}
+        {/* Contact */}
         <div style={{ background: "#fff", borderRadius: 20, padding: "28px", boxShadow: "0 6px 24px rgba(0,0,0,0.10)", marginBottom: 20 }}>
           <div style={{ fontSize: 20, fontWeight: 700, color: BRAND.text, marginBottom: 18 }}>📞 Contact This Provider</div>
-
           {provider.phone && (
             <a href={`tel:${provider.phone}`} style={{ textDecoration: "none" }}>
               <div style={contactRowStyle(BRAND.orange)}>
-                <span>📱</span>
-                <span style={{ fontSize: 20, fontWeight: 700 }}>{provider.phone}</span>
+                <span style={{ fontSize: 22 }}>📱</span>
+                <span style={{ fontSize: 22, fontWeight: 700 }}>{provider.phone}</span>
               </div>
             </a>
           )}
           {provider.email && (
             <a href={`mailto:${provider.email}`} style={{ textDecoration: "none" }}>
               <div style={contactRowStyle(BRAND.teal)}>
-                <span>✉️</span>
+                <span style={{ fontSize: 22 }}>✉️</span>
                 <span style={{ fontSize: 18, fontWeight: 600 }}>{provider.email}</span>
               </div>
             </a>
@@ -380,12 +416,11 @@ function ProviderProfile({ provider, areas, categories, services, onBack }) {
           {provider.website && (
             <a href={provider.website.startsWith("http") ? provider.website : `https://${provider.website}`} target="_blank" rel="noreferrer" style={{ textDecoration: "none" }}>
               <div style={contactRowStyle(BRAND.blue)}>
-                <span>🌐</span>
+                <span style={{ fontSize: 22 }}>🌐</span>
                 <span style={{ fontSize: 18, fontWeight: 600 }}>{provider.website}</span>
               </div>
             </a>
           )}
-
           {!provider.phone && !provider.email && !provider.website && (
             <div style={{ color: BRAND.subtext, fontSize: 16 }}>No contact info available yet.</div>
           )}
@@ -411,8 +446,8 @@ function ProviderProfile({ provider, areas, categories, services, onBack }) {
             <div style={{ fontSize: 20, fontWeight: 700, color: BRAND.text, marginBottom: 16 }}>📍 Service Areas</div>
             <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
               {providerAreas.map((a) => (
-                <span key={a.id} style={{ background: `${BRAND.orange}15`, color: BRAND.orange, borderRadius: 20, padding: "8px 16px", fontSize: 16, fontWeight: 600 }}>
-                  {a.name}
+                <span key={a.id} style={{ background: `${BRAND.orange}15`, color: BRAND.orange, borderRadius: 20, padding: "8px 16px", fontSize: 15, fontWeight: 600 }}>
+                  {getVillageName(a)}
                 </span>
               ))}
             </div>
@@ -423,35 +458,6 @@ function ProviderProfile({ provider, areas, categories, services, onBack }) {
   );
 }
 
-const labelStyle = {
-  display: "block",
-  fontSize: 17,
-  fontWeight: 600,
-  color: "#333",
-  marginBottom: 8,
-  marginTop: 18,
-};
-
-const selectStyle = {
-  width: "100%",
-  padding: "16px 14px",
-  fontSize: 17,
-  borderRadius: 12,
-  border: "2px solid #e0e0e0",
-  background: "#fff",
-  color: "#333",
-  outline: "none",
-  boxSizing: "border-box",
-};
-
-const contactRowStyle = (color) => ({
-  display: "flex",
-  alignItems: "center",
-  gap: 14,
-  background: `${color}12`,
-  border: `2px solid ${color}30`,
-  borderRadius: 14,
-  padding: "16px 20px",
-  marginBottom: 12,
-  color: color,
-});
+const labelStyle = { display: "block", fontSize: 17, fontWeight: 600, color: "#333", marginBottom: 8, marginTop: 18 };
+const selectStyle = { width: "100%", padding: "16px 14px", fontSize: 17, borderRadius: 12, border: "2px solid #e0e0e0", background: "#fff", color: "#333", outline: "none", boxSizing: "border-box" };
+const contactRowStyle = (color) => ({ display: "flex", alignItems: "center", gap: 14, background: `${color}12`, border: `2px solid ${color}30`, borderRadius: 14, padding: "16px 20px", marginBottom: 12, color: color });
