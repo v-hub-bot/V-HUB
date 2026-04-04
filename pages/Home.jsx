@@ -279,7 +279,7 @@ export default function Home() {
               {/* Service dropdown */}
               <div style={{ borderRight: `1px solid ${INK}`, position: "relative" }}>
                 <button onClick={e => { e.stopPropagation(); setSOpen(!sOpen); setVOpen(false); }}
-                  style={{ width: "100%", background: PAPER, border: "none", padding: "8px 10px", fontSize: 12, fontFamily: "'Times New Roman', serif", color: selCat ? INK : INK_FADE, cursor: "pointer", display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: 0 }}>
+                  style={{ width: "100%", background: PAPER, border: "3px solid #FFDB00", boxShadow: "0 0 0 2px #FFE800, 0 0 8px 1px rgba(255,224,0,0.3)", padding: "8px 10px", fontSize: 12, fontFamily: "'Times New Roman', serif", color: selCat ? INK : INK_FADE, cursor: "pointer", display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: 0 }}>
                   <span>{selCat ? (cats.find(c => c.id === selCat)?.name || "Select a Service") : "Select a Service"}</span>
                   <span style={{ fontSize: 9, color: INK_FADE, flexShrink: 0 }}>▼</span>
                 </button>
@@ -301,7 +301,7 @@ export default function Home() {
               {/* Village dropdown */}
               <div style={{ position: "relative" }}>
                 <button onClick={e => { e.stopPropagation(); setVOpen(!vOpen); setSOpen(false); }}
-                  style={{ width: "100%", background: PAPER, border: "none", padding: "8px 10px", fontSize: 12, fontFamily: "'Times New Roman', serif", color: selArea ? INK : INK_FADE, cursor: "pointer", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  style={{ width: "100%", background: PAPER, border: "3px solid #FFDB00", boxShadow: "0 0 0 2px #FFE800, 0 0 8px 1px rgba(255,224,0,0.3)", padding: "8px 10px", fontSize: 12, fontFamily: "'Times New Roman', serif", color: selArea ? INK : INK_FADE, cursor: "pointer", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                   <span>{selArea ? vName(selArea) : "Select a Village"}</span>
                   <span style={{ fontSize: 9, color: INK_FADE, flexShrink: 0 }}>▼</span>
                 </button>
