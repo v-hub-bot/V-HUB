@@ -14,42 +14,59 @@ const BRAND = {
   subtext: "#555",
 };
 
-// These match EXACTLY the description values in the database
-const SECTION_ORDER = [
-  "Historic Side | Spanish Springs",
-  "Established Villages | North of SR-466A",
-  "Newer Villages | South of SR-44",
-  "Eastport | Newest Development Area",
-  "Family & Non-Age-Restricted Villages",
+const SECTIONS = [
+  {
+    key: "Historic Side | Spanish Springs",
+    label: "Historic Side",
+    sub: "Spanish Springs",
+    emoji: "🌴",
+    color: BRAND.orange,
+  },
+  {
+    key: "Established Villages | North of SR-466A",
+    label: "Established Villages",
+    sub: "North of SR-466A",
+    emoji: "🏡",
+    color: BRAND.teal,
+  },
+  {
+    key: "Newer Villages | South of SR-44",
+    label: "Newer Villages",
+    sub: "South of SR-44",
+    emoji: "🌿",
+    color: BRAND.green,
+  },
+  {
+    key: "Eastport | Newest Development Area",
+    label: "Eastport",
+    sub: "Newest Development",
+    emoji: "🌊",
+    color: BRAND.blue,
+  },
+  {
+    key: "Family & Non-Age-Restricted Villages",
+    label: "Family Villages",
+    sub: "Non-Age-Restricted",
+    emoji: "🏠",
+    color: BRAND.yellow,
+  },
 ];
 
-const SECTION_LABELS = {
-  "Historic Side | Spanish Springs": "🌴 Historic Side (Spanish Springs)",
-  "Established Villages | North of SR-466A": "🏡 Established Villages (North of SR-466A)",
-  "Newer Villages | South of SR-44": "🌿 Newer Villages (South of SR-44)",
-  "Eastport | Newest Development Area": "🌊 Eastport / Newest",
-  "Family & Non-Age-Restricted Villages": "🏠 Family / Non-Age-Restricted",
-};
-
-// Only show the individual village records (those with a "—" in the name)
-// Skip the 5 summary records
 function isVillageRecord(area) {
-  return area.name.includes("—") || area.name.includes(" — ");
+  return area.name.includes("\u2014");
 }
 
 function getVillageName(area) {
-  const parts = area.name.split("—");
+  const parts = area.name.split("\u2014");
   return parts.length > 1 ? parts[1].trim() : area.name;
 }
 
 function groupAreas(areas) {
   const groups = {};
-  SECTION_ORDER.forEach(s => (groups[s] = []));
+  SECTIONS.forEach(s => (groups[s.key] = []));
   areas.filter(isVillageRecord).forEach(a => {
     const key = a.description;
-    if (groups[key] !== undefined) {
-      groups[key].push(a);
-    }
+    if (groups[key] !== undefined) groups[key].push(a);
   });
   return groups;
 }
@@ -58,9 +75,10 @@ export default function Home() {
   const [areas, setAreas] = useState([]);
   const [categories, setCategories] = useState([]);
   const [services, setServices] = useState([]);
-  const [selectedArea, setSelectedArea] = useState("");
+  const [selectedArea, setSelectedArea] = useState(null); // full area object
   const [selectedCategory, setSelectedCategory] = useState("");
   const [selectedService, setSelectedService] = useState("");
+  const [openSection, setOpenSection] = useState(null);
   const [results, setResults] = useState([]);
   const [searched, setSearched] = useState(false);
   const [selectedProvider, setSelectedProvider] = useState(null);
@@ -77,11 +95,16 @@ export default function Home() {
 
   const groupedAreas = groupAreas(areas);
 
+  const handleSelectVillage = (area) => {
+    setSelectedArea(area);
+    setOpenSection(null);
+  };
+
   const handleSearch = async () => {
     if (!selectedArea) return;
     const all = await Provider.filter({ is_visible: true });
     const filtered = all.filter((p) => {
-      const areaMatch = p.service_areas && p.service_areas.includes(selectedArea);
+      const areaMatch = p.service_areas && p.service_areas.includes(selectedArea.id);
       const serviceMatch = !selectedService || (p.services && p.services.includes(selectedService));
       const statusMatch = p.subscription_status === "active" || p.subscription_status === "trial";
       return areaMatch && serviceMatch && statusMatch;
@@ -95,12 +118,13 @@ export default function Home() {
   };
 
   const handleReset = () => {
-    setSelectedArea("");
+    setSelectedArea(null);
     setSelectedCategory("");
     setSelectedService("");
     setResults([]);
     setSearched(false);
     setSelectedProvider(null);
+    setOpenSection(null);
   };
 
   if (selectedProvider) {
@@ -161,41 +185,118 @@ export default function Home() {
         <div style={{
           background: "#fff",
           borderRadius: 24,
-          padding: "36px 30px",
+          padding: "32px 26px",
           boxShadow: "0 12px 48px rgba(0,0,0,0.13)",
           marginTop: -32,
           position: "relative",
           zIndex: 10,
           border: "1px solid rgba(0,0,0,0.05)"
         }}>
-          <div style={{ fontSize: 22, fontWeight: 800, color: BRAND.text, marginBottom: 6 }}>
+          <div style={{ fontSize: 22, fontWeight: 800, color: BRAND.text, marginBottom: 4 }}>
             🔍 Find a Service Provider
           </div>
-          <div style={{ fontSize: 15, color: BRAND.subtext, marginBottom: 6 }}>
-            Select your village, then choose a service to find providers near you.
+          <div style={{ fontSize: 15, color: BRAND.subtext, marginBottom: 20 }}>
+            Pick your area, then tap a village to search.
           </div>
 
-          {/* Village dropdown — grouped by section */}
-          <label style={{ ...labelStyle, color: BRAND.teal }}>📍 Your Village *</label>
-          <select
-            value={selectedArea}
-            onChange={(e) => setSelectedArea(e.target.value)}
-            style={{ ...selectStyle, borderColor: selectedArea ? BRAND.teal : "#e0e0e0" }}
-          >
-            <option value="">— Select your village —</option>
-            {SECTION_ORDER.map(section => {
-              const sectionAreas = groupedAreas[section] || [];
-              if (sectionAreas.length === 0) return null;
+          {/* Selected village display */}
+          {selectedArea && (
+            <div style={{
+              background: `${BRAND.teal}15`,
+              border: `2px solid ${BRAND.teal}`,
+              borderRadius: 14,
+              padding: "14px 18px",
+              marginBottom: 18,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between"
+            }}>
+              <div>
+                <div style={{ fontSize: 13, color: BRAND.teal, fontWeight: 700, textTransform: "uppercase", letterSpacing: 0.5 }}>Selected Village</div>
+                <div style={{ fontSize: 20, fontWeight: 800, color: BRAND.text }}>{getVillageName(selectedArea)}</div>
+              </div>
+              <button onClick={() => setSelectedArea(null)} style={{ background: "none", border: "none", fontSize: 20, cursor: "pointer", color: BRAND.subtext }}>✕</button>
+            </div>
+          )}
+
+          {/* ── 5 ACCORDION SECTIONS ── */}
+          <div style={{ marginBottom: 20 }}>
+            <div style={{ fontSize: 16, fontWeight: 700, color: BRAND.text, marginBottom: 12 }}>📍 Select Your Village</div>
+            {SECTIONS.map((section) => {
+              const villages = groupedAreas[section.key] || [];
+              const isOpen = openSection === section.key;
               return (
-                <optgroup key={section} label={SECTION_LABELS[section]}>
-                  {sectionAreas.map(a => (
-                    <option key={a.id} value={a.id}>{getVillageName(a)}</option>
-                  ))}
-                </optgroup>
+                <div key={section.key} style={{ marginBottom: 8 }}>
+                  {/* Section header button */}
+                  <button
+                    onClick={() => setOpenSection(isOpen ? null : section.key)}
+                    style={{
+                      width: "100%",
+                      background: isOpen ? section.color : "#fff",
+                      color: isOpen ? "#fff" : BRAND.text,
+                      border: `2px solid ${section.color}`,
+                      borderRadius: isOpen ? "14px 14px 0 0" : 14,
+                      padding: "16px 20px",
+                      fontSize: 17,
+                      fontWeight: 700,
+                      cursor: "pointer",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      textAlign: "left",
+                      transition: "all 0.15s",
+                    }}
+                  >
+                    <span>
+                      <span style={{ fontSize: 22, marginRight: 10 }}>{section.emoji}</span>
+                      <span>{section.label}</span>
+                      <span style={{ fontSize: 13, fontWeight: 400, opacity: 0.8, marginLeft: 8 }}>— {section.sub}</span>
+                    </span>
+                    <span style={{ fontSize: 18 }}>{isOpen ? "▲" : "▼"}</span>
+                  </button>
+
+                  {/* Village list */}
+                  {isOpen && (
+                    <div style={{
+                      border: `2px solid ${section.color}`,
+                      borderTop: "none",
+                      borderRadius: "0 0 14px 14px",
+                      background: "#fff",
+                      padding: "12px",
+                      display: "flex",
+                      flexWrap: "wrap",
+                      gap: 8,
+                    }}>
+                      {villages.map((v) => {
+                        const isSelected = selectedArea?.id === v.id;
+                        return (
+                          <button
+                            key={v.id}
+                            onClick={() => handleSelectVillage(v)}
+                            style={{
+                              background: isSelected ? section.color : `${section.color}15`,
+                              color: isSelected ? "#fff" : section.color,
+                              border: `2px solid ${section.color}`,
+                              borderRadius: 20,
+                              padding: "10px 18px",
+                              fontSize: 15,
+                              fontWeight: 600,
+                              cursor: "pointer",
+                              transition: "all 0.1s",
+                            }}
+                          >
+                            {getVillageName(v)}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
               );
             })}
-          </select>
+          </div>
 
+          {/* Category */}
           <label style={{ ...labelStyle, color: BRAND.orange }}>📂 Category (optional)</label>
           <select
             value={selectedCategory}
@@ -208,6 +309,7 @@ export default function Home() {
             ))}
           </select>
 
+          {/* Service */}
           <label style={{ ...labelStyle, color: BRAND.blue }}>🛠️ Service (optional)</label>
           <select
             value={selectedService}
@@ -238,7 +340,7 @@ export default function Home() {
               boxShadow: selectedArea ? "0 6px 22px rgba(232,67,26,0.32)" : "none",
             }}
           >
-            Search Providers
+            {selectedArea ? `Search in ${getVillageName(selectedArea)}` : "Select a Village First"}
           </button>
         </div>
 
@@ -268,7 +370,6 @@ export default function Home() {
                 <span style={{ fontSize: 15 }}>Check back soon as more providers join V-Hub!</span>
               </div>
             )}
-
             {results.map((p) => (
               <ProviderCard key={p.id} provider={p} categories={categories} services={services} onClick={() => setSelectedProvider(p)} />
             ))}
@@ -278,16 +379,10 @@ export default function Home() {
         {/* ── CATEGORY GRID ── */}
         {!searched && (
           <div style={{ marginTop: 40 }}>
-            <div style={{
-              background: `linear-gradient(135deg, ${BRAND.orange}, ${BRAND.yellow})`,
-              borderRadius: 16,
-              padding: "18px 22px",
-              marginBottom: 20,
-            }}>
+            <div style={{ background: `linear-gradient(135deg, ${BRAND.orange}, ${BRAND.yellow})`, borderRadius: 16, padding: "18px 22px", marginBottom: 20 }}>
               <div style={{ fontSize: 20, fontWeight: 800, color: "#fff" }}>Browse by Category</div>
               <div style={{ fontSize: 14, color: "rgba(255,255,255,0.85)", marginTop: 3 }}>Tap a category to filter your search</div>
             </div>
-
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(145px, 1fr))", gap: 14 }}>
               {categories.map((c, i) => {
                 const palette = [BRAND.teal, BRAND.orange, BRAND.blue, BRAND.green, BRAND.yellow, "#0099CC", BRAND.orange, BRAND.teal, BRAND.green, BRAND.blue];
@@ -297,7 +392,6 @@ export default function Home() {
                   <div key={c.id} onClick={() => setSelectedCategory(active ? "" : c.id)}
                     style={{
                       background: active ? color : "#fff",
-                      color: active ? "#fff" : BRAND.text,
                       borderRadius: 16, padding: "20px 12px", textAlign: "center",
                       cursor: "pointer",
                       boxShadow: active ? `0 6px 20px ${color}55` : "0 3px 14px rgba(0,0,0,0.08)",
@@ -321,9 +415,9 @@ export default function Home() {
               <div style={{ fontSize: 20, fontWeight: 800, color: "#fff", marginBottom: 20, textAlign: "center" }}>How V-Hub Works</div>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16 }}>
                 {[
-                  { icon: "📍", title: "Select Your Village", desc: "Pick your area in The Villages" },
+                  { icon: "📍", title: "Pick Your Village", desc: "Tap your area in The Villages" },
                   { icon: "🔍", title: "Find a Service", desc: "Browse categories or search directly" },
-                  { icon: "📞", title: "Contact Directly", desc: "Call or email the provider — no middleman" },
+                  { icon: "📞", title: "Contact Directly", desc: "Call or email — no middleman" },
                 ].map((step, i) => (
                   <div key={i} style={{ textAlign: "center", background: "rgba(255,255,255,0.12)", borderRadius: 14, padding: "18px 10px" }}>
                     <div style={{ fontSize: 28, marginBottom: 8 }}>{step.icon}</div>
@@ -451,6 +545,6 @@ function ProviderProfile({ provider, areas, categories, services, onBack }) {
   );
 }
 
-const labelStyle = { display: "block", fontSize: 17, fontWeight: 700, marginBottom: 8, marginTop: 20 };
+const labelStyle = { display: "block", fontSize: 16, fontWeight: 700, marginBottom: 8, marginTop: 20 };
 const selectStyle = { width: "100%", padding: "16px 14px", fontSize: 17, borderRadius: 12, border: "2px solid #e0e0e0", background: "#fff", color: "#333", outline: "none", boxSizing: "border-box" };
 const contactRowStyle = (color) => ({ display: "flex", alignItems: "center", gap: 14, background: `${color}12`, border: `2px solid ${color}35`, borderRadius: 14, padding: "16px 20px", marginBottom: 12, color: color });
