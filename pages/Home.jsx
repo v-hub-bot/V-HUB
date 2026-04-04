@@ -973,6 +973,9 @@ export default function Home() {
               <img
                 src="https://base44.app/api/apps/69d062aca815ce8e697894b1/files/mp/public/69d062aca815ce8e697894b1/db767c521_palm_user_raw.png"
                 alt="Palm trees"
+                loading="eager"
+                fetchPriority="high"
+                decoding="sync"
                 style={{
                   width: 72, height: 72,
                   objectFit: "contain",
