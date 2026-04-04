@@ -150,7 +150,19 @@ export default function Home() {
         {/* Centered title */}
         <div style={{ fontSize: 72, fontWeight: 900, color: INK, letterSpacing: -1, lineHeight: 1, fontFamily: "'Times New Roman', serif", display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
           <img src="https://base44.app/api/apps/69d062aca815ce8e697894b1/files/mp/public/69d062aca815ce8e697894b1/4cd1eeb55_palm_v_transparent.png" alt="palm trees" style={{ height: 72, width: "auto", objectFit: "contain", mixBlendMode: "multiply" }} />
-          <span>V-Hub</span>
+          <span style={{
+            fontFamily: "'Playfair Display', 'Georgia', serif",
+            fontSize: 52,
+            fontWeight: 900,
+            letterSpacing: 3,
+            background: "linear-gradient(180deg, #C8860A 0%, #7A4820 40%, #3A1800 100%)",
+            WebkitBackgroundClip: "text",
+            WebkitTextFillColor: "transparent",
+            backgroundClip: "text",
+            textShadow: "none",
+            lineHeight: 1,
+            fontStyle: "italic",
+          }}>V&#8209;Hub</span>
         </div>
 
         {/* Tagline */}
@@ -240,10 +252,38 @@ export default function Home() {
           {/* ── Search panel ── */}
           <div style={{ border: `1.5px solid ${INK}`, background: PAPER_MID }}>
             {/* FIND SERVICES button — TOP */}
-            <button onClick={doSearch} disabled={!selArea || !selCat}
-              style={{ width: "100%", background: `linear-gradient(180deg, #9A6030 0%, ${BROWN_BTN} 50%, #5A3010 100%)`, color: "#F5E8CC", border: `1px solid #3A1800`, borderRadius: 5, padding: "9px 20px", fontSize: 13, fontWeight: 900, fontFamily: "'Times New Roman', serif", letterSpacing: 4, boxShadow: "0 2px 6px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.15), 0 0 0 3px #FFE135, 0 0 0 5px #F5C200, 0 0 8px 6px rgba(255,210,0,0.55)", outline: "none", textTransform: "uppercase", cursor: (selArea && selCat) ? "pointer" : "not-allowed", boxShadow: (selArea && selCat) ? "inset 0 1px 0 rgba(255,255,255,0.08)" : "none" }}>
-              Find Services
-            </button>
+            <div style={{ position: "relative", display: "block" }}>
+              <button onClick={doSearch} disabled={!selArea || !selCat}
+                style={{ width: "100%", background: `linear-gradient(180deg, #9A6030 0%, ${BROWN_BTN} 50%, #5A3010 100%)`, color: "#F5E8CC", border: `1px solid #3A1800`, borderRadius: 5, padding: "9px 20px", fontSize: 13, fontWeight: 900, fontFamily: "'Times New Roman', serif", letterSpacing: 4, boxShadow: "0 2px 6px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.15)", outline: "none", textTransform: "uppercase", cursor: (selArea && selCat) ? "pointer" : "not-allowed", position: "relative", zIndex: 1 }}>
+                Find Services
+              </button>
+              {/* Hand-drawn highlighter circle */}
+              <svg viewBox="0 0 300 52" preserveAspectRatio="none" style={{ position: "absolute", top: -7, left: -8, width: "calc(100% + 16px)", height: "calc(100% + 14px)", pointerEvents: "none", zIndex: 2 }}>
+                <ellipse cx="150" cy="26" rx="140" ry="22"
+                  fill="rgba(255, 210, 0, 0.22)"
+                  stroke="#F5C200"
+                  strokeWidth="3.5"
+                  strokeLinecap="round"
+                  style={{ filter: "url(#squiggle)" }}
+                />
+                <ellipse cx="150" cy="26" rx="143" ry="24"
+                  fill="none"
+                  stroke="#FFE135"
+                  strokeWidth="2"
+                  strokeDasharray="6 3"
+                  strokeLinecap="round"
+                  opacity="0.7"
+                />
+                <defs>
+                  <feTurbulence type="turbulence" baseFrequency="0.04" numOctaves="3" result="noise" id="squiggleFe" />
+                  <feDisplacementMap in="SourceGraphic" in2="noise" scale="2.5" xChannelSelector="R" yChannelSelector="G" />
+                  <filter id="squiggle" x="-20%" y="-20%" width="140%" height="140%">
+                    <feTurbulence type="turbulence" baseFrequency="0.04" numOctaves="3" result="noise" />
+                    <feDisplacementMap in="SourceGraphic" in2="noise" scale="2.5" xChannelSelector="R" yChannelSelector="G" />
+                  </filter>
+                </defs>
+              </svg>
+            </div>
 
             {/* Labels row */}
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", borderBottom: `1px solid ${INK}` }}>
