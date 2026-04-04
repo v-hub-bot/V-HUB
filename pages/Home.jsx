@@ -434,6 +434,46 @@ function StarRating({ n = 5 }) {
   );
 }
 
+function ProviderRatingBadge({ providerId, googleRating }) {
+  const [vhubRating, setVhubRating] = React.useState(null);
+  const [count, setCount] = React.useState(0);
+
+  React.useEffect(() => {
+    ProviderReview.filter({ provider_id: providerId, is_approved: true })
+      .then(revs => {
+        const approved = (revs || []);
+        if (approved.length > 0) {
+          const avg = approved.reduce((s, r) => s + (r.rating || 0), 0) / approved.length;
+          setVhubRating(avg);
+          setCount(approved.length);
+        }
+      }).catch(() => {});
+  }, [providerId]);
+
+  if (vhubRating !== null) {
+    return (
+      <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 6 }}>
+        <StarRating n={vhubRating} />
+        <span style={{ fontSize: 11, color: INK_FADE, fontFamily: "'Times New Roman', serif" }}>
+          {vhubRating.toFixed(1)}/5 · <span style={{ color: TEAL, fontWeight: 700 }}>{count} Villager {count === 1 ? "review" : "reviews"}</span>
+        </span>
+      </div>
+    );
+  }
+  if (typeof googleRating === "number" && googleRating > 0) {
+    return (
+      <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 6 }}>
+        <StarRating n={googleRating} />
+        <span style={{ fontSize: 11, color: INK_FADE, fontFamily: "'Times New Roman', serif" }}>
+          {googleRating}/5 · <span style={{ color: "#4285F4", fontWeight: 700 }}>Google rating</span>
+        </span>
+      </div>
+    );
+  }
+  return null;
+}
+
+
 function ClassifiedAd({ p, onSel }) {
   const tier = p.subscription_tier;
   const isPremium = tier === "premium";
@@ -492,14 +532,8 @@ function ClassifiedAd({ p, onSel }) {
         )}
       </div>
 
-      {/* Real V-Hub rating (if it exists) */}
-      {typeof p.rating === "number" && p.rating > 0 && (
-        <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 6 }}>
-          <span style={{ fontSize: 11, fontWeight: 700, color: "#B8860B", fontFamily: "'Times New Roman', serif" }}>★</span>
-          <StarRating n={p.rating} />
-          <span style={{ fontSize: 11, color: INK_FADE, fontFamily: "'Times New Roman', serif" }}>{p.rating}/5</span>
-        </div>
-      )}
+      {/* Rating display — V-Hub villager rating preferred, falls back to Google rating */}
+      <ProviderRatingBadge providerId={p.id} googleRating={p.rating} />
 
       {/* Description */}
       {p.description && (
@@ -925,7 +959,31 @@ export default function Home() {
         (!p.services?.length && p.category_id === selSvc.category_id);
       return areaMatch && svcMatch;
     });
+    // Fetch approved V-Hub reviews for matched providers and sort by rating
+    const ids = out.map(p => p.id);
+    let reviewMap = {};
+    try {
+      const allRevs = await ProviderReview.filter({ is_approved: true });
+      (allRevs || []).forEach(r => {
+        if (!reviewMap[r.provider_id]) reviewMap[r.provider_id] = [];
+        reviewMap[r.provider_id].push(r.rating);
+      });
+    } catch(e) { /* silently continue */ }
+
+    const getScore = (p) => {
+      const revs = reviewMap[p.id];
+      if (revs && revs.length > 0) {
+        // V-Hub villager rating — primary sort
+        return revs.reduce((s, r) => s + r, 0) / revs.length;
+      }
+      // Fall back to Google/seeded rating field
+      return typeof p.rating === "number" ? p.rating : 0;
+    };
+
     out.sort((a, b) => {
+      // Higher rating first; same rating → tier order
+      const ratingDiff = getScore(b) - getScore(a);
+      if (ratingDiff !== 0) return ratingDiff;
       const tier = { premium: 0, featured: 1, basic: 2 };
       return (tier[a.subscription_tier] ?? 3) - (tier[b.subscription_tier] ?? 3);
     });
