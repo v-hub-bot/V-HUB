@@ -162,7 +162,7 @@ export default function Home() {
             textShadow: "none",
             lineHeight: 1,
             fontStyle: "italic",
-          }}><span style={{ fontStyle: "italic", fontWeight: 900 }}>V</span><span style={{ fontStyle: "normal" }}>&#8209;Hub</span></span>
+          }}><span style={{ fontStyle: "italic", fontWeight: 900, fontFamily: "'Playfair Display', Georgia, serif", fontSize: "1.15em", letterSpacing: 1 }}>V</span><span style={{ fontStyle: "normal" }}>&#8209;Hub</span></span>
         </div>
 
         {/* Tagline */}
@@ -254,7 +254,7 @@ export default function Home() {
             {/* FIND SERVICES button — TOP */}
             <div style={{ position: "relative", display: "block", padding: "5px" }}>
               <button onClick={doSearch} disabled={!selArea || !selCat}
-                style={{ width: "100%", background: `linear-gradient(180deg, #9A6030 0%, ${BROWN_BTN} 50%, #5A3010 100%)`, color: "#F5E8CC", border: `3px solid #E8C840`, borderRadius: 5, padding: "9px 20px", fontSize: 13, fontWeight: 900, fontFamily: "'Times New Roman', serif", letterSpacing: 4, boxShadow: "0 2px 6px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.15), 0 0 0 2px #F5D800", outline: "none", textTransform: "uppercase", cursor: (selArea && selCat) ? "pointer" : "not-allowed", position: "relative", zIndex: 1 }}>
+                style={{ width: "100%", background: `linear-gradient(180deg, #9A6030 0%, ${BROWN_BTN} 50%, #5A3010 100%)`, color: "#F5E8CC", border: `3px solid #F2CC00`, borderRadius: 5, padding: "9px 20px", fontSize: 13, fontWeight: 900, fontFamily: "'Times New Roman', serif", letterSpacing: 4, boxShadow: "0 2px 6px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.15), 0 0 0 2px #FFE000", outline: "none", textTransform: "uppercase", cursor: (selArea && selCat) ? "pointer" : "not-allowed", position: "relative", zIndex: 1 }}>
                 Find Services
               </button>
 
