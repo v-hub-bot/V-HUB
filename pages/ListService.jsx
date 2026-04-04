@@ -7,52 +7,46 @@ const BRAND = {
   deepBlue: "#001F3F",
   green: "#2E9B3B",
   yellow: "#F5A623",
-  lightBg: "#F8FFFE",
-  text: "#1A1A2E",
-  subtext: "#555",
+  paper: "#F5ECD7",
+  paperDark: "#E8D5B0",
+  ink: "#2C1A0E",
+  inkLight: "#5C3D1E",
 };
-
-const NAV_LINKS = [
-  { label: "🏠 Home", href: "/" },
-  { label: "🔍 Find Services", href: "/?mode=find" },
-  { label: "📋 List Your Service", href: "/list-service" },
-];
 
 function BurgerMenu() {
   const [open, setOpen] = useState(false);
+  const navLinks = [
+    { label: "🏠 Home", href: "/" },
+    { label: "🔍 Find Services", href: "/" },
+    { label: "📋 List Your Service", href: "/list-service" },
+  ];
   return (
     <>
-      <button
-        onClick={() => setOpen(true)}
-        style={{ background: "rgba(255,255,255,0.15)", border: "1.5px solid rgba(255,255,255,0.3)", borderRadius: 10, padding: "10px 14px", cursor: "pointer", display: "flex", flexDirection: "column", gap: 5, alignItems: "center" }}
-      >
-        <span style={{ display: "block", width: 22, height: 2.5, background: "#fff", borderRadius: 2 }} />
-        <span style={{ display: "block", width: 22, height: 2.5, background: "#fff", borderRadius: 2 }} />
-        <span style={{ display: "block", width: 22, height: 2.5, background: "#fff", borderRadius: 2 }} />
+      <button onClick={() => setOpen(true)}
+        style={{ background: "rgba(255,255,255,0.15)", border: "1.5px solid rgba(255,255,255,0.3)", borderRadius: 8, padding: "9px 12px", cursor: "pointer", display: "flex", flexDirection: "column", gap: 5 }}>
+        <span style={{ display: "block", width: 20, height: 2, background: "#fff", borderRadius: 2 }} />
+        <span style={{ display: "block", width: 20, height: 2, background: "#fff", borderRadius: 2 }} />
+        <span style={{ display: "block", width: 20, height: 2, background: "#fff", borderRadius: 2 }} />
       </button>
-
       {open && (
         <>
-          <div onClick={() => setOpen(false)} style={{ position: "fixed", inset: 0, zIndex: 199, background: "rgba(0,0,0,0.4)" }} />
-          <div style={{ position: "fixed", top: 0, right: 0, bottom: 0, width: 280, background: "#fff", zIndex: 200, boxShadow: "-4px 0 30px rgba(0,0,0,0.2)", display: "flex", flexDirection: "column", fontFamily: "'Segoe UI', sans-serif" }}>
-            <div style={{ background: `linear-gradient(135deg, #001F3F, #003F6B)`, padding: "24px 20px 20px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                <img src="https://media.base44.com/images/public/69d062aca815ce8e697894b1/f418f4c1d_V-Hublogo.png" style={{ width: 38, height: 38, borderRadius: "50%", objectFit: "contain" }} alt="V-Hub" />
-                <div style={{ color: "#fff", fontWeight: 800, fontSize: 17 }}>V-HUB</div>
-              </div>
-              <button onClick={() => setOpen(false)} style={{ background: "rgba(255,255,255,0.15)", border: "none", color: "#fff", borderRadius: 8, width: 32, height: 32, fontSize: 18, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>✕</button>
+          <div onClick={() => setOpen(false)} style={{ position: "fixed", inset: 0, zIndex: 199, background: "rgba(0,0,0,0.45)" }} />
+          <div style={{ position: "fixed", top: 0, right: 0, bottom: 0, width: 280, background: BRAND.paper, zIndex: 200, boxShadow: "-4px 0 30px rgba(0,0,0,0.25)", display: "flex", flexDirection: "column", fontFamily: "Georgia, serif" }}>
+            <div style={{ background: BRAND.ink, padding: "22px 20px 18px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+              <div style={{ color: "#F5ECD7", fontWeight: 800, fontSize: 18, fontFamily: "Georgia, serif", letterSpacing: 1 }}>V-HUB</div>
+              <button onClick={() => setOpen(false)} style={{ background: "rgba(255,255,255,0.12)", border: "none", color: "#fff", borderRadius: 6, width: 30, height: 30, fontSize: 16, cursor: "pointer" }}>✕</button>
             </div>
             <div style={{ padding: "16px 12px", flex: 1 }}>
-              {NAV_LINKS.map((link, i) => (
+              {navLinks.map((link, i) => (
                 <a key={i} href={link.href} style={{ textDecoration: "none" }}>
-                  <div style={{ padding: "16px", borderRadius: 12, fontSize: 17, fontWeight: 600, color: BRAND.text, marginBottom: 6, background: "#f8f8f8", borderLeft: `4px solid ${[BRAND.teal, BRAND.orange, BRAND.blue][i]}` }}>
+                  <div style={{ padding: "15px 16px", borderRadius: 8, fontSize: 16, fontWeight: 600, color: BRAND.ink, marginBottom: 6, background: BRAND.paperDark, borderLeft: `4px solid ${["#8B4513","#E8431A","#1565C0"][i]}`, fontFamily: "Georgia, serif" }}>
                     {link.label}
                   </div>
                 </a>
               ))}
             </div>
-            <div style={{ padding: "16px 20px", borderTop: "1px solid #eee", textAlign: "center" }}>
-              <div style={{ fontSize: 12, color: BRAND.subtext }}>V-HUB — The Villages, FL</div>
+            <div style={{ padding: "14px 20px", borderTop: `1px solid ${BRAND.paperDark}`, textAlign: "center" }}>
+              <div style={{ fontSize: 12, color: BRAND.inkLight, fontFamily: "Georgia, serif" }}>V-HUB — The Villages, FL</div>
             </div>
           </div>
         </>
@@ -72,89 +66,69 @@ export default function ListService() {
   ];
 
   return (
-    <div style={{ minHeight: "100vh", background: BRAND.lightBg, fontFamily: "'Segoe UI', sans-serif" }}>
+    <div style={{ minHeight: "100vh", background: BRAND.paper, fontFamily: "Georgia, serif" }}>
 
       {/* ── Header ── */}
-      <div style={{
-        background: `linear-gradient(135deg, #001F3F, #003F6B)`,
-        padding: "14px 20px",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-        boxShadow: "0 4px 16px rgba(0,0,0,0.25)"
-      }}>
-        {/* Left: logo + title + home button */}
+      <div style={{ background: BRAND.ink, padding: "14px 20px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
           <a href="/" style={{ textDecoration: "none" }}>
-            <button style={{ background: "rgba(255,255,255,0.15)", border: "1.5px solid rgba(255,255,255,0.3)", color: "#fff", borderRadius: 10, padding: "8px 16px", fontSize: 15, cursor: "pointer", fontWeight: 700 }}>
-              ← Home
-            </button>
+            <button style={{ background: "rgba(255,255,255,0.15)", border: "1.5px solid rgba(255,255,255,0.3)", color: "#fff", borderRadius: 8, padding: "8px 16px", fontSize: 15, cursor: "pointer", fontFamily: "Georgia, serif", fontWeight: 700 }}>← Home</button>
           </a>
-          <img src="https://media.base44.com/images/public/69d062aca815ce8e697894b1/f418f4c1d_V-Hublogo.png"
-            style={{ height: 42, width: 42, borderRadius: "50%", objectFit: "contain" }} alt="V-Hub" />
-          <div style={{ color: "#fff", fontSize: 19, fontWeight: 800 }}>List Your Service</div>
+          <div style={{ color: BRAND.paper, fontSize: 20, fontWeight: 800, fontFamily: "Georgia, serif", letterSpacing: 1 }}>🌴 V-Hub</div>
         </div>
-        {/* Right: burger */}
         <BurgerMenu />
       </div>
 
-      {/* ── Hero Banner ── */}
-      <div style={{
-        background: `linear-gradient(135deg, ${BRAND.orange}, ${BRAND.yellow} 60%, ${BRAND.teal})`,
-        padding: "44px 24px",
-        textAlign: "center",
-        position: "relative",
-        overflow: "hidden",
-      }}>
-        <div style={{ position: "absolute", top: -40, left: -40, width: 180, height: 180, borderRadius: "50%", background: "rgba(255,255,255,0.06)", pointerEvents: "none" }} />
-        <div style={{ position: "absolute", bottom: -30, right: -30, width: 200, height: 200, borderRadius: "50%", background: "rgba(0,0,0,0.06)", pointerEvents: "none" }} />
-        <div style={{ fontSize: 48, marginBottom: 12 }}>📋</div>
-        <div style={{ color: "#fff", fontSize: 30, fontWeight: 900, marginBottom: 10, textShadow: "0 2px 10px rgba(0,0,0,0.2)" }}>
-          Grow Your Business in<br />The Villages
-        </div>
-        <div style={{ color: "rgba(255,255,255,0.9)", fontSize: 17, maxWidth: 440, margin: "0 auto", lineHeight: 1.7 }}>
-          Reach thousands of residents who are actively searching for trusted local service providers just like you.
-        </div>
+      {/* ── Masthead ── */}
+      <div style={{ background: BRAND.paper, borderBottom: `2px solid ${BRAND.paperDark}`, padding: "24px 20px", textAlign: "center" }}>
+        <div style={{ fontSize: 32, fontWeight: 900, color: BRAND.ink, fontFamily: "Georgia, serif", letterSpacing: 2 }}>List Your Service</div>
+        <div style={{ fontSize: 14, color: BRAND.inkLight, fontStyle: "italic", marginTop: 4 }}>Reach thousands of residents in The Villages, FL</div>
+        <div style={{ height: 2, background: `linear-gradient(90deg, transparent, ${BRAND.ink}, transparent)`, marginTop: 14 }} />
       </div>
 
       <div style={{ maxWidth: 720, margin: "0 auto", padding: "0 20px 50px" }}>
 
         {/* ── 3 Value Props ── */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 14, marginTop: 28, marginBottom: 24 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 14, marginTop: 28, marginBottom: 28 }}>
           {[
-            { icon: "👥", title: "Large Audience", desc: "Thousands of active Villages residents", color: BRAND.teal },
+            { icon: "👥", title: "Large Audience", desc: "Thousands of active Villages residents", color: "#8B4513" },
             { icon: "📍", title: "Hyper-Local", desc: "Exclusively for The Villages community", color: BRAND.orange },
-            { icon: "⚡", title: "Easy Setup", desc: "Your listing goes live in minutes", color: BRAND.blue },
+            { icon: "⚡", title: "Easy Setup", desc: "Your listing goes live in minutes", color: "#1565C0" },
           ].map((item, i) => (
-            <div key={i} style={{ background: "#fff", borderRadius: 18, padding: "22px 14px", textAlign: "center", boxShadow: "0 4px 16px rgba(0,0,0,0.08)", border: `2px solid ${item.color}25` }}>
-              <div style={{ fontSize: 32, marginBottom: 8 }}>{item.icon}</div>
-              <div style={{ fontSize: 14, fontWeight: 800, color: item.color, marginBottom: 4 }}>{item.title}</div>
-              <div style={{ fontSize: 12, color: BRAND.subtext, lineHeight: 1.5 }}>{item.desc}</div>
+            <div key={i} style={{ background: BRAND.paperDark, borderRadius: 12, padding: "20px 12px", textAlign: "center", border: `1px solid ${item.color}25`, boxShadow: "0 2px 8px rgba(44,26,14,0.08)" }}>
+              <div style={{ fontSize: 30, marginBottom: 8 }}>{item.icon}</div>
+              <div style={{ fontSize: 13, fontWeight: 800, color: item.color, marginBottom: 4, fontFamily: "Georgia, serif" }}>{item.title}</div>
+              <div style={{ fontSize: 12, color: BRAND.inkLight, lineHeight: 1.5, fontStyle: "italic" }}>{item.desc}</div>
             </div>
           ))}
         </div>
 
+        {/* Decorative rule */}
+        <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 24 }}>
+          <div style={{ flex: 1, height: 1, background: `${BRAND.ink}30` }} />
+          <div style={{ fontSize: 14, color: BRAND.inkLight, fontStyle: "italic", fontFamily: "Georgia, serif" }}>Choose Your Plan</div>
+          <div style={{ flex: 1, height: 1, background: `${BRAND.ink}30` }} />
+        </div>
+
         {/* ── Listing Tiers ── */}
-        <div style={{ marginBottom: 28 }}>
-          <div style={{ fontSize: 22, fontWeight: 800, color: BRAND.text, marginBottom: 6, textAlign: "center" }}>Choose Your Plan</div>
-          <div style={{ fontSize: 14, color: BRAND.subtext, textAlign: "center", marginBottom: 20 }}>All plans include a searchable profile visible to Villages residents</div>
+        <div style={{ marginBottom: 32 }}>
           {[
-            { tier: "Basic", icon: "🟢", color: BRAND.green, features: ["Searchable provider profile", "List your services & areas", "Contact info visible to residents", "Standard search placement"] },
+            { tier: "Basic", icon: "🟢", color: "#2E7D32", features: ["Searchable provider profile", "List your services & areas", "Contact info visible to residents", "Standard search placement"] },
             { tier: "Featured", icon: "⭐", color: BRAND.orange, highlight: true, badge: "Most Popular", features: ["Everything in Basic", "Featured badge on your profile", "Priority placement in search results", "Highlighted listing card"] },
-            { tier: "Premium", icon: "👑", color: BRAND.blue, features: ["Everything in Featured", "Top placement in all searches", "Enhanced profile with logo", "Maximum visibility across platform"] },
+            { tier: "Premium", icon: "👑", color: "#1565C0", features: ["Everything in Featured", "Top placement in all searches", "Enhanced profile with logo", "Maximum visibility across platform"] },
           ].map((plan, i) => (
-            <div key={i} style={{ background: plan.highlight ? `linear-gradient(135deg, ${BRAND.orange}08, ${BRAND.yellow}08)` : "#fff", borderRadius: 18, padding: "24px 22px", marginBottom: 14, boxShadow: plan.highlight ? "0 8px 28px rgba(232,67,26,0.15)" : "0 4px 16px rgba(0,0,0,0.07)", border: `2px solid ${plan.highlight ? plan.color : plan.color + "30"}`, position: "relative" }}>
+            <div key={i} style={{ background: plan.highlight ? "#fff" : BRAND.paperDark, borderRadius: 12, padding: "22px 20px", marginBottom: 12, border: `2px solid ${plan.highlight ? plan.color : plan.color + "30"}`, position: "relative", boxShadow: plan.highlight ? "0 6px 20px rgba(232,67,26,0.12)" : "0 2px 8px rgba(44,26,14,0.06)" }}>
               {plan.badge && (
-                <div style={{ position: "absolute", top: -12, right: 20, background: `linear-gradient(135deg, ${BRAND.orange}, ${BRAND.yellow})`, color: "#fff", borderRadius: 20, padding: "4px 14px", fontSize: 12, fontWeight: 700 }}>{plan.badge}</div>
+                <div style={{ position: "absolute", top: -12, right: 20, background: BRAND.orange, color: "#fff", borderRadius: 16, padding: "3px 12px", fontSize: 11, fontWeight: 700, fontFamily: "Georgia, serif" }}>{plan.badge}</div>
               )}
-              <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 14 }}>
-                <span style={{ fontSize: 28 }}>{plan.icon}</span>
-                <div style={{ fontSize: 20, fontWeight: 800, color: plan.color }}>{plan.tier} Listing</div>
+              <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
+                <span style={{ fontSize: 26 }}>{plan.icon}</span>
+                <div style={{ fontSize: 18, fontWeight: 800, color: plan.color, fontFamily: "Georgia, serif" }}>{plan.tier} Listing</div>
               </div>
-              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: 7 }}>
                 {plan.features.map((f, j) => (
-                  <div key={j} style={{ display: "flex", alignItems: "center", gap: 10, fontSize: 15, color: BRAND.text }}>
-                    <span style={{ color: plan.color, fontWeight: 700, fontSize: 16 }}>✓</span> {f}
+                  <div key={j} style={{ display: "flex", alignItems: "center", gap: 10, fontSize: 14, color: BRAND.ink, fontFamily: "Georgia, serif" }}>
+                    <span style={{ color: plan.color, fontWeight: 700 }}>✓</span> {f}
                   </div>
                 ))}
               </div>
@@ -163,47 +137,49 @@ export default function ListService() {
         </div>
 
         {/* ── Contact CTA ── */}
-        <div style={{ background: `linear-gradient(135deg, ${BRAND.deepBlue}, #003F6B)`, borderRadius: 22, padding: "34px 28px", textAlign: "center", marginBottom: 24 }}>
-          <div style={{ fontSize: 24, fontWeight: 900, color: "#fff", marginBottom: 10 }}>Ready to Get Listed?</div>
-          <div style={{ color: "rgba(255,255,255,0.78)", fontSize: 16, marginBottom: 28, lineHeight: 1.7 }}>
+        <div style={{ background: BRAND.ink, borderRadius: 16, padding: "32px 26px", textAlign: "center", marginBottom: 28 }}>
+          <div style={{ fontSize: 24, fontWeight: 900, color: BRAND.paper, fontFamily: "Georgia, serif", letterSpacing: 1, marginBottom: 8 }}>Ready to Get Listed?</div>
+          <div style={{ color: `${BRAND.paper}90`, fontSize: 15, marginBottom: 26, lineHeight: 1.7, fontStyle: "italic" }}>
             Contact William Evans to set up your provider profile and start reaching customers across The Villages today.
           </div>
-          <div style={{ display: "flex", flexDirection: "column", gap: 14, alignItems: "center" }}>
-            <a href="mailto:william@vhub.com" style={{ textDecoration: "none", width: "100%", maxWidth: 360 }}>
-              <div style={{ background: `linear-gradient(135deg, ${BRAND.orange}, ${BRAND.yellow})`, color: "#fff", borderRadius: 14, padding: "18px 24px", fontSize: 18, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center", gap: 10, boxShadow: "0 6px 20px rgba(232,67,26,0.35)" }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: 12, alignItems: "center" }}>
+            <a href="mailto:william@vhub.com" style={{ textDecoration: "none", width: "100%", maxWidth: 340 }}>
+              <div style={{ background: BRAND.orange, color: "#fff", borderRadius: 10, padding: "16px 24px", fontSize: 17, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center", gap: 10, boxShadow: "0 4px 16px rgba(232,67,26,0.35)", fontFamily: "Georgia, serif" }}>
                 ✉️ Email to Get Started
               </div>
             </a>
-            <a href="tel:+13521234567" style={{ textDecoration: "none", width: "100%", maxWidth: 360 }}>
-              <div style={{ background: BRAND.teal, color: "#fff", borderRadius: 14, padding: "18px 24px", fontSize: 18, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center", gap: 10, boxShadow: "0 6px 20px rgba(0,191,165,0.3)" }}>
+            <a href="tel:+13521234567" style={{ textDecoration: "none", width: "100%", maxWidth: 340 }}>
+              <div style={{ background: BRAND.paper, color: BRAND.ink, borderRadius: 10, padding: "16px 24px", fontSize: 17, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center", gap: 10, fontFamily: "Georgia, serif" }}>
                 📞 Call William Evans
               </div>
             </a>
           </div>
         </div>
 
-        {/* ── FAQ Accordion ── */}
-        <div style={{ marginBottom: 24 }}>
-          <div style={{ fontSize: 20, fontWeight: 800, color: BRAND.text, marginBottom: 16 }}>Frequently Asked Questions</div>
-          {faqs.map((faq, i) => (
-            <div key={i} style={{ background: "#fff", borderRadius: 14, marginBottom: 8, boxShadow: "0 2px 10px rgba(0,0,0,0.07)", overflow: "hidden" }}>
-              <button onClick={() => setOpenFaq(openFaq === i ? null : i)}
-                style={{ width: "100%", background: "none", border: "none", padding: "18px 20px", display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer", fontSize: 16, fontWeight: 700, color: BRAND.text, textAlign: "left" }}>
-                {faq.title}
-                <span style={{ fontSize: 18, color: BRAND.teal, flexShrink: 0, marginLeft: 10 }}>{openFaq === i ? "▲" : "▼"}</span>
-              </button>
-              {openFaq === i && (
-                <div style={{ padding: "4px 20px 18px", fontSize: 15, color: BRAND.subtext, lineHeight: 1.8, whiteSpace: "pre-line" }}>{faq.content}</div>
-              )}
-            </div>
-          ))}
+        {/* ── FAQ ── */}
+        <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
+          <div style={{ flex: 1, height: 1, background: `${BRAND.ink}30` }} />
+          <div style={{ fontSize: 14, color: BRAND.inkLight, fontStyle: "italic", fontFamily: "Georgia, serif" }}>Frequently Asked Questions</div>
+          <div style={{ flex: 1, height: 1, background: `${BRAND.ink}30` }} />
         </div>
+        {faqs.map((faq, i) => (
+          <div key={i} style={{ background: BRAND.paperDark, borderRadius: 10, marginBottom: 8, border: `1px solid ${BRAND.ink}15`, overflow: "hidden" }}>
+            <button onClick={() => setOpenFaq(openFaq === i ? null : i)}
+              style={{ width: "100%", background: "none", border: "none", padding: "16px 18px", display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer", fontSize: 15, fontWeight: 700, color: BRAND.ink, fontFamily: "Georgia, serif", textAlign: "left" }}>
+              {faq.title}
+              <span style={{ fontSize: 14, color: BRAND.inkLight, flexShrink: 0 }}>{openFaq === i ? "▲" : "▼"}</span>
+            </button>
+            {openFaq === i && (
+              <div style={{ padding: "4px 18px 16px", fontSize: 14, color: BRAND.inkLight, lineHeight: 1.8, whiteSpace: "pre-line", fontStyle: "italic" }}>{faq.content}</div>
+            )}
+          </div>
+        ))}
 
         {/* Footer */}
-        <div style={{ textAlign: "center", padding: "20px 0" }}>
-          <img src="https://media.base44.com/images/public/69d062aca815ce8e697894b1/f418f4c1d_V-Hublogo.png"
-            alt="V-Hub" style={{ width: 50, height: 50, objectFit: "contain", borderRadius: "50%", marginBottom: 8 }} />
-          <div style={{ color: BRAND.subtext, fontSize: 13 }}>V-HUB — The Villages, FL</div>
+        <div style={{ textAlign: "center", padding: "24px 0 0" }}>
+          <div style={{ height: 1, background: `linear-gradient(90deg, transparent, ${BRAND.ink}40, transparent)`, marginBottom: 16 }} />
+          <div style={{ fontSize: 18, fontWeight: 800, color: BRAND.ink, fontFamily: "Georgia, serif", letterSpacing: 2 }}>🌴 V-HUB</div>
+          <div style={{ color: BRAND.inkLight, fontSize: 12, marginTop: 4, fontStyle: "italic" }}>The Villages, FL</div>
         </div>
       </div>
     </div>
