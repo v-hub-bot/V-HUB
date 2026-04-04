@@ -173,6 +173,7 @@ export default function Home() {
   const [sOpen,    setSOpen]    = useState(false);
   const [vOpen,    setVOpen]    = useState(false);
   const [openSec,  setOpenSec]  = useState(null);
+  const [openCat,  setOpenCat]  = useState(null);
   const [results,  setResults]  = useState([]);
   const [searched, setSearched] = useState(false);
   const [selProv,  setSelProv]  = useState(null);
@@ -201,7 +202,7 @@ export default function Home() {
   const reset = () => {
     setSelArea(null); setSelCat(""); setSelSvc("");
     setResults([]); setSearched(false); setSelProv(null);
-    setSOpen(false); setVOpen(false); setOpenSec(null);
+    setSOpen(false); setVOpen(false); setOpenSec(null); setOpenCat(null); setOpenCat(null);
   };
 
   if (selProv)  return <ProvDetail prov={selProv} areas={areas} cats={cats} onBack={() => setSelProv(null)} />;
@@ -287,16 +288,23 @@ export default function Home() {
                   <span style={{ fontSize: 12 }}>{sOpen ? "▲" : "▼"}</span>
                 </button>
                 {sOpen && (
-                  <div onClick={e => e.stopPropagation()} style={{ position: "absolute", top: "calc(100% + 3px)", left: 0, right: 0, background: PAPER, border: `2px solid ${INK}`, borderRadius: 5, zIndex: 9999, boxShadow: "0 10px 30px rgba(0,0,0,0.45)", maxHeight: 320, overflowY: "auto" }}>
-                    <div onClick={() => { setSelCat(""); setSelSvc(""); setSOpen(false); }} style={{ padding: "10px 14px", fontSize: 13, color: INK_FADE, fontStyle: "italic", borderBottom: `1px solid ${PAPER_DK}`, cursor: "pointer" }}>— All Services —</div>
+                  <div onClick={e => e.stopPropagation()} style={{ position: "absolute", top: "calc(100% + 3px)", left: 0, right: 0, background: PAPER, border: `2px solid ${INK}`, borderRadius: 5, zIndex: 9999, boxShadow: "0 10px 30px rgba(0,0,0,0.45)", maxHeight: 360, overflowY: "auto" }}>
+                    <div onClick={() => { setSelCat(""); setSelSvc(""); setSOpen(false); setOpenCat(null); }} style={{ padding: "10px 14px", fontSize: 13, color: INK_FADE, fontStyle: "italic", borderBottom: `1px solid ${PAPER_DK}`, cursor: "pointer" }}>— All Services —</div>
                     {cats.map(c => {
                       const catSvcs = svcs.filter(s => s.category_id === c.id);
+                      const isCatOpen = openCat === c.id;
                       return (
                         <div key={c.id}>
-                          <div style={{ padding: "9px 14px", fontSize: 12, fontWeight: 700, color: "#fff", background: "#5C2E0E", letterSpacing: 0.5, textTransform: "uppercase" }}>{c.icon} {c.name}</div>
-                          {catSvcs.map(s => (
-                            <div key={s.id} onClick={() => { setSelCat(c.id); setSelSvc(s.id); setSOpen(false); }}
-                              style={{ padding: "10px 14px 10px 26px", fontSize: 14, color: INK, background: selSvc===s.id ? PAPER_MID : PAPER, borderBottom: `1px solid ${PAPER_DK}`, cursor: "pointer" }}>
+                          <div
+                            onClick={e => { e.stopPropagation(); setOpenCat(isCatOpen ? null : c.id); }}
+                            style={{ padding: "11px 14px", fontSize: 13, fontWeight: 700, color: "#fff", background: "#5C2E0E", display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer", borderBottom: "1px solid rgba(255,255,255,0.15)" }}>
+                            <span>{c.icon} {c.name}</span>
+                            <span style={{ fontSize: 11 }}>{isCatOpen ? "▲" : "▼"}</span>
+                          </div>
+                          {isCatOpen && catSvcs.map(s => (
+                            <div key={s.id}
+                              onClick={e => { e.stopPropagation(); setSelCat(c.id); setSelSvc(s.id); setSOpen(false); setOpenCat(null); }}
+                              style={{ padding: "10px 14px 10px 28px", fontSize: 14, color: INK, background: selSvc===s.id ? PAPER_MID : PAPER, borderBottom: `1px solid ${PAPER_DK}`, cursor: "pointer" }}>
                               {s.name}
                             </div>
                           ))}
@@ -310,7 +318,7 @@ export default function Home() {
               {/* VILLAGE selector — full width */}
               <div style={{ fontSize: 9, fontWeight: 700, color: INK_FADE, textTransform: "uppercase", letterSpacing: 1, marginBottom: 3 }}>Where do you need it?</div>
               <div style={{ position: "relative" }}>
-                <button onClick={e => { e.stopPropagation(); setVOpen(o => !o); setSOpen(false); setOpenSec(null); }}
+                <button onClick={e => { e.stopPropagation(); setVOpen(o => !o); setSOpen(false); setOpenSec(null); setOpenCat(null); }}
                   style={{ display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%", background: PAPER, border: `4px solid ${YELLOW}`, boxShadow: `0 0 0 2px ${YELLOW},0 0 10px 2px rgba(255,220,0,0.4)`, borderRadius: 6, padding: "12px 14px", fontSize: 15, fontFamily:"'Times New Roman',serif", color: selArea ? INK : INK_FADE, cursor: "pointer", textAlign: "left" }}>
                   <span>{selArea ? vName(selArea) : "Select a Village"}</span>
                   <span style={{ fontSize: 12 }}>{vOpen ? "▲" : "▼"}</span>
