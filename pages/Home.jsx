@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef } from "react";
 import { ServiceArea, Category, Service, Provider } from "@/api/entities";
 
 const INK       = "#1C0F00";
@@ -38,15 +38,6 @@ function groupAreas(areas) {
   return g;
 }
 
-function NewsCol({ idx = 0, lines = 2, style = {} }) {
-  const text = FILLER.slice(idx, idx + lines).join(" ");
-  return (
-    <div style={{ fontFamily: "'Times New Roman', Georgia, serif", fontSize: 7.5, color: INK_FADE, lineHeight: 1.85, textAlign: "justify", ...style }}>
-      {text}
-    </div>
-  );
-}
-
 function Rule({ thick = false, style = {} }) {
   return (
     <div style={style}>
@@ -84,7 +75,6 @@ function Burger() {
           </div>
         </>
       )}
-
     </>
   );
 }
@@ -134,14 +124,12 @@ function Results({ results, areas, cats, onReset, onSel, selArea, selCatId }) {
   const cat = cats.find(c => c.id === selCatId);
   return (
     <div style={{ minHeight: "100vh", background: PAPER, fontFamily: "'Times New Roman', serif", maxWidth: 860, margin: "0 auto", boxShadow: "0 2px 40px rgba(0,0,0,0.28)" }}>
-      {/* Header */}
       <div style={{ background: INK, padding: "10px 14px", display: "flex", alignItems: "center", gap: 10 }}>
         <button onClick={onReset} style={{ background: "rgba(255,255,255,0.15)", border: "none", color: PAPER, borderRadius: 3, padding: "4px 10px", fontSize: 12, cursor: "pointer" }}>← Back</button>
         <span style={{ color: PAPER, fontWeight: 700, fontSize: 13, letterSpacing: 1 }}>
           {cat ? cat.name : "All Services"}{selArea ? ` · ${vName(selArea)}` : ""}
         </span>
       </div>
-      {/* Results */}
       <div style={{ padding: "14px" }}>
         <div style={{ fontSize: 11, color: INK_FADE, marginBottom: 10, fontStyle: "italic" }}>
           {results.length} provider{results.length !== 1 ? "s" : ""} found
@@ -154,18 +142,17 @@ function Results({ results, areas, cats, onReset, onSel, selArea, selCatId }) {
           const pCat = cats.find(c => c.id === p.category_id);
           return (
             <div key={p.id} onClick={() => onSel(p)}
-              style={{ background: PAPER, border: `1px solid ${PAPER_DK}`, borderRadius: 5, padding: "12px 14px", marginBottom: 10, cursor: "pointer", display: "flex", gap: 12, alignItems: "center", boxShadow: "0 1px 4px rgba(0,0,0,0.1)" }}>
-              {p.logo_url
-                ? <img src={p.logo_url} alt="logo" style={{ width: 52, height: 52, borderRadius: 5, objectFit: "cover", flexShrink: 0, border: `1px solid ${PAPER_DK}` }} />
-                : <div style={{ width: 52, height: 52, borderRadius: 5, background: PAPER_MID, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22 }}>{pCat?.icon || "🏠"}</div>
-              }
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontSize: 15, fontWeight: 900, color: INK, marginBottom: 2 }}>{p.business_name}</div>
-                {pCat && <div style={{ fontSize: 11, color: INK_FADE }}>{pCat.icon} {pCat.name}</div>}
-                {p.rating && <div style={{ fontSize: 12, color: "#B8860B" }}>{"★".repeat(Math.round(p.rating))} {p.rating}/5</div>}
-                {p.phone && <div style={{ fontSize: 11, color: INK_FADE, marginTop: 2 }}>📞 {p.phone}</div>}
+              style={{ background: PAPER_MID, borderRadius: 4, padding: "12px 14px", marginBottom: 10, border: `1px solid ${PAPER_DK}`, cursor: "pointer" }}>
+              <div style={{ display: "flex", gap: 10, alignItems: "flex-start" }}>
+                {p.logo_url && <img src={p.logo_url} alt="" style={{ width: 44, height: 44, borderRadius: 4, objectFit: "cover", flexShrink: 0 }} />}
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontSize: 15, fontWeight: 900, color: INK }}>{p.business_name}</div>
+                  {pCat && <div style={{ fontSize: 11, color: INK_FADE }}>{pCat.icon} {pCat.name}</div>}
+                  {p.phone && <div style={{ fontSize: 12, color: INK, marginTop: 3 }}>📞 {p.phone}</div>}
+                  {p.subscription_tier === "featured" && <span style={{ background: BROWN_BTN, color: PAPER, borderRadius: 3, padding: "1px 7px", fontSize: 10, fontWeight: 700, marginTop: 3, display: "inline-block" }}>⭐ FEATURED</span>}
+                  {p.subscription_tier === "premium" && <span style={{ background: INK, color: YELLOW, borderRadius: 3, padding: "1px 7px", fontSize: 10, fontWeight: 700, marginTop: 3, display: "inline-block" }}>👑 PREMIUM</span>}
+                </div>
               </div>
-              <span style={{ fontSize: 20, color: PAPER_DK, flexShrink: 0 }}>›</span>
             </div>
           );
         })}
@@ -174,7 +161,7 @@ function Results({ results, areas, cats, onReset, onSel, selArea, selCatId }) {
   );
 }
 
-// ── Dropdown button (yellow border, burnt brown) ──────────────────────────────
+// ── Dropdown Button ───────────────────────────────────────────────────────────
 function DropBtn({ label, isOpen, onClick }) {
   return (
     <button
@@ -195,6 +182,7 @@ function DropBtn({ label, isOpen, onClick }) {
         justifyContent: "space-between",
         alignItems: "center",
         textAlign: "left",
+        boxSizing: "border-box",
       }}>
       <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "85%" }}>{label}</span>
       <span style={{ fontSize: 10, flexShrink: 0, marginLeft: 4 }}>{isOpen ? "▲" : "▼"}</span>
@@ -202,13 +190,12 @@ function DropBtn({ label, isOpen, onClick }) {
   );
 }
 
-// ── Service Dropdown (fixed position, renders at root level) ──────────────────
+// ── Service Dropdown ──────────────────────────────────────────────────────────
 function SvcDropdown({ open, btnRef, cats, svcs, openCat, selCat, setOpenCat, setSelCat, setSOpen }) {
   if (!open) return null;
-  const r = btnRef.current?.getBoundingClientRect() || { bottom: 320, left: 220, width: 130 };
-  console.log("SvcDropdown open, rect:", r, "cats:", cats.length);
+  const r = btnRef.current?.getBoundingClientRect() || { bottom: 320, left: 10, width: 160 };
   return (
-    <div onClick={e => e.stopPropagation()} style={{ position: "fixed", top: r.bottom + 3, left: r.left, width: Math.max(r.width, 130), background: PAPER, border: `2px solid ${INK}`, borderRadius: 4, zIndex: 99999, boxShadow: "0 8px 28px rgba(0,0,0,0.4)", maxHeight: 300, overflowY: "auto" }}>
+    <div onClick={e => e.stopPropagation()} style={{ position: "fixed", top: r.bottom + 3, left: r.left, width: Math.max(r.width, 160), background: PAPER, border: `2px solid ${INK}`, borderRadius: 4, zIndex: 99999, boxShadow: "0 8px 28px rgba(0,0,0,0.4)", maxHeight: 280, overflowY: "auto" }}>
       {cats.map(c => {
         const catSvcs = svcs.filter(s => s.category_id === c.id);
         const isExpanded = openCat === c.id;
@@ -233,12 +220,15 @@ function SvcDropdown({ open, btnRef, cats, svcs, openCat, selCat, setOpenCat, se
   );
 }
 
-// ── Village Dropdown (fixed position, renders at root level) ──────────────────
+// ── Village Dropdown ──────────────────────────────────────────────────────────
 function VilDropdown({ open, btnRef, grouped, openSec, selArea, setOpenSec, setSelArea, setVOpen }) {
   if (!open) return null;
-  const r = btnRef.current?.getBoundingClientRect() || { bottom: 320, left: 360, width: 130 };
+  const r = btnRef.current?.getBoundingClientRect() || { bottom: 320, left: 10, width: 160 };
+  // Clamp left so it doesn't overflow the right edge of the screen
+  const maxLeft = window.innerWidth - Math.max(r.width, 160) - 4;
+  const left = Math.min(r.left, maxLeft);
   return (
-    <div onClick={e => e.stopPropagation()} style={{ position: "fixed", top: r.bottom + 3, left: r.left, width: Math.max(r.width, 130), background: PAPER, border: `2px solid ${INK}`, borderRadius: 4, zIndex: 99999, boxShadow: "0 8px 28px rgba(0,0,0,0.4)", maxHeight: 300, overflowY: "auto" }}>
+    <div onClick={e => e.stopPropagation()} style={{ position: "fixed", top: r.bottom + 3, left: Math.max(4, left), width: Math.max(r.width, 160), background: PAPER, border: `2px solid ${INK}`, borderRadius: 4, zIndex: 99999, boxShadow: "0 8px 28px rgba(0,0,0,0.4)", maxHeight: 280, overflowY: "auto" }}>
       {SECTIONS.map(sec => {
         const vils = grouped[sec.key] || [];
         const isExpanded = openSec === sec.key;
@@ -263,24 +253,97 @@ function VilDropdown({ open, btnRef, grouped, openSec, selArea, setOpenSec, setS
   );
 }
 
+// ── Search Box (self-contained, responsive) ───────────────────────────────────
+function SearchBox({ cats, svcs, areas, grouped, onSearch }) {
+  const [selCat,  setSelCat]  = useState(null);
+  const [selArea, setSelArea] = useState(null);
+  const [sOpen,   setSOpen]   = useState(false);
+  const [vOpen,   setVOpen]   = useState(false);
+  const [openCat, setOpenCat] = useState(null);
+  const [openSec, setOpenSec] = useState(null);
+  const sBtnRef = useRef(null);
+  const vBtnRef = useRef(null);
+
+  const closeAll = () => { setSOpen(false); setVOpen(false); };
+
+  return (
+    <div
+      onClick={closeAll}
+      style={{
+        background: PAPER_MID,
+        border: `2px solid ${PAPER_DK}`,
+        borderRadius: 6,
+        padding: "14px 12px",
+        width: "100%",
+        boxSizing: "border-box",
+      }}>
+
+      {/* Row: labels */}
+      <div style={{ display: "flex", gap: 8, marginBottom: 5 }}>
+        <div style={{ flex: 1, fontSize: 11, fontWeight: 700, color: INK, fontFamily: "'Times New Roman', serif" }}>
+          What service do you need?
+        </div>
+        <div style={{ flex: 1, fontSize: 11, fontWeight: 700, color: INK, fontFamily: "'Times New Roman', serif" }}>
+          Where do you need it?
+        </div>
+      </div>
+
+      {/* Row: dropdowns side by side */}
+      <div style={{ display: "flex", gap: 8, marginBottom: 10 }}>
+        <div style={{ flex: 1, minWidth: 0, position: "relative" }} ref={sBtnRef}>
+          <DropBtn
+            label={selCat ? selCat.name : "Select a Serv..."}
+            isOpen={sOpen}
+            onClick={e => { e.stopPropagation(); setSOpen(!sOpen); setVOpen(false); }}
+          />
+          <SvcDropdown open={sOpen} btnRef={sBtnRef} cats={cats} svcs={svcs} openCat={openCat} selCat={selCat} setOpenCat={setOpenCat} setSelCat={c => { setSelCat(c); }} setSOpen={setSOpen} />
+        </div>
+        <div style={{ flex: 1, minWidth: 0, position: "relative" }} ref={vBtnRef}>
+          <DropBtn
+            label={selArea ? vName(selArea) : "Select a Villa..."}
+            isOpen={vOpen}
+            onClick={e => { e.stopPropagation(); setVOpen(!vOpen); setSOpen(false); }}
+          />
+          <VilDropdown open={vOpen} btnRef={vBtnRef} grouped={grouped} openSec={openSec} selArea={selArea} setOpenSec={setOpenSec} setSelArea={a => { setSelArea(a); }} setVOpen={setVOpen} />
+        </div>
+      </div>
+
+      {/* Find Services button */}
+      <button
+        onClick={e => { e.stopPropagation(); onSearch(selCat, selArea); }}
+        style={{
+          width: "100%",
+          background: `linear-gradient(180deg,#9A6030,${BROWN_BTN} 60%,#5A3010)`,
+          border: `3px solid ${YELLOW}`,
+          boxShadow: `0 0 0 1.5px ${YELLOW}, 0 0 10px 2px rgba(255,220,0,0.35)`,
+          borderRadius: 5,
+          color: "#F5E8CC",
+          fontFamily: "'Times New Roman', serif",
+          fontWeight: 700,
+          fontSize: 14,
+          letterSpacing: 3,
+          padding: "13px",
+          cursor: "pointer",
+          boxSizing: "border-box",
+        }}>
+        FIND SERVICES
+      </button>
+
+      <SvcDropdown open={false} btnRef={sBtnRef} cats={[]} svcs={[]} openCat={null} selCat={null} setOpenCat={() => {}} setSelCat={() => {}} setSOpen={() => {}} />
+    </div>
+  );
+}
 
 // ── Main ──────────────────────────────────────────────────────────────────────
 export default function Home() {
   const [areas,    setAreas]    = useState([]);
   const [cats,     setCats]     = useState([]);
   const [svcs,     setSvcs]     = useState([]);
-  const [selArea,  setSelArea]  = useState(null);   // ServiceArea object
-  const [selCat,   setSelCat]   = useState(null);   // Category object
-  const [sOpen,    setSOpen]    = useState(false);
-  const [vOpen,    setVOpen]    = useState(false);
-  const [openCat,  setOpenCat]  = useState(null);
-  const [openSec,  setOpenSec]  = useState(null);
-  const sBtnRef = useRef(null);
-  const vBtnRef = useRef(null);
-
   const [results,  setResults]  = useState([]);
   const [searched, setSearched] = useState(false);
   const [selProv,  setSelProv]  = useState(null);
+  const [selAreaR, setSelAreaR] = useState(null);
+  const [selCatR,  setSelCatR]  = useState(null);
 
   useEffect(() => {
     ServiceArea.filter({ is_active: true }).then(setAreas);
@@ -290,13 +353,9 @@ export default function Home() {
 
   const grouped = groupAreas(areas);
 
-  // Flat village list for display (all villages across all sections)
-  const allVillages = areas.filter(isVillage).sort((a, b) => vName(a).localeCompare(vName(b)));
-
-  const closeAll = () => { setSOpen(false); setVOpen(false); };
-
-  const doSearch = async () => {
-    closeAll();
+  const doSearch = async (selCat, selArea) => {
+    setSelAreaR(selArea);
+    setSelCatR(selCat);
     const all = await Provider.filter({ is_visible: true });
     const out = all.filter(p => {
       const areaMatch = !selArea || p.service_areas?.includes(selArea.id);
@@ -312,23 +371,45 @@ export default function Home() {
   };
 
   const reset = () => {
-    setSelArea(null); setSelCat(null);
     setResults([]); setSearched(false); setSelProv(null);
-    setOpenCat(null); setOpenSec(null);
-    closeAll();
+    setSelAreaR(null); setSelCatR(null);
   };
 
   if (selProv)  return <ProvDetail prov={selProv} areas={areas} cats={cats} onBack={() => setSelProv(null)} />;
-  if (searched) return <Results results={results} areas={areas} cats={cats} onReset={reset} onSel={setSelProv} selArea={selArea} selCatId={selCat?.id} />;
+  if (searched) return <Results results={results} areas={areas} cats={cats} onReset={reset} onSel={setSelProv} selArea={selAreaR} selCatId={selCatR?.id} />;
 
   return (
     <>
       <link rel="preconnect" href="https://fonts.googleapis.com" />
       <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet" />
+      <style>{`
+        * { box-sizing: border-box; }
+        body, html { margin: 0; padding: 0; overflow-x: hidden; }
+        .vhub-wrap { width: 100%; max-width: 860px; margin: 0 auto; overflow-x: hidden; }
+        .vhub-body { display: flex; flex-direction: column; }
+        .vhub-sidecol { display: none; }
+        .vhub-newscol { padding: 10px 12px; }
+        @media (min-width: 600px) {
+          .vhub-body { flex-direction: row; }
+          .vhub-sidecol { display: block; width: 90px; min-width: 90px; padding: 10px 8px; border-right: 1px solid ${INK}; font-family: 'Times New Roman', serif; font-size: 7.5px; color: ${INK_FADE}; line-height: 1.85; text-align: justify; }
+          .vhub-newscol { flex: 1; padding: 10px 12px; border-right: 1px solid ${INK}; }
+          .vhub-rightcol { display: block; width: 90px; min-width: 90px; padding: 10px 8px; font-family: 'Times New Roman', serif; font-size: 7.5px; color: ${INK_FADE}; line-height: 1.85; text-align: justify; }
+        }
+        @media (min-width: 600px) {
+          .vhub-rightcol { display: block; }
+        }
+        .vhub-rightcol { display: none; }
+      `}</style>
 
       <div
-        onClick={closeAll}
-        style={{ minHeight: "100vh", background: PAPER, backgroundImage: `repeating-linear-gradient(0deg,transparent,transparent 27px,rgba(28,15,0,0.04) 27px,rgba(28,15,0,0.04) 28px)`, fontFamily: "'Times New Roman', Georgia, serif", maxWidth: 860, margin: "0 auto", boxShadow: "0 2px 40px rgba(0,0,0,0.28)" }}>
+        className="vhub-wrap"
+        style={{
+          minHeight: "100vh",
+          background: PAPER,
+          backgroundImage: `repeating-linear-gradient(0deg,transparent,transparent 27px,rgba(28,15,0,0.04) 27px,rgba(28,15,0,0.04) 28px)`,
+          fontFamily: "'Times New Roman', Georgia, serif",
+          boxShadow: "0 2px 40px rgba(0,0,0,0.28)",
+        }}>
 
         {/* ── MASTHEAD ── */}
         <div style={{ background: PAPER, padding: "14px 14px 8px", position: "relative", textAlign: "center" }}>
@@ -361,120 +442,60 @@ export default function Home() {
         <Rule />
 
         {/* PHOTO */}
-        <img src="https://media.base44.com/images/public/69d062aca815ce8e697894b1/2b4566a86_lakesum.jpg" alt="Lake Sumter Landing"
-          style={{ width: "100%", height: 160, objectFit: "cover", display: "block" }}
-          onError={e => { e.target.style.display = "none"; }} />
+        <img
+          src="https://media.base44.com/images/public/69d062aca815ce8e697894b1/2b4566a86_lakesum.jpg"
+          alt="Lake Sumter Landing"
+          style={{ width: "100%", height: 140, objectFit: "cover", display: "block" }}
+          onError={e => { e.target.style.display = "none"; }}
+        />
 
         <Rule />
 
-        {/* ── THREE COLUMN BODY ── */}
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1.8fr 1fr", gap: 0, overflow: "visible" }}>
+        {/* ── RESPONSIVE BODY ── */}
+        <div className="vhub-body">
 
-          {/* Left */}
-          <div style={{ padding: "12px 10px", borderRight: `1px solid ${INK}` }}>
-            <NewsCol idx={0} lines={2} />
+          {/* Left filler column — hidden on mobile */}
+          <div className="vhub-sidecol">
+            {FILLER[0]}
           </div>
 
-          {/* Centre — search */}
-          <div style={{ padding: "12px 14px", borderRight: `1px solid ${INK}`, overflow: "visible", position: "relative" }}>
-            <NewsCol idx={2} lines={1} style={{ marginBottom: 12, fontSize: 8 }} />
+          {/* CENTER — search always visible, full width on mobile */}
+          <div className="vhub-newscol">
+            {/* Intro text */}
+            <p style={{ fontFamily: "'Times New Roman', serif", fontSize: 12, color: INK_FADE, lineHeight: 1.8, textAlign: "justify", marginTop: 0, marginBottom: 12 }}>
+              {FILLER[2]}
+            </p>
 
-            {/* ══ SEARCH PANEL ══ */}
-            <div onClick={e => e.stopPropagation()} style={{ border: `2px solid ${INK}`, borderRadius: 5, background: PAPER_MID, padding: "8px 8px 10px" }}>
+            {/* Search box */}
+            <SearchBox
+              cats={cats}
+              svcs={svcs}
+              areas={areas}
+              grouped={grouped}
+              onSearch={doSearch}
+            />
 
-              {/* Labels row */}
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 4 }}>
-                <div style={{ fontSize: 9, fontWeight: 700, color: INK, fontFamily: "'Times New Roman', serif" }}>What service do you need?</div>
-                <div style={{ fontSize: 9, fontWeight: 700, color: INK, fontFamily: "'Times New Roman', serif" }}>Where do you need it?</div>
-              </div>
-
-              {/* Dropdowns row */}
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6 }}>
-                {/* Service button */}
-                <div ref={sBtnRef}>
-                  <DropBtn
-                    label={selCat ? selCat.name : "Select a Service"}
-                    isOpen={sOpen}
-                    onClick={e => { e.stopPropagation(); setSOpen(o => !o); setVOpen(false); }}
-                  />
-                </div>
-                {/* Village button */}
-                <div ref={vBtnRef}>
-                  <DropBtn
-                    label={selArea ? vName(selArea) : "Select a Village"}
-                    isOpen={vOpen}
-                    onClick={e => { e.stopPropagation(); setVOpen(o => !o); setSOpen(false); }}
-                  />
-                </div>
-              </div>
-
-              {/* FIND SERVICES button */}
-              <div style={{ marginTop: 10 }}>
-                <button
-                  onClick={doSearch}
-                  style={{
-                    width: "100%",
-                    background: `linear-gradient(180deg,#9A6030,${BROWN_BTN} 55%,#5A3010)`,
-                    color: "#F5E8CC",
-                    border: `3px solid ${YELLOW}`,
-                    boxShadow: `0 0 0 1.5px ${YELLOW}, 0 0 12px 3px rgba(255,220,0,0.5)`,
-                    borderRadius: 5,
-                    padding: "12px 10px",
-                    fontSize: 14,
-                    fontWeight: 900,
-                    fontFamily: "'Times New Roman', serif",
-                    letterSpacing: 4,
-                    textTransform: "uppercase",
-                    cursor: "pointer",
-                  }}>
-                  Find Services
-                </button>
-              </div>
-
-            </div>
-            {/* ══ END SEARCH PANEL ══ */}
-
-            <NewsCol idx={5} lines={1} style={{ marginTop: 12, fontSize: 8 }} />
+            {/* Below-search filler */}
+            <p style={{ fontFamily: "'Times New Roman', serif", fontSize: 12, color: INK_FADE, lineHeight: 1.8, textAlign: "justify", marginTop: 12, marginBottom: 0 }}>
+              {FILLER[5]}
+            </p>
           </div>
 
-          {/* Right */}
-          <div style={{ padding: "12px 10px" }}>
-            <NewsCol idx={3} lines={2} />
+          {/* Right filler column — hidden on mobile */}
+          <div className="vhub-rightcol">
+            {FILLER[3]}
           </div>
 
         </div>
 
-        <Rule thick style={{ marginTop: 0 }} />
+        <Rule style={{ marginTop: 8 }} />
 
-        {/* FOOTER */}
-        <div style={{ padding: "10px", textAlign: "center", fontSize: 9, color: INK_FADE, letterSpacing: 1, textTransform: "uppercase" }}>
-          V-HUB · The Villages, FL · Connecting Residents with Trusted Local Providers · All Rights Reserved
+        {/* Footer */}
+        <div style={{ padding: "10px 14px", textAlign: "center", fontSize: 10, color: INK_FADE, fontStyle: "italic" }}>
+          © V-Hub · The Villages, Florida · All rights reserved
         </div>
 
       </div>
-
-      {/* ── ROOT LEVEL DROPDOWNS (fixed position, escape all stacking contexts) ── */}
-      <SvcDropdown
-        open={sOpen}
-        btnRef={sBtnRef}
-        cats={cats}
-        svcs={svcs}
-        openCat={openCat}
-        selCat={selCat}
-        setOpenCat={setOpenCat}
-        setSelCat={setSelCat}
-        setSOpen={setSOpen}
-      />
-      <VilDropdown
-        open={vOpen}
-        btnRef={vBtnRef}
-        grouped={grouped}
-        openSec={openSec}
-        selArea={selArea}
-        setOpenSec={setOpenSec}
-        setSelArea={setSelArea}
-        setVOpen={setVOpen}
-      />
     </>
   );
 }
