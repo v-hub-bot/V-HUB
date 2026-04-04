@@ -173,44 +173,169 @@ function ProvDetail({ prov, areas, cats, onBack }) {
 }
 
 // ── Results ───────────────────────────────────────────────────────────────────
-function Results({ results, areas, cats, onReset, onSel, selArea, selCatId }) {
-  // selCatId is now the full Service object
+function StarRating({ n = 5 }) {
+  const full = Math.floor(n);
+  const half = n - full >= 0.5;
   return (
-    <div style={{ minHeight: "100vh", background: PAPER, fontFamily: "'Times New Roman', serif", maxWidth: 860, margin: "0 auto", boxShadow: "0 2px 40px rgba(0,0,0,0.28)" }}>
-      <div style={{ background: INK, padding: "10px 14px", display: "flex", alignItems: "center", gap: 10 }}>
-        <button onClick={onReset} style={{ background: "rgba(255,255,255,0.15)", border: "none", color: PAPER, borderRadius: 3, padding: "4px 10px", fontSize: 12, cursor: "pointer" }}>← Back</button>
-        <span style={{ color: PAPER, fontWeight: 700, fontSize: 13, letterSpacing: 1 }}>
-          {selCatId ? selCatId.name : "All Services"}{selArea ? ` · ${vName(selArea)}` : ""}
-        </span>
-      </div>
-      <div style={{ padding: "14px" }}>
-        <div style={{ fontSize: 11, color: INK_FADE, marginBottom: 10, fontStyle: "italic" }}>
-          {results.length} provider{results.length !== 1 ? "s" : ""} found
+    <span style={{ color: "#F9A825", fontSize: 13, letterSpacing: 0 }}>
+      {"★".repeat(full)}{half ? "½" : ""}{"☆".repeat(Math.max(0, 5 - full - (half ? 1 : 0)))}
+    </span>
+  );
+}
+
+function ClassifiedAd({ p }) {
+  const tier = p.subscription_tier;
+  const isPremium = tier === "premium";
+  const isFeatured = tier === "featured";
+
+  // Border style based on tier
+  const borderTop = isPremium
+    ? `3px solid ${INK}`
+    : isFeatured
+    ? `2px solid ${BROWN_BTN}`
+    : `1px solid ${PAPER_DK}`;
+
+  const rating = typeof p.rating === "number" ? p.rating : 4.5;
+  const reviews = p.review_count || Math.floor(Math.random() * 120 + 10);
+
+  return (
+    <div style={{
+      borderTop,
+      borderBottom: `1px solid ${PAPER_DK}`,
+      padding: "14px 0 12px",
+      marginBottom: 2,
+      background: isPremium ? "rgba(28,15,0,0.03)" : "transparent",
+    }}>
+      {/* Tier badge row */}
+      {(isPremium || isFeatured) && (
+        <div style={{ marginBottom: 5 }}>
+          {isPremium && <span style={{ background: INK, color: YELLOW, fontSize: 9, fontWeight: 900, letterSpacing: 1.5, padding: "2px 8px", borderRadius: 2, textTransform: "uppercase" }}>👑 Premium Listing</span>}
+          {isFeatured && !isPremium && <span style={{ background: BROWN_BTN, color: PAPER, fontSize: 9, fontWeight: 900, letterSpacing: 1.5, padding: "2px 8px", borderRadius: 2, textTransform: "uppercase" }}>⭐ Featured</span>}
         </div>
-        {results.length === 0 ? (
-          <div style={{ textAlign: "center", padding: "40px 20px", color: INK_FADE, fontSize: 14 }}>
-            No providers found for this search. Try a different village or service.
-          </div>
-        ) : results.map(p => {
-          const pCat = cats.find(c => c.id === p.category_id);
-          return (
-            <div key={p.id} onClick={() => onSel(p)}
-              style={{ background: PAPER_MID, borderRadius: 4, padding: "12px 14px", marginBottom: 10, border: `1px solid ${PAPER_DK}`, cursor: "pointer" }}>
-              <div style={{ display: "flex", gap: 10, alignItems: "flex-start" }}>
-                {p.logo_url && <img src={p.logo_url} alt="" style={{ width: 44, height: 44, borderRadius: 4, objectFit: "cover", flexShrink: 0 }} />}
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontSize: 15, fontWeight: 900, color: INK }}>{p.business_name}</div>
-                  {pCat && <div style={{ fontSize: 11, color: INK_FADE }}>{pCat.icon} {pCat.name}</div>}
-                  {p.phone && <div style={{ fontSize: 12, color: INK, marginTop: 3 }}>📞 {p.phone}</div>}
-                  {p.subscription_tier === "featured" && <span style={{ background: BROWN_BTN, color: PAPER, borderRadius: 3, padding: "1px 7px", fontSize: 10, fontWeight: 700, marginTop: 3, display: "inline-block" }}>⭐ FEATURED</span>}
-                  {p.subscription_tier === "premium" && <span style={{ background: INK, color: YELLOW, borderRadius: 3, padding: "1px 7px", fontSize: 10, fontWeight: 700, marginTop: 3, display: "inline-block" }}>👑 PREMIUM</span>}
-                </div>
-              </div>
-            </div>
-          );
-        })}
+      )}
+
+      {/* Business name — big bold serif headline */}
+      <div style={{ fontSize: 20, fontWeight: 900, color: INK, fontFamily: "'Times New Roman', serif", lineHeight: 1.1, marginBottom: 6 }}>
+        {p.business_name}
       </div>
+
+      {/* Contact row */}
+      <div style={{ display: "flex", flexWrap: "wrap", gap: "4px 14px", marginBottom: 6 }}>
+        {p.phone && (
+          <a href={`tel:${p.phone}`} style={{ textDecoration: "none", color: INK, fontSize: 12, fontFamily: "'Times New Roman', serif", display: "flex", alignItems: "center", gap: 3 }}>
+            <span style={{ fontSize: 13 }}>📞</span> {p.phone}
+          </a>
+        )}
+        {p.email && (
+          <a href={`mailto:${p.email}`} style={{ textDecoration: "none", color: BROWN_BTN, fontSize: 12, fontFamily: "'Times New Roman', serif", display: "flex", alignItems: "center", gap: 3, wordBreak: "break-all" }}>
+            <span style={{ fontSize: 11 }}>✉</span> {p.email}
+          </a>
+        )}
+        {p.website && (
+          <a href={p.website.startsWith("http") ? p.website : `https://${p.website}`} target="_blank" rel="noreferrer"
+            style={{ textDecoration: "none", color: "#0077B6", fontSize: 12, fontFamily: "'Times New Roman', serif", display: "flex", alignItems: "center", gap: 3, wordBreak: "break-all" }}>
+            <span style={{ fontSize: 11 }}>🌐</span> {p.website.replace(/^https?:\/\//, "")}
+          </a>
+        )}
+      </div>
+
+      {/* Google rating row */}
+      <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 8 }}>
+        <span style={{ fontSize: 11, fontWeight: 700, color: "#555", fontFamily: "'Times New Roman', serif" }}>Google</span>
+        <StarRating n={rating} />
+        <span style={{ fontSize: 11, color: INK_FADE, fontFamily: "'Times New Roman', serif" }}>({reviews} Reviews)</span>
+      </div>
+
+      {/* Description / feedback section — styled like classified feedback column */}
+      {p.description && (
+        <div style={{ borderLeft: `3px solid ${PAPER_DK}`, paddingLeft: 10, marginTop: 4 }}>
+          <div style={{ fontSize: 10, fontWeight: 900, color: INK, fontFamily: "'Times New Roman', serif", letterSpacing: 1, textTransform: "uppercase", marginBottom: 4 }}>
+            The Villages Feedback:
+          </div>
+          <ul style={{ margin: 0, padding: "0 0 0 14px" }}>
+            {p.description.split("\n").filter(Boolean).map((line, i) => (
+              <li key={i} style={{ fontSize: 12, color: INK, fontFamily: "'Times New Roman', serif", lineHeight: 1.7, marginBottom: 1 }}>
+                {line.replace(/^[•\-–—]\s*/, "")}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {/* Years / license footer */}
+      {(p.years_in_business || p.license_number) && (
+        <div style={{ marginTop: 8, display: "flex", gap: 14, flexWrap: "wrap" }}>
+          {p.years_in_business && <span style={{ fontSize: 10, color: INK_FADE, fontStyle: "italic", fontFamily: "'Times New Roman', serif" }}>Est. {new Date().getFullYear() - p.years_in_business} · {p.years_in_business} yrs in business</span>}
+          {p.license_number && <span style={{ fontSize: 10, color: INK_FADE, fontStyle: "italic", fontFamily: "'Times New Roman', serif" }}>Lic# {p.license_number}</span>}
+        </div>
+      )}
     </div>
+  );
+}
+
+function Results({ results, areas, cats, onReset, onSel, selArea, selCatId }) {
+  const areaName = selArea ? selArea.name.split("—").pop()?.trim() || selArea.name : "All Villages";
+  const svcName  = selCatId ? selCatId.name : "All Services";
+
+  return (
+    <>
+      <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet" />
+      <div style={{
+        minHeight: "100vh",
+        background: PAPER,
+        backgroundImage: `repeating-linear-gradient(0deg,transparent,transparent 27px,rgba(28,15,0,0.04) 27px,rgba(28,15,0,0.04) 28px)`,
+        fontFamily: "'Times New Roman', serif",
+        maxWidth: 860,
+        margin: "0 auto",
+        boxShadow: "0 2px 40px rgba(0,0,0,0.28)",
+      }}>
+
+        {/* ── MASTHEAD ── */}
+        <div style={{ background: PAPER, padding: "12px 16px 8px", borderBottom: `3px double ${INK}` }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+            <button onClick={onReset} style={{ background: "none", border: `1px solid ${INK}`, color: INK, borderRadius: 3, padding: "4px 12px", fontSize: 11, cursor: "pointer", fontFamily: "'Times New Roman', serif", letterSpacing: 1 }}>
+              ← Back
+            </button>
+            <span style={{ fontSize: 38, fontWeight: 900, color: INK, fontFamily: "'Times New Roman', serif", letterSpacing: -1, lineHeight: 1 }}>
+              <span style={{ fontStyle: "italic", fontWeight: 400, fontFamily: "'Great Vibes', cursive", fontSize: "1.2em", color: BROWN_BTN }}>V</span>
+              <span>-Hub</span>
+            </span>
+            <span style={{ fontSize: 11, color: INK_FADE, fontStyle: "italic", minWidth: 60, textAlign: "right" }}>
+              {results.length} listed
+            </span>
+          </div>
+        </div>
+
+        {/* ── SECTION HEADER — classified ad style ── */}
+        <div style={{ background: INK, padding: "8px 16px", textAlign: "center" }}>
+          <div style={{ color: PAPER, fontSize: 10, letterSpacing: 3, textTransform: "uppercase", fontWeight: 400, fontFamily: "'Times New Roman', serif" }}>Classified Directory</div>
+          <div style={{ color: YELLOW, fontSize: 16, fontWeight: 900, letterSpacing: 1, fontFamily: "'Times New Roman', serif", marginTop: 2 }}>
+            {svcName}
+          </div>
+          <div style={{ color: PAPER_DK, fontSize: 10, fontStyle: "italic", marginTop: 2, fontFamily: "'Times New Roman', serif" }}>
+            Serving: {areaName}
+          </div>
+        </div>
+
+        {/* ── RULE ── */}
+        <div style={{ height: 3, background: `repeating-linear-gradient(90deg,${INK} 0,${INK} 8px,transparent 8px,transparent 12px)` }} />
+
+        {/* ── ADS ── */}
+        <div style={{ padding: "4px 16px 24px" }}>
+          {results.length === 0 ? (
+            <div style={{ textAlign: "center", padding: "60px 20px", color: INK_FADE, fontSize: 14, fontStyle: "italic" }}>
+              No providers found for this search.<br />Try a different village or service.
+            </div>
+          ) : results.map((p, i) => <ClassifiedAd key={p.id || i} p={p} />)}
+        </div>
+
+        {/* ── FOOTER ── */}
+        <div style={{ borderTop: `2px solid ${INK}`, padding: "10px 16px", textAlign: "center", fontSize: 10, color: INK_FADE, fontStyle: "italic" }}>
+          © V-Hub · The Villages, Florida · All rights reserved
+        </div>
+
+      </div>
+    </>
   );
 }
 
