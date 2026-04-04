@@ -271,156 +271,75 @@ export default function Home() {
             <NewsCol idx={2} lines={1} style={{ marginBottom: 12, fontSize: 8 }} />
 
             {/* ════ SEARCH PANEL ════ */}
-            <div onClick={e => e.stopPropagation()} style={{ border: `2px solid ${INK}`, borderRadius: 4, background: PAPER_MID, overflow: "visible" }}>
+            <div onClick={e => e.stopPropagation()} style={{ border: `2px solid ${INK}`, borderRadius: 6, background: PAPER_MID, padding: "8px 8px 10px" }}>
 
               {/* FIND SERVICES button */}
-              <div style={{ padding: "7px" }}>
-                <button
-                  onClick={doSearch}
-                  style={{
-                    width: "100%",
-                    background: `linear-gradient(180deg, #9A6030 0%, ${BROWN_BTN} 55%, #5A3010 100%)`,
-                    color: "#F5E8CC",
-                    border: `4px solid ${YELLOW}`,
-                    boxShadow: `0 0 0 2px ${YELLOW}, 0 0 14px 3px rgba(255,220,0,0.5)`,
-                    borderRadius: 5,
-                    padding: "11px 10px",
-                    fontSize: 14,
-                    fontWeight: 900,
-                    fontFamily: "'Times New Roman', serif",
-                    letterSpacing: 4,
-                    textTransform: "uppercase",
-                    cursor: "pointer"
-                  }}>
-                  Find Services
+              <button onClick={doSearch} style={{ display: "block", width: "100%", background: `linear-gradient(180deg,#9A6030,${BROWN_BTN} 55%,#5A3010)`, color: "#F5E8CC", border: `4px solid ${YELLOW}`, boxShadow: `0 0 0 2px ${YELLOW},0 0 14px 4px rgba(255,220,0,0.55)`, borderRadius: 6, padding: "13px 10px", fontSize: 15, fontWeight: 900, fontFamily:"'Times New Roman',serif", letterSpacing: 4, textTransform: "uppercase", cursor: "pointer", marginBottom: 10 }}>
+                Find Services
+              </button>
+
+              {/* SERVICE selector — full width */}
+              <div style={{ fontSize: 9, fontWeight: 700, color: INK_FADE, textTransform: "uppercase", letterSpacing: 1, marginBottom: 3 }}>What service do you need?</div>
+              <div style={{ position: "relative", marginBottom: 8 }}>
+                <button onClick={e => { e.stopPropagation(); setSOpen(o => !o); setVOpen(false); }}
+                  style={{ display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%", background: PAPER, border: `4px solid ${YELLOW}`, boxShadow: `0 0 0 2px ${YELLOW},0 0 10px 2px rgba(255,220,0,0.4)`, borderRadius: 6, padding: "12px 14px", fontSize: 15, fontFamily:"'Times New Roman',serif", color: selSvc ? INK : INK_FADE, cursor: "pointer", textAlign: "left" }}>
+                  <span>{selSvc ? (svcs.find(s=>s.id===selSvc)?.name || "Select a Service") : "Select a Service"}</span>
+                  <span style={{ fontSize: 12 }}>{sOpen ? "▲" : "▼"}</span>
                 </button>
-              </div>
-
-              {/* Column labels */}
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", padding: "2px 7px 4px" }}>
-                <div style={{ fontSize: 8, fontWeight: 700, color: INK_FADE, textTransform: "uppercase", letterSpacing: 1, borderRight: `1px solid ${PAPER_DK}`, paddingRight: 6 }}>
-                  What service?
-                </div>
-                <div style={{ fontSize: 8, fontWeight: 700, color: INK_FADE, textTransform: "uppercase", letterSpacing: 1, paddingLeft: 6 }}>
-                  Which village?
-                </div>
-              </div>
-
-              {/* Dropdown row */}
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 7, padding: "0 7px 8px" }}>
-
-                {/* ── SERVICE button ── */}
-                <div style={{ position: "relative" }}>
-                  <button
-                    onClick={e => { e.stopPropagation(); setSOpen(o => !o); setVOpen(false); }}
-                    style={{
-                      width: "100%",
-                      background: PAPER,
-                      border: `4px solid ${YELLOW}`,
-                      boxShadow: `0 0 0 2px ${YELLOW}, 0 0 10px 2px rgba(255,220,0,0.4)`,
-                      borderRadius: 5,
-                      padding: "9px 8px",
-                      fontSize: 11,
-                      fontFamily: "'Times New Roman', serif",
-                      color: selSvc ? INK : INK_FADE,
-                      cursor: "pointer",
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                      textAlign: "left"
-                    }}>
-                    <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "80%" }}>
-                      {selSvc ? (svcs.find(s => s.id === selSvc)?.name || "Select a Service") : "Select a Service"}
-                    </span>
-                    <span>{sOpen ? "▲" : "▼"}</span>
-                  </button>
-
-                  {sOpen && (
-                    <div
-                      onClick={e => e.stopPropagation()}
-                      style={{ position: "absolute", top: "calc(100% + 4px)", left: 0, right: 0, background: PAPER, border: `2px solid ${INK}`, borderRadius: 4, zIndex: 9999, boxShadow: "0 10px 30px rgba(0,0,0,0.45)", maxHeight: 300, overflowY: "auto" }}>
-                      <div
-                        onClick={() => { setSelCat(""); setSelSvc(""); setSOpen(false); }}
-                        style={{ padding: "8px 12px", fontSize: 10, color: INK_FADE, fontStyle: "italic", borderBottom: `1px solid ${PAPER_DK}`, cursor: "pointer", background: PAPER }}>
-                        — All Services —
-                      </div>
-                      {cats.map(c => {
-                        const catSvcs = svcs.filter(s => s.category_id === c.id);
-                        return (
-                          <div key={c.id}>
-                            <div style={{ padding: "7px 12px", fontSize: 10, fontWeight: 700, color: "#fff", background: "#5C2E0E", letterSpacing: 0.5, textTransform: "uppercase" }}>
-                              {c.icon} {c.name}
+                {sOpen && (
+                  <div onClick={e => e.stopPropagation()} style={{ position: "absolute", top: "calc(100% + 3px)", left: 0, right: 0, background: PAPER, border: `2px solid ${INK}`, borderRadius: 5, zIndex: 9999, boxShadow: "0 10px 30px rgba(0,0,0,0.45)", maxHeight: 320, overflowY: "auto" }}>
+                    <div onClick={() => { setSelCat(""); setSelSvc(""); setSOpen(false); }} style={{ padding: "10px 14px", fontSize: 13, color: INK_FADE, fontStyle: "italic", borderBottom: `1px solid ${PAPER_DK}`, cursor: "pointer" }}>— All Services —</div>
+                    {cats.map(c => {
+                      const catSvcs = svcs.filter(s => s.category_id === c.id);
+                      return (
+                        <div key={c.id}>
+                          <div style={{ padding: "9px 14px", fontSize: 12, fontWeight: 700, color: "#fff", background: "#5C2E0E", letterSpacing: 0.5, textTransform: "uppercase" }}>{c.icon} {c.name}</div>
+                          {catSvcs.map(s => (
+                            <div key={s.id} onClick={() => { setSelCat(c.id); setSelSvc(s.id); setSOpen(false); }}
+                              style={{ padding: "10px 14px 10px 26px", fontSize: 14, color: INK, background: selSvc===s.id ? PAPER_MID : PAPER, borderBottom: `1px solid ${PAPER_DK}`, cursor: "pointer" }}>
+                              {s.name}
                             </div>
-                            {catSvcs.map(s => (
-                              <div key={s.id}
-                                onClick={() => { setSelCat(c.id); setSelSvc(s.id); setSOpen(false); }}
-                                style={{ padding: "8px 12px 8px 22px", fontSize: 12, color: INK, background: selSvc === s.id ? PAPER_MID : PAPER, borderBottom: `1px solid ${PAPER_DK}`, cursor: "pointer" }}>
-                                {s.name}
-                              </div>
-                            ))}
-                          </div>
-                        );
-                      })}
-                    </div>
-                  )}
-                </div>
-
-                {/* ── VILLAGE button ── */}
-                <div style={{ position: "relative" }}>
-                  <button
-                    onClick={e => { e.stopPropagation(); setVOpen(o => !o); setSOpen(false); }}
-                    style={{
-                      width: "100%",
-                      background: PAPER,
-                      border: `4px solid ${YELLOW}`,
-                      boxShadow: `0 0 0 2px ${YELLOW}, 0 0 10px 2px rgba(255,220,0,0.4)`,
-                      borderRadius: 5,
-                      padding: "9px 8px",
-                      fontSize: 11,
-                      fontFamily: "'Times New Roman', serif",
-                      color: selArea ? INK : INK_FADE,
-                      cursor: "pointer",
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                      textAlign: "left"
-                    }}>
-                    <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "80%" }}>
-                      {selArea ? vName(selArea) : "Select a Village"}
-                    </span>
-                    <span>{vOpen ? "▲" : "▼"}</span>
-                  </button>
-
-                  {vOpen && (
-                    <div
-                      onClick={e => e.stopPropagation()}
-                      style={{ position: "absolute", top: "calc(100% + 4px)", left: 0, right: 0, background: PAPER, border: `2px solid ${INK}`, borderRadius: 4, zIndex: 9999, boxShadow: "0 10px 30px rgba(0,0,0,0.45)", maxHeight: 320, overflowY: "auto" }}>
-                      {SECTIONS.map(sec => {
-                        const vils = grouped[sec.key] || [];
-                        const isExpanded = openSec === sec.key;
-                        return (
-                          <div key={sec.key}>
-                            <div
-                              onClick={e => { e.stopPropagation(); setOpenSec(isExpanded ? null : sec.key); }}
-                              style={{ padding: "9px 12px", fontSize: 11, fontWeight: 700, color: "#fff", background: sec.color, display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer" }}>
-                              <span>{sec.label}</span>
-                              <span>{isExpanded ? "▲" : "▼"}</span>
-                            </div>
-                            {isExpanded && vils.map(v => (
-                              <div key={v.id}
-                                onClick={e => { e.stopPropagation(); setSelArea(v); setVOpen(false); setOpenSec(null); }}
-                                style={{ padding: "8px 12px 8px 24px", fontSize: 12, color: INK, background: selArea?.id === v.id ? PAPER_MID : PAPER, borderBottom: `1px solid ${PAPER_DK}`, cursor: "pointer" }}>
-                                {vName(v)}
-                              </div>
-                            ))}
-                          </div>
-                        );
-                      })}
-                    </div>
-                  )}
-                </div>
-
+                          ))}
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
+
+              {/* VILLAGE selector — full width */}
+              <div style={{ fontSize: 9, fontWeight: 700, color: INK_FADE, textTransform: "uppercase", letterSpacing: 1, marginBottom: 3 }}>Where do you need it?</div>
+              <div style={{ position: "relative" }}>
+                <button onClick={e => { e.stopPropagation(); setVOpen(o => !o); setSOpen(false); setOpenSec(null); }}
+                  style={{ display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%", background: PAPER, border: `4px solid ${YELLOW}`, boxShadow: `0 0 0 2px ${YELLOW},0 0 10px 2px rgba(255,220,0,0.4)`, borderRadius: 6, padding: "12px 14px", fontSize: 15, fontFamily:"'Times New Roman',serif", color: selArea ? INK : INK_FADE, cursor: "pointer", textAlign: "left" }}>
+                  <span>{selArea ? vName(selArea) : "Select a Village"}</span>
+                  <span style={{ fontSize: 12 }}>{vOpen ? "▲" : "▼"}</span>
+                </button>
+                {vOpen && (
+                  <div onClick={e => e.stopPropagation()} style={{ position: "absolute", top: "calc(100% + 3px)", left: 0, right: 0, background: PAPER, border: `2px solid ${INK}`, borderRadius: 5, zIndex: 9999, boxShadow: "0 10px 30px rgba(0,0,0,0.45)", maxHeight: 340, overflowY: "auto" }}>
+                    {SECTIONS.map(sec => {
+                      const vils = grouped[sec.key] || [];
+                      const isExpanded = openSec === sec.key;
+                      return (
+                        <div key={sec.key}>
+                          <div onClick={e => { e.stopPropagation(); setOpenSec(isExpanded ? null : sec.key); }}
+                            style={{ padding: "11px 14px", fontSize: 13, fontWeight: 700, color: "#fff", background: sec.color, display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer" }}>
+                            <span>{sec.label}</span>
+                            <span>{isExpanded ? "▲" : "▼"}</span>
+                          </div>
+                          {isExpanded && vils.map(v => (
+                            <div key={v.id} onClick={e => { e.stopPropagation(); setSelArea(v); setVOpen(false); setOpenSec(null); }}
+                              style={{ padding: "10px 14px 10px 28px", fontSize: 14, color: INK, background: selArea?.id===v.id ? PAPER_MID : PAPER, borderBottom: `1px solid ${PAPER_DK}`, cursor: "pointer" }}>
+                              {vName(v)}
+                            </div>
+                          ))}
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+
             </div>
             {/* ════ END SEARCH PANEL ════ */}
 
