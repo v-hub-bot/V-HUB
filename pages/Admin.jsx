@@ -1,4 +1,39 @@
 import { useState, useEffect } from "react";
+
+// ── SEO Meta Tags ──────────────────────────────────────────────────────────
+function useMeta({ title, description, keywords, ogTitle, ogDescription, ogImage, canonical }) {
+  useEffect(() => {
+    // Title
+    document.title = title || "V-Hub | The Villages, FL Local Services Directory";
+    const setMeta = (name, content, prop = false) => {
+      const attr = prop ? "property" : "name";
+      let el = document.querySelector(`meta[${attr}="${name}"]`);
+      if (!el) { el = document.createElement("meta"); el.setAttribute(attr, name); document.head.appendChild(el); }
+      el.setAttribute("content", content);
+    };
+    setMeta("description", description || "V-Hub connects The Villages, Florida residents with trusted local service providers. Search landscaping, home repair, pet care, transportation, and more.");
+    setMeta("keywords", keywords || "The Villages Florida services, local service directory, home repair Villages FL, landscaping Villages Florida, V-Hub");
+    setMeta("robots", "index, follow");
+    setMeta("viewport", "width=device-width, initial-scale=1.0, maximum-scale=1.0");
+    // Open Graph
+    setMeta("og:type", "website", true);
+    setMeta("og:site_name", "V-Hub", true);
+    setMeta("og:title", ogTitle || title || "V-Hub | The Villages, FL Local Services", true);
+    setMeta("og:description", ogDescription || description || "Find trusted local service providers in The Villages, Florida.", true);
+    setMeta("og:image", ogImage || "https://media.base44.com/images/public/69d062aca815ce8e697894b1/a9af95bc3_V-Hublogo.png", true);
+    // Twitter card
+    setMeta("twitter:card", "summary_large_image");
+    setMeta("twitter:title", ogTitle || title || "V-Hub | The Villages, FL");
+    setMeta("twitter:description", description || "Find trusted local service providers in The Villages, Florida.");
+    setMeta("twitter:image", ogImage || "https://media.base44.com/images/public/69d062aca815ce8e697894b1/a9af95bc3_V-Hublogo.png");
+    if (canonical) {
+      let link = document.querySelector('link[rel="canonical"]');
+      if (!link) { link = document.createElement("link"); link.rel = "canonical"; document.head.appendChild(link); }
+      link.href = canonical;
+    }
+  }, [title]);
+}
+
 import { ServiceArea, Category, Service, Provider, ProviderReview } from "@/api/entities";
 
 const BRAND = {
@@ -46,6 +81,13 @@ function getVillageName(area) {
 }
 
 export default function Admin() {
+  useMeta({
+    title: "V-Hub Admin | William Evans",
+    description: "V-Hub admin panel — manage providers, categories, services, and reviews.",
+    keywords: "",
+    canonical: "https://v-hub-app-edf7f8e8.base44.app/Admin",
+  });
+
   const [activeTab, setActiveTab] = useState("Providers");
   const [providers, setProviders] = useState([]);
   const [categories, setCategories] = useState([]);

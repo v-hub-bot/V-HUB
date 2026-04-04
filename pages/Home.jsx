@@ -1,6 +1,41 @@
 import { useState, useEffect, useRef } from "react"; // v2
 import { ServiceArea, Category, Service, Provider, ProviderReview } from "@/api/entities";
 
+// ── SEO Meta Tags ──────────────────────────────────────────────────────────
+function useMeta({ title, description, keywords, ogTitle, ogDescription, ogImage, canonical }) {
+  useEffect(() => {
+    // Title
+    document.title = title || "V-Hub | The Villages, FL Local Services Directory";
+    const setMeta = (name, content, prop = false) => {
+      const attr = prop ? "property" : "name";
+      let el = document.querySelector(`meta[${attr}="${name}"]`);
+      if (!el) { el = document.createElement("meta"); el.setAttribute(attr, name); document.head.appendChild(el); }
+      el.setAttribute("content", content);
+    };
+    setMeta("description", description || "V-Hub connects The Villages, Florida residents with trusted local service providers. Search landscaping, home repair, pet care, transportation, and more.");
+    setMeta("keywords", keywords || "The Villages Florida services, local service directory, home repair Villages FL, landscaping Villages Florida, V-Hub");
+    setMeta("robots", "index, follow");
+    setMeta("viewport", "width=device-width, initial-scale=1.0, maximum-scale=1.0");
+    // Open Graph
+    setMeta("og:type", "website", true);
+    setMeta("og:site_name", "V-Hub", true);
+    setMeta("og:title", ogTitle || title || "V-Hub | The Villages, FL Local Services", true);
+    setMeta("og:description", ogDescription || description || "Find trusted local service providers in The Villages, Florida.", true);
+    setMeta("og:image", ogImage || "https://media.base44.com/images/public/69d062aca815ce8e697894b1/a9af95bc3_V-Hublogo.png", true);
+    // Twitter card
+    setMeta("twitter:card", "summary_large_image");
+    setMeta("twitter:title", ogTitle || title || "V-Hub | The Villages, FL");
+    setMeta("twitter:description", description || "Find trusted local service providers in The Villages, Florida.");
+    setMeta("twitter:image", ogImage || "https://media.base44.com/images/public/69d062aca815ce8e697894b1/a9af95bc3_V-Hublogo.png");
+    if (canonical) {
+      let link = document.querySelector('link[rel="canonical"]');
+      if (!link) { link = document.createElement("link"); link.rel = "canonical"; document.head.appendChild(link); }
+      link.href = canonical;
+    }
+  }, [title]);
+}
+
+
 const INK       = "#1C0F00";
 const INK_FADE  = "#5C3A10";
 const PAPER     = "#F0E6C8";
@@ -340,20 +375,20 @@ function StarRating({ n = 5 }) {
   );
 }
 
-function ClassifiedAd({ p }) {
+function ClassifiedAd({ p, onSel }) {
   const tier = p.subscription_tier;
   const isPremium = tier === "premium";
   const isFeatured = tier === "featured";
 
-  // Border style based on tier
   const borderTop = isPremium
     ? `3px solid ${INK}`
     : isFeatured
     ? `2px solid ${BROWN_BTN}`
     : `1px solid ${PAPER_DK}`;
 
-  const rating = typeof p.rating === "number" ? p.rating : 4.5;
-  const reviews = p.review_count || Math.floor(Math.random() * 120 + 10);
+  const handleClick = () => {
+    if (onSel) onSel(p);
+  };
 
   return (
     <div style={{
@@ -362,8 +397,9 @@ function ClassifiedAd({ p }) {
       padding: "14px 0 12px",
       marginBottom: 2,
       background: isPremium ? "rgba(28,15,0,0.03)" : "transparent",
+      cursor: onSel ? "pointer" : "default",
     }}>
-      {/* Tier badge row */}
+      {/* Tier badge */}
       {(isPremium || isFeatured) && (
         <div style={{ marginBottom: 5 }}>
           {isPremium && <span style={{ background: INK, color: YELLOW, fontSize: 9, fontWeight: 900, letterSpacing: 1.5, padding: "2px 8px", borderRadius: 2, textTransform: "uppercase" }}>👑 Premium Listing</span>}
@@ -371,61 +407,70 @@ function ClassifiedAd({ p }) {
         </div>
       )}
 
-      {/* Business name — big bold serif headline */}
-      <div style={{ fontSize: 20, fontWeight: 900, color: INK, fontFamily: "'Times New Roman', serif", lineHeight: 1.1, marginBottom: 6 }}>
+      {/* Business name — clickable to open detail */}
+      <div onClick={handleClick} style={{ fontSize: 20, fontWeight: 900, color: onSel ? BROWN_BTN : INK, fontFamily: "'Times New Roman', serif", lineHeight: 1.1, marginBottom: 6, textDecoration: onSel ? "underline" : "none", textDecorationStyle: "dotted" }}>
         {p.business_name}
       </div>
+      {p.provider_id && <div style={{ fontSize: 10, color: INK_FADE, fontStyle: "italic", marginBottom: 4, fontFamily: "Georgia, serif" }}>Provider ID: {p.provider_id}</div>}
 
       {/* Contact row */}
       <div style={{ display: "flex", flexWrap: "wrap", gap: "4px 14px", marginBottom: 6 }}>
         {p.phone && (
-          <a href={`tel:${p.phone}`} style={{ textDecoration: "none", color: INK, fontSize: 12, fontFamily: "'Times New Roman', serif", display: "flex", alignItems: "center", gap: 3 }}>
+          <a href={`tel:${p.phone}`} onClick={e => e.stopPropagation()} style={{ textDecoration: "none", color: INK, fontSize: 12, fontFamily: "'Times New Roman', serif", display: "flex", alignItems: "center", gap: 3 }}>
             <span style={{ fontSize: 13 }}>📞</span> {p.phone}
           </a>
         )}
         {p.email && (
-          <a href={`mailto:${p.email}`} style={{ textDecoration: "none", color: BROWN_BTN, fontSize: 12, fontFamily: "'Times New Roman', serif", display: "flex", alignItems: "center", gap: 3, wordBreak: "break-all" }}>
+          <a href={`mailto:${p.email}`} onClick={e => e.stopPropagation()} style={{ textDecoration: "none", color: BROWN_BTN, fontSize: 12, fontFamily: "'Times New Roman', serif", display: "flex", alignItems: "center", gap: 3, wordBreak: "break-all" }}>
             <span style={{ fontSize: 11 }}>✉</span> {p.email}
           </a>
         )}
         {p.website && (
-          <a href={p.website.startsWith("http") ? p.website : `https://${p.website}`} target="_blank" rel="noreferrer"
+          <a href={p.website.startsWith("http") ? p.website : `https://${p.website}`} target="_blank" rel="noreferrer" onClick={e => e.stopPropagation()}
             style={{ textDecoration: "none", color: "#0077B6", fontSize: 12, fontFamily: "'Times New Roman', serif", display: "flex", alignItems: "center", gap: 3, wordBreak: "break-all" }}>
             <span style={{ fontSize: 11 }}>🌐</span> {p.website.replace(/^https?:\/\//, "")}
           </a>
         )}
       </div>
 
-      {/* Google rating row */}
-      <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 8 }}>
-        <span style={{ fontSize: 11, fontWeight: 700, color: "#555", fontFamily: "'Times New Roman', serif" }}>Google</span>
-        <StarRating n={rating} />
-        <span style={{ fontSize: 11, color: INK_FADE, fontFamily: "'Times New Roman', serif" }}>({reviews} Reviews)</span>
-      </div>
+      {/* Real V-Hub rating (if it exists) */}
+      {typeof p.rating === "number" && p.rating > 0 && (
+        <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 6 }}>
+          <span style={{ fontSize: 11, fontWeight: 700, color: "#B8860B", fontFamily: "'Times New Roman', serif" }}>★</span>
+          <StarRating n={p.rating} />
+          <span style={{ fontSize: 11, color: INK_FADE, fontFamily: "'Times New Roman', serif" }}>{p.rating}/5</span>
+        </div>
+      )}
 
-      {/* Description / feedback section — styled like classified feedback column */}
+      {/* Description */}
       {p.description && (
         <div style={{ borderLeft: `3px solid ${PAPER_DK}`, paddingLeft: 10, marginTop: 4 }}>
-          <div style={{ fontSize: 10, fontWeight: 900, color: INK, fontFamily: "'Times New Roman', serif", letterSpacing: 1, textTransform: "uppercase", marginBottom: 4 }}>
-            The Villages Feedback:
-          </div>
-          <ul style={{ margin: 0, padding: "0 0 0 14px" }}>
-            {p.description.split("\n").filter(Boolean).map((line, i) => (
-              <li key={i} style={{ fontSize: 12, color: INK, fontFamily: "'Times New Roman', serif", lineHeight: 1.7, marginBottom: 1 }}>
-                {line.replace(/^[•\-–—]\s*/, "")}
-              </li>
-            ))}
-          </ul>
+          <p style={{ margin: 0, fontSize: 12, color: INK_FADE, fontFamily: "Georgia, serif", lineHeight: 1.7, fontStyle: "italic" }}>{p.description}</p>
         </div>
       )}
 
-      {/* Years / license footer */}
-      {(p.years_in_business || p.license_number) && (
-        <div style={{ marginTop: 8, display: "flex", gap: 14, flexWrap: "wrap" }}>
-          {p.years_in_business && <span style={{ fontSize: 10, color: INK_FADE, fontStyle: "italic", fontFamily: "'Times New Roman', serif" }}>Est. {new Date().getFullYear() - p.years_in_business} · {p.years_in_business} yrs in business</span>}
-          {p.license_number && <span style={{ fontSize: 10, color: INK_FADE, fontStyle: "italic", fontFamily: "'Times New Roman', serif" }}>Lic# {p.license_number}</span>}
+      {/* Services chips */}
+      {(p.services || []).length > 0 && (
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 4, marginTop: 8 }}>
+          {(p.services || []).slice(0, 5).map(s => (
+            <span key={s} style={{ background: PAPER_MID, border: `1px solid ${PAPER_DK}`, borderRadius: 3, padding: "1px 7px", fontSize: 10, color: INK, fontFamily: "Georgia, serif" }}>{s}</span>
+          ))}
+          {(p.services || []).length > 5 && <span style={{ fontSize: 10, color: INK_FADE, fontStyle: "italic", alignSelf: "center" }}>+{(p.services || []).length - 5} more</span>}
         </div>
       )}
+
+      {/* Footer: years / license / view profile */}
+      <div style={{ marginTop: 10, display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 6 }}>
+        <div style={{ display: "flex", gap: 14, flexWrap: "wrap" }}>
+          {p.years_in_business && <span style={{ fontSize: 10, color: INK_FADE, fontStyle: "italic", fontFamily: "'Times New Roman', serif" }}>Est. {new Date().getFullYear() - Math.round(p.years_in_business)} · {p.years_in_business} yrs in business</span>}
+          {p.license_number && <span style={{ fontSize: 10, color: INK_FADE, fontStyle: "italic", fontFamily: "'Times New Roman', serif" }}>Lic# {p.license_number}</span>}
+        </div>
+        {onSel && (
+          <button onClick={handleClick} style={{ background: BROWN_BTN, color: PAPER, border: "none", borderRadius: 4, padding: "5px 14px", fontSize: 11, cursor: "pointer", fontFamily: "'Times New Roman', serif", fontWeight: 700, letterSpacing: 1 }}>
+            View Profile →
+          </button>
+        )}
+      </div>
     </div>
   );
 }
@@ -483,7 +528,7 @@ function Results({ results, areas, cats, onReset, onSel, selArea, selCatId }) {
             <div style={{ textAlign: "center", padding: "60px 20px", color: INK_FADE, fontSize: 14, fontStyle: "italic" }}>
               No providers found for this search.<br />Try a different village or service.
             </div>
-          ) : results.map((p, i) => <ClassifiedAd key={p.id || i} p={p} />)}
+          ) : results.map((p, i) => <ClassifiedAd key={p.id || i} p={p} onSel={onSel} />)}
         </div>
 
         {/* ── FOOTER ── */}
@@ -794,14 +839,29 @@ export default function Home() {
 
   const doSearch = async (selSvc, selArea) => {
     setSelAreaR(selArea);
-    setSelCatR(selSvc);  // store the service object for display in Results header
+    setSelCatR(selSvc);
     let all = [];
-    try { all = await Provider.filter({ is_visible: true }); } catch(e) { all = []; }
+    try { all = await Provider.list(); } catch(e) { all = []; }
+    // Map village description (section key like "Historic Side | Spanish Springs") to
+    // the short macro key stored in provider.service_areas
+    const SECTION_TO_MACRO = {
+      "Historic Side | Spanish Springs":         "Historic Side",
+      "Established Villages | North of SR-466A": "Established Villages",
+      "Newer Villages | South of SR-44":          "Newer Villages",
+      "Eastport | Newest Development Area":       "Eastport",
+      "Family & Non-Age-Restricted Villages":     "Family Villages",
+    };
+    const macroKey = selArea ? SECTION_TO_MACRO[selArea.description] || null : null;
     const out = all.filter(p => {
-      const areaMatch = !selArea || p.service_areas?.includes(selArea.id);
-      // Match by specific service ID in provider's services array, OR by category if no services listed
-      const svcMatch  = !selSvc  || 
-        (p.services?.includes(selSvc.id)) ||
+      if (p.is_visible === false) return false;
+      // Area match: provider serves this macro area OR "All Villages"
+      const areaMatch = !selArea || !macroKey ||
+        (p.service_areas || []).includes(macroKey) ||
+        (p.service_areas || []).includes("All Villages");
+      // Service match: provider lists this service name OR no filter
+      const svcMatch = !selSvc ||
+        (p.services || []).includes(selSvc.name) ||
+        // fallback: match by category if no specific services listed
         (!p.services?.length && p.category_id === selSvc.category_id);
       return areaMatch && svcMatch;
     });
@@ -811,12 +871,26 @@ export default function Home() {
     });
     setResults(out);
     setSearched(true);
+    // Silently increment search_appearances for each matched provider
+    out.forEach(p => {
+      Provider.update(p.id, { search_appearances: (p.search_appearances || 0) + 1 }).catch(() => {});
+    });
   };
 
   const reset = () => {
     setResults([]); setSearched(false); setSelProv(null);
     setSelAreaR(null); setSelCatR(null);
   };
+
+  useMeta({
+    title: "V-Hub | Find Local Services in The Villages, Florida",
+    description: "V-Hub is The Villages, Florida's trusted local service directory. Search landscaping, home repair, cleaning, pet care, golf cart services, transportation and more across all 59 villages.",
+    keywords: "The Villages FL services, local service directory, home repair, landscaping, cleaning, pet care, golf cart services, The Villages Florida",
+    ogTitle: "V-Hub — The Villages Local Services Directory",
+    ogDescription: "Find trusted, vetted local service providers across all 59 villages in The Villages, FL. No fees. No middlemen. Just neighbors serving neighbors.",
+    ogImage: "https://media.base44.com/images/public/69d062aca815ce8e697894b1/f19aa517d_generated_image.png",
+    canonical: "https://v-hub-app-edf7f8e8.base44.app/",
+  });
 
   // Newspaper typography
   const hd  = { margin: "0 0 2px 0", fontWeight: 900, fontSize: 9, textTransform: "uppercase", letterSpacing: 1, color: INK, fontFamily: "'Times New Roman', serif" };

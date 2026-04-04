@@ -1,4 +1,39 @@
 import { useState, useEffect } from "react";
+
+// ── SEO Meta Tags ──────────────────────────────────────────────────────────
+function useMeta({ title, description, keywords, ogTitle, ogDescription, ogImage, canonical }) {
+  useEffect(() => {
+    // Title
+    document.title = title || "V-Hub | The Villages, FL Local Services Directory";
+    const setMeta = (name, content, prop = false) => {
+      const attr = prop ? "property" : "name";
+      let el = document.querySelector(`meta[${attr}="${name}"]`);
+      if (!el) { el = document.createElement("meta"); el.setAttribute(attr, name); document.head.appendChild(el); }
+      el.setAttribute("content", content);
+    };
+    setMeta("description", description || "V-Hub connects The Villages, Florida residents with trusted local service providers. Search landscaping, home repair, pet care, transportation, and more.");
+    setMeta("keywords", keywords || "The Villages Florida services, local service directory, home repair Villages FL, landscaping Villages Florida, V-Hub");
+    setMeta("robots", "index, follow");
+    setMeta("viewport", "width=device-width, initial-scale=1.0, maximum-scale=1.0");
+    // Open Graph
+    setMeta("og:type", "website", true);
+    setMeta("og:site_name", "V-Hub", true);
+    setMeta("og:title", ogTitle || title || "V-Hub | The Villages, FL Local Services", true);
+    setMeta("og:description", ogDescription || description || "Find trusted local service providers in The Villages, Florida.", true);
+    setMeta("og:image", ogImage || "https://media.base44.com/images/public/69d062aca815ce8e697894b1/a9af95bc3_V-Hublogo.png", true);
+    // Twitter card
+    setMeta("twitter:card", "summary_large_image");
+    setMeta("twitter:title", ogTitle || title || "V-Hub | The Villages, FL");
+    setMeta("twitter:description", description || "Find trusted local service providers in The Villages, Florida.");
+    setMeta("twitter:image", ogImage || "https://media.base44.com/images/public/69d062aca815ce8e697894b1/a9af95bc3_V-Hublogo.png");
+    if (canonical) {
+      let link = document.querySelector('link[rel="canonical"]');
+      if (!link) { link = document.createElement("link"); link.rel = "canonical"; document.head.appendChild(link); }
+      link.href = canonical;
+    }
+  }, [title]);
+}
+
 import { Provider, ProviderReview, ServiceSearchStat } from "@/api/entities";
 
 // ── Design tokens (newspaper palette) ────────────────────────────────────────
@@ -153,6 +188,13 @@ function SvcAccordion({ selSvcs, setSelSvcs }) {
 
 // ── MAIN PAGE ─────────────────────────────────────────────────────────────────
 export default function ProviderDashboard() {
+  useMeta({
+    title: "Provider Hub | V-Hub — The Villages, FL",
+    description: "V-Hub Provider Hub — manage your business listing, view your search stats, read customer reviews, and update your profile at any time.",
+    keywords: "V-Hub provider dashboard, manage listing Villages FL, provider hub, business directory management",
+    canonical: "https://v-hub-app-edf7f8e8.base44.app/ProviderDashboard",
+  });
+
   const [view, setView]           = useState("lookup"); // lookup | dashboard | edit
   const [lookupId, setLookupId]   = useState("");
   const [lookupErr, setLookupErr] = useState("");
