@@ -149,7 +149,7 @@ export default function Home() {
       <div style={{ position: "relative", padding: "16px 18px 14px", borderBottom: `2px solid ${INK}`, textAlign: "center" }}>
         {/* Centered title */}
         <div style={{ fontSize: 72, fontWeight: 900, color: INK, letterSpacing: -1, lineHeight: 1, fontFamily: "'Times New Roman', serif", display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
-          <span style={{ fontSize: 64 }}>🌴</span>
+          <img src="https://media.base44.com/images/public/69d062aca815ce8e697894b1/b517a567b_generated_image.png" alt="palm tree" style={{ height: 72, width: "auto", objectFit: "contain", filter: "drop-shadow(0 2px 6px rgba(0,0,0,0.18))" }} />
           <span>V-Hub</span>
         </div>
 
