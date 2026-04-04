@@ -352,10 +352,87 @@ export default function Home() {
   const [selAreaR, setSelAreaR] = useState(null);
   const [selCatR,  setSelCatR]  = useState(null);
 
+  // Hardcoded categories & services (no auth needed on homepage)
+  const CATS_STATIC = [
+    { id: "69d09c14d5ee9e7be9aa301b", name: "Home Services", icon: "🏠" },
+    { id: "69d181fe57b60e0aecf4067d", name: "Home Systems & Utilities", icon: "💡" },
+    { id: "69d09c14d5ee9e7be9aa301c", name: "Yard & Outdoor", icon: "🌿" },
+    { id: "69d09c14d5ee9e7be9aa301d", name: "Golf Cart Services", icon: "⛳" },
+    { id: "69d09c14d5ee9e7be9aa301e", name: "Automobile Services", icon: "🚗" },
+    { id: "69d09c14d5ee9e7be9aa301f", name: "Personal Care", icon: "💆" },
+    { id: "69d09c14d5ee9e7be9aa3020", name: "Pet Services", icon: "🐾" },
+    { id: "69d09c14d5ee9e7be9aa3021", name: "Transportation", icon: "🚐" },
+    { id: "69d181fe57b60e0aecf4067e", name: "Professional Services", icon: "💼" },
+  ];
+  const SVCS_STATIC = [
+    { id: "s01", category_id: "69d09c14d5ee9e7be9aa301b", name: "Home Improvements" },
+    { id: "s02", category_id: "69d09c14d5ee9e7be9aa301b", name: "General Repairs" },
+    { id: "s03", category_id: "69d09c14d5ee9e7be9aa301b", name: "Cleaning Services (Home & Pool)" },
+    { id: "s04", category_id: "69d09c14d5ee9e7be9aa301b", name: "Painting (Interior/Exterior)" },
+    { id: "s05", category_id: "69d09c14d5ee9e7be9aa301b", name: "Garage Door Services" },
+    { id: "s06", category_id: "69d09c14d5ee9e7be9aa301b", name: "Window Installation/Repair" },
+    { id: "s07", category_id: "69d09c14d5ee9e7be9aa301b", name: "HVAC" },
+    { id: "s08", category_id: "69d09c14d5ee9e7be9aa301b", name: "Plumbing" },
+    { id: "s09", category_id: "69d09c14d5ee9e7be9aa301b", name: "Roofing" },
+    { id: "s10", category_id: "69d181fe57b60e0aecf4067d", name: "Handyman Services" },
+    { id: "s11", category_id: "69d181fe57b60e0aecf4067d", name: "Security & Home Watch" },
+    { id: "s12", category_id: "69d181fe57b60e0aecf4067d", name: "Pest Control" },
+    { id: "s13", category_id: "69d181fe57b60e0aecf4067d", name: "Appliance Repair" },
+    { id: "s14", category_id: "69d181fe57b60e0aecf4067d", name: "Electrical & Lighting" },
+    { id: "s15", category_id: "69d181fe57b60e0aecf4067d", name: "Flooring (Tile, Wood, Carpet)" },
+    { id: "s16", category_id: "69d181fe57b60e0aecf4067d", name: "Home Organization" },
+    { id: "s17", category_id: "69d181fe57b60e0aecf4067d", name: "Smart Home Installation" },
+    { id: "s18", category_id: "69d181fe57b60e0aecf4067d", name: "Pool & Spa Services" },
+    { id: "s19", category_id: "69d09c14d5ee9e7be9aa301c", name: "Lawn Mowing" },
+    { id: "s20", category_id: "69d09c14d5ee9e7be9aa301c", name: "Sod Installation" },
+    { id: "s21", category_id: "69d09c14d5ee9e7be9aa301c", name: "Tree Trimming & Pruning/Removal" },
+    { id: "s22", category_id: "69d09c14d5ee9e7be9aa301c", name: "Lawn Fertilization" },
+    { id: "s23", category_id: "69d09c14d5ee9e7be9aa301c", name: "Irrigation/Sprinkler Services" },
+    { id: "s24", category_id: "69d09c14d5ee9e7be9aa301c", name: "Landscaping" },
+    { id: "s25", category_id: "69d09c14d5ee9e7be9aa301c", name: "Hardscaping" },
+    { id: "s26", category_id: "69d09c14d5ee9e7be9aa301c", name: "Pressure Washing" },
+    { id: "s27", category_id: "69d09c14d5ee9e7be9aa301c", name: "Driveway Repair/Cleaning/Painting" },
+    { id: "s28", category_id: "69d09c14d5ee9e7be9aa301d", name: "Rentals" },
+    { id: "s29", category_id: "69d09c14d5ee9e7be9aa301d", name: "Repairs" },
+    { id: "s30", category_id: "69d09c14d5ee9e7be9aa301d", name: "Detailing" },
+    { id: "s31", category_id: "69d09c14d5ee9e7be9aa301d", name: "Lighting Upgrades" },
+    { id: "s32", category_id: "69d09c14d5ee9e7be9aa301d", name: "Improvements/Customizations" },
+    { id: "s33", category_id: "69d09c14d5ee9e7be9aa301d", name: "Battery Replacement" },
+    { id: "s34", category_id: "69d09c14d5ee9e7be9aa301d", name: "Tire Services" },
+    { id: "s35", category_id: "69d09c14d5ee9e7be9aa301e", name: "Auto Repairs" },
+    { id: "s36", category_id: "69d09c14d5ee9e7be9aa301e", name: "Auto Detailing" },
+    { id: "s37", category_id: "69d09c14d5ee9e7be9aa301e", name: "Oil Changes" },
+    { id: "s38", category_id: "69d09c14d5ee9e7be9aa301e", name: "Tire Services" },
+    { id: "s39", category_id: "69d09c14d5ee9e7be9aa301e", name: "Mobile Mechanic" },
+    { id: "s40", category_id: "69d09c14d5ee9e7be9aa301f", name: "Hair Stylists" },
+    { id: "s41", category_id: "69d09c14d5ee9e7be9aa301f", name: "Nail Technicians" },
+    { id: "s42", category_id: "69d09c14d5ee9e7be9aa301f", name: "Spa Services" },
+    { id: "s43", category_id: "69d09c14d5ee9e7be9aa301f", name: "Home Health Aides" },
+    { id: "s44", category_id: "69d09c14d5ee9e7be9aa301f", name: "Massage Therapists" },
+    { id: "s45", category_id: "69d09c14d5ee9e7be9aa301f", name: "Personal Trainers" },
+    { id: "s46", category_id: "69d09c14d5ee9e7be9aa301f", name: "Makeup Artists" },
+    { id: "s47", category_id: "69d09c14d5ee9e7be9aa3020", name: "Veterinary Services" },
+    { id: "s48", category_id: "69d09c14d5ee9e7be9aa3020", name: "Grooming" },
+    { id: "s49", category_id: "69d09c14d5ee9e7be9aa3020", name: "Pet Sitting/Walking" },
+    { id: "s50", category_id: "69d09c14d5ee9e7be9aa3020", name: "Pet Training" },
+    { id: "s51", category_id: "69d09c14d5ee9e7be9aa3020", name: "Mobile Grooming" },
+    { id: "s52", category_id: "69d09c14d5ee9e7be9aa3021", name: "Medical Transport" },
+    { id: "s53", category_id: "69d09c14d5ee9e7be9aa3021", name: "Airport Transport" },
+    { id: "s54", category_id: "69d09c14d5ee9e7be9aa3021", name: "Local Rides" },
+    { id: "s55", category_id: "69d09c14d5ee9e7be9aa3021", name: "Errand Services" },
+    { id: "s56", category_id: "69d09c14d5ee9e7be9aa3021", name: "Courier/Delivery Services" },
+    { id: "s57", category_id: "69d181fe57b60e0aecf4067e", name: "Accounting & Bookkeeping" },
+    { id: "s58", category_id: "69d181fe57b60e0aecf4067e", name: "Notary Services" },
+    { id: "s59", category_id: "69d181fe57b60e0aecf4067e", name: "IT Support" },
+    { id: "s60", category_id: "69d181fe57b60e0aecf4067e", name: "Legal Services" },
+    { id: "s61", category_id: "69d181fe57b60e0aecf4067e", name: "Business Consulting" },
+    { id: "s62", category_id: "69d181fe57b60e0aecf4067e", name: "Tax Preparation" },
+  ];
+
   useEffect(() => {
-    ServiceArea.filter({ is_active: true }).then(setAreas);
-    Category.filter({ is_active: true }).then(setCats);
-    Service.filter({ is_active: true }).then(setSvcs);
+    setCats(CATS_STATIC);
+    setSvcs(SVCS_STATIC);
+    ServiceArea.filter({ is_active: true }).then(setAreas).catch(() => {});
   }, []);
 
   const grouped = groupAreas(areas);
