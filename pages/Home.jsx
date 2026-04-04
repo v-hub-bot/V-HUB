@@ -144,38 +144,27 @@ export default function Home() {
     }}>
 
       {/* ════════════════════════════════════════════════════════
-          MASTHEAD — top bar with date + "The Villages Daily"
+          HEADER — Palm tree, V-Hub, tagline, nav
       ════════════════════════════════════════════════════════ */}
-      <div style={{ background: PAPER_MID, borderBottom: `1px solid ${INK}`, padding: "3px 14px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-        <span style={{ fontSize: 8, color: INK_FADE, fontStyle: "italic", letterSpacing: 0.5 }}>Vol. XXXIX · No. 142</span>
-        <span style={{ fontSize: 9, fontWeight: 900, color: INK, letterSpacing: 3, textTransform: "uppercase" }}>The Villages Daily</span>
-        <span style={{ fontSize: 8, color: INK_FADE, fontStyle: "italic" }}>Est. 1985 · The Villages, FL</span>
-      </div>
-
-      <Rule thick />
-
-      {/* ════════════════════════════════════════════════════════
-          NAMEPLATE — 🌴 V-Hub title + tagline + List button
-      ════════════════════════════════════════════════════════ */}
-      <div style={{ padding: "10px 18px 6px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10 }}>
+      <div style={{ padding: "16px 18px 10px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, borderBottom: `2px solid ${INK}` }}>
         {/* Left spacer column text */}
         <div style={{ width: 140, flexShrink: 0 }}>
           <NewsCol idx={0} lines={1} />
         </div>
 
-        {/* Center — big name */}
+        {/* Center — big palm + V-Hub + tagline */}
         <div style={{ flex: 1, textAlign: "center" }}>
-          <div style={{ fontSize: 52, fontWeight: 900, color: INK, letterSpacing: -1, lineHeight: 1, fontFamily: "'Times New Roman', serif", display: "flex", alignItems: "center", justifyContent: "center", gap: 4 }}>
-            <span style={{ fontSize: 44 }}>🌴</span>
+          <div style={{ fontSize: 58, fontWeight: 900, color: INK, letterSpacing: -1, lineHeight: 1, fontFamily: "'Times New Roman', serif", display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
+            <span style={{ fontSize: 50 }}>🌴</span>
             <span>V-Hub</span>
           </div>
-          <div style={{ fontSize: 11, fontStyle: "italic", color: INK_FADE, marginTop: 3, letterSpacing: 0.3 }}>
+          <div style={{ fontSize: 12, fontStyle: "italic", color: INK_FADE, marginTop: 5, letterSpacing: 0.3 }}>
             Connecting You to Local Services in The Villages!
           </div>
         </div>
 
-        {/* Right — List Your Service button */}
-        <div style={{ width: 140, flexShrink: 0, display: "flex", justifyContent: "flex-end" }}>
+        {/* Right — List Your Service button + burger */}
+        <div style={{ width: 140, flexShrink: 0, display: "flex", justifyContent: "flex-end", alignItems: "center", gap: 8 }}>
           <a href="/list-service" style={{ textDecoration: "none" }} onClick={e => e.stopPropagation()}>
             <button style={{
               background: `linear-gradient(180deg, #9A6030 0%, ${BROWN_BTN} 50%, #5A3010 100%)`,
@@ -194,11 +183,11 @@ export default function Home() {
               List Your Service
             </button>
           </a>
-          <div style={{ marginLeft: 8 }}><Burger /></div>
+          <Burger />
         </div>
       </div>
 
-      <Rule thick style={{ margin: "4px 0 0" }} />
+      <Rule thick style={{ margin: "0 0 0" }} />
 
       {/* ════════════════════════════════════════════════════════
           SECTION HEADERS — LOCAL SERVICES | CLASSIFIEDS
