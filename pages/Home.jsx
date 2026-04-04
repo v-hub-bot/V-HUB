@@ -11,12 +11,14 @@ const BROWN_HL  = "#6B3010";
 const YELLOW    = "#FFDB00";
 
 const FILLER = [
-  "Residents across The Villages seek quality local services every day. From landscaping to home repair, demand for trusted neighborhood providers has never been stronger. Local businesses report record inquiries as the community grows. Families and retirees depend on reliable professionals who understand the Villages lifestyle.",
-  "Trusted providers in The Villages have served the community for decades. From Spanish Springs to Fenney, skilled professionals are ready to serve you. Our verified directory ensures every listing meets community standards. Browse today and discover the talent right in your neighborhood.",
-  "New listings are added daily as V-Hub grows its network of verified providers. Whether you need a plumber, a pet sitter, or a personal trainer, The Villages has world-class options right in your backyard. Support local businesses and build the community we all cherish.",
-  "Community leaders gathered last week to discuss expanded support for local entrepreneurs. The Villages remains one of Florida's fastest-growing communities, drawing new residents every year. With tens of thousands of active members, local providers enjoy unmatched access to a loyal customer base.",
-  "V-Hub makes discovery simple — search by village, browse by category, and contact providers directly. No fees, no middlemen, no hassle. Just neighbors helping neighbors across our beloved community every single day. Find your trusted provider and experience the difference.",
-  "Service excellence defines The Villages. Providers here understand the lifestyle and needs of active adults. Whether it's technology help, home maintenance, pet care, or personal wellness, you'll find trusted professionals nearby ready to assist whenever you need them.",
+  "Residents across The Villages seek quality local services every day. From landscaping to home repair, demand for trusted neighborhood providers has never been stronger.",
+  "Trusted providers in The Villages have served the community for decades. From Spanish Springs to Fenney, skilled professionals are ready to serve you. Our verified directory ensures every listing meets community standards.",
+  "New listings are added daily as V-Hub grows its network of verified providers. Whether you need a plumber, a pet sitter, or a personal trainer, The Villages has world-class options right in your backyard.",
+  "Community leaders gathered last week to discuss expanded support for local entrepreneurs. The Villages remains one of Florida's fastest-growing communities, drawing new residents every year.",
+  "V-Hub makes discovery simple — search by village, browse by category, and contact providers directly. No fees, no middlemen, no hassle. Just neighbors helping neighbors.",
+  "Service excellence defines The Villages. Providers here understand the lifestyle and needs of active adults. Whether it's technology help, home maintenance, pet care, or personal wellness, you'll find trusted professionals nearby.",
+  "Local businesses report record inquiries as the community grows. Families and retirees depend on reliable professionals who understand the Villages lifestyle and the values we share.",
+  "With tens of thousands of active members, local providers enjoy unmatched access to a loyal customer base. Support local businesses and build the community we all cherish together.",
 ];
 
 const SECTIONS = [
@@ -46,6 +48,15 @@ function Rule({ thick = false, style = {} }) {
     </div>
   );
 }
+
+const newsStyle = {
+  fontFamily: "'Times New Roman', Georgia, serif",
+  fontSize: 8.5,
+  color: INK_FADE,
+  lineHeight: 1.9,
+  textAlign: "justify",
+  margin: 0,
+};
 
 function Burger() {
   const [open, setOpen] = useState(false);
@@ -164,26 +175,17 @@ function Results({ results, areas, cats, onReset, onSel, selArea, selCatId }) {
 // ── Dropdown Button ───────────────────────────────────────────────────────────
 function DropBtn({ label, isOpen, onClick }) {
   return (
-    <button
-      onClick={onClick}
-      style={{
-        width: "100%",
-        background: PAPER,
-        border: `3px solid ${YELLOW}`,
-        boxShadow: `0 0 0 1.5px ${YELLOW}, 0 0 10px 2px rgba(255,220,0,0.35)`,
-        borderRadius: 5,
-        padding: "10px 12px",
-        fontSize: 13,
-        fontFamily: "'Times New Roman', serif",
-        color: label.startsWith("Select") ? INK_FADE : INK,
-        fontWeight: label.startsWith("Select") ? 400 : 700,
-        cursor: "pointer",
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "center",
-        textAlign: "left",
-        boxSizing: "border-box",
-      }}>
+    <button onClick={onClick} style={{
+      width: "100%", background: PAPER,
+      border: `3px solid ${YELLOW}`,
+      boxShadow: `0 0 0 1.5px ${YELLOW}, 0 0 10px 2px rgba(255,220,0,0.35)`,
+      borderRadius: 5, padding: "10px 12px", fontSize: 13,
+      fontFamily: "'Times New Roman', serif",
+      color: label.startsWith("Select") ? INK_FADE : INK,
+      fontWeight: label.startsWith("Select") ? 400 : 700,
+      cursor: "pointer", display: "flex", justifyContent: "space-between",
+      alignItems: "center", textAlign: "left", boxSizing: "border-box",
+    }}>
       <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "85%" }}>{label}</span>
       <span style={{ fontSize: 10, flexShrink: 0, marginLeft: 4 }}>{isOpen ? "▲" : "▼"}</span>
     </button>
@@ -194,8 +196,9 @@ function DropBtn({ label, isOpen, onClick }) {
 function SvcDropdown({ open, btnRef, cats, svcs, openCat, selCat, setOpenCat, setSelCat, setSOpen }) {
   if (!open) return null;
   const r = btnRef.current?.getBoundingClientRect() || { bottom: 320, left: 10, width: 160 };
+  const maxLeft = window.innerWidth - Math.max(r.width, 160) - 4;
   return (
-    <div onClick={e => e.stopPropagation()} style={{ position: "fixed", top: r.bottom + 3, left: r.left, width: Math.max(r.width, 160), background: PAPER, border: `2px solid ${INK}`, borderRadius: 4, zIndex: 99999, boxShadow: "0 8px 28px rgba(0,0,0,0.4)", maxHeight: 280, overflowY: "auto" }}>
+    <div onClick={e => e.stopPropagation()} style={{ position: "fixed", top: r.bottom + 3, left: Math.max(4, Math.min(r.left, maxLeft)), width: Math.max(r.width, 160), background: PAPER, border: `2px solid ${INK}`, borderRadius: 4, zIndex: 99999, boxShadow: "0 8px 28px rgba(0,0,0,0.4)", maxHeight: 280, overflowY: "auto" }}>
       {cats.map(c => {
         const catSvcs = svcs.filter(s => s.category_id === c.id);
         const isExpanded = openCat === c.id;
@@ -224,11 +227,9 @@ function SvcDropdown({ open, btnRef, cats, svcs, openCat, selCat, setOpenCat, se
 function VilDropdown({ open, btnRef, grouped, openSec, selArea, setOpenSec, setSelArea, setVOpen }) {
   if (!open) return null;
   const r = btnRef.current?.getBoundingClientRect() || { bottom: 320, left: 10, width: 160 };
-  // Clamp left so it doesn't overflow the right edge of the screen
   const maxLeft = window.innerWidth - Math.max(r.width, 160) - 4;
-  const left = Math.min(r.left, maxLeft);
   return (
-    <div onClick={e => e.stopPropagation()} style={{ position: "fixed", top: r.bottom + 3, left: Math.max(4, left), width: Math.max(r.width, 160), background: PAPER, border: `2px solid ${INK}`, borderRadius: 4, zIndex: 99999, boxShadow: "0 8px 28px rgba(0,0,0,0.4)", maxHeight: 280, overflowY: "auto" }}>
+    <div onClick={e => e.stopPropagation()} style={{ position: "fixed", top: r.bottom + 3, left: Math.max(4, Math.min(r.left, maxLeft)), width: Math.max(r.width, 160), background: PAPER, border: `2px solid ${INK}`, borderRadius: 4, zIndex: 99999, boxShadow: "0 8px 28px rgba(0,0,0,0.4)", maxHeight: 280, overflowY: "auto" }}>
       {SECTIONS.map(sec => {
         const vils = grouped[sec.key] || [];
         const isExpanded = openSec === sec.key;
@@ -253,8 +254,8 @@ function VilDropdown({ open, btnRef, grouped, openSec, selArea, setOpenSec, setS
   );
 }
 
-// ── Search Box (self-contained, responsive) ───────────────────────────────────
-function SearchBox({ cats, svcs, areas, grouped, onSearch }) {
+// ── Search Box ────────────────────────────────────────────────────────────────
+function SearchBox({ cats, svcs, grouped, onSearch }) {
   const [selCat,  setSelCat]  = useState(null);
   const [selArea, setSelArea] = useState(null);
   const [sOpen,   setSOpen]   = useState(false);
@@ -267,69 +268,29 @@ function SearchBox({ cats, svcs, areas, grouped, onSearch }) {
   const closeAll = () => { setSOpen(false); setVOpen(false); };
 
   return (
-    <div
-      onClick={closeAll}
-      style={{
-        background: PAPER_MID,
-        border: `2px solid ${PAPER_DK}`,
-        borderRadius: 6,
-        padding: "14px 12px",
-        width: "100%",
-        boxSizing: "border-box",
-      }}>
-
-      {/* Row: labels */}
+    <div onClick={closeAll} style={{ background: PAPER_MID, border: `2px solid ${PAPER_DK}`, borderRadius: 6, padding: "14px 12px", width: "100%", boxSizing: "border-box" }}>
       <div style={{ display: "flex", gap: 8, marginBottom: 5 }}>
-        <div style={{ flex: 1, fontSize: 11, fontWeight: 700, color: INK, fontFamily: "'Times New Roman', serif" }}>
-          What service do you need?
-        </div>
-        <div style={{ flex: 1, fontSize: 11, fontWeight: 700, color: INK, fontFamily: "'Times New Roman', serif" }}>
-          Where do you need it?
-        </div>
+        <div style={{ flex: 1, fontSize: 11, fontWeight: 700, color: INK, fontFamily: "'Times New Roman', serif" }}>What service do you need?</div>
+        <div style={{ flex: 1, fontSize: 11, fontWeight: 700, color: INK, fontFamily: "'Times New Roman', serif" }}>Where do you need it?</div>
       </div>
-
-      {/* Row: dropdowns side by side */}
       <div style={{ display: "flex", gap: 8, marginBottom: 10 }}>
         <div style={{ flex: 1, minWidth: 0, position: "relative" }} ref={sBtnRef}>
-          <DropBtn
-            label={selCat ? selCat.name : "Select a Serv..."}
-            isOpen={sOpen}
-            onClick={e => { e.stopPropagation(); setSOpen(!sOpen); setVOpen(false); }}
-          />
+          <DropBtn label={selCat ? selCat.name : "Select a Serv..."} isOpen={sOpen} onClick={e => { e.stopPropagation(); setSOpen(!sOpen); setVOpen(false); }} />
           <SvcDropdown open={sOpen} btnRef={sBtnRef} cats={cats} svcs={svcs} openCat={openCat} selCat={selCat} setOpenCat={setOpenCat} setSelCat={c => { setSelCat(c); }} setSOpen={setSOpen} />
         </div>
         <div style={{ flex: 1, minWidth: 0, position: "relative" }} ref={vBtnRef}>
-          <DropBtn
-            label={selArea ? vName(selArea) : "Select a Villa..."}
-            isOpen={vOpen}
-            onClick={e => { e.stopPropagation(); setVOpen(!vOpen); setSOpen(false); }}
-          />
+          <DropBtn label={selArea ? vName(selArea) : "Select a Villa..."} isOpen={vOpen} onClick={e => { e.stopPropagation(); setVOpen(!vOpen); setSOpen(false); }} />
           <VilDropdown open={vOpen} btnRef={vBtnRef} grouped={grouped} openSec={openSec} selArea={selArea} setOpenSec={setOpenSec} setSelArea={a => { setSelArea(a); }} setVOpen={setVOpen} />
         </div>
       </div>
-
-      {/* Find Services button */}
-      <button
-        onClick={e => { e.stopPropagation(); onSearch(selCat, selArea); }}
-        style={{
-          width: "100%",
-          background: `linear-gradient(180deg,#9A6030,${BROWN_BTN} 60%,#5A3010)`,
-          border: `3px solid ${YELLOW}`,
-          boxShadow: `0 0 0 1.5px ${YELLOW}, 0 0 10px 2px rgba(255,220,0,0.35)`,
-          borderRadius: 5,
-          color: "#F5E8CC",
-          fontFamily: "'Times New Roman', serif",
-          fontWeight: 700,
-          fontSize: 14,
-          letterSpacing: 3,
-          padding: "13px",
-          cursor: "pointer",
-          boxSizing: "border-box",
-        }}>
+      <button onClick={e => { e.stopPropagation(); onSearch(selCat, selArea); }} style={{
+        width: "100%", background: `linear-gradient(180deg,#9A6030,${BROWN_BTN} 60%,#5A3010)`,
+        border: `3px solid ${YELLOW}`, boxShadow: `0 0 0 1.5px ${YELLOW}, 0 0 10px 2px rgba(255,220,0,0.35)`,
+        borderRadius: 5, color: "#F5E8CC", fontFamily: "'Times New Roman', serif",
+        fontWeight: 700, fontSize: 14, letterSpacing: 3, padding: "13px", cursor: "pointer", boxSizing: "border-box",
+      }}>
         FIND SERVICES
       </button>
-
-      <SvcDropdown open={false} btnRef={sBtnRef} cats={[]} svcs={[]} openCat={null} selCat={null} setOpenCat={() => {}} setSelCat={() => {}} setSOpen={() => {}} />
     </div>
   );
 }
@@ -385,31 +346,61 @@ export default function Home() {
       <style>{`
         * { box-sizing: border-box; }
         body, html { margin: 0; padding: 0; overflow-x: hidden; }
-        .vhub-wrap { width: 100%; max-width: 860px; margin: 0 auto; overflow-x: hidden; }
-        .vhub-body { display: flex; flex-direction: column; }
-        .vhub-sidecol { display: none; }
-        .vhub-newscol { padding: 10px 12px; }
-        @media (min-width: 600px) {
-          .vhub-body { flex-direction: row; }
-          .vhub-sidecol { display: block; width: 90px; min-width: 90px; padding: 10px 8px; border-right: 1px solid ${INK}; font-family: 'Times New Roman', serif; font-size: 7.5px; color: ${INK_FADE}; line-height: 1.85; text-align: justify; }
-          .vhub-newscol { flex: 1; padding: 10px 12px; border-right: 1px solid ${INK}; }
-          .vhub-rightcol { display: block; width: 90px; min-width: 90px; padding: 10px 8px; font-family: 'Times New Roman', serif; font-size: 7.5px; color: ${INK_FADE}; line-height: 1.85; text-align: justify; }
+
+        .np-col { font-family: 'Times New Roman', Georgia, serif; font-size: 8.5px; color: ${INK_FADE}; line-height: 1.9; text-align: justify; }
+
+        /* Mobile: single column, all news text stacked */
+        .np-grid {
+          display: flex;
+          flex-direction: column;
+          padding: 10px 12px;
+          gap: 10px;
         }
-        @media (min-width: 600px) {
-          .vhub-rightcol { display: block; }
+        .np-side-left, .np-side-right { display: none; }
+        .np-center { width: 100%; }
+
+        /* Tablet / Desktop: 3-column newspaper */
+        @media (min-width: 580px) {
+          .np-grid {
+            display: grid;
+            grid-template-columns: 1fr 2fr 1fr;
+            grid-template-rows: auto auto auto;
+            gap: 0;
+            padding: 0;
+          }
+          .np-side-left {
+            display: block;
+            padding: 10px 9px 10px 12px;
+            border-right: 1px solid ${INK};
+          }
+          .np-center {
+            padding: 10px 12px;
+            border-right: 1px solid ${INK};
+          }
+          .np-side-right {
+            display: block;
+            padding: 10px 12px 10px 9px;
+          }
         }
-        .vhub-rightcol { display: none; }
+
+        /* Mobile newsprint strips above/below search */
+        .np-mobile-top { display: block; }
+        .np-mobile-bot { display: block; }
+        @media (min-width: 580px) {
+          .np-mobile-top, .np-mobile-bot { display: none; }
+        }
       `}</style>
 
-      <div
-        className="vhub-wrap"
-        style={{
-          minHeight: "100vh",
-          background: PAPER,
-          backgroundImage: `repeating-linear-gradient(0deg,transparent,transparent 27px,rgba(28,15,0,0.04) 27px,rgba(28,15,0,0.04) 28px)`,
-          fontFamily: "'Times New Roman', Georgia, serif",
-          boxShadow: "0 2px 40px rgba(0,0,0,0.28)",
-        }}>
+      <div style={{
+        minHeight: "100vh",
+        background: PAPER,
+        backgroundImage: `repeating-linear-gradient(0deg,transparent,transparent 27px,rgba(28,15,0,0.04) 27px,rgba(28,15,0,0.04) 28px)`,
+        fontFamily: "'Times New Roman', Georgia, serif",
+        maxWidth: 860,
+        margin: "0 auto",
+        overflowX: "hidden",
+        boxShadow: "0 2px 40px rgba(0,0,0,0.28)",
+      }}>
 
         {/* ── MASTHEAD ── */}
         <div style={{ background: PAPER, padding: "14px 14px 8px", position: "relative", textAlign: "center" }}>
@@ -451,42 +442,53 @@ export default function Home() {
 
         <Rule />
 
-        {/* ── RESPONSIVE BODY ── */}
-        <div className="vhub-body">
+        {/* ── NEWSPAPER BODY ── */}
+        <div className="np-grid">
 
-          {/* Left filler column — hidden on mobile */}
-          <div className="vhub-sidecol">
-            {FILLER[0]}
+          {/* LEFT COLUMN — desktop only */}
+          <div className="np-side-left np-col">
+            <p style={{ margin: "0 0 8px 0", fontWeight: 700, fontSize: 9, textTransform: "uppercase", letterSpacing: 1, color: INK, borderBottom: `1px solid ${INK_FADE}`, paddingBottom: 3 }}>Community News</p>
+            <p style={{ margin: "0 0 8px 0" }}>{FILLER[0]}</p>
+            <p style={{ margin: "0 0 8px 0" }}>{FILLER[6]}</p>
+            <p style={{ margin: 0 }}>{FILLER[4]}</p>
           </div>
 
-          {/* CENTER — search always visible, full width on mobile */}
-          <div className="vhub-newscol">
-            {/* Intro text */}
-            <p style={{ fontFamily: "'Times New Roman', serif", fontSize: 12, color: INK_FADE, lineHeight: 1.8, textAlign: "justify", marginTop: 0, marginBottom: 12 }}>
+          {/* CENTER COLUMN */}
+          <div className="np-center">
+
+            {/* Mobile-only news strip above search */}
+            <div className="np-mobile-top np-col" style={{ marginBottom: 10 }}>
               {FILLER[2]}
-            </p>
+            </div>
 
             {/* Search box */}
-            <SearchBox
-              cats={cats}
-              svcs={svcs}
-              areas={areas}
-              grouped={grouped}
-              onSearch={doSearch}
-            />
+            <SearchBox cats={cats} svcs={svcs} grouped={grouped} onSearch={doSearch} />
 
-            {/* Below-search filler */}
-            <p style={{ fontFamily: "'Times New Roman', serif", fontSize: 12, color: INK_FADE, lineHeight: 1.8, textAlign: "justify", marginTop: 12, marginBottom: 0 }}>
+            {/* Mobile-only news strip below search */}
+            <div className="np-mobile-bot np-col" style={{ marginTop: 10 }}>
               {FILLER[5]}
-            </p>
+            </div>
+
+            {/* Desktop-only second strip below search */}
+            <p className="np-col" style={{ margin: "10px 0 0 0", display: "none" }} id="desk-below">{FILLER[5]}</p>
           </div>
 
-          {/* Right filler column — hidden on mobile */}
-          <div className="vhub-rightcol">
-            {FILLER[3]}
+          {/* RIGHT COLUMN — desktop only */}
+          <div className="np-side-right np-col">
+            <p style={{ margin: "0 0 8px 0", fontWeight: 700, fontSize: 9, textTransform: "uppercase", letterSpacing: 1, color: INK, borderBottom: `1px solid ${INK_FADE}`, paddingBottom: 3 }}>Provider Spotlight</p>
+            <p style={{ margin: "0 0 8px 0" }}>{FILLER[1]}</p>
+            <p style={{ margin: "0 0 8px 0" }}>{FILLER[3]}</p>
+            <p style={{ margin: 0 }}>{FILLER[7]}</p>
           </div>
 
         </div>
+
+        {/* Extra desktop filler row — fills space below search in center col */}
+        <style>{`
+          @media (min-width: 580px) {
+            #desk-below { display: block !important; }
+          }
+        `}</style>
 
         <Rule style={{ marginTop: 8 }} />
 
