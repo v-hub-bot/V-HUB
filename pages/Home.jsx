@@ -315,6 +315,16 @@ function SearchBox({ cats, svcs, grouped, onSearch }) {
 
   return (
     <div onClick={closeAll} style={{ background: PAPER_MID, border: `2px solid ${PAPER_DK}`, borderRadius: 6, padding: "14px 12px", width: "100%", boxSizing: "border-box" }}>
+      <a href="/list-service" style={{ textDecoration: "none", display: "block", marginBottom: 8 }} onClick={e => e.stopPropagation()}>
+        <button style={{
+          width: "100%", background: `linear-gradient(180deg,#9A6030,${BROWN_BTN} 60%,#5A3010)`,
+          border: `3px solid ${BROWN_BTN}`,
+          borderRadius: 5, color: "#F5E8CC", fontFamily: "'Times New Roman', serif",
+          fontWeight: 700, fontSize: 14, letterSpacing: 3, padding: "13px", cursor: "pointer", boxSizing: "border-box",
+        }}>
+          LIST YOUR SERVICE
+        </button>
+      </a>
       <button onClick={e => { e.stopPropagation(); onSearch(selSvc, selArea); }} style={{
         width: "100%", background: `linear-gradient(180deg,#9A6030,${BROWN_BTN} 60%,#5A3010)`,
         border: `3px solid ${YELLOW}`, boxShadow: `0 0 0 1.5px ${YELLOW}, 0 0 10px 2px rgba(255,220,0,0.35)`,
