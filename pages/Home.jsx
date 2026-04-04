@@ -146,26 +146,28 @@ export default function Home() {
       {/* ════════════════════════════════════════════════════════
           HEADER — Palm tree, V-Hub, tagline, nav
       ════════════════════════════════════════════════════════ */}
-      <div style={{ position: "relative", padding: "16px 18px 12px", borderBottom: `2px solid ${INK}`, textAlign: "center" }}>
-        {/* Centered title + tagline */}
+      <div style={{ position: "relative", padding: "16px 18px 14px", borderBottom: `2px solid ${INK}`, textAlign: "center" }}>
+        {/* Centered title */}
         <div style={{ fontSize: 72, fontWeight: 900, color: INK, letterSpacing: -1, lineHeight: 1, fontFamily: "'Times New Roman', serif", display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
           <span style={{ fontSize: 64 }}>🌴</span>
           <span>V-Hub</span>
         </div>
+
+        {/* Tagline */}
         <div style={{ fontSize: 13, fontStyle: "italic", color: INK_FADE, marginTop: 6, letterSpacing: 0.3 }}>
           Connecting You to Local Services in The Villages!
         </div>
 
-        {/* Absolutely positioned LEFT — List Your Service button */}
-        <div style={{ position: "absolute", top: "50%", left: 18, transform: "translateY(-50%)", display: "flex", alignItems: "center", gap: 8 }} onClick={e => e.stopPropagation()}>
+        {/* List Your Service button — centered below tagline */}
+        <div style={{ marginTop: 10 }} onClick={e => e.stopPropagation()}>
           <a href="/list-service" style={{ textDecoration: "none" }}>
             <button style={{
               background: `linear-gradient(180deg, #9A6030 0%, ${BROWN_BTN} 50%, #5A3010 100%)`,
               color: "#F5E8CC",
               border: `1px solid #3A1800`,
               borderRadius: 5,
-              padding: "8px 14px",
-              fontSize: 11,
+              padding: "9px 20px",
+              fontSize: 12,
               fontWeight: 700,
               fontFamily: "'Times New Roman', serif",
               cursor: "pointer",
@@ -179,7 +181,7 @@ export default function Home() {
         </div>
 
         {/* Absolutely positioned RIGHT — burger menu */}
-        <div style={{ position: "absolute", top: "50%", right: 18, transform: "translateY(-50%)" }} onClick={e => e.stopPropagation()}>
+        <div style={{ position: "absolute", top: 18, right: 18 }} onClick={e => e.stopPropagation()}>
           <Burger />
         </div>
       </div>
