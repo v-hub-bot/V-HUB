@@ -1,0 +1,37 @@
+{
+  "type": "object",
+  "properties": {
+    "provider_id": {
+      "type": "string"
+    },
+    "customer_name": {
+      "type": "string"
+    },
+    "customer_email": {
+      "type": "string"
+    },
+    "customer_phone": {
+      "type": "string"
+    },
+    "service_area_id": {
+      "type": "string"
+    },
+    "service_id": {
+      "type": "string"
+    },
+    "message": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "new",
+        "viewed",
+        "contacted",
+        "closed"
+      ]
+    }
+  },
+  "required": [],
+  "name": "LeadInquiry"
+}

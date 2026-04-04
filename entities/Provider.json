@@ -1,0 +1,74 @@
+{
+  "type": "object",
+  "properties": {
+    "business_name": {
+      "type": "string"
+    },
+    "owner_name": {
+      "type": "string"
+    },
+    "email": {
+      "type": "string"
+    },
+    "phone": {
+      "type": "string"
+    },
+    "website": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "logo_url": {
+      "type": "string"
+    },
+    "service_areas": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Array of ServiceArea IDs"
+    },
+    "category_id": {
+      "type": "string"
+    },
+    "services": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Array of Service IDs"
+    },
+    "subscription_status": {
+      "type": "string",
+      "enum": [
+        "trial",
+        "active",
+        "inactive",
+        "pending"
+      ]
+    },
+    "subscription_tier": {
+      "type": "string",
+      "enum": [
+        "basic",
+        "featured",
+        "premium"
+      ]
+    },
+    "is_visible": {
+      "type": "boolean"
+    },
+    "years_in_business": {
+      "type": "number"
+    },
+    "license_number": {
+      "type": "string"
+    },
+    "rating": {
+      "type": "number"
+    }
+  },
+  "required": [],
+  "name": "Provider"
+}
