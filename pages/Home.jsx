@@ -210,6 +210,8 @@ export default function Home() {
   const [selCat,   setSelCat]   = useState(null);   // Category object
   const [sOpen,    setSOpen]    = useState(false);
   const [vOpen,    setVOpen]    = useState(false);
+  const [openCat,  setOpenCat]  = useState(null);
+  const [openSec,  setOpenSec]  = useState(null);
   const [results,  setResults]  = useState([]);
   const [searched, setSearched] = useState(false);
   const [selProv,  setSelProv]  = useState(null);
@@ -246,6 +248,7 @@ export default function Home() {
   const reset = () => {
     setSelArea(null); setSelCat(null);
     setResults([]); setSearched(false); setSelProv(null);
+    setOpenCat(null); setOpenSec(null);
     closeAll();
   };
 
@@ -342,35 +345,56 @@ export default function Home() {
                         borderRadius: 4,
                         zIndex: 9999,
                         boxShadow: "0 8px 28px rgba(0,0,0,0.4)",
-                        maxHeight: 280,
+                        maxHeight: 300,
                         overflowY: "auto",
                       }}>
-                      {/* All option */}
                       <div
-                        onClick={() => { setSelCat(null); setSOpen(false); }}
-                        style={{ padding: "9px 12px", fontSize: 12, color: INK_FADE, fontStyle: "italic", borderBottom: `1px solid ${PAPER_DK}`, cursor: "pointer", background: !selCat ? PAPER_MID : PAPER }}>
+                        onClick={() => { setSelCat(null); setOpenCat(null); setSOpen(false); }}
+                        style={{ padding: "9px 12px", fontSize: 11, color: INK_FADE, fontStyle: "italic", borderBottom: `1px solid ${PAPER_DK}`, cursor: "pointer", background: !selCat ? PAPER_MID : PAPER }}>
                         — All Services —
                       </div>
-                      {cats.map(c => (
-                        <div
-                          key={c.id}
-                          onClick={() => { setSelCat(c); setSOpen(false); }}
-                          style={{
-                            padding: "10px 12px",
-                            fontSize: 13,
-                            fontWeight: selCat?.id === c.id ? 700 : 400,
-                            color: selCat?.id === c.id ? "#fff" : INK,
-                            background: selCat?.id === c.id ? BROWN_HL : PAPER,
-                            borderBottom: `1px solid ${PAPER_DK}`,
-                            cursor: "pointer",
-                            display: "flex",
-                            alignItems: "center",
-                            gap: 6,
-                          }}>
-                          <span>{c.icon}</span>
-                          <span>{c.name}</span>
-                        </div>
-                      ))}
+                      {cats.map(c => {
+                        const catSvcs = svcs.filter(s => s.category_id === c.id);
+                        const isExpanded = openCat === c.id;
+                        return (
+                          <div key={c.id}>
+                            {/* Category header row */}
+                            <div
+                              onClick={e => { e.stopPropagation(); setOpenCat(isExpanded ? null : c.id); }}
+                              style={{
+                                padding: "10px 12px",
+                                fontSize: 12,
+                                fontWeight: 700,
+                                color: "#fff",
+                                background: selCat?.id === c.id ? BROWN_HL : "#5C2E0E",
+                                borderBottom: `1px solid rgba(255,255,255,0.12)`,
+                                cursor: "pointer",
+                                display: "flex",
+                                justifyContent: "space-between",
+                                alignItems: "center",
+                              }}>
+                              <span>{c.icon} {c.name}</span>
+                              <span style={{ fontSize: 9 }}>{isExpanded ? "▲" : "▼"}</span>
+                            </div>
+                            {/* Subcategory rows */}
+                            {isExpanded && catSvcs.map(s => (
+                              <div
+                                key={s.id}
+                                onClick={e => { e.stopPropagation(); setSelCat(c); setSOpen(false); setOpenCat(null); }}
+                                style={{
+                                  padding: "9px 12px 9px 22px",
+                                  fontSize: 12,
+                                  color: selCat?.id === c.id ? "#fff" : INK,
+                                  background: selCat?.id === c.id ? BROWN_HL : PAPER,
+                                  borderBottom: `1px solid ${PAPER_DK}`,
+                                  cursor: "pointer",
+                                }}>
+                                {s.name}
+                              </div>
+                            ))}
+                          </div>
+                        );
+                      })}
                     </div>
                   )}
                 </div>
@@ -395,31 +419,38 @@ export default function Home() {
                         borderRadius: 4,
                         zIndex: 9999,
                         boxShadow: "0 8px 28px rgba(0,0,0,0.4)",
-                        maxHeight: 280,
+                        maxHeight: 300,
                         overflowY: "auto",
                       }}>
-                      {/* All option */}
                       <div
-                        onClick={() => { setSelArea(null); setVOpen(false); }}
-                        style={{ padding: "9px 12px", fontSize: 12, color: INK_FADE, fontStyle: "italic", borderBottom: `1px solid ${PAPER_DK}`, cursor: "pointer", background: !selArea ? PAPER_MID : PAPER }}>
+                        onClick={() => { setSelArea(null); setOpenSec(null); setVOpen(false); }}
+                        style={{ padding: "9px 12px", fontSize: 11, color: INK_FADE, fontStyle: "italic", borderBottom: `1px solid ${PAPER_DK}`, cursor: "pointer", background: !selArea ? PAPER_MID : PAPER }}>
                         — All Villages —
                       </div>
-                      {allVillages.map(v => (
-                        <div
-                          key={v.id}
-                          onClick={() => { setSelArea(v); setVOpen(false); }}
-                          style={{
-                            padding: "10px 12px",
-                            fontSize: 13,
-                            fontWeight: selArea?.id === v.id ? 700 : 400,
-                            color: selArea?.id === v.id ? "#fff" : INK,
-                            background: selArea?.id === v.id ? BROWN_HL : PAPER,
-                            borderBottom: `1px solid ${PAPER_DK}`,
-                            cursor: "pointer",
-                          }}>
-                          {vName(v)}
-                        </div>
-                      ))}
+                      {SECTIONS.map(sec => {
+                        const vils = grouped[sec.key] || [];
+                        const isExpanded = openSec === sec.key;
+                        const secColors = { "Historic Side | Spanish Springs": "#5C2E0E", "Established Villages | North of SR-466A": "#2E4E1A", "Newer Villages | South of SR-44": "#1E4E1E", "Eastport | Newest Development Area": "#1A3060", "Family & Non-Age-Restricted Villages": "#3A1E5C" };
+                        const hdrColor = secColors[sec.key] || "#5C2E0E";
+                        return (
+                          <div key={sec.key}>
+                            <div
+                              onClick={e => { e.stopPropagation(); setOpenSec(isExpanded ? null : sec.key); }}
+                              style={{ padding: "10px 12px", fontSize: 12, fontWeight: 700, color: "#fff", background: hdrColor, borderBottom: "1px solid rgba(255,255,255,0.12)", cursor: "pointer", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                              <span>{sec.label}</span>
+                              <span style={{ fontSize: 9 }}>{isExpanded ? "▲" : "▼"}</span>
+                            </div>
+                            {isExpanded && vils.map(v => (
+                              <div
+                                key={v.id}
+                                onClick={e => { e.stopPropagation(); setSelArea(v); setVOpen(false); setOpenSec(null); }}
+                                style={{ padding: "9px 12px 9px 22px", fontSize: 12, color: selArea?.id === v.id ? "#fff" : INK, background: selArea?.id === v.id ? BROWN_HL : PAPER, borderBottom: `1px solid ${PAPER_DK}`, cursor: "pointer" }}>
+                                {vName(v)}
+                              </div>
+                            ))}
+                          </div>
+                        );
+                      })}
                     </div>
                   )}
                 </div>
