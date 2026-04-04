@@ -968,8 +968,19 @@ export default function Home() {
         <div style={{ background: PAPER, padding: "14px 14px 8px" }}>
           {/* Top row: palm | title (centered) | burger */}
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-            {/* Left: palm tree — fixed 40x40 to match burger width exactly */}
-            <span style={{ fontSize: 34, lineHeight: 1, flexShrink: 0, width: 40, height: 40, display: "flex", alignItems: "center", justifyContent: "center" }}>🌴</span>
+            {/* Left: realistic palm tree cluster */}
+            <div style={{ flexShrink: 0, width: 68, height: 72, display: "flex", alignItems: "flex-end", justifyContent: "center" }}>
+              <img
+                src="https://base44.app/api/apps/69d062aca815ce8e697894b1/files/mp/public/69d062aca815ce8e697894b1/eec112014_palm_transparent2.png"
+                alt="Palm trees"
+                style={{
+                  width: 72, height: 72,
+                  objectFit: "contain",
+                  objectPosition: "bottom center",
+                  display: "block",
+                }}
+              />
+            </div>
             {/* Center: V-Hub title */}
             <span style={{ flex: 1, textAlign: "center", fontSize: 52, fontWeight: 900, color: INK, fontFamily: "'Times New Roman', serif", letterSpacing: -1, lineHeight: 1 }}>
               <span style={{ fontStyle: "italic", fontWeight: 400, fontFamily: "'Great Vibes', cursive", fontSize: "1.2em", color: BROWN_BTN }}>V</span>
