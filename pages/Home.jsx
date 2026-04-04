@@ -85,55 +85,6 @@ function Burger() {
         </>
       )}
 
-      {/* ── ROOT LEVEL DROPDOWNS (fixed position, escape all stacking contexts) ── */}
-      {sOpen && sRect && (
-        <div onClick={e => e.stopPropagation()} style={{ position: "fixed", top: sRect.bottom + 3, left: sRect.left, width: Math.max(sRect.width, 160), background: PAPER, border: `2px solid ${INK}`, borderRadius: 4, zIndex: 99999, boxShadow: "0 8px 28px rgba(0,0,0,0.4)", maxHeight: 300, overflowY: "auto" }}>
-          {cats.map(c => {
-            const catSvcs = svcs.filter(s => s.category_id === c.id);
-            const isExpanded = openCat === c.id;
-            const isSelected = selCat?.id === c.id;
-            return (
-              <div key={c.id}>
-                <div onClick={e => { e.stopPropagation(); setOpenCat(isExpanded ? null : c.id); }}
-                  style={{ padding: "10px 14px", fontSize: 13, fontWeight: 600, color: isSelected ? "#fff" : INK, background: isSelected ? BROWN_HL : PAPER, borderBottom: `1px solid ${PAPER_DK}`, cursor: "pointer", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                  <span>{c.icon} {c.name}</span>
-                  <span style={{ fontSize: 9, color: isSelected ? "#fff" : INK_FADE }}>{isExpanded ? "▲" : "▼"}</span>
-                </div>
-                {isExpanded && catSvcs.map(s => (
-                  <div key={s.id} onClick={e => { e.stopPropagation(); setSelCat(c); setSOpen(false); setOpenCat(null); }}
-                    style={{ padding: "9px 14px 9px 28px", fontSize: 13, color: INK, background: PAPER_MID, borderBottom: `1px solid ${PAPER_DK}`, cursor: "pointer" }}>
-                    {s.name}
-                  </div>
-                ))}
-              </div>
-            );
-          })}
-        </div>
-      )}
-      {vOpen && vRect && (
-        <div onClick={e => e.stopPropagation()} style={{ position: "fixed", top: vRect.bottom + 3, left: vRect.left, width: Math.max(vRect.width, 160), background: PAPER, border: `2px solid ${INK}`, borderRadius: 4, zIndex: 99999, boxShadow: "0 8px 28px rgba(0,0,0,0.4)", maxHeight: 300, overflowY: "auto" }}>
-          {SECTIONS.map(sec => {
-            const vils = grouped[sec.key] || [];
-            const isExpanded = openSec === sec.key;
-            const secSelected = selArea && vils.some(v => v.id === selArea.id);
-            return (
-              <div key={sec.key}>
-                <div onClick={e => { e.stopPropagation(); setOpenSec(isExpanded ? null : sec.key); }}
-                  style={{ padding: "10px 14px", fontSize: 13, fontWeight: 600, color: secSelected ? "#fff" : INK, background: secSelected ? BROWN_HL : PAPER, borderBottom: `1px solid ${PAPER_DK}`, cursor: "pointer", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                  <span>{sec.label}</span>
-                  <span style={{ fontSize: 9, color: secSelected ? "#fff" : INK_FADE }}>{isExpanded ? "▲" : "▼"}</span>
-                </div>
-                {isExpanded && vils.map(v => (
-                  <div key={v.id} onClick={e => { e.stopPropagation(); setSelArea(v); setVOpen(false); setOpenSec(null); }}
-                    style={{ padding: "9px 14px 9px 28px", fontSize: 13, color: selArea?.id === v.id ? "#fff" : INK, background: selArea?.id === v.id ? BROWN_HL : PAPER_MID, borderBottom: `1px solid ${PAPER_DK}`, cursor: "pointer" }}>
-                    {vName(v)}
-                  </div>
-                ))}
-              </div>
-            );
-          })}
-        </div>
-      )}
     </>
   );
 }
@@ -251,6 +202,68 @@ function DropBtn({ label, isOpen, onClick }) {
   );
 }
 
+// ── Service Dropdown (fixed position, renders at root level) ──────────────────
+function SvcDropdown({ open, btnRef, cats, svcs, openCat, selCat, setOpenCat, setSelCat, setSOpen }) {
+  if (!open) return null;
+  const r = btnRef.current?.getBoundingClientRect() || { bottom: 320, left: 220, width: 130 };
+  console.log("SvcDropdown open, rect:", r, "cats:", cats.length);
+  return (
+    <div onClick={e => e.stopPropagation()} style={{ position: "fixed", top: r.bottom + 3, left: r.left, width: Math.max(r.width, 130), background: PAPER, border: `2px solid ${INK}`, borderRadius: 4, zIndex: 99999, boxShadow: "0 8px 28px rgba(0,0,0,0.4)", maxHeight: 300, overflowY: "auto" }}>
+      {cats.map(c => {
+        const catSvcs = svcs.filter(s => s.category_id === c.id);
+        const isExpanded = openCat === c.id;
+        const isSelected = selCat?.id === c.id;
+        return (
+          <div key={c.id}>
+            <div onClick={e => { e.stopPropagation(); setOpenCat(isExpanded ? null : c.id); }}
+              style={{ padding: "10px 14px", fontSize: 13, fontWeight: 600, color: isSelected ? "#fff" : INK, background: isSelected ? BROWN_HL : PAPER, borderBottom: `1px solid ${PAPER_DK}`, cursor: "pointer", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <span>{c.icon} {c.name}</span>
+              <span style={{ fontSize: 9 }}>{isExpanded ? "▲" : "▼"}</span>
+            </div>
+            {isExpanded && catSvcs.map(s => (
+              <div key={s.id} onClick={e => { e.stopPropagation(); setSelCat(c); setSOpen(false); setOpenCat(null); }}
+                style={{ padding: "9px 14px 9px 28px", fontSize: 13, color: INK, background: PAPER_MID, borderBottom: `1px solid ${PAPER_DK}`, cursor: "pointer" }}>
+                {s.name}
+              </div>
+            ))}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+// ── Village Dropdown (fixed position, renders at root level) ──────────────────
+function VilDropdown({ open, btnRef, grouped, openSec, selArea, setOpenSec, setSelArea, setVOpen }) {
+  if (!open) return null;
+  const r = btnRef.current?.getBoundingClientRect() || { bottom: 320, left: 360, width: 130 };
+  return (
+    <div onClick={e => e.stopPropagation()} style={{ position: "fixed", top: r.bottom + 3, left: r.left, width: Math.max(r.width, 130), background: PAPER, border: `2px solid ${INK}`, borderRadius: 4, zIndex: 99999, boxShadow: "0 8px 28px rgba(0,0,0,0.4)", maxHeight: 300, overflowY: "auto" }}>
+      {SECTIONS.map(sec => {
+        const vils = grouped[sec.key] || [];
+        const isExpanded = openSec === sec.key;
+        const secSelected = selArea && vils.some(v => v.id === selArea.id);
+        return (
+          <div key={sec.key}>
+            <div onClick={e => { e.stopPropagation(); setOpenSec(isExpanded ? null : sec.key); }}
+              style={{ padding: "10px 14px", fontSize: 13, fontWeight: 600, color: secSelected ? "#fff" : INK, background: secSelected ? BROWN_HL : PAPER, borderBottom: `1px solid ${PAPER_DK}`, cursor: "pointer", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <span>{sec.label}</span>
+              <span style={{ fontSize: 9 }}>{isExpanded ? "▲" : "▼"}</span>
+            </div>
+            {isExpanded && vils.map(v => (
+              <div key={v.id} onClick={e => { e.stopPropagation(); setSelArea(v); setVOpen(false); setOpenSec(null); }}
+                style={{ padding: "9px 14px 9px 28px", fontSize: 13, color: selArea?.id === v.id ? "#fff" : INK, background: selArea?.id === v.id ? BROWN_HL : PAPER_MID, borderBottom: `1px solid ${PAPER_DK}`, cursor: "pointer" }}>
+                {vName(v)}
+              </div>
+            ))}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+
 // ── Main ──────────────────────────────────────────────────────────────────────
 export default function Home() {
   const [areas,    setAreas]    = useState([]);
@@ -262,23 +275,9 @@ export default function Home() {
   const [vOpen,    setVOpen]    = useState(false);
   const [openCat,  setOpenCat]  = useState(null);
   const [openSec,  setOpenSec]  = useState(null);
-  const [sRect,    setSRect]    = useState(null);
-  const [vRect,    setVRect]    = useState(null);
   const sBtnRef = useRef(null);
   const vBtnRef = useRef(null);
 
-  // Measure button rects when dropdowns open
-  useEffect(() => {
-    if (sOpen && sBtnRef.current) {
-      setSRect(sBtnRef.current.getBoundingClientRect());
-    }
-  }, [sOpen]);
-
-  useEffect(() => {
-    if (vOpen && vBtnRef.current) {
-      setVRect(vBtnRef.current.getBoundingClientRect());
-    }
-  }, [vOpen]);
   const [results,  setResults]  = useState([]);
   const [searched, setSearched] = useState(false);
   const [selProv,  setSelProv]  = useState(null);
@@ -381,7 +380,7 @@ export default function Home() {
             <NewsCol idx={2} lines={1} style={{ marginBottom: 12, fontSize: 8 }} />
 
             {/* ══ SEARCH PANEL ══ */}
-            <div onClick={e => e.stopPropagation()} style={{ border: `2px solid ${INK}`, borderRadius: 5, background: PAPER_MID, padding: "8px 8px 10px", position: "relative", overflow: "visible" }}>
+            <div onClick={e => e.stopPropagation()} style={{ border: `2px solid ${INK}`, borderRadius: 5, background: PAPER_MID, padding: "8px 8px 10px" }}>
 
               {/* Labels row */}
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 4 }}>
@@ -389,30 +388,27 @@ export default function Home() {
                 <div style={{ fontSize: 9, fontWeight: 700, color: INK, fontFamily: "'Times New Roman', serif" }}>Where do you need it?</div>
               </div>
 
-              {/* Buttons + open dropdowns row */}
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6, position: "relative", minWidth: 0 }}>
-
-                {/* ── SERVICE column ── */}
-                <div style={{ position: "relative" }}>
-                  <div ref={sBtnRef}>
+              {/* Dropdowns row */}
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6 }}>
+                {/* Service button */}
+                <div ref={sBtnRef}>
                   <DropBtn
                     label={selCat ? selCat.name : "Select a Service"}
                     isOpen={sOpen}
                     onClick={e => { e.stopPropagation(); setSOpen(o => !o); setVOpen(false); }}
                   />
                 </div>
-                  
-                {/* ── VILLAGE column ── */}
-                <div style={{ position: "relative" }} ref={vBtnRef}>
+                {/* Village button */}
+                <div ref={vBtnRef}>
                   <DropBtn
                     label={selArea ? vName(selArea) : "Select a Village"}
                     isOpen={vOpen}
                     onClick={e => { e.stopPropagation(); setVOpen(o => !o); setSOpen(false); }}
                   />
-                  
+                </div>
               </div>
 
-              {/* FIND SERVICES button — below dropdowns */}
+              {/* FIND SERVICES button */}
               <div style={{ marginTop: 10 }}>
                 <button
                   onClick={doSearch}
@@ -458,54 +454,27 @@ export default function Home() {
       </div>
 
       {/* ── ROOT LEVEL DROPDOWNS (fixed position, escape all stacking contexts) ── */}
-      {sOpen && sRect && (
-        <div onClick={e => e.stopPropagation()} style={{ position: "fixed", top: sRect.bottom + 3, left: sRect.left, width: Math.max(sRect.width, 160), background: PAPER, border: `2px solid ${INK}`, borderRadius: 4, zIndex: 99999, boxShadow: "0 8px 28px rgba(0,0,0,0.4)", maxHeight: 300, overflowY: "auto" }}>
-          {cats.map(c => {
-            const catSvcs = svcs.filter(s => s.category_id === c.id);
-            const isExpanded = openCat === c.id;
-            const isSelected = selCat?.id === c.id;
-            return (
-              <div key={c.id}>
-                <div onClick={e => { e.stopPropagation(); setOpenCat(isExpanded ? null : c.id); }}
-                  style={{ padding: "10px 14px", fontSize: 13, fontWeight: 600, color: isSelected ? "#fff" : INK, background: isSelected ? BROWN_HL : PAPER, borderBottom: `1px solid ${PAPER_DK}`, cursor: "pointer", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                  <span>{c.icon} {c.name}</span>
-                  <span style={{ fontSize: 9, color: isSelected ? "#fff" : INK_FADE }}>{isExpanded ? "▲" : "▼"}</span>
-                </div>
-                {isExpanded && catSvcs.map(s => (
-                  <div key={s.id} onClick={e => { e.stopPropagation(); setSelCat(c); setSOpen(false); setOpenCat(null); }}
-                    style={{ padding: "9px 14px 9px 28px", fontSize: 13, color: INK, background: PAPER_MID, borderBottom: `1px solid ${PAPER_DK}`, cursor: "pointer" }}>
-                    {s.name}
-                  </div>
-                ))}
-              </div>
-            );
-          })}
-        </div>
-      )}
-      {vOpen && vRect && (
-        <div onClick={e => e.stopPropagation()} style={{ position: "fixed", top: vRect.bottom + 3, left: vRect.left, width: Math.max(vRect.width, 160), background: PAPER, border: `2px solid ${INK}`, borderRadius: 4, zIndex: 99999, boxShadow: "0 8px 28px rgba(0,0,0,0.4)", maxHeight: 300, overflowY: "auto" }}>
-          {SECTIONS.map(sec => {
-            const vils = grouped[sec.key] || [];
-            const isExpanded = openSec === sec.key;
-            const secSelected = selArea && vils.some(v => v.id === selArea.id);
-            return (
-              <div key={sec.key}>
-                <div onClick={e => { e.stopPropagation(); setOpenSec(isExpanded ? null : sec.key); }}
-                  style={{ padding: "10px 14px", fontSize: 13, fontWeight: 600, color: secSelected ? "#fff" : INK, background: secSelected ? BROWN_HL : PAPER, borderBottom: `1px solid ${PAPER_DK}`, cursor: "pointer", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                  <span>{sec.label}</span>
-                  <span style={{ fontSize: 9, color: secSelected ? "#fff" : INK_FADE }}>{isExpanded ? "▲" : "▼"}</span>
-                </div>
-                {isExpanded && vils.map(v => (
-                  <div key={v.id} onClick={e => { e.stopPropagation(); setSelArea(v); setVOpen(false); setOpenSec(null); }}
-                    style={{ padding: "9px 14px 9px 28px", fontSize: 13, color: selArea?.id === v.id ? "#fff" : INK, background: selArea?.id === v.id ? BROWN_HL : PAPER_MID, borderBottom: `1px solid ${PAPER_DK}`, cursor: "pointer" }}>
-                    {vName(v)}
-                  </div>
-                ))}
-              </div>
-            );
-          })}
-        </div>
-      )}
+      <SvcDropdown
+        open={sOpen}
+        btnRef={sBtnRef}
+        cats={cats}
+        svcs={svcs}
+        openCat={openCat}
+        selCat={selCat}
+        setOpenCat={setOpenCat}
+        setSelCat={setSelCat}
+        setSOpen={setSOpen}
+      />
+      <VilDropdown
+        open={vOpen}
+        btnRef={vBtnRef}
+        grouped={grouped}
+        openSec={openSec}
+        selArea={selArea}
+        setOpenSec={setOpenSec}
+        setSelArea={setSelArea}
+        setVOpen={setVOpen}
+      />
     </>
   );
 }
