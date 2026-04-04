@@ -104,8 +104,8 @@ function Burger() {
   const [open, setOpen] = useState(false);
   return (
     <>
-      <button onClick={() => setOpen(true)} style={{ background: "rgba(28,15,0,0.12)", border: `1px solid ${INK}44`, borderRadius: 3, padding: "5px 8px", cursor: "pointer", display: "flex", flexDirection: "column", gap: 3.5, flexShrink: 0 }}>
-        {[0,1,2].map(i => <span key={i} style={{ display: "block", width: 16, height: 2, background: INK, borderRadius: 1 }} />)}
+      <button onClick={() => setOpen(true)} style={{ background: "rgba(28,15,0,0.12)", border: `1px solid ${INK}44`, borderRadius: 4, width: 40, height: 40, cursor: "pointer", display: "flex", flexDirection: "column", gap: 5, justifyContent: "center", alignItems: "center", flexShrink: 0, padding: 0, boxSizing: "border-box" }}>
+        {[0,1,2].map(i => <span key={i} style={{ display: "block", width: 18, height: 2, background: INK, borderRadius: 1 }} />)}
       </button>
       {open && (
         <>
@@ -466,8 +466,8 @@ export default function Home() {
         <div style={{ background: PAPER, padding: "14px 14px 8px" }}>
           {/* Top row: palm | title (centered) | burger */}
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-            {/* Left: palm tree */}
-            <span style={{ fontSize: 48, lineHeight: 1, flexShrink: 0 }}>🌴</span>
+            {/* Left: palm tree — fixed 40x40 to match burger width exactly */}
+            <span style={{ fontSize: 34, lineHeight: 1, flexShrink: 0, width: 40, height: 40, display: "flex", alignItems: "center", justifyContent: "center" }}>🌴</span>
             {/* Center: V-Hub title */}
             <span style={{ flex: 1, textAlign: "center", fontSize: 52, fontWeight: 900, color: INK, fontFamily: "'Times New Roman', serif", letterSpacing: -1, lineHeight: 1 }}>
               <span style={{ fontStyle: "italic", fontWeight: 400, fontFamily: "'Great Vibes', cursive", fontSize: "1.2em", color: BROWN_BTN }}>V</span>
