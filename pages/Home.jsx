@@ -132,13 +132,13 @@ function ProvDetail({ prov, areas, cats, onBack }) {
 
 // ── Results ───────────────────────────────────────────────────────────────────
 function Results({ results, areas, cats, onReset, onSel, selArea, selCatId }) {
-  const cat = cats.find(c => c.id === selCatId);
+  // selCatId is now the full Service object
   return (
     <div style={{ minHeight: "100vh", background: PAPER, fontFamily: "'Times New Roman', serif", maxWidth: 860, margin: "0 auto", boxShadow: "0 2px 40px rgba(0,0,0,0.28)" }}>
       <div style={{ background: INK, padding: "10px 14px", display: "flex", alignItems: "center", gap: 10 }}>
         <button onClick={onReset} style={{ background: "rgba(255,255,255,0.15)", border: "none", color: PAPER, borderRadius: 3, padding: "4px 10px", fontSize: 12, cursor: "pointer" }}>← Back</button>
         <span style={{ color: PAPER, fontWeight: 700, fontSize: 13, letterSpacing: 1 }}>
-          {cat ? cat.name : "All Services"}{selArea ? ` · ${vName(selArea)}` : ""}
+          {selCatId ? selCatId.name : "All Services"}{selArea ? ` · ${vName(selArea)}` : ""}
         </span>
       </div>
       <div style={{ padding: "14px" }}>
@@ -181,7 +181,7 @@ function DropBtn({ label, isOpen, onClick }) {
       boxShadow: `0 0 0 1.5px ${YELLOW}, 0 0 10px 2px rgba(255,220,0,0.35)`,
       borderRadius: 5, padding: "10px 12px", fontSize: 13,
       fontFamily: "'Times New Roman', serif",
-      color: label.startsWith("Select") ? INK_FADE : INK,
+      color: (label.startsWith("Select") || label === "Select a Service...") ? INK_FADE : INK,
       fontWeight: label.startsWith("Select") ? 400 : 700,
       cursor: "pointer", display: "flex", justifyContent: "space-between",
       alignItems: "center", textAlign: "left", boxSizing: "border-box",
@@ -193,7 +193,8 @@ function DropBtn({ label, isOpen, onClick }) {
 }
 
 // ── Service Dropdown ──────────────────────────────────────────────────────────
-function SvcDropdown({ open, btnRef, cats, svcs, openCat, selCat, setOpenCat, setSelCat, setSOpen }) {
+// selSvc = the selected Service object (subcategory); selCatId = its parent category id
+function SvcDropdown({ open, btnRef, cats, svcs, openCat, selSvc, setOpenCat, setSelSvc, setSOpen }) {
   if (!open) return null;
   const r = btnRef.current?.getBoundingClientRect() || { bottom: 320, left: 10, width: 160 };
   const maxLeft = window.innerWidth - Math.max(r.width, 160) - 4;
@@ -202,20 +203,25 @@ function SvcDropdown({ open, btnRef, cats, svcs, openCat, selCat, setOpenCat, se
       {cats.map(c => {
         const catSvcs = svcs.filter(s => s.category_id === c.id);
         const isExpanded = openCat === c.id;
-        const isSelected = selCat?.id === c.id;
+        // highlight the parent category row if any of its services is selected
+        const parentSelected = selSvc?.category_id === c.id;
         return (
           <div key={c.id}>
             <div onClick={e => { e.stopPropagation(); setOpenCat(isExpanded ? null : c.id); }}
-              style={{ padding: "10px 14px", fontSize: 13, fontWeight: 600, color: isSelected ? "#fff" : INK, background: isSelected ? BROWN_HL : PAPER, borderBottom: `1px solid ${PAPER_DK}`, cursor: "pointer", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              style={{ padding: "10px 14px", fontSize: 13, fontWeight: 600, color: parentSelected ? "#fff" : INK, background: parentSelected ? BROWN_HL : PAPER, borderBottom: `1px solid ${PAPER_DK}`, cursor: "pointer", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
               <span>{c.icon} {c.name}</span>
               <span style={{ fontSize: 9 }}>{isExpanded ? "▲" : "▼"}</span>
             </div>
-            {isExpanded && catSvcs.map(s => (
-              <div key={s.id} onClick={e => { e.stopPropagation(); setSelCat(c); setSOpen(false); setOpenCat(null); }}
-                style={{ padding: "9px 14px 9px 28px", fontSize: 13, color: INK, background: PAPER_MID, borderBottom: `1px solid ${PAPER_DK}`, cursor: "pointer" }}>
-                {s.name}
-              </div>
-            ))}
+            {isExpanded && catSvcs.map(s => {
+              const isSvcSelected = selSvc?.id === s.id;
+              return (
+                <div key={s.id}
+                  onClick={e => { e.stopPropagation(); setSelSvc(s); setSOpen(false); setOpenCat(null); }}
+                  style={{ padding: "9px 14px 9px 28px", fontSize: 13, color: isSvcSelected ? "#fff" : INK, background: isSvcSelected ? BROWN_HL : PAPER_MID, borderBottom: `1px solid ${PAPER_DK}`, cursor: "pointer", fontWeight: isSvcSelected ? 700 : 400 }}>
+                  {isSvcSelected ? "✓ " : ""}{s.name}
+                </div>
+              );
+            })}
           </div>
         );
       })}
@@ -256,7 +262,7 @@ function VilDropdown({ open, btnRef, grouped, openSec, selArea, setOpenSec, setS
 
 // ── Search Box ────────────────────────────────────────────────────────────────
 function SearchBox({ cats, svcs, grouped, onSearch }) {
-  const [selCat,  setSelCat]  = useState(null);
+  const [selSvc,  setSelSvc]  = useState(null);   // selected Service (subcategory)
   const [selArea, setSelArea] = useState(null);
   const [sOpen,   setSOpen]   = useState(false);
   const [vOpen,   setVOpen]   = useState(false);
@@ -267,6 +273,9 @@ function SearchBox({ cats, svcs, grouped, onSearch }) {
 
   const closeAll = () => { setSOpen(false); setVOpen(false); };
 
+  // Build display label: show selected service name
+  const svcLabel = selSvc ? selSvc.name : "Select a Service...";
+
   return (
     <div onClick={closeAll} style={{ background: PAPER_MID, border: `2px solid ${PAPER_DK}`, borderRadius: 6, padding: "14px 12px", width: "100%", boxSizing: "border-box" }}>
       <div style={{ display: "flex", gap: 8, marginBottom: 5 }}>
@@ -275,15 +284,15 @@ function SearchBox({ cats, svcs, grouped, onSearch }) {
       </div>
       <div style={{ display: "flex", gap: 8, marginBottom: 10 }}>
         <div style={{ flex: 1, minWidth: 0, position: "relative" }} ref={sBtnRef}>
-          <DropBtn label={selCat ? selCat.name : "Select a Serv..."} isOpen={sOpen} onClick={e => { e.stopPropagation(); setSOpen(!sOpen); setVOpen(false); }} />
-          <SvcDropdown open={sOpen} btnRef={sBtnRef} cats={cats} svcs={svcs} openCat={openCat} selCat={selCat} setOpenCat={setOpenCat} setSelCat={c => { setSelCat(c); }} setSOpen={setSOpen} />
+          <DropBtn label={svcLabel} isOpen={sOpen} onClick={e => { e.stopPropagation(); setSOpen(!sOpen); setVOpen(false); }} />
+          <SvcDropdown open={sOpen} btnRef={sBtnRef} cats={cats} svcs={svcs} openCat={openCat} selSvc={selSvc} setOpenCat={setOpenCat} setSelSvc={s => { setSelSvc(s); }} setSOpen={setSOpen} />
         </div>
         <div style={{ flex: 1, minWidth: 0, position: "relative" }} ref={vBtnRef}>
           <DropBtn label={selArea ? vName(selArea) : "Select a Villa..."} isOpen={vOpen} onClick={e => { e.stopPropagation(); setVOpen(!vOpen); setSOpen(false); }} />
           <VilDropdown open={vOpen} btnRef={vBtnRef} grouped={grouped} openSec={openSec} selArea={selArea} setOpenSec={setOpenSec} setSelArea={a => { setSelArea(a); }} setVOpen={setVOpen} />
         </div>
       </div>
-      <button onClick={e => { e.stopPropagation(); onSearch(selCat, selArea); }} style={{
+      <button onClick={e => { e.stopPropagation(); onSearch(selSvc, selArea); }} style={{
         width: "100%", background: `linear-gradient(180deg,#9A6030,${BROWN_BTN} 60%,#5A3010)`,
         border: `3px solid ${YELLOW}`, boxShadow: `0 0 0 1.5px ${YELLOW}, 0 0 10px 2px rgba(255,220,0,0.35)`,
         borderRadius: 5, color: "#F5E8CC", fontFamily: "'Times New Roman', serif",
@@ -314,14 +323,17 @@ export default function Home() {
 
   const grouped = groupAreas(areas);
 
-  const doSearch = async (selCat, selArea) => {
+  const doSearch = async (selSvc, selArea) => {
     setSelAreaR(selArea);
-    setSelCatR(selCat);
+    setSelCatR(selSvc);  // store the service object for display in Results header
     const all = await Provider.filter({ is_visible: true });
     const out = all.filter(p => {
       const areaMatch = !selArea || p.service_areas?.includes(selArea.id);
-      const catMatch  = !selCat  || p.category_id === selCat.id;
-      return areaMatch && catMatch;
+      // Match by specific service ID in provider's services array, OR by category if no services listed
+      const svcMatch  = !selSvc  || 
+        (p.services?.includes(selSvc.id)) ||
+        (!p.services?.length && p.category_id === selSvc.category_id);
+      return areaMatch && svcMatch;
     });
     out.sort((a, b) => {
       const tier = { premium: 0, featured: 1, basic: 2 };
@@ -337,7 +349,7 @@ export default function Home() {
   };
 
   if (selProv)  return <ProvDetail prov={selProv} areas={areas} cats={cats} onBack={() => setSelProv(null)} />;
-  if (searched) return <Results results={results} areas={areas} cats={cats} onReset={reset} onSel={setSelProv} selArea={selAreaR} selCatId={selCatR?.id} />;
+  if (searched) return <Results results={results} areas={areas} cats={cats} onReset={reset} onSel={setSelProv} selArea={selAreaR} selCatId={selCatR} />;
 
   return (
     <>
