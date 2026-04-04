@@ -502,10 +502,9 @@ export default function Home() {
 
         {/* PHOTO */}
         <img
-          src="https://media.base44.com/images/public/69d062aca815ce8e697894b1/2b4566a86_lakesum.jpg"
+          src="https://media.base44.com/images/public/69d062aca815ce8e697894b1/f19aa517d_generated_image.png"
           alt="Lake Sumter Landing"
-          style={{ width: "100%", height: 140, objectFit: "cover", display: "block" }}
-          onError={e => { e.target.style.display = "none"; }}
+          style={{ width: "100%", height: 200, objectFit: "cover", objectPosition: "center", display: "block" }}
         />
 
         <Rule />
