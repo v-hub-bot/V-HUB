@@ -239,6 +239,12 @@ export default function Home() {
 
           {/* ── Search panel ── */}
           <div style={{ border: `1.5px solid ${INK}`, background: PAPER_MID }}>
+            {/* FIND SERVICES button — TOP */}
+            <button onClick={doSearch} disabled={!selArea || !selCat}
+              style={{ width: "100%", background: (selArea && selCat) ? FIND_BTN : `${FIND_BTN}55`, color: "#F0E6C8", border: "none", borderBottom: `1.5px solid ${INK}`, padding: "11px", fontSize: 13, fontWeight: 900, fontFamily: "'Times New Roman', serif", letterSpacing: 4, textTransform: "uppercase", cursor: (selArea && selCat) ? "pointer" : "not-allowed", boxShadow: (selArea && selCat) ? "inset 0 1px 0 rgba(255,255,255,0.08)" : "none" }}>
+              Find Services
+            </button>
+
             {/* Labels row */}
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", borderBottom: `1px solid ${INK}` }}>
               <div style={{ padding: "5px 10px", borderRight: `1px solid ${INK}` }}>
@@ -308,11 +314,7 @@ export default function Home() {
               </div>
             </div>
 
-            {/* FIND SERVICES button */}
-            <button onClick={doSearch} disabled={!selArea}
-              style={{ width: "100%", background: selArea ? FIND_BTN : `${FIND_BTN}80`, color: "#F0E6C8", border: "none", padding: "11px", fontSize: 13, fontWeight: 900, fontFamily: "'Times New Roman', serif", letterSpacing: 4, textTransform: "uppercase", cursor: selArea ? "pointer" : "not-allowed", boxShadow: selArea ? "inset 0 1px 0 rgba(255,255,255,0.08)" : "none" }}>
-              Find Services
-            </button>
+
           </div>
 
           {/* Filler below */}
