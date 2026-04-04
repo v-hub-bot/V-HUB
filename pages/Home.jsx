@@ -168,23 +168,15 @@ export default function Home() {
           </div>
 
           {/* ── BIG V-HUB LOGO CENTER ── */}
-          <div style={{ textAlign: "center", padding: "8px 0 4px", position: "relative" }}>
+          <div style={{ textAlign: "center", padding: "4px 0 0", position: "relative" }}>
             <div style={{ display: "inline-block", position: "relative" }}>
-              {/* Palm tree silhouette left */}
-              <span style={{ position: "absolute", left: -20, bottom: 8, fontSize: 52, lineHeight: 1, opacity: 0.85, filter: "grayscale(100%) brightness(0.15)" }}>🌴</span>
-              {/* Main title */}
-              <div style={{ fontSize: 76, fontWeight: 900, color: BRAND.ink, fontFamily: "'Times New Roman', serif", letterSpacing: 4, lineHeight: 1, textShadow: "3px 3px 0 rgba(0,0,0,0.15)", display: "inline-block", paddingLeft: 40 }}>
-                V-HUB
-              </div>
+              <img
+                src="https://media.base44.com/images/public/69d062aca815ce8e697894b1/1148d0041_V-HublocalservicesinTheVillages.png"
+                alt="V-Hub"
+                style={{ maxWidth: 480, width: "90%", height: "auto", display: "block", margin: "0 auto", filter: "sepia(15%) contrast(1.05)" }}
+              />
             </div>
-            {/* Double rule + tagline */}
-            <div style={{ height: 3, background: BRAND.ink, margin: "6px 0 2px" }} />
-            <div style={{ height: 1, background: BRAND.ink, marginBottom: 5 }} />
-            <div style={{ fontSize: 14, fontStyle: "italic", color: BRAND.ink, fontWeight: 700, letterSpacing: 1 }}>
-              Connecting You to Local Services in The Villages!
-            </div>
-            <div style={{ height: 1, background: BRAND.ink, marginTop: 5 }} />
-            <div style={{ height: 3, background: BRAND.ink, marginTop: 2, marginBottom: 0 }} />
+
           </div>
         </div>
 
