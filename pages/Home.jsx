@@ -147,7 +147,7 @@ function Burger() {
     setPin(next);
     setPinError(false);
     if (next.length === 4) {
-      if (next === "6185") {
+      if (next === "6185" || next === "1357") {
         setAdminUnlocked(true);
         setPinMode(false);
         setPin("");
