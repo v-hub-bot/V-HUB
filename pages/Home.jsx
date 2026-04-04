@@ -235,32 +235,29 @@ function DropBtn({ label, isOpen, onClick }) {
 }
 
 // ── Service Dropdown ──────────────────────────────────────────────────────────
-// selSvc = the selected Service object (subcategory); selCatId = its parent category id
-function SvcDropdown({ open, btnRef, cats, svcs, openCat, selSvc, setOpenCat, setSelSvc, setSOpen }) {
+function SvcDropdown({ open, cats, svcs, openCat, selSvc, setOpenCat, setSelSvc, setSOpen }) {
   if (!open) return null;
-  const r = btnRef.current?.getBoundingClientRect() || { bottom: 320, left: 10, width: 160 };
-  const maxLeft = window.innerWidth - Math.max(r.width, 160) - 4;
   return (
-    <div onClick={e => e.stopPropagation()} style={{ position: "fixed", top: r.bottom + 3, left: Math.max(4, Math.min(r.left, maxLeft)), width: Math.max(r.width, 160), background: PAPER, border: `2px solid ${INK}`, borderRadius: 4, zIndex: 99999, boxShadow: "0 8px 28px rgba(0,0,0,0.4)", maxHeight: 280, overflowY: "auto" }}>
+    <div onClick={e => e.stopPropagation()} style={{ position: "absolute", top: "100%", left: 0, right: 0, background: PAPER, border: `2px solid ${INK}`, borderRadius: 4, zIndex: 99999, boxShadow: "0 8px 28px rgba(0,0,0,0.4)", maxHeight: 300, overflowY: "auto", marginTop: 2 }}>
+      {cats.length === 0 && <div style={{ padding: 12, fontSize: 12, color: INK_FADE }}>Loading...</div>}
       {cats.map(c => {
         const catSvcs = svcs.filter(s => s.category_id === c.id);
         const isExpanded = openCat === c.id;
-        // highlight the parent category row if any of its services is selected
         const parentSelected = selSvc?.category_id === c.id;
         return (
           <div key={c.id}>
             <div onClick={e => { e.stopPropagation(); setOpenCat(isExpanded ? null : c.id); }}
-              style={{ padding: "10px 14px", fontSize: 13, fontWeight: 600, color: parentSelected ? "#fff" : INK, background: parentSelected ? BROWN_HL : PAPER, borderBottom: `1px solid ${PAPER_DK}`, cursor: "pointer", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              style={{ padding: "10px 14px", fontSize: 13, fontWeight: 700, color: parentSelected ? "#fff" : INK, background: parentSelected ? BROWN_HL : PAPER, borderBottom: `1px solid ${PAPER_DK}`, cursor: "pointer", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
               <span>{c.icon} {c.name}</span>
-              <span style={{ fontSize: 9 }}>{isExpanded ? "▲" : "▼"}</span>
+              <span style={{ fontSize: 10 }}>{isExpanded ? "▲" : "▼"}</span>
             </div>
             {isExpanded && catSvcs.map(s => {
               const isSvcSelected = selSvc?.id === s.id;
               return (
                 <div key={s.id}
                   onClick={e => { e.stopPropagation(); setSelSvc(s); setSOpen(false); setOpenCat(null); }}
-                  style={{ padding: "9px 14px 9px 28px", fontSize: 13, color: isSvcSelected ? "#fff" : INK, background: isSvcSelected ? BROWN_HL : PAPER_MID, borderBottom: `1px solid ${PAPER_DK}`, cursor: "pointer", fontWeight: isSvcSelected ? 700 : 400 }}>
-                  {isSvcSelected ? "✓ " : ""}{s.name}
+                  style={{ padding: "9px 14px 9px 30px", fontSize: 12, color: isSvcSelected ? "#fff" : INK, background: isSvcSelected ? BROWN_HL : PAPER_MID, borderBottom: `1px solid ${PAPER_DK}`, cursor: "pointer", fontWeight: isSvcSelected ? 700 : 400 }}>
+                  {isSvcSelected ? "✓ " : "– "}{s.name}
                 </div>
               );
             })}
@@ -272,12 +269,10 @@ function SvcDropdown({ open, btnRef, cats, svcs, openCat, selSvc, setOpenCat, se
 }
 
 // ── Village Dropdown ──────────────────────────────────────────────────────────
-function VilDropdown({ open, btnRef, grouped, openSec, selArea, setOpenSec, setSelArea, setVOpen }) {
+function VilDropdown({ open, grouped, openSec, selArea, setOpenSec, setSelArea, setVOpen }) {
   if (!open) return null;
-  const r = btnRef.current?.getBoundingClientRect() || { bottom: 320, left: 10, width: 160 };
-  const maxLeft = window.innerWidth - Math.max(r.width, 160) - 4;
   return (
-    <div onClick={e => e.stopPropagation()} style={{ position: "fixed", top: r.bottom + 3, left: Math.max(4, Math.min(r.left, maxLeft)), width: Math.max(r.width, 160), background: PAPER, border: `2px solid ${INK}`, borderRadius: 4, zIndex: 99999, boxShadow: "0 8px 28px rgba(0,0,0,0.4)", maxHeight: 280, overflowY: "auto" }}>
+    <div onClick={e => e.stopPropagation()} style={{ position: "absolute", top: "100%", left: 0, right: 0, background: PAPER, border: `2px solid ${INK}`, borderRadius: 4, zIndex: 99999, boxShadow: "0 8px 28px rgba(0,0,0,0.4)", maxHeight: 300, overflowY: "auto", marginTop: 2 }}>
       {SECTIONS.map(sec => {
         const vils = grouped[sec.key] || [];
         const isExpanded = openSec === sec.key;
@@ -327,11 +322,11 @@ function SearchBox({ cats, svcs, grouped, onSearch }) {
       <div style={{ display: "flex", gap: 8, marginBottom: 10 }}>
         <div style={{ flex: 1, minWidth: 0, position: "relative" }} ref={sBtnRef}>
           <DropBtn label={svcLabel} isOpen={sOpen} onClick={e => { e.stopPropagation(); setSOpen(!sOpen); setVOpen(false); }} />
-          <SvcDropdown open={sOpen} btnRef={sBtnRef} cats={cats} svcs={svcs} openCat={openCat} selSvc={selSvc} setOpenCat={setOpenCat} setSelSvc={s => { setSelSvc(s); }} setSOpen={setSOpen} />
+          <SvcDropdown open={sOpen} cats={cats} svcs={svcs} openCat={openCat} selSvc={selSvc} setOpenCat={setOpenCat} setSelSvc={s => { setSelSvc(s); }} setSOpen={setSOpen} />
         </div>
         <div style={{ flex: 1, minWidth: 0, position: "relative" }} ref={vBtnRef}>
           <DropBtn label={selArea ? vName(selArea) : "Select a Villa..."} isOpen={vOpen} onClick={e => { e.stopPropagation(); setVOpen(!vOpen); setSOpen(false); }} />
-          <VilDropdown open={vOpen} btnRef={vBtnRef} grouped={grouped} openSec={openSec} selArea={selArea} setOpenSec={setOpenSec} setSelArea={a => { setSelArea(a); }} setVOpen={setVOpen} />
+          <VilDropdown open={vOpen} grouped={grouped} openSec={openSec} selArea={selArea} setOpenSec={setOpenSec} setSelArea={a => { setSelArea(a); }} setVOpen={setVOpen} />
         </div>
       </div>
       <button onClick={e => { e.stopPropagation(); onSearch(selSvc, selArea); }} style={{
