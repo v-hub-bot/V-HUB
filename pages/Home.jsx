@@ -34,7 +34,7 @@ const SECTION_LABELS = {
 // Only show the individual village records (those with a "—" in the name)
 // Skip the 5 summary records
 function isVillageRecord(area) {
-  return area.name.includes("—");
+  return area.name.includes("—") || area.name.includes(" — ");
 }
 
 function getVillageName(area) {
