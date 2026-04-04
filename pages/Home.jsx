@@ -3,74 +3,68 @@ import { ServiceArea, Category, Service, Provider } from "@/api/entities";
 
 const BRAND = {
   orange: "#E8431A",
-  paper: "#F5ECD7",
-  paperDark: "#E8D5B0",
-  ink: "#2C1A0E",
-  inkLight: "#5C3D1E",
-  blue: "#0077B6",
+  paper: "#D4C5A0",
+  paperLight: "#E8DCC0",
+  paperDark: "#B8A882",
+  ink: "#1A1008",
+  inkLight: "#3D2E14",
+  inkFade: "#6B5A3E",
+  blue: "#1565C0",
 };
 
 const SECTIONS = [
-  { key: "Historic Side | Spanish Springs",        label: "Historic Side",        sub: "Spanish Springs",    emoji: "🌴", color: "#8B4513" },
-  { key: "Established Villages | North of SR-466A", label: "Established Villages", sub: "North of SR-466A",   emoji: "🏡", color: "#5C7A3E" },
-  { key: "Newer Villages | South of SR-44",         label: "Newer Villages",       sub: "South of SR-44",     emoji: "🌿", color: "#2E7D32" },
-  { key: "Eastport | Newest Development Area",      label: "Eastport",             sub: "Newest Development", emoji: "🌊", color: "#1565C0" },
-  { key: "Family & Non-Age-Restricted Villages",    label: "Family Villages",      sub: "Non-Age-Restricted", emoji: "🏠", color: "#6A4C93" },
+  { key: "Historic Side | Spanish Springs",         label: "Historic Side",        sub: "Spanish Springs",    emoji: "🌴", color: "#6B3A1F" },
+  { key: "Established Villages | North of SR-466A", label: "Established Villages", sub: "North of SR-466A",   emoji: "🏡", color: "#3D5C2A" },
+  { key: "Newer Villages | South of SR-44",         label: "Newer Villages",       sub: "South of SR-44",     emoji: "🌿", color: "#2A5C2A" },
+  { key: "Eastport | Newest Development Area",      label: "Eastport",             sub: "Newest Development", emoji: "🌊", color: "#1A3F6F" },
+  { key: "Family & Non-Age-Restricted Villages",    label: "Family Villages",      sub: "Non-Age-Restricted", emoji: "🏠", color: "#4A2E6B" },
 ];
 
-function isVillageRecord(area) { return area.name.includes("—"); }
-function getVillageName(area) {
-  const parts = area.name.split("—");
-  return parts.length > 1 ? parts[1].trim() : area.name;
-}
+const FILLER = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation. Duis aute irure dolor in reprehenderit voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident. Sunt in culpa qui officia deserunt mollit anim id est laborum. Curabitur pretium tincidunt lacus nulla sapien semper ligula, laoreet fames vel.";
+const FILLER2 = "Pellentesque habitant morbi tristique senectus et netus malesuada fames ac turpis egestas. Vestibulum tortor quam feugiat vitae ultricies eget tempor. Donec eu libero sit amet quam egestas semper. Aenean ultricies mi vitae est mauris placerat eleifend. Nam libero tempore cum soluta nobis eligendi optio cumque nihil impedit quo minus.";
+const FILLER3 = "Temporibus autem quibusdam et aut officiis debitis rerum necessitatibus saepe eveniet voluptates repudiandae molestiae recusandae. Itaque earum rerum hic tenetur sapiente delectus aut reiciendis voluptatibus maiores alias consequatur aut perferendis doloribus asperiores repellat occaecati cupiditate non provident.";
+
+function isVillageRecord(a) { return a.name.includes("—"); }
+function getVillageName(a) { const p = a.name.split("—"); return p.length > 1 ? p[1].trim() : a.name; }
 function groupAreas(areas) {
-  const groups = {};
-  SECTIONS.forEach(s => (groups[s.key] = []));
-  areas.filter(isVillageRecord).forEach(a => {
-    if (groups[a.description] !== undefined) groups[a.description].push(a);
-  });
-  return groups;
+  const g = {};
+  SECTIONS.forEach(s => (g[s.key] = []));
+  areas.filter(isVillageRecord).forEach(a => { if (g[a.description] !== undefined) g[a.description].push(a); });
+  return g;
 }
 
 // ── Burger Menu ───────────────────────────────────────────────────────────────
 function BurgerMenu({ dark = false }) {
   const [open, setOpen] = useState(false);
-  const lineColor = dark ? "#fff" : BRAND.ink;
-  const btnBorder = dark ? "rgba(255,255,255,0.3)" : "rgba(44,26,14,0.25)";
-  const btnBg = dark ? "rgba(255,255,255,0.15)" : "rgba(44,26,14,0.08)";
-  const navLinks = [
-    { label: "🏠 Home", href: "/", color: "#8B4513" },
+  const lc = dark ? BRAND.paperLight : BRAND.ink;
+  const links = [
+    { label: "🏠 Home", href: "/", color: "#6B3A1F" },
     { label: "🔍 Find Services", href: "/", color: BRAND.orange },
-    { label: "📋 List Your Service", href: "/list-service", color: "#1565C0" },
+    { label: "📋 List Your Service", href: "/list-service", color: "#1A3F6F" },
   ];
   return (
     <>
-      <button onClick={() => setOpen(true)}
-        style={{ background: btnBg, border: `1.5px solid ${btnBorder}`, borderRadius: 8, padding: "9px 12px", cursor: "pointer", display: "flex", flexDirection: "column", gap: 5 }}>
-        <span style={{ display: "block", width: 20, height: 2, background: lineColor, borderRadius: 2 }} />
-        <span style={{ display: "block", width: 20, height: 2, background: lineColor, borderRadius: 2 }} />
-        <span style={{ display: "block", width: 20, height: 2, background: lineColor, borderRadius: 2 }} />
+      <button onClick={() => setOpen(true)} style={{ background: dark ? "rgba(255,255,255,0.12)" : "rgba(26,16,8,0.08)", border: `1.5px solid ${dark ? "rgba(255,255,255,0.25)" : "rgba(26,16,8,0.2)"}`, borderRadius: 6, padding: "8px 11px", cursor: "pointer", display: "flex", flexDirection: "column", gap: 4 }}>
+        <span style={{ display: "block", width: 18, height: 2, background: lc, borderRadius: 1 }} />
+        <span style={{ display: "block", width: 18, height: 2, background: lc, borderRadius: 1 }} />
+        <span style={{ display: "block", width: 18, height: 2, background: lc, borderRadius: 1 }} />
       </button>
       {open && (
         <>
-          <div onClick={() => setOpen(false)} style={{ position: "fixed", inset: 0, zIndex: 199, background: "rgba(0,0,0,0.45)" }} />
-          <div style={{ position: "fixed", top: 0, right: 0, bottom: 0, width: 270, background: BRAND.paper, zIndex: 200, boxShadow: "-4px 0 28px rgba(0,0,0,0.25)", display: "flex", flexDirection: "column", fontFamily: "Georgia, serif" }}>
-            <div style={{ background: BRAND.ink, padding: "20px 18px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-              <span style={{ color: BRAND.paper, fontWeight: 900, fontSize: 18, letterSpacing: 2 }}>🌴 V-HUB</span>
-              <button onClick={() => setOpen(false)} style={{ background: "rgba(255,255,255,0.12)", border: "none", color: "#fff", borderRadius: 6, width: 28, height: 28, fontSize: 15, cursor: "pointer" }}>✕</button>
+          <div onClick={() => setOpen(false)} style={{ position: "fixed", inset: 0, zIndex: 199, background: "rgba(0,0,0,0.5)" }} />
+          <div style={{ position: "fixed", top: 0, right: 0, bottom: 0, width: 260, background: BRAND.paperLight, zIndex: 200, boxShadow: "-4px 0 24px rgba(0,0,0,0.3)", display: "flex", flexDirection: "column", fontFamily: "'Times New Roman', serif" }}>
+            <div style={{ background: BRAND.ink, padding: "18px 16px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+              <span style={{ color: BRAND.paperLight, fontWeight: 900, fontSize: 17, letterSpacing: 2, fontFamily: "'Times New Roman', serif" }}>V-HUB</span>
+              <button onClick={() => setOpen(false)} style={{ background: "rgba(255,255,255,0.1)", border: "none", color: "#fff", borderRadius: 5, width: 26, height: 26, fontSize: 14, cursor: "pointer" }}>✕</button>
             </div>
-            <div style={{ padding: "14px 12px", flex: 1 }}>
-              {navLinks.map((link, i) => (
-                <a key={i} href={link.href} style={{ textDecoration: "none" }}>
-                  <div style={{ padding: "14px 16px", borderRadius: 8, fontSize: 15, fontWeight: 600, color: BRAND.ink, marginBottom: 6, background: BRAND.paperDark, borderLeft: `4px solid ${link.color}`, fontFamily: "Georgia, serif" }}>
-                    {link.label}
-                  </div>
+            <div style={{ padding: "12px 10px", flex: 1 }}>
+              {links.map((l, i) => (
+                <a key={i} href={l.href} style={{ textDecoration: "none" }}>
+                  <div style={{ padding: "13px 14px", borderRadius: 6, fontSize: 15, fontWeight: 700, color: BRAND.ink, marginBottom: 5, background: BRAND.paper, borderLeft: `4px solid ${l.color}`, fontFamily: "'Times New Roman', serif" }}>{l.label}</div>
                 </a>
               ))}
             </div>
-            <div style={{ padding: "12px 18px", borderTop: `1px solid ${BRAND.paperDark}`, textAlign: "center" }}>
-              <div style={{ fontSize: 11, color: BRAND.inkLight, fontStyle: "italic" }}>V-HUB — The Villages, FL</div>
-            </div>
+            <div style={{ padding: "10px 16px", borderTop: `1px solid ${BRAND.paperDark}`, textAlign: "center", fontSize: 10, color: BRAND.inkFade, fontStyle: "italic" }}>V-HUB · The Villages, FL</div>
           </div>
         </>
       )}
@@ -82,7 +76,6 @@ function BurgerMenu({ dark = false }) {
 export default function Home() {
   const [areas, setAreas] = useState([]);
   const [categories, setCategories] = useState([]);
-  const [services, setServices] = useState([]);
   const [selectedArea, setSelectedArea] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState("");
   const [villageOpen, setVillageOpen] = useState(false);
@@ -95,13 +88,13 @@ export default function Home() {
   useEffect(() => {
     ServiceArea.filter({ is_active: true }).then(setAreas);
     Category.filter({ is_active: true }).then(setCategories);
-    Service.filter({ is_active: true }).then(setServices);
   }, []);
 
   const groupedAreas = groupAreas(areas);
 
   const handleSearch = async () => {
     if (!selectedArea) return;
+    const { Provider, Service } = await import("@/api/entities");
     const all = await Provider.filter({ is_visible: true });
     const filtered = all.filter(p => {
       const areaMatch = p.service_areas && p.service_areas.includes(selectedArea.id);
@@ -120,296 +113,310 @@ export default function Home() {
     setVillageOpen(false); setServiceOpen(false); setOpenSection(null);
   };
 
-  if (selectedProvider) return <ProviderProfile provider={selectedProvider} areas={areas} categories={categories} services={services} onBack={() => setSelectedProvider(null)} />;
-  if (searched) return <ResultsPage results={results} categories={categories} services={services} areas={areas} onReset={handleReset} onSelect={setSelectedProvider} selectedArea={selectedArea} />;
+  if (selectedProvider) return <ProviderProfile provider={selectedProvider} areas={areas} categories={categories} onBack={() => setSelectedProvider(null)} />;
+  if (searched) return <ResultsPage results={results} areas={areas} categories={categories} onReset={handleReset} onSelect={setSelectedProvider} selectedArea={selectedArea} />;
+
+  // Close dropdowns on outside click
+  const closeAll = () => { setVillageOpen(false); setServiceOpen(false); };
 
   return (
-    <div style={{ minHeight: "100vh", background: BRAND.paper, fontFamily: "Georgia, serif" }}>
+    <div onClick={closeAll} style={{ minHeight: "100vh", background: BRAND.paper, fontFamily: "'Times New Roman', Georgia, serif", position: "relative", overflow: "hidden" }}>
 
-      {/* ══ MASTHEAD ══ */}
-      <div style={{ background: BRAND.paper, padding: "12px 20px 10px", position: "relative" }}>
-        {/* Top rule */}
-        <div style={{ height: 3, background: BRAND.ink, marginBottom: 10 }} />
+      {/* ── Aged paper texture overlay ── */}
+      <div style={{ position: "fixed", inset: 0, backgroundImage: "url('https://www.transparenttextures.com/patterns/old-mathematics.png')", opacity: 0.08, pointerEvents: "none", zIndex: 0 }} />
 
-        <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between" }}>
-          {/* Left spacer to balance the right buttons */}
-          <div style={{ width: 160 }} />
+      <div style={{ position: "relative", zIndex: 1 }}>
 
-          {/* Center: Masthead */}
-          <div style={{ textAlign: "center", flex: 1 }}>
-            <div style={{ fontSize: 52, fontWeight: 900, color: BRAND.ink, fontFamily: "Georgia, serif", letterSpacing: 3, lineHeight: 1, textShadow: "1px 2px 0px rgba(0,0,0,0.10)" }}>
-              🌴 V-Hub
+        {/* ══ TOP STRIP ══ */}
+        <div style={{ background: BRAND.ink, padding: "4px 16px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <span style={{ color: BRAND.paperLight, fontSize: 10, fontWeight: 700, letterSpacing: 2, textTransform: "uppercase" }}>Local News</span>
+          <span style={{ color: BRAND.paperLight, fontSize: 11, fontWeight: 900, letterSpacing: 3, textTransform: "uppercase" }}>The Villages Daily</span>
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <div style={{ textAlign: "right" }}>
+              <div style={{ color: BRAND.paperLight, fontSize: 9, letterSpacing: 1, textTransform: "uppercase" }}>Serving Our Community · Est. 1985</div>
             </div>
-            <div style={{ fontSize: 13, color: BRAND.inkLight, fontStyle: "italic", letterSpacing: 0.5, marginTop: 5 }}>
+            <BurgerMenu dark={true} />
+          </div>
+        </div>
+
+        {/* ══ MASTHEAD ══ */}
+        <div style={{ background: BRAND.paperLight, padding: "0 16px 0", borderBottom: `3px solid ${BRAND.ink}` }}>
+          {/* Top thin rule */}
+          <div style={{ height: 1, background: BRAND.ink, marginBottom: 0 }} />
+
+          {/* Three column headers */}
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1px 1fr 1px 1fr", gap: 0, borderBottom: `1px solid ${BRAND.ink}`, padding: "8px 0" }}>
+            <div style={{ paddingRight: 12 }}>
+              <div style={{ fontSize: 11, fontWeight: 900, color: BRAND.ink, letterSpacing: 1, textTransform: "uppercase", lineHeight: 1.2 }}>Community Connections</div>
+              <div style={{ fontSize: 9, color: BRAND.inkFade, fontStyle: "italic", marginTop: 2 }}>Bringing Local Services to You</div>
+            </div>
+            <div style={{ background: BRAND.ink, alignSelf: "stretch" }} />
+            <div style={{ padding: "0 12px", textAlign: "center" }}>
+              <div style={{ fontSize: 11, fontWeight: 900, color: BRAND.ink, letterSpacing: 1, textTransform: "uppercase", lineHeight: 1.3 }}>Support Local<br/>Build Community</div>
+            </div>
+            <div style={{ background: BRAND.ink, alignSelf: "stretch" }} />
+            <div style={{ paddingLeft: 12, display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+              <div>
+                <div style={{ fontSize: 11, fontWeight: 900, color: BRAND.ink, letterSpacing: 1, textTransform: "uppercase", lineHeight: 1.3 }}>Your Guide to<br/>The Villages</div>
+              </div>
+              <a href="/list-service" style={{ textDecoration: "none" }} onClick={e => e.stopPropagation()}>
+                <button style={{ background: BRAND.orange, color: "#fff", border: "none", borderRadius: 4, padding: "6px 12px", fontSize: 10, fontWeight: 900, cursor: "pointer", fontFamily: "'Times New Roman', serif", letterSpacing: 1, textTransform: "uppercase", whiteSpace: "nowrap", boxShadow: "0 2px 6px rgba(0,0,0,0.25)" }}>
+                  List Your Service
+                </button>
+              </a>
+            </div>
+          </div>
+
+          {/* ── BIG V-HUB LOGO CENTER ── */}
+          <div style={{ textAlign: "center", padding: "8px 0 4px", position: "relative" }}>
+            <div style={{ display: "inline-block", position: "relative" }}>
+              {/* Palm tree silhouette left */}
+              <span style={{ position: "absolute", left: -20, bottom: 8, fontSize: 52, lineHeight: 1, opacity: 0.85, filter: "grayscale(100%) brightness(0.15)" }}>🌴</span>
+              {/* Main title */}
+              <div style={{ fontSize: 76, fontWeight: 900, color: BRAND.ink, fontFamily: "'Times New Roman', serif", letterSpacing: 4, lineHeight: 1, textShadow: "3px 3px 0 rgba(0,0,0,0.15)", display: "inline-block", paddingLeft: 40 }}>
+                V-HUB
+              </div>
+            </div>
+            {/* Double rule + tagline */}
+            <div style={{ height: 3, background: BRAND.ink, margin: "6px 0 2px" }} />
+            <div style={{ height: 1, background: BRAND.ink, marginBottom: 5 }} />
+            <div style={{ fontSize: 14, fontStyle: "italic", color: BRAND.ink, fontWeight: 700, letterSpacing: 1 }}>
               Connecting You to Local Services in The Villages!
             </div>
-          </div>
-
-          {/* Right: List Your Service + Burger */}
-          <div style={{ display: "flex", alignItems: "center", gap: 8, width: 160, justifyContent: "flex-end" }}>
-            <a href="/list-service" style={{ textDecoration: "none" }}>
-              <button style={{ background: BRAND.orange, color: "#fff", border: "none", borderRadius: 6, padding: "9px 14px", fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "Georgia, serif", boxShadow: "0 3px 8px rgba(232,67,26,0.35)", whiteSpace: "nowrap" }}>
-                List Your Service
-              </button>
-            </a>
-            <BurgerMenu dark={false} />
+            <div style={{ height: 1, background: BRAND.ink, marginTop: 5 }} />
+            <div style={{ height: 3, background: BRAND.ink, marginTop: 2, marginBottom: 0 }} />
           </div>
         </div>
 
-        {/* Bottom double rule */}
-        <div style={{ height: 3, background: BRAND.ink, marginTop: 10 }} />
-        <div style={{ height: 1, background: BRAND.ink, marginTop: 3 }} />
-      </div>
+        {/* ══ NEWSPAPER BODY — 3 COLUMNS ══ */}
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1px 1.4fr 1px 1fr", gap: 0, background: BRAND.paperLight, borderBottom: `2px solid ${BRAND.ink}` }}>
 
-      {/* ══ LOCAL SERVICES | CLASSIFIEDS ══ */}
-      <div style={{ background: BRAND.paperDark, display: "flex", justifyContent: "space-between", alignItems: "center", padding: "5px 28px", borderBottom: `2px solid ${BRAND.ink}` }}>
-        <div style={{ fontSize: 17, fontWeight: 900, color: BRAND.ink, fontFamily: "Georgia, serif", letterSpacing: 3, textTransform: "uppercase" }}>◆ Local Services</div>
-        <div style={{ width: 1, height: 20, background: BRAND.ink }} />
-        <div style={{ fontSize: 17, fontWeight: 900, color: BRAND.ink, fontFamily: "Georgia, serif", letterSpacing: 3, textTransform: "uppercase" }}>Classifieds ◆</div>
-      </div>
-
-      {/* ══ TROPICAL BANNER ══ */}
-      <div style={{ width: "100%", height: 200, overflow: "hidden", position: "relative", borderBottom: `2px solid ${BRAND.ink}` }}>
-        <img
-          src="https://media.base44.com/images/public/69d062aca815ce8e697894b1/392f3af96_generated_image.png"
-          alt="The Villages"
-          style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center 35%", display: "block" }}
-        />
-        {/* Parchment fade on sides to blend into newspaper */}
-        <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to right, rgba(245,236,215,0.35) 0%, transparent 12%, transparent 88%, rgba(245,236,215,0.35) 100%)" }} />
-        <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, transparent 65%, rgba(232,213,176,0.55) 100%)" }} />
-      </div>
-
-      {/* ══ SEARCH AREA (newspaper columns look) ══ */}
-      <div style={{ background: BRAND.paper, padding: "24px 28px 32px" }}>
-        {/* Faint column lines — newspaper feel */}
-        <div style={{ maxWidth: 760, margin: "0 auto", display: "grid", gridTemplateColumns: "1fr 2px 1fr", gap: 0, alignItems: "start" }}>
-
-          {/* LEFT COLUMN — Service */}
-          <div style={{ paddingRight: 28 }}>
-            <div style={{ fontSize: 13, fontWeight: 700, color: BRAND.inkLight, fontFamily: "Georgia, serif", marginBottom: 8, fontStyle: "italic", letterSpacing: 0.5 }}>
-              What service do you need?
-            </div>
-            <div style={{ position: "relative" }}>
-              <button
-                onClick={() => { setServiceOpen(!serviceOpen); setVillageOpen(false); }}
-                style={{ width: "100%", background: "#fff", border: `1.5px solid ${BRAND.ink}50`, borderRadius: 4, padding: "10px 14px", fontSize: 15, fontFamily: "Georgia, serif", color: selectedCategory ? BRAND.ink : BRAND.inkLight, cursor: "pointer", display: "flex", justifyContent: "space-between", alignItems: "center", boxShadow: "inset 0 1px 3px rgba(0,0,0,0.06)" }}
-              >
-                <span>{selectedCategory ? categories.find(c => c.id === selectedCategory)?.name || "Select a Service" : "Select a Service"}</span>
-                <span style={{ fontSize: 11, color: BRAND.inkLight }}>▼</span>
-              </button>
-              {serviceOpen && (
-                <div style={{ position: "absolute", top: "100%", left: 0, right: 0, background: "#fff", border: `1.5px solid ${BRAND.ink}50`, borderTop: "none", borderRadius: "0 0 4px 4px", zIndex: 50, boxShadow: "0 8px 24px rgba(0,0,0,0.15)", maxHeight: 280, overflowY: "auto" }}>
-                  <div onClick={() => { setSelectedCategory(""); setServiceOpen(false); }}
-                    style={{ padding: "10px 14px", cursor: "pointer", fontSize: 14, color: BRAND.inkLight, fontFamily: "Georgia, serif", borderBottom: `1px solid ${BRAND.paperDark}`, fontStyle: "italic" }}>
-                    All Services
-                  </div>
-                  {categories.map(c => (
-                    <div key={c.id} onClick={() => { setSelectedCategory(c.id); setServiceOpen(false); }}
-                      style={{ padding: "10px 14px", cursor: "pointer", fontSize: 14, color: BRAND.ink, fontFamily: "Georgia, serif", background: selectedCategory === c.id ? BRAND.paperDark : "#fff", borderBottom: `1px solid ${BRAND.paperDark}` }}
-                      onMouseEnter={e => e.currentTarget.style.background = BRAND.paperDark}
-                      onMouseLeave={e => e.currentTarget.style.background = selectedCategory === c.id ? BRAND.paperDark : "#fff"}
-                    >
-                      {c.icon} {c.name}
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
+          {/* LEFT COLUMN */}
+          <div style={{ padding: "10px 12px" }}>
+            <div style={{ fontSize: 11, fontWeight: 900, color: BRAND.ink, textTransform: "uppercase", letterSpacing: 1, borderBottom: `1px solid ${BRAND.ink}`, paddingBottom: 3, marginBottom: 6 }}>Local Businesses<br/>Stronger Together</div>
+            <div style={{ fontSize: 9, color: BRAND.inkFade, lineHeight: 1.7, textAlign: "justify" }}>{FILLER}</div>
+            <div style={{ fontSize: 9, color: BRAND.inkFade, lineHeight: 1.7, textAlign: "justify", marginTop: 6 }}>{FILLER2.slice(0, 180)}</div>
           </div>
 
-          {/* CENTER DIVIDER */}
-          <div style={{ background: `${BRAND.ink}30`, alignSelf: "stretch", minHeight: 40 }} />
+          {/* DIVIDER */}
+          <div style={{ background: BRAND.ink }} />
 
-          {/* RIGHT COLUMN — Village */}
-          <div style={{ paddingLeft: 28 }}>
-            <div style={{ fontSize: 13, fontWeight: 700, color: BRAND.inkLight, fontFamily: "Georgia, serif", marginBottom: 8, fontStyle: "italic", letterSpacing: 0.5 }}>
-              Where do you need it?
+          {/* CENTER COLUMN — SEARCH */}
+          <div style={{ padding: "12px 16px" }} onClick={e => e.stopPropagation()}>
+
+            {/* Small filler text above */}
+            <div style={{ fontSize: 8, color: BRAND.inkFade, lineHeight: 1.6, textAlign: "justify", marginBottom: 10 }}>{FILLER3.slice(0, 120)}</div>
+
+            {/* Vintage illustration box */}
+            <div style={{ border: `1px solid ${BRAND.paperDark}`, borderRadius: 2, overflow: "hidden", marginBottom: 10, height: 90, background: BRAND.paper, display: "flex", alignItems: "center", justifyContent: "center", position: "relative" }}>
+              <img src="https://media.base44.com/images/public/69d062aca815ce8e697894b1/392f3af96_generated_image.png"
+                style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center 40%", filter: "sepia(80%) contrast(0.85) brightness(0.92)", display: "block" }} alt="" />
+              <div style={{ position: "absolute", inset: 0, background: "rgba(212,197,160,0.2)" }} />
             </div>
-            <div style={{ position: "relative" }}>
-              <button
-                onClick={() => { setVillageOpen(!villageOpen); setServiceOpen(false); }}
-                style={{ width: "100%", background: "#fff", border: `1.5px solid ${BRAND.ink}50`, borderRadius: 4, padding: "10px 14px", fontSize: 15, fontFamily: "Georgia, serif", color: selectedArea ? BRAND.ink : BRAND.inkLight, cursor: "pointer", display: "flex", justifyContent: "space-between", alignItems: "center", boxShadow: "inset 0 1px 3px rgba(0,0,0,0.06)" }}
-              >
-                <span>{selectedArea ? getVillageName(selectedArea) : "Select a Village"}</span>
-                <span style={{ fontSize: 11, color: BRAND.inkLight }}>▼</span>
-              </button>
-              {villageOpen && (
-                <div style={{ position: "absolute", top: "100%", left: 0, right: 0, background: "#fff", border: `1.5px solid ${BRAND.ink}50`, borderTop: "none", borderRadius: "0 0 4px 4px", zIndex: 50, boxShadow: "0 8px 24px rgba(0,0,0,0.18)", maxHeight: 320, overflowY: "auto" }}>
-                  {SECTIONS.map(section => {
-                    const villages = groupedAreas[section.key] || [];
-                    const isOpen = openSection === section.key;
-                    return (
-                      <div key={section.key}>
-                        <div onClick={() => setOpenSection(isOpen ? null : section.key)}
-                          style={{ padding: "10px 14px", cursor: "pointer", fontSize: 13, fontWeight: 700, color: "#fff", background: section.color, display: "flex", justifyContent: "space-between", alignItems: "center", fontFamily: "Georgia, serif" }}>
-                          <span>{section.emoji} {section.label} — {section.sub}</span>
-                          <span style={{ fontSize: 11, opacity: 0.85 }}>{isOpen ? "▲" : "▼"}</span>
+
+            {/* Search section styled as a classified ad box */}
+            <div style={{ border: `2px solid ${BRAND.ink}`, borderRadius: 2, padding: "10px 12px", background: BRAND.paper }}>
+              <div style={{ textAlign: "center", borderBottom: `1px solid ${BRAND.ink}`, paddingBottom: 6, marginBottom: 10 }}>
+                <div style={{ fontSize: 11, fontWeight: 900, textTransform: "uppercase", letterSpacing: 2, color: BRAND.ink }}>Find Local Services</div>
+              </div>
+
+              {/* Service dropdown */}
+              <div style={{ marginBottom: 8 }}>
+                <div style={{ fontSize: 9, fontWeight: 700, color: BRAND.inkFade, textTransform: "uppercase", letterSpacing: 1, marginBottom: 4 }}>What service do you need?</div>
+                <div style={{ position: "relative" }}>
+                  <button onClick={(e) => { e.stopPropagation(); setServiceOpen(!serviceOpen); setVillageOpen(false); }}
+                    style={{ width: "100%", background: BRAND.paperLight, border: `1.5px solid ${BRAND.ink}60`, borderRadius: 2, padding: "7px 10px", fontSize: 12, fontFamily: "'Times New Roman', serif", color: selectedCategory ? BRAND.ink : BRAND.inkFade, cursor: "pointer", display: "flex", justifyContent: "space-between", alignItems: "center", textAlign: "left" }}>
+                    <span>{selectedCategory ? categories.find(c => c.id === selectedCategory)?.name || "Select a Service" : "Select a Service"}</span>
+                    <span style={{ fontSize: 9, color: BRAND.inkFade }}>▼</span>
+                  </button>
+                  {serviceOpen && (
+                    <div style={{ position: "absolute", top: "100%", left: 0, right: 0, background: BRAND.paperLight, border: `1.5px solid ${BRAND.ink}60`, borderTop: "none", zIndex: 100, boxShadow: "0 6px 18px rgba(0,0,0,0.2)", maxHeight: 200, overflowY: "auto" }}>
+                      <div onClick={() => { setSelectedCategory(""); setServiceOpen(false); }} style={{ padding: "8px 10px", cursor: "pointer", fontSize: 12, color: BRAND.inkFade, fontStyle: "italic", borderBottom: `1px solid ${BRAND.paperDark}`, fontFamily: "'Times New Roman', serif" }}>All Services</div>
+                      {categories.map(c => (
+                        <div key={c.id} onClick={() => { setSelectedCategory(c.id); setServiceOpen(false); }}
+                          style={{ padding: "8px 10px", cursor: "pointer", fontSize: 12, color: BRAND.ink, background: selectedCategory === c.id ? BRAND.paper : BRAND.paperLight, borderBottom: `1px solid ${BRAND.paperDark}`, fontFamily: "'Times New Roman', serif" }}
+                          onMouseEnter={e => e.currentTarget.style.background = BRAND.paper}
+                          onMouseLeave={e => e.currentTarget.style.background = selectedCategory === c.id ? BRAND.paper : BRAND.paperLight}>
+                          {c.icon} {c.name}
                         </div>
-                        {isOpen && villages.map(v => (
-                          <div key={v.id}
-                            onClick={() => { setSelectedArea(v); setVillageOpen(false); setOpenSection(null); }}
-                            style={{ padding: "9px 24px", cursor: "pointer", fontSize: 14, color: BRAND.ink, fontFamily: "Georgia, serif", background: selectedArea?.id === v.id ? BRAND.paperDark : "#fff", borderBottom: `1px solid ${BRAND.paperDark}` }}
-                            onMouseEnter={e => e.currentTarget.style.background = BRAND.paperDark}
-                            onMouseLeave={e => e.currentTarget.style.background = selectedArea?.id === v.id ? BRAND.paperDark : "#fff"}
-                          >
-                            {getVillageName(v)}
-                          </div>
-                        ))}
-                      </div>
-                    );
-                  })}
+                      ))}
+                    </div>
+                  )}
                 </div>
-              )}
+              </div>
+
+              {/* Village dropdown */}
+              <div style={{ marginBottom: 10 }}>
+                <div style={{ fontSize: 9, fontWeight: 700, color: BRAND.inkFade, textTransform: "uppercase", letterSpacing: 1, marginBottom: 4 }}>Where do you need it?</div>
+                <div style={{ position: "relative" }}>
+                  <button onClick={(e) => { e.stopPropagation(); setVillageOpen(!villageOpen); setServiceOpen(false); }}
+                    style={{ width: "100%", background: BRAND.paperLight, border: `1.5px solid ${BRAND.ink}60`, borderRadius: 2, padding: "7px 10px", fontSize: 12, fontFamily: "'Times New Roman', serif", color: selectedArea ? BRAND.ink : BRAND.inkFade, cursor: "pointer", display: "flex", justifyContent: "space-between", alignItems: "center", textAlign: "left" }}>
+                    <span>{selectedArea ? getVillageName(selectedArea) : "Select a Village"}</span>
+                    <span style={{ fontSize: 9, color: BRAND.inkFade }}>▼</span>
+                  </button>
+                  {villageOpen && (
+                    <div style={{ position: "absolute", top: "100%", left: 0, right: 0, background: BRAND.paperLight, border: `1.5px solid ${BRAND.ink}60`, borderTop: "none", zIndex: 100, boxShadow: "0 6px 18px rgba(0,0,0,0.2)", maxHeight: 260, overflowY: "auto" }}>
+                      {SECTIONS.map(section => {
+                        const villages = groupedAreas[section.key] || [];
+                        const isOpen = openSection === section.key;
+                        return (
+                          <div key={section.key}>
+                            <div onClick={(e) => { e.stopPropagation(); setOpenSection(isOpen ? null : section.key); }}
+                              style={{ padding: "8px 10px", cursor: "pointer", fontSize: 11, fontWeight: 700, color: "#fff", background: section.color, display: "flex", justifyContent: "space-between", fontFamily: "'Times New Roman', serif" }}>
+                              <span>{section.emoji} {section.label} — {section.sub}</span>
+                              <span style={{ fontSize: 9 }}>{isOpen ? "▲" : "▼"}</span>
+                            </div>
+                            {isOpen && villages.map(v => (
+                              <div key={v.id} onClick={(e) => { e.stopPropagation(); setSelectedArea(v); setVillageOpen(false); setOpenSection(null); }}
+                                style={{ padding: "7px 20px", cursor: "pointer", fontSize: 12, color: BRAND.ink, background: selectedArea?.id === v.id ? BRAND.paper : BRAND.paperLight, borderBottom: `1px solid ${BRAND.paperDark}`, fontFamily: "'Times New Roman', serif" }}
+                                onMouseEnter={e => e.currentTarget.style.background = BRAND.paper}
+                                onMouseLeave={e => e.currentTarget.style.background = selectedArea?.id === v.id ? BRAND.paper : BRAND.paperLight}>
+                                {getVillageName(v)}
+                              </div>
+                            ))}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* FIND SERVICES */}
+              <button onClick={handleSearch} disabled={!selectedArea}
+                style={{ width: "100%", background: selectedArea ? BRAND.ink : `${BRAND.ink}50`, color: BRAND.paperLight, border: "none", borderRadius: 2, padding: "10px", fontSize: 13, fontWeight: 900, fontFamily: "'Times New Roman', serif", letterSpacing: 2, textTransform: "uppercase", cursor: selectedArea ? "pointer" : "not-allowed" }}>
+                Find Services
+              </button>
             </div>
+
+            <div style={{ fontSize: 8, color: BRAND.inkFade, lineHeight: 1.6, textAlign: "justify", marginTop: 8 }}>{FILLER.slice(0, 100)}</div>
+          </div>
+
+          {/* DIVIDER */}
+          <div style={{ background: BRAND.ink }} />
+
+          {/* RIGHT COLUMN */}
+          <div style={{ padding: "10px 12px" }}>
+            <div style={{ fontSize: 11, fontWeight: 900, color: BRAND.ink, textTransform: "uppercase", letterSpacing: 1, borderBottom: `1px solid ${BRAND.ink}`, paddingBottom: 3, marginBottom: 6 }}>Services You<br/>Can Trust</div>
+            <div style={{ fontSize: 9, color: BRAND.inkFade, lineHeight: 1.7, textAlign: "justify" }}>{FILLER2}</div>
+            <div style={{ fontSize: 9, color: BRAND.inkFade, lineHeight: 1.7, textAlign: "justify", marginTop: 6 }}>{FILLER3.slice(0, 160)}</div>
           </div>
         </div>
 
-        {/* FIND SERVICES button */}
-        <div style={{ textAlign: "center", marginTop: 28 }}>
-          <button
-            onClick={handleSearch}
-            disabled={!selectedArea}
-            style={{
-              background: selectedArea ? BRAND.ink : `${BRAND.ink}55`,
-              color: BRAND.paper,
-              border: "none",
-              borderRadius: 5,
-              padding: "14px 56px",
-              fontSize: 17,
-              fontWeight: 700,
-              fontFamily: "Georgia, serif",
-              letterSpacing: 2,
-              textTransform: "uppercase",
-              cursor: selectedArea ? "pointer" : "not-allowed",
-              boxShadow: selectedArea ? "0 4px 14px rgba(44,26,14,0.3)" : "none",
-            }}
-          >
-            Find Services
-          </button>
+        {/* ══ BOTTOM RULE ══ */}
+        <div style={{ background: BRAND.paperLight, padding: "4px 16px 6px" }}>
+          <div style={{ height: 2, background: BRAND.ink }} />
+          <div style={{ height: 1, background: BRAND.ink, marginTop: 2 }} />
+          <div style={{ textAlign: "center", marginTop: 4, fontSize: 9, color: BRAND.inkFade, fontStyle: "italic", letterSpacing: 1 }}>
+            V-HUB · The Villages, FL · Connecting Residents with Trusted Local Providers · All Rights Reserved
+          </div>
         </div>
-      </div>
 
-      {/* ══ NEWSPAPER FOOTER RULE ══ */}
-      <div style={{ padding: "0 20px 20px" }}>
-        <div style={{ height: 3, background: BRAND.ink }} />
-        <div style={{ height: 1, background: BRAND.ink, marginTop: 3 }} />
-        <div style={{ textAlign: "center", marginTop: 10, fontSize: 11, color: BRAND.inkLight, fontStyle: "italic", letterSpacing: 1 }}>
-          V-HUB · The Villages, FL · Connecting Residents with Trusted Local Providers
-        </div>
       </div>
-
     </div>
   );
 }
 
 // ── Results Page ──────────────────────────────────────────────────────────────
-function ResultsPage({ results, categories, services, areas, onReset, onSelect, selectedArea }) {
+function ResultsPage({ results, areas, categories, onReset, onSelect, selectedArea }) {
   return (
-    <div style={{ minHeight: "100vh", background: BRAND.paper, fontFamily: "Georgia, serif" }}>
-      <div style={{ background: BRAND.ink, padding: "13px 20px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+    <div style={{ minHeight: "100vh", background: BRAND.paperLight, fontFamily: "'Times New Roman', serif" }}>
+      <div style={{ background: BRAND.ink, padding: "11px 18px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-          <button onClick={onReset} style={{ background: "rgba(255,255,255,0.15)", border: "1.5px solid rgba(255,255,255,0.3)", color: "#fff", borderRadius: 7, padding: "7px 15px", fontSize: 14, cursor: "pointer", fontFamily: "Georgia, serif", fontWeight: 700 }}>← Home</button>
-          <span style={{ color: BRAND.paper, fontSize: 20, fontWeight: 900, fontFamily: "Georgia, serif", letterSpacing: 2 }}>🌴 V-Hub</span>
+          <button onClick={onReset} style={{ background: "rgba(255,255,255,0.12)", border: "1.5px solid rgba(255,255,255,0.25)", color: BRAND.paperLight, borderRadius: 5, padding: "6px 14px", fontSize: 13, cursor: "pointer", fontFamily: "'Times New Roman', serif", fontWeight: 700 }}>← Home</button>
+          <span style={{ color: BRAND.paperLight, fontSize: 18, fontWeight: 900, letterSpacing: 3 }}>V-HUB</span>
         </div>
         <BurgerMenu dark={true} />
       </div>
-      <div style={{ maxWidth: 720, margin: "0 auto", padding: "24px 20px" }}>
-        <div style={{ background: BRAND.paperDark, borderRadius: 10, padding: "14px 20px", display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20, border: `1px solid ${BRAND.ink}30` }}>
-          <div style={{ fontSize: 17, fontWeight: 700, color: BRAND.ink, fontFamily: "Georgia, serif" }}>
+      <div style={{ maxWidth: 700, margin: "0 auto", padding: "22px 18px" }}>
+        <div style={{ background: BRAND.paper, border: `2px solid ${BRAND.ink}`, borderRadius: 4, padding: "12px 18px", display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 18 }}>
+          <div style={{ fontSize: 16, fontWeight: 700, color: BRAND.ink, fontFamily: "'Times New Roman', serif" }}>
             {results.length > 0 ? `${results.length} Provider${results.length > 1 ? "s" : ""} Found` : "No Providers Found"}
-            {selectedArea && <span style={{ fontSize: 13, fontStyle: "italic", color: BRAND.inkLight }}> · {getVillageName(selectedArea)}</span>}
+            {selectedArea && <span style={{ fontSize: 12, fontStyle: "italic", color: BRAND.inkFade }}> · {getVillageName(selectedArea)}</span>}
           </div>
-          <button onClick={onReset} style={{ background: BRAND.ink, color: BRAND.paper, border: "none", borderRadius: 7, fontSize: 13, cursor: "pointer", fontWeight: 700, padding: "7px 14px", fontFamily: "Georgia, serif" }}>← New Search</button>
+          <button onClick={onReset} style={{ background: BRAND.ink, color: BRAND.paperLight, border: "none", borderRadius: 4, fontSize: 12, cursor: "pointer", fontWeight: 700, padding: "6px 12px", fontFamily: "'Times New Roman', serif" }}>← New Search</button>
         </div>
         {results.length === 0 && (
-          <div style={{ textAlign: "center", padding: "40px 20px", background: BRAND.paperDark, borderRadius: 10, color: BRAND.inkLight, fontSize: 16, fontStyle: "italic" }}>
-            No providers found for this area yet.<br /><span style={{ fontSize: 13 }}>Check back soon as more providers join V-Hub!</span>
+          <div style={{ textAlign: "center", padding: "36px 18px", background: BRAND.paper, border: `1px solid ${BRAND.paperDark}`, borderRadius: 4, color: BRAND.inkFade, fontSize: 15, fontStyle: "italic" }}>
+            No providers found for this area yet.<br /><span style={{ fontSize: 13 }}>Check back soon!</span>
           </div>
         )}
-        {results.map(p => <ProviderCard key={p.id} provider={p} categories={categories} services={services} onClick={() => onSelect(p)} />)}
+        {results.map(p => <ProviderCard key={p.id} provider={p} categories={categories} onClick={() => onSelect(p)} />)}
       </div>
     </div>
   );
 }
 
-// ── Provider Card ─────────────────────────────────────────────────────────────
-function ProviderCard({ provider, categories, services, onClick }) {
+function ProviderCard({ provider, categories, onClick }) {
   const cat = categories.find(c => c.id === provider.category_id);
-  const providerServices = services.filter(s => provider.services && provider.services.includes(s.id));
   const isFeatured = provider.subscription_tier === "premium" || provider.subscription_tier === "featured";
   return (
-    <div onClick={onClick} style={{ background: "#fff", borderRadius: 10, padding: "18px 20px", marginBottom: 12, boxShadow: "0 2px 10px rgba(44,26,14,0.10)", cursor: "pointer", borderLeft: `5px solid ${isFeatured ? BRAND.orange : "#8B4513"}`, border: `1px solid ${BRAND.paperDark}` }}>
-      <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 8 }}>
+    <div onClick={onClick} style={{ background: BRAND.paper, border: `1px solid ${BRAND.paperDark}`, borderLeft: `4px solid ${isFeatured ? BRAND.orange : BRAND.ink}`, borderRadius: 4, padding: "14px 16px", marginBottom: 10, cursor: "pointer" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 6 }}>
         {provider.logo_url
-          ? <img src={provider.logo_url} style={{ width: 50, height: 50, borderRadius: 8, objectFit: "cover" }} alt="" />
-          : <div style={{ width: 50, height: 50, borderRadius: 8, background: `linear-gradient(135deg, ${BRAND.orange}, #8B4513)`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20, color: "#fff", fontWeight: 700 }}>{provider.business_name?.[0] || "?"}</div>
+          ? <img src={provider.logo_url} style={{ width: 44, height: 44, borderRadius: 6, objectFit: "cover", filter: "sepia(20%)" }} alt="" />
+          : <div style={{ width: 44, height: 44, borderRadius: 6, background: `linear-gradient(135deg, ${BRAND.orange}, #6B3A1F)`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, color: "#fff", fontWeight: 700 }}>{provider.business_name?.[0] || "?"}</div>
         }
         <div style={{ flex: 1 }}>
-          <div style={{ fontSize: 17, fontWeight: 700, color: BRAND.ink, fontFamily: "Georgia, serif" }}>{provider.business_name}</div>
-          {cat && <div style={{ fontSize: 12, color: "#8B4513", fontStyle: "italic" }}>{cat.icon} {cat.name}</div>}
+          <div style={{ fontSize: 16, fontWeight: 700, color: BRAND.ink, fontFamily: "'Times New Roman', serif" }}>{provider.business_name}</div>
+          {cat && <div style={{ fontSize: 11, color: BRAND.inkFade, fontStyle: "italic" }}>{cat.icon} {cat.name}</div>}
         </div>
-        {isFeatured && <div style={{ background: BRAND.orange, color: "#fff", borderRadius: 14, padding: "3px 10px", fontSize: 11, fontWeight: 700, fontFamily: "Georgia, serif" }}>⭐ Featured</div>}
+        {isFeatured && <div style={{ background: BRAND.orange, color: "#fff", borderRadius: 10, padding: "2px 8px", fontSize: 10, fontWeight: 700 }}>⭐ Featured</div>}
       </div>
-      {provider.description && <div style={{ fontSize: 13, color: BRAND.inkLight, marginBottom: 8, lineHeight: 1.6, fontStyle: "italic" }}>{provider.description.slice(0, 110)}{provider.description.length > 110 ? "..." : ""}</div>}
-      <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-        {providerServices.slice(0, 4).map(s => <span key={s.id} style={{ background: BRAND.paperDark, color: BRAND.ink, borderRadius: 12, padding: "3px 10px", fontSize: 12, fontFamily: "Georgia, serif" }}>{s.name}</span>)}
-      </div>
-      <div style={{ color: BRAND.orange, fontWeight: 600, fontSize: 12, textAlign: "right", marginTop: 6, fontFamily: "Georgia, serif" }}>View Details →</div>
+      {provider.description && <div style={{ fontSize: 12, color: BRAND.inkFade, lineHeight: 1.6, fontStyle: "italic" }}>{provider.description.slice(0, 100)}{provider.description.length > 100 ? "..." : ""}</div>}
+      <div style={{ color: BRAND.orange, fontWeight: 700, fontSize: 11, textAlign: "right", marginTop: 6, fontFamily: "'Times New Roman', serif" }}>View Details →</div>
     </div>
   );
 }
 
-// ── Provider Profile ──────────────────────────────────────────────────────────
-function ProviderProfile({ provider, areas, categories, services, onBack }) {
+function ProviderProfile({ provider, areas, categories, onBack }) {
+  const [services, setServices] = useState([]);
+  useEffect(() => { import("@/api/entities").then(({ Service }) => Service.filter({ is_active: true }).then(setServices)); }, []);
   const cat = categories.find(c => c.id === provider.category_id);
   const providerServices = services.filter(s => provider.services && provider.services.includes(s.id));
   const providerAreas = areas.filter(a => provider.service_areas && provider.service_areas.includes(a.id));
   return (
-    <div style={{ minHeight: "100vh", background: BRAND.paper, fontFamily: "Georgia, serif" }}>
-      <div style={{ background: BRAND.ink, padding: "13px 20px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+    <div style={{ minHeight: "100vh", background: BRAND.paperLight, fontFamily: "'Times New Roman', serif" }}>
+      <div style={{ background: BRAND.ink, padding: "11px 18px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-          <button onClick={onBack} style={{ background: "rgba(255,255,255,0.15)", border: "1.5px solid rgba(255,255,255,0.3)", color: "#fff", borderRadius: 7, padding: "7px 15px", fontSize: 14, cursor: "pointer", fontFamily: "Georgia, serif", fontWeight: 700 }}>← Back</button>
-          <span style={{ color: BRAND.paper, fontSize: 20, fontWeight: 900, fontFamily: "Georgia, serif", letterSpacing: 2 }}>🌴 V-Hub</span>
+          <button onClick={onBack} style={{ background: "rgba(255,255,255,0.12)", border: "1.5px solid rgba(255,255,255,0.25)", color: BRAND.paperLight, borderRadius: 5, padding: "6px 14px", fontSize: 13, cursor: "pointer", fontFamily: "'Times New Roman', serif", fontWeight: 700 }}>← Back</button>
+          <span style={{ color: BRAND.paperLight, fontSize: 18, fontWeight: 900, letterSpacing: 3 }}>V-HUB</span>
         </div>
         <BurgerMenu dark={true} />
       </div>
-      <div style={{ maxWidth: 720, margin: "0 auto", padding: "24px 20px" }}>
-        <div style={{ background: BRAND.paperDark, borderRadius: 14, padding: "24px", marginBottom: 16, border: `1px solid ${BRAND.ink}20` }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 12 }}>
-            {provider.logo_url ? <img src={provider.logo_url} style={{ width: 68, height: 68, borderRadius: 10, objectFit: "cover" }} alt="" />
-              : <div style={{ width: 68, height: 68, borderRadius: 10, background: `linear-gradient(135deg, ${BRAND.orange}, #8B4513)`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 26, color: "#fff", fontWeight: 700 }}>{provider.business_name?.[0] || "?"}</div>}
+      <div style={{ maxWidth: 700, margin: "0 auto", padding: "22px 18px" }}>
+        <div style={{ background: BRAND.paper, border: `2px solid ${BRAND.ink}`, borderRadius: 4, padding: "22px", marginBottom: 14 }}>
+          <div style={{ display: "flex", gap: 14, marginBottom: 12 }}>
+            {provider.logo_url ? <img src={provider.logo_url} style={{ width: 64, height: 64, borderRadius: 8, objectFit: "cover", filter: "sepia(15%)" }} alt="" />
+              : <div style={{ width: 64, height: 64, borderRadius: 8, background: `linear-gradient(135deg, ${BRAND.orange}, #6B3A1F)`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 24, color: "#fff", fontWeight: 700 }}>{provider.business_name?.[0] || "?"}</div>}
             <div>
-              <div style={{ fontSize: 21, fontWeight: 800, color: BRAND.ink, fontFamily: "Georgia, serif" }}>{provider.business_name}</div>
-              {cat && <div style={{ fontSize: 13, color: "#8B4513", fontStyle: "italic" }}>{cat.icon} {cat.name}</div>}
-              {provider.years_in_business && <div style={{ fontSize: 12, color: BRAND.inkLight }}>{provider.years_in_business} years in business</div>}
+              <div style={{ fontSize: 20, fontWeight: 800, color: BRAND.ink }}>{provider.business_name}</div>
+              {cat && <div style={{ fontSize: 12, color: BRAND.inkFade, fontStyle: "italic" }}>{cat.icon} {cat.name}</div>}
+              {provider.years_in_business && <div style={{ fontSize: 11, color: BRAND.inkFade }}>{provider.years_in_business} years in business</div>}
             </div>
           </div>
-          {provider.description && <div style={{ fontSize: 14, color: BRAND.inkLight, lineHeight: 1.7, fontStyle: "italic" }}>{provider.description}</div>}
+          {provider.description && <div style={{ fontSize: 13, color: BRAND.inkFade, lineHeight: 1.7, fontStyle: "italic" }}>{provider.description}</div>}
         </div>
-
-        <div style={{ background: "#fff", borderRadius: 14, padding: "22px", marginBottom: 16, border: `1px solid ${BRAND.paperDark}` }}>
-          <div style={{ fontSize: 16, fontWeight: 700, color: BRAND.ink, fontFamily: "Georgia, serif", marginBottom: 12 }}>📞 Contact This Provider</div>
-          {provider.phone && <a href={`tel:${provider.phone}`} style={{ textDecoration: "none" }}><div style={cRow("#8B4513")}><span>📱</span><span style={{ fontSize: 18, fontWeight: 700 }}>{provider.phone}</span></div></a>}
+        <div style={{ background: BRAND.paper, border: `1px solid ${BRAND.paperDark}`, borderRadius: 4, padding: "18px", marginBottom: 14 }}>
+          <div style={{ fontSize: 14, fontWeight: 700, color: BRAND.ink, marginBottom: 10, borderBottom: `1px solid ${BRAND.paperDark}`, paddingBottom: 6 }}>📞 Contact</div>
+          {provider.phone && <a href={`tel:${provider.phone}`} style={{ textDecoration: "none" }}><div style={cRow("#6B3A1F")}><span>📱</span><span style={{ fontWeight: 700 }}>{provider.phone}</span></div></a>}
           {provider.email && <a href={`mailto:${provider.email}`} style={{ textDecoration: "none" }}><div style={cRow(BRAND.blue)}><span>✉️</span><span>{provider.email}</span></div></a>}
-          {provider.website && <a href={provider.website.startsWith("http") ? provider.website : `https://${provider.website}`} target="_blank" rel="noreferrer" style={{ textDecoration: "none" }}><div style={cRow("#1565C0")}><span>🌐</span><span>{provider.website}</span></div></a>}
-          {!provider.phone && !provider.email && !provider.website && <div style={{ color: BRAND.inkLight, fontStyle: "italic", fontSize: 14 }}>No contact info available yet.</div>}
+          {provider.website && <a href={provider.website.startsWith("http") ? provider.website : `https://${provider.website}`} target="_blank" rel="noreferrer" style={{ textDecoration: "none" }}><div style={cRow("#1A3F6F")}><span>🌐</span><span>{provider.website}</span></div></a>}
+          {!provider.phone && !provider.email && !provider.website && <div style={{ fontSize: 13, fontStyle: "italic", color: BRAND.inkFade }}>No contact info available.</div>}
         </div>
-
         {providerServices.length > 0 && (
-          <div style={{ background: BRAND.paperDark, borderRadius: 14, padding: "22px", marginBottom: 16, border: `1px solid ${BRAND.ink}20` }}>
-            <div style={{ fontSize: 16, fontWeight: 700, color: BRAND.ink, fontFamily: "Georgia, serif", marginBottom: 10 }}>🛠️ Services Offered</div>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-              {providerServices.map(s => <span key={s.id} style={{ background: BRAND.ink, color: BRAND.paper, borderRadius: 14, padding: "6px 14px", fontSize: 13, fontFamily: "Georgia, serif" }}>{s.name}</span>)}
+          <div style={{ background: BRAND.paper, border: `1px solid ${BRAND.paperDark}`, borderRadius: 4, padding: "18px", marginBottom: 14 }}>
+            <div style={{ fontSize: 14, fontWeight: 700, color: BRAND.ink, marginBottom: 10, borderBottom: `1px solid ${BRAND.paperDark}`, paddingBottom: 6 }}>🛠️ Services</div>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 7 }}>
+              {providerServices.map(s => <span key={s.id} style={{ background: BRAND.ink, color: BRAND.paperLight, borderRadius: 10, padding: "5px 12px", fontSize: 12 }}>{s.name}</span>)}
             </div>
           </div>
         )}
-
         {providerAreas.length > 0 && (
-          <div style={{ background: "#fff", borderRadius: 14, padding: "22px", border: `1px solid ${BRAND.paperDark}` }}>
-            <div style={{ fontSize: 16, fontWeight: 700, color: BRAND.ink, fontFamily: "Georgia, serif", marginBottom: 10 }}>📍 Service Areas</div>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-              {providerAreas.map(a => <span key={a.id} style={{ background: "#5C7A3E", color: "#fff", borderRadius: 14, padding: "6px 14px", fontSize: 12, fontFamily: "Georgia, serif" }}>{getVillageName(a)}</span>)}
+          <div style={{ background: BRAND.paper, border: `1px solid ${BRAND.paperDark}`, borderRadius: 4, padding: "18px" }}>
+            <div style={{ fontSize: 14, fontWeight: 700, color: BRAND.ink, marginBottom: 10, borderBottom: `1px solid ${BRAND.paperDark}`, paddingBottom: 6 }}>📍 Service Areas</div>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 7 }}>
+              {providerAreas.map(a => <span key={a.id} style={{ background: "#3D5C2A", color: "#fff", borderRadius: 10, padding: "5px 12px", fontSize: 11 }}>{getVillageName(a)}</span>)}
             </div>
           </div>
         )}
@@ -418,4 +425,4 @@ function ProviderProfile({ provider, areas, categories, services, onBack }) {
   );
 }
 
-const cRow = (color) => ({ display: "flex", alignItems: "center", gap: 12, background: `${color}12`, border: `1px solid ${color}30`, borderRadius: 7, padding: "11px 15px", marginBottom: 8, color, fontSize: 16, fontFamily: "Georgia, serif" });
+const cRow = (color) => ({ display: "flex", alignItems: "center", gap: 10, background: `${color}12`, border: `1px solid ${color}25`, borderRadius: 5, padding: "9px 12px", marginBottom: 7, color, fontSize: 14, fontFamily: "'Times New Roman', serif" });
