@@ -44,6 +44,7 @@ function NewsCol({ idx = 0, lines = 2, style = {} }) {
     <div style={{ fontFamily: "'Times New Roman', Georgia, serif", fontSize: 7.5, color: INK_FADE, lineHeight: 1.85, textAlign: "justify", ...style }}>
       {text}
     </div>
+  </>
   );
 }
 
@@ -130,6 +131,9 @@ export default function Home() {
   if (searched) return <Results results={results} areas={areas} cats={cats} onReset={reset} onSel={setSelProv} selArea={selArea} />;
 
   return (
+    <>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=UnifrakturMaguntia&display=swap" rel="stylesheet" />
     <div onClick={closeAll} style={{
       minHeight: "100vh",
       background: PAPER,
@@ -162,7 +166,7 @@ export default function Home() {
             textShadow: "none",
             lineHeight: 1,
             fontStyle: "italic",
-          }}><span style={{ fontStyle: "italic", fontWeight: 900, fontFamily: "'Playfair Display', Georgia, serif", fontSize: "1.15em", letterSpacing: 1 }}>V</span><span style={{ fontStyle: "normal" }}>&#8209;Hub</span></span>
+          }}><span style={{ fontStyle: "normal", fontWeight: 900, fontFamily: "'UnifrakturMaguntia', 'MedievalSharp', cursive", fontSize: "1.2em", letterSpacing: 2, WebkitTextFillColor: "transparent", background: "linear-gradient(180deg, #C8860A 0%, #7A4820 40%, #3A1800 100%)", WebkitBackgroundClip: "text", backgroundClip: "text" }}>V</span><span style={{ fontStyle: "normal" }}>&#8209;Hub</span></span>
         </div>
 
         {/* Tagline */}
@@ -254,7 +258,7 @@ export default function Home() {
             {/* FIND SERVICES button — TOP */}
             <div style={{ position: "relative", display: "block", padding: "5px" }}>
               <button onClick={doSearch} disabled={!selArea || !selCat}
-                style={{ width: "100%", background: `linear-gradient(180deg, #9A6030 0%, ${BROWN_BTN} 50%, #5A3010 100%)`, color: "#F5E8CC", border: `3px solid #F2CC00`, borderRadius: 5, padding: "9px 20px", fontSize: 13, fontWeight: 900, fontFamily: "'Times New Roman', serif", letterSpacing: 4, boxShadow: "0 2px 6px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.15), 0 0 0 2px #FFE000", outline: "none", textTransform: "uppercase", cursor: (selArea && selCat) ? "pointer" : "not-allowed", position: "relative", zIndex: 1 }}>
+                style={{ width: "100%", background: `linear-gradient(180deg, #9A6030 0%, ${BROWN_BTN} 50%, #5A3010 100%)`, color: "#F5E8CC", border: `3.5px solid #FFDB00`, borderRadius: 5, padding: "9px 20px", fontSize: 13, fontWeight: 900, fontFamily: "'Times New Roman', serif", letterSpacing: 4, boxShadow: "0 2px 6px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.15), 0 0 0 3px #FFE800, 0 0 10px 2px rgba(255,224,0,0.35)", outline: "none", textTransform: "uppercase", cursor: (selArea && selCat) ? "pointer" : "not-allowed", position: "relative", zIndex: 1 }}>
                 Find Services
               </button>
 
