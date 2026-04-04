@@ -908,14 +908,7 @@ export default function Home() {
           <div style={{ fontSize: 13, fontStyle: "italic", color: INK_FADE, textAlign: "center", margin: "6px 0 10px" }}>
             Connecting You to Local Services in The Villages!
           </div>
-          {/* List Your Service button */}
-          <div style={{ textAlign: "center" }}>
-            <a href="/ListService" style={{ textDecoration: "none" }}>
-              <button style={{ background: `linear-gradient(180deg,#9A6030,${BROWN_BTN} 60%,#5A3010)`, color: "#F5E8CC", border: "none", borderRadius: 5, padding: "9px 28px", fontSize: 13, fontWeight: 700, fontFamily: "'Times New Roman', serif", letterSpacing: 2, cursor: "pointer", boxShadow: "0 2px 8px rgba(0,0,0,0.3)" }}>
-                List Your Service
-              </button>
-            </a>
-          </div>
+          {/* List Your Service button removed — accessible via burger menu */}
         </div>
 
         <Rule thick />
@@ -932,7 +925,7 @@ export default function Home() {
         <img
           src="https://media.base44.com/images/public/69d062aca815ce8e697894b1/f19aa517d_generated_image.png"
           alt="Lake Sumter Landing"
-          style={{ width: "100%", height: 200, objectFit: "cover", objectPosition: "center", display: "block" }}
+          style={{ width: "100%", height: 200, objectFit: "cover", objectPosition: "center 60%", display: "block" }}
         />
 
         <Rule />
