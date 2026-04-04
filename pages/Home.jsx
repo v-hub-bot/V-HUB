@@ -148,16 +148,16 @@ export default function Home() {
       ════════════════════════════════════════════════════════ */}
       <div style={{ position: "relative", padding: "16px 18px 12px", borderBottom: `2px solid ${INK}`, textAlign: "center" }}>
         {/* Centered title + tagline */}
-        <div style={{ fontSize: 58, fontWeight: 900, color: INK, letterSpacing: -1, lineHeight: 1, fontFamily: "'Times New Roman', serif", display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
-          <span style={{ fontSize: 50 }}>🌴</span>
+        <div style={{ fontSize: 72, fontWeight: 900, color: INK, letterSpacing: -1, lineHeight: 1, fontFamily: "'Times New Roman', serif", display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
+          <span style={{ fontSize: 64 }}>🌴</span>
           <span>V-Hub</span>
         </div>
-        <div style={{ fontSize: 12, fontStyle: "italic", color: INK_FADE, marginTop: 5, letterSpacing: 0.3 }}>
+        <div style={{ fontSize: 13, fontStyle: "italic", color: INK_FADE, marginTop: 6, letterSpacing: 0.3 }}>
           Connecting You to Local Services in The Villages!
         </div>
 
-        {/* Absolutely positioned right — List button + burger */}
-        <div style={{ position: "absolute", top: "50%", right: 18, transform: "translateY(-50%)", display: "flex", alignItems: "center", gap: 8 }} onClick={e => e.stopPropagation()}>
+        {/* Absolutely positioned LEFT — List Your Service button */}
+        <div style={{ position: "absolute", top: "50%", left: 18, transform: "translateY(-50%)", display: "flex", alignItems: "center", gap: 8 }} onClick={e => e.stopPropagation()}>
           <a href="/list-service" style={{ textDecoration: "none" }}>
             <button style={{
               background: `linear-gradient(180deg, #9A6030 0%, ${BROWN_BTN} 50%, #5A3010 100%)`,
@@ -176,6 +176,10 @@ export default function Home() {
               List Your Service
             </button>
           </a>
+        </div>
+
+        {/* Absolutely positioned RIGHT — burger menu */}
+        <div style={{ position: "absolute", top: "50%", right: 18, transform: "translateY(-50%)" }} onClick={e => e.stopPropagation()}>
           <Burger />
         </div>
       </div>
@@ -200,7 +204,7 @@ export default function Home() {
       {/* ════════════════════════════════════════════════════════
           TROPICAL BANNER IMAGE — full width
       ════════════════════════════════════════════════════════ */}
-      <div style={{ height: 140, overflow: "hidden", lineHeight: 0 }}>
+      <div style={{ height: 220, overflow: "hidden", lineHeight: 0 }}>
         <img
           src="https://media.base44.com/images/public/69d062aca815ce8e697894b1/392f3af96_generated_image.png"
           alt=""
