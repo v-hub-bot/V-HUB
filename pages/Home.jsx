@@ -8,7 +8,7 @@ const PAPER     = "#F0E6C8";
 const PAPER_MID = "#E4D5A8";
 const PAPER_DK  = "#C8B07A";
 const BROWN_BTN = "#7A4820";
-const FIND_BTN  = "#3A2008";
+const FIND_BTN  = "#7A4820";
 
 // ── Filler text ───────────────────────────────────────────────────────────────
 const FILLER = [
@@ -241,7 +241,7 @@ export default function Home() {
           <div style={{ border: `1.5px solid ${INK}`, background: PAPER_MID }}>
             {/* FIND SERVICES button — TOP */}
             <button onClick={doSearch} disabled={!selArea || !selCat}
-              style={{ width: "100%", background: (selArea && selCat) ? FIND_BTN : `${FIND_BTN}55`, color: "#F0E6C8", border: "none", borderBottom: `1.5px solid ${INK}`, padding: "11px", fontSize: 13, fontWeight: 900, fontFamily: "'Times New Roman', serif", letterSpacing: 4, textTransform: "uppercase", cursor: (selArea && selCat) ? "pointer" : "not-allowed", boxShadow: (selArea && selCat) ? "inset 0 1px 0 rgba(255,255,255,0.08)" : "none" }}>
+              style={{ width: "100%", background: (selArea && selCat) ? `linear-gradient(180deg, #9A6030 0%, ${FIND_BTN} 50%, #5A3010 100%)` : `linear-gradient(180deg, #9A603088 0%, ${FIND_BTN}88 50%, #5A301088 100%)`, color: "#F0E6C8", border: "none", borderBottom: `1.5px solid ${INK}`, padding: "11px", fontSize: 13, fontWeight: 900, fontFamily: "'Times New Roman', serif", letterSpacing: 4, textTransform: "uppercase", cursor: (selArea && selCat) ? "pointer" : "not-allowed", boxShadow: (selArea && selCat) ? "inset 0 1px 0 rgba(255,255,255,0.08)" : "none" }}>
               Find Services
             </button>
 
