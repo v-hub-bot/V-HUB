@@ -12,12 +12,12 @@ const FIND_BTN  = "#3A2008";
 
 // ── Filler text ───────────────────────────────────────────────────────────────
 const FILLER = [
-  "Residents across The Villages continue to seek quality local services. From landscaping to home repair, the demand for trusted neighborhood providers has never been stronger. Local businesses report record inquiries as the community grows. Families and retirees alike depend on reliable professionals who understand the unique needs of Villages living.",
-  "New listings are added daily as V-Hub grows its network of verified service providers. Whether you need a plumber, a pet sitter, or a personal trainer, The Villages has world-class options right in your backyard. Support local and build the community we all cherish.",
-  "Community leaders gathered last week to discuss expanded support for local entrepreneurs. The Villages remains one of Florida's fastest-growing communities. With tens of thousands of active residents, local providers enjoy unmatched access to a loyal customer base.",
+  "Residents across The Villages seek quality local services every day. From landscaping to home repair, demand for trusted neighborhood providers has never been stronger. Local businesses report record inquiries as the community grows. Families and retirees depend on reliable professionals who understand the Villages lifestyle.",
   "Trusted providers in The Villages have served the community for decades. From Spanish Springs to Fenney, skilled professionals are ready to serve you. Our verified directory ensures every listing meets community standards. Browse today and discover the talent right in your neighborhood.",
-  "V-Hub makes discovery simple — search by village, browse by category, and contact providers directly. No fees, no middlemen. Just neighbors helping neighbors across our beloved community each and every day.",
-  "Service excellence defines The Villages difference. Providers here understand the lifestyle and needs of active adults. Whether it's technology help, home maintenance, pet care, or personal wellness, you'll find trusted professionals nearby ready to assist.",
+  "New listings are added daily as V-Hub grows its network of verified providers. Whether you need a plumber, a pet sitter, or a personal trainer, The Villages has world-class options right in your backyard. Support local businesses and build the community we all cherish.",
+  "Community leaders gathered last week to discuss expanded support for local entrepreneurs. The Villages remains one of Florida's fastest-growing communities, drawing new residents every year. With tens of thousands of active members, local providers enjoy unmatched access to a loyal customer base.",
+  "V-Hub makes discovery simple — search by village, browse by category, and contact providers directly. No fees, no middlemen, no hassle. Just neighbors helping neighbors across our beloved community every single day. Find your trusted provider and experience the difference.",
+  "Service excellence defines The Villages. Providers here understand the lifestyle and needs of active adults. Whether it's technology help, home maintenance, pet care, or personal wellness, you'll find trusted professionals nearby ready to assist whenever you need them.",
 ];
 
 // ── Village groups ────────────────────────────────────────────────────────────
@@ -224,11 +224,9 @@ export default function Home() {
 
         {/* ── Left column ── */}
         <div style={{ padding: "10px 14px 20px" }}>
-          <NewsCol idx={0} lines={2} />
+          <NewsCol idx={0} lines={1} />
           <div style={{ height: 1, background: `${INK}30`, margin: "9px 0" }} />
-          <NewsCol idx={3} lines={1} />
-          <div style={{ height: 1, background: `${INK}30`, margin: "9px 0" }} />
-          <NewsCol idx={5} lines={1} />
+          <NewsCol idx={1} lines={1} />
         </div>
 
         <div style={{ background: INK }} />
@@ -318,18 +316,16 @@ export default function Home() {
           </div>
 
           {/* Filler below */}
-          <NewsCol idx={4} lines={1} style={{ marginTop: 10, fontSize: 8 }} />
+          <NewsCol idx={5} lines={1} style={{ marginTop: 10, fontSize: 8 }} />
         </div>
 
         <div style={{ background: INK }} />
 
         {/* ── Right column ── */}
         <div style={{ padding: "10px 14px 20px" }}>
-          <NewsCol idx={1} lines={2} />
+          <NewsCol idx={3} lines={1} />
           <div style={{ height: 1, background: `${INK}30`, margin: "9px 0" }} />
           <NewsCol idx={4} lines={1} />
-          <div style={{ height: 1, background: `${INK}30`, margin: "9px 0" }} />
-          <NewsCol idx={5} lines={1} />
         </div>
       </div>
 
