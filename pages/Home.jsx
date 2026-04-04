@@ -162,7 +162,7 @@ export default function Home() {
             textShadow: "none",
             lineHeight: 1,
             fontStyle: "italic",
-          }}>V&#8209;Hub</span>
+          }}><span style={{ fontStyle: "italic", fontWeight: 900 }}>V</span><span style={{ fontStyle: "normal" }}>&#8209;Hub</span></span>
         </div>
 
         {/* Tagline */}
