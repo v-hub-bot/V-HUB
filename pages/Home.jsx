@@ -21,9 +21,7 @@ const SECTIONS = [
   { key: "Family & Non-Age-Restricted Villages", label: "Family Villages", sub: "Non-Age-Restricted", emoji: "🏠", color: BRAND.yellow },
 ];
 
-function isVillageRecord(area) {
-  return area.name.includes("\u2014");
-}
+function isVillageRecord(area) { return area.name.includes("\u2014"); }
 function getVillageName(area) {
   const parts = area.name.split("\u2014");
   return parts.length > 1 ? parts[1].trim() : area.name;
@@ -37,6 +35,139 @@ function groupAreas(areas) {
   return groups;
 }
 
+// ── Shared Nav Bar ────────────────────────────────────────────────────────────
+function NavBar({ showHome = false, onHome }) {
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  const navLinks = [
+    { label: "🏠 Home", href: "/" },
+    { label: "🔍 Find Services", href: "/?mode=find" },
+    { label: "📋 List Your Service", href: "/list-service" },
+  ];
+
+  return (
+    <>
+      <div style={{
+        position: "absolute", top: 0, left: 0, right: 0,
+        display: "flex", alignItems: "center", justifyContent: "space-between",
+        padding: "14px 20px",
+        zIndex: 100,
+      }}>
+        {/* Left: Home/Back button (only on sub-pages) */}
+        {showHome && (
+          <button
+            onClick={onHome || (() => window.location.href = "/")}
+            style={{
+              background: "rgba(255,255,255,0.15)",
+              border: "1.5px solid rgba(255,255,255,0.3)",
+              color: "#fff",
+              borderRadius: 10,
+              padding: "8px 16px",
+              fontSize: 15,
+              fontWeight: 700,
+              cursor: "pointer",
+              backdropFilter: "blur(6px)",
+            }}
+          >
+            ← Home
+          </button>
+        )}
+        {!showHome && <div />}
+
+        {/* Right: Burger */}
+        <button
+          onClick={() => setMenuOpen(!menuOpen)}
+          style={{
+            background: "rgba(255,255,255,0.15)",
+            border: "1.5px solid rgba(255,255,255,0.3)",
+            borderRadius: 10,
+            padding: "10px 14px",
+            cursor: "pointer",
+            backdropFilter: "blur(6px)",
+            display: "flex",
+            flexDirection: "column",
+            gap: 5,
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <span style={{ display: "block", width: 22, height: 2.5, background: "#fff", borderRadius: 2 }} />
+          <span style={{ display: "block", width: 22, height: 2.5, background: "#fff", borderRadius: 2 }} />
+          <span style={{ display: "block", width: 22, height: 2.5, background: "#fff", borderRadius: 2 }} />
+        </button>
+      </div>
+
+      {/* Dropdown Menu */}
+      {menuOpen && (
+        <>
+          {/* Backdrop */}
+          <div
+            onClick={() => setMenuOpen(false)}
+            style={{ position: "fixed", inset: 0, zIndex: 199, background: "rgba(0,0,0,0.4)" }}
+          />
+          {/* Menu panel */}
+          <div style={{
+            position: "fixed", top: 0, right: 0, bottom: 0,
+            width: 280, background: "#fff",
+            zIndex: 200, boxShadow: "-4px 0 30px rgba(0,0,0,0.2)",
+            display: "flex", flexDirection: "column",
+            fontFamily: "'Segoe UI', sans-serif",
+          }}>
+            {/* Menu header */}
+            <div style={{
+              background: `linear-gradient(135deg, #001F3F, #003F6B)`,
+              padding: "24px 20px 20px",
+              display: "flex", alignItems: "center", justifyContent: "space-between",
+            }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                <img
+                  src="https://media.base44.com/images/public/69d062aca815ce8e697894b1/f418f4c1d_V-Hublogo.png"
+                  style={{ width: 38, height: 38, borderRadius: "50%", objectFit: "contain" }}
+                  alt="V-Hub"
+                />
+                <div style={{ color: "#fff", fontWeight: 800, fontSize: 17 }}>V-HUB</div>
+              </div>
+              <button onClick={() => setMenuOpen(false)} style={{ background: "rgba(255,255,255,0.15)", border: "none", color: "#fff", borderRadius: 8, width: 32, height: 32, fontSize: 18, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>✕</button>
+            </div>
+
+            {/* Nav links */}
+            <div style={{ padding: "16px 12px", flex: 1 }}>
+              {navLinks.map((link, i) => (
+                <a key={i} href={link.href} style={{ textDecoration: "none" }}>
+                  <div style={{
+                    padding: "16px 16px",
+                    borderRadius: 12,
+                    fontSize: 17,
+                    fontWeight: 600,
+                    color: BRAND.text,
+                    marginBottom: 6,
+                    background: "#f8f8f8",
+                    cursor: "pointer",
+                    borderLeft: `4px solid ${[BRAND.teal, BRAND.orange, BRAND.blue][i]}`,
+                  }}
+                    onMouseEnter={e => e.currentTarget.style.background = "#f0f0f0"}
+                    onMouseLeave={e => e.currentTarget.style.background = "#f8f8f8"}
+                  >
+                    {link.label}
+                  </div>
+                </a>
+              ))}
+            </div>
+
+            {/* Menu footer */}
+            <div style={{ padding: "16px 20px", borderTop: "1px solid #eee", textAlign: "center" }}>
+              <div style={{ fontSize: 12, color: BRAND.subtext }}>V-HUB — The Villages, FL</div>
+              <div style={{ fontSize: 11, color: "#aaa", marginTop: 3 }}>Connecting residents with trusted providers</div>
+            </div>
+          </div>
+        </>
+      )}
+    </>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+
 export default function Home() {
   const [areas, setAreas] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -48,7 +179,7 @@ export default function Home() {
   const [results, setResults] = useState([]);
   const [searched, setSearched] = useState(false);
   const [selectedProvider, setSelectedProvider] = useState(null);
-  const [mode, setMode] = useState(null); // "find" | "list" | null
+  const [mode, setMode] = useState(null);
 
   useEffect(() => {
     ServiceArea.filter({ is_active: true }).then(setAreas);
@@ -62,10 +193,7 @@ export default function Home() {
 
   const groupedAreas = groupAreas(areas);
 
-  const handleSelectVillage = (area) => {
-    setSelectedArea(area);
-    setOpenSection(null);
-  };
+  const handleSelectVillage = (area) => { setSelectedArea(area); setOpenSection(null); };
 
   const handleSearch = async () => {
     if (!selectedArea) return;
@@ -85,23 +213,16 @@ export default function Home() {
   };
 
   const handleReset = () => {
-    setSelectedArea(null);
-    setSelectedCategory("");
-    setSelectedService("");
-    setResults([]);
-    setSearched(false);
-    setSelectedProvider(null);
-    setOpenSection(null);
-    setMode(null);
+    setSelectedArea(null); setSelectedCategory(""); setSelectedService("");
+    setResults([]); setSearched(false); setSelectedProvider(null);
+    setOpenSection(null); setMode(null);
   };
 
   if (selectedProvider) {
     return (
       <ProviderProfile
         provider={selectedProvider}
-        areas={areas}
-        categories={categories}
-        services={services}
+        areas={areas} categories={categories} services={services}
         onBack={() => setSelectedProvider(null)}
       />
     );
@@ -113,16 +234,16 @@ export default function Home() {
       {/* ══ HERO ══ */}
       <div style={{
         background: `linear-gradient(170deg, #001F3F 0%, #003F6B 55%, #0077B6 100%)`,
-        padding: "40px 24px 50px",
+        padding: "60px 24px 50px",
         textAlign: "center",
         position: "relative",
         overflow: "hidden",
       }}>
-        {/* bg blobs */}
+        <NavBar showHome={false} />
+
         <div style={{ position: "absolute", top: -60, left: -60, width: 220, height: 220, borderRadius: "50%", background: "rgba(0,191,165,0.07)", pointerEvents: "none" }} />
         <div style={{ position: "absolute", bottom: -40, right: -40, width: 260, height: 260, borderRadius: "50%", background: "rgba(232,67,26,0.07)", pointerEvents: "none" }} />
 
-        {/* Tagline ABOVE logo */}
         <div style={{ marginBottom: 20 }}>
           <div style={{ color: "#fff", fontSize: 28, fontWeight: 800, letterSpacing: 0.3, textShadow: "0 2px 12px rgba(0,0,0,0.35)" }}>
             The Villages Local Services
@@ -132,7 +253,6 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Logo — round, slightly smaller */}
         <div style={{
           display: "inline-block",
           background: "rgba(255,255,255,0.08)",
@@ -150,7 +270,6 @@ export default function Home() {
           />
         </div>
 
-        {/* CTA Buttons */}
         <div style={{ display: "flex", justifyContent: "center", gap: 16, flexWrap: "wrap" }}>
           <button
             onClick={() => { setMode("find"); setSearched(false); }}
@@ -158,13 +277,8 @@ export default function Home() {
               background: mode === "find" ? "#fff" : `linear-gradient(135deg, ${BRAND.orange}, ${BRAND.yellow})`,
               color: mode === "find" ? BRAND.orange : "#fff",
               border: `2px solid ${mode === "find" ? "#fff" : "transparent"}`,
-              borderRadius: 50,
-              padding: "16px 36px",
-              fontSize: 18,
-              fontWeight: 700,
-              cursor: "pointer",
-              boxShadow: "0 6px 20px rgba(0,0,0,0.25)",
-              letterSpacing: 0.3,
+              borderRadius: 50, padding: "16px 36px", fontSize: 18, fontWeight: 700,
+              cursor: "pointer", boxShadow: "0 6px 20px rgba(0,0,0,0.25)", letterSpacing: 0.3,
             }}
           >
             🔍 Find Services
@@ -172,16 +286,9 @@ export default function Home() {
           <button
             onClick={() => window.location.href = "/list-service"}
             style={{
-              background: mode === "list" ? "#fff" : "transparent",
-              color: mode === "list" ? BRAND.teal : "#fff",
-              border: "2px solid #fff",
-              borderRadius: 50,
-              padding: "16px 36px",
-              fontSize: 18,
-              fontWeight: 700,
-              cursor: "pointer",
-              boxShadow: "0 6px 20px rgba(0,0,0,0.15)",
-              letterSpacing: 0.3,
+              background: "transparent", color: "#fff", border: "2px solid #fff",
+              borderRadius: 50, padding: "16px 36px", fontSize: 18, fontWeight: 700,
+              cursor: "pointer", boxShadow: "0 6px 20px rgba(0,0,0,0.15)", letterSpacing: 0.3,
             }}
           >
             📋 List Your Service
@@ -194,23 +301,10 @@ export default function Home() {
       {/* ══ FIND SERVICES PANEL ══ */}
       {mode === "find" && !searched && (
         <div style={{ maxWidth: 720, margin: "0 auto", padding: "0 20px 40px" }}>
-          <div style={{
-            background: "#fff",
-            borderRadius: 24,
-            padding: "32px 26px",
-            boxShadow: "0 12px 48px rgba(0,0,0,0.13)",
-            marginTop: -20,
-            position: "relative",
-            zIndex: 10,
-            border: "1px solid rgba(0,0,0,0.05)"
-          }}>
-            {/* Section title */}
+          <div style={{ background: "#fff", borderRadius: 24, padding: "32px 26px", boxShadow: "0 12px 48px rgba(0,0,0,0.13)", marginTop: -20, position: "relative", zIndex: 10, border: "1px solid rgba(0,0,0,0.05)" }}>
             <div style={{ fontSize: 22, fontWeight: 800, color: BRAND.text, marginBottom: 4 }}>Find a Service</div>
-            <div style={{ fontSize: 15, color: BRAND.subtext, marginBottom: 24 }}>
-              Choose your area then select your village below.
-            </div>
+            <div style={{ fontSize: 15, color: BRAND.subtext, marginBottom: 24 }}>Choose your area then select your village below.</div>
 
-            {/* Selected village chip */}
             {selectedArea && (
               <div style={{ background: `${BRAND.teal}15`, border: `2px solid ${BRAND.teal}`, borderRadius: 14, padding: "12px 18px", marginBottom: 18, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                 <div>
@@ -221,7 +315,6 @@ export default function Home() {
               </div>
             )}
 
-            {/* ── 5 Accordion sections ── */}
             <div style={{ fontSize: 16, fontWeight: 700, color: BRAND.text, marginBottom: 12 }}>📍 Your Location</div>
             {SECTIONS.map(section => {
               const villages = groupedAreas[section.key] || [];
@@ -231,19 +324,11 @@ export default function Home() {
                   <button
                     onClick={() => setOpenSection(isOpen ? null : section.key)}
                     style={{
-                      width: "100%",
-                      background: isOpen ? section.color : "#fff",
-                      color: isOpen ? "#fff" : BRAND.text,
-                      border: `2px solid ${section.color}`,
-                      borderRadius: isOpen ? "14px 14px 0 0" : 14,
-                      padding: "15px 20px",
-                      fontSize: 17,
-                      fontWeight: 700,
-                      cursor: "pointer",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                      textAlign: "left",
+                      width: "100%", background: isOpen ? section.color : "#fff",
+                      color: isOpen ? "#fff" : BRAND.text, border: `2px solid ${section.color}`,
+                      borderRadius: isOpen ? "14px 14px 0 0" : 14, padding: "15px 20px",
+                      fontSize: 17, fontWeight: 700, cursor: "pointer",
+                      display: "flex", alignItems: "center", justifyContent: "space-between", textAlign: "left",
                     }}
                   >
                     <span>
@@ -254,33 +339,12 @@ export default function Home() {
                     <span style={{ fontSize: 16 }}>{isOpen ? "▲" : "▼"}</span>
                   </button>
                   {isOpen && (
-                    <div style={{
-                      border: `2px solid ${section.color}`,
-                      borderTop: "none",
-                      borderRadius: "0 0 14px 14px",
-                      background: "#fafafa",
-                      padding: "14px",
-                      display: "flex",
-                      flexWrap: "wrap",
-                      gap: 8,
-                    }}>
+                    <div style={{ border: `2px solid ${section.color}`, borderTop: "none", borderRadius: "0 0 14px 14px", background: "#fafafa", padding: "14px", display: "flex", flexWrap: "wrap", gap: 8 }}>
                       {villages.map(v => {
                         const isSel = selectedArea?.id === v.id;
                         return (
-                          <button
-                            key={v.id}
-                            onClick={() => handleSelectVillage(v)}
-                            style={{
-                              background: isSel ? section.color : "#fff",
-                              color: isSel ? "#fff" : section.color,
-                              border: `2px solid ${section.color}`,
-                              borderRadius: 20,
-                              padding: "9px 18px",
-                              fontSize: 15,
-                              fontWeight: 600,
-                              cursor: "pointer",
-                            }}
-                          >
+                          <button key={v.id} onClick={() => handleSelectVillage(v)}
+                            style={{ background: isSel ? section.color : "#fff", color: isSel ? "#fff" : section.color, border: `2px solid ${section.color}`, borderRadius: 20, padding: "9px 18px", fontSize: 15, fontWeight: 600, cursor: "pointer" }}>
                             {getVillageName(v)}
                           </button>
                         );
@@ -291,7 +355,6 @@ export default function Home() {
               );
             })}
 
-            {/* Category */}
             <div style={{ marginTop: 24 }}>
               <div style={{ fontSize: 16, fontWeight: 700, color: BRAND.orange, marginBottom: 10 }}>📂 Service Category (optional)</div>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(130px, 1fr))", gap: 10 }}>
@@ -301,14 +364,7 @@ export default function Home() {
                   const active = selectedCategory === c.id;
                   return (
                     <div key={c.id} onClick={() => setSelectedCategory(active ? "" : c.id)}
-                      style={{
-                        background: active ? color : "#fff",
-                        borderRadius: 14, padding: "14px 10px", textAlign: "center",
-                        cursor: "pointer",
-                        boxShadow: active ? `0 4px 14px ${color}44` : "0 2px 8px rgba(0,0,0,0.07)",
-                        border: `2px solid ${active ? "transparent" : color + "40"}`,
-                      }}
-                    >
+                      style={{ background: active ? color : "#fff", borderRadius: 14, padding: "14px 10px", textAlign: "center", cursor: "pointer", boxShadow: active ? `0 4px 14px ${color}44` : "0 2px 8px rgba(0,0,0,0.07)", border: `2px solid ${active ? "transparent" : color + "40"}` }}>
                       <div style={{ fontSize: 26, marginBottom: 5 }}>{c.icon}</div>
                       <div style={{ color: active ? "#fff" : color, fontWeight: 700, fontSize: 13 }}>{c.name}</div>
                     </div>
@@ -317,7 +373,6 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Service filter */}
             {selectedCategory && (
               <div style={{ marginTop: 18 }}>
                 <div style={{ fontSize: 16, fontWeight: 700, color: BRAND.blue, marginBottom: 8 }}>🛠️ Specific Service (optional)</div>
@@ -329,66 +384,14 @@ export default function Home() {
               </div>
             )}
 
-            {/* Search button */}
-            <button
-              onClick={handleSearch}
-              disabled={!selectedArea}
+            <button onClick={handleSearch} disabled={!selectedArea}
               style={{
-                width: "100%",
-                background: selectedArea ? `linear-gradient(135deg, ${BRAND.orange}, ${BRAND.yellow} 50%, ${BRAND.teal})` : "#ddd",
-                color: "#fff",
-                border: "none",
-                borderRadius: 14,
-                padding: "20px",
-                fontSize: 20,
-                fontWeight: 700,
-                cursor: selectedArea ? "pointer" : "not-allowed",
-                marginTop: 24,
+                width: "100%", background: selectedArea ? `linear-gradient(135deg, ${BRAND.orange}, ${BRAND.yellow} 50%, ${BRAND.teal})` : "#ddd",
+                color: "#fff", border: "none", borderRadius: 14, padding: "20px", fontSize: 20,
+                fontWeight: 700, cursor: selectedArea ? "pointer" : "not-allowed", marginTop: 24,
                 boxShadow: selectedArea ? "0 6px 22px rgba(232,67,26,0.3)" : "none",
-              }}
-            >
+              }}>
               {selectedArea ? `🔍 Search in ${getVillageName(selectedArea)}` : "Select a Village to Search"}
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* ══ LIST YOUR SERVICE PANEL ══ */}
-      {mode === "list" && (
-        <div style={{ maxWidth: 720, margin: "0 auto", padding: "0 20px 40px" }}>
-          <div style={{
-            background: "#fff", borderRadius: 24, padding: "40px 28px",
-            boxShadow: "0 12px 48px rgba(0,0,0,0.12)", marginTop: -20,
-            border: "1px solid rgba(0,0,0,0.05)", textAlign: "center"
-          }}>
-            <div style={{ fontSize: 40, marginBottom: 12 }}>📋</div>
-            <div style={{ fontSize: 24, fontWeight: 800, color: BRAND.text, marginBottom: 10 }}>List Your Service</div>
-            <div style={{ fontSize: 16, color: BRAND.subtext, maxWidth: 420, margin: "0 auto", lineHeight: 1.7, marginBottom: 28 }}>
-              Reach thousands of Villages residents looking for trusted local providers. Join V-Hub and grow your business today.
-            </div>
-
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 16, marginBottom: 32 }}>
-              {[
-                { icon: "👥", title: "Large Audience", desc: "Thousands of active residents" },
-                { icon: "📍", title: "Local Focus", desc: "The Villages community only" },
-                { icon: "💼", title: "Easy Setup", desc: "Listed in minutes" },
-              ].map((item, i) => (
-                <div key={i} style={{ background: `${BRAND.teal}10`, borderRadius: 14, padding: "18px 10px", border: `1px solid ${BRAND.teal}25` }}>
-                  <div style={{ fontSize: 28, marginBottom: 6 }}>{item.icon}</div>
-                  <div style={{ fontSize: 14, fontWeight: 700, color: BRAND.text }}>{item.title}</div>
-                  <div style={{ fontSize: 12, color: BRAND.subtext, marginTop: 4 }}>{item.desc}</div>
-                </div>
-              ))}
-            </div>
-
-            <div style={{ background: `${BRAND.orange}10`, borderRadius: 16, padding: "20px", border: `1px solid ${BRAND.orange}30`, marginBottom: 24 }}>
-              <div style={{ fontSize: 16, fontWeight: 700, color: BRAND.orange, marginBottom: 6 }}>Ready to get started?</div>
-              <div style={{ fontSize: 15, color: BRAND.subtext }}>Contact William Evans to list your business on V-Hub and start reaching customers in your area.</div>
-            </div>
-
-            <button onClick={handleReset}
-              style={{ background: "none", border: `2px solid ${BRAND.subtext}40`, borderRadius: 12, padding: "12px 24px", fontSize: 15, color: BRAND.subtext, cursor: "pointer", fontWeight: 600 }}>
-              ← Back to Home
             </button>
           </div>
         </div>
@@ -397,37 +400,24 @@ export default function Home() {
       {/* ══ RESULTS ══ */}
       {searched && (
         <div style={{ maxWidth: 720, margin: "0 auto", padding: "0 20px 40px" }}>
-          <div style={{
-            background: `linear-gradient(135deg, ${BRAND.teal}, ${BRAND.blue})`,
-            borderRadius: 16, padding: "16px 22px",
-            display: "flex", justifyContent: "space-between", alignItems: "center",
-            marginTop: 24, marginBottom: 18,
-          }}>
+          <div style={{ background: `linear-gradient(135deg, ${BRAND.teal}, ${BRAND.blue})`, borderRadius: 16, padding: "16px 22px", display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 24, marginBottom: 18 }}>
             <div style={{ fontSize: 20, fontWeight: 700, color: "#fff" }}>
               {results.length > 0 ? `${results.length} Provider${results.length > 1 ? "s" : ""} Found` : "No Providers Found"}
             </div>
-            <button onClick={handleReset} style={{ color: "#fff", background: "rgba(255,255,255,0.18)", border: "none", borderRadius: 10, fontSize: 15, cursor: "pointer", fontWeight: 600, padding: "7px 14px" }}>
-              ← New Search
-            </button>
+            <button onClick={handleReset} style={{ color: "#fff", background: "rgba(255,255,255,0.18)", border: "none", borderRadius: 10, fontSize: 15, cursor: "pointer", fontWeight: 600, padding: "7px 14px" }}>← New Search</button>
           </div>
-
           {results.length === 0 && (
             <div style={{ textAlign: "center", padding: "40px 20px", background: "#fff", borderRadius: 16, color: BRAND.subtext, fontSize: 18 }}>
-              😔 No providers found for this area yet.<br />
-              <span style={{ fontSize: 15 }}>Check back soon as more providers join V-Hub!</span>
+              😔 No providers found for this area yet.<br /><span style={{ fontSize: 15 }}>Check back soon!</span>
             </div>
           )}
-          {results.map(p => (
-            <ProviderCard key={p.id} provider={p} categories={categories} services={services} onClick={() => setSelectedProvider(p)} />
-          ))}
+          {results.map(p => <ProviderCard key={p.id} provider={p} categories={categories} services={services} onClick={() => setSelectedProvider(p)} />)}
         </div>
       )}
 
-      {/* ══ DEFAULT HOME (no mode selected) ══ */}
+      {/* ══ DEFAULT HOME ══ */}
       {!mode && !searched && (
         <div style={{ maxWidth: 720, margin: "0 auto", padding: "0 20px 40px" }}>
-
-          {/* Discover section */}
           <div style={{ background: "#fff", borderRadius: 20, padding: "28px", boxShadow: "0 6px 24px rgba(0,0,0,0.08)", marginTop: 28, marginBottom: 20 }}>
             <div style={{ fontSize: 20, fontWeight: 800, color: BRAND.text, marginBottom: 4, textAlign: "center" }}>Discover Services Near You</div>
             <div style={{ fontSize: 14, color: BRAND.subtext, textAlign: "center", marginBottom: 20 }}>Tap "Find Services" above to search by your village</div>
@@ -446,7 +436,6 @@ export default function Home() {
             </div>
           </div>
 
-          {/* How it works */}
           <div style={{ background: `linear-gradient(135deg, ${BRAND.green}, #1a7a28)`, borderRadius: 20, padding: "28px 24px", marginBottom: 20 }}>
             <div style={{ fontSize: 20, fontWeight: 800, color: "#fff", marginBottom: 20, textAlign: "center" }}>How V-Hub Works</div>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 14 }}>
@@ -464,10 +453,8 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Pricing accordion */}
           <PricingAccordion />
 
-          {/* Footer */}
           <div style={{ marginTop: 20, background: `linear-gradient(135deg, ${BRAND.deepBlue}, #003F6B)`, borderRadius: 20, padding: "24px", textAlign: "center" }}>
             <img src="https://media.base44.com/images/public/69d062aca815ce8e697894b1/f418f4c1d_V-Hublogo.png"
               alt="V-Hub" style={{ width: 56, height: 56, objectFit: "contain", marginBottom: 10, borderRadius: "50%" }} />
@@ -480,52 +467,33 @@ export default function Home() {
   );
 }
 
-// ── Pricing Accordion ────────────────────────────────────────────────────────
 function PricingAccordion() {
   const [open, setOpen] = useState(null);
   const items = [
-    {
-      title: "Why Advertise with Us?",
-      content: "V-Hub is the go-to directory for The Villages community. Residents trust us to find reliable, local service providers. Get your business in front of thousands of active neighbors who are actively searching for services like yours."
-    },
-    {
-      title: "Pricing Plans",
-      content: "• Basic Listing — Get found by local residents\n• Featured Listing — Appear at the top of search results with a highlighted badge\n• Premium Listing — Maximum visibility with priority placement and enhanced profile\n\nContact William Evans for current pricing details."
-    },
-    {
-      title: "How It Works",
-      content: "1. Contact V-Hub to set up your provider profile\n2. Choose your service areas (select the villages you serve)\n3. Add your services, contact info, and business description\n4. Go live and start receiving inquiries from residents in your area"
-    },
+    { title: "Why Advertise with Us?", content: "V-Hub is the go-to directory for The Villages community. Residents trust us to find reliable, local service providers. Get your business in front of thousands of active neighbors who are actively searching for services like yours." },
+    { title: "Pricing Plans", content: "• Basic Listing — Get found by local residents\n• Featured Listing — Appear at the top of search results with a highlighted badge\n• Premium Listing — Maximum visibility with priority placement and enhanced profile\n\nContact William Evans for current pricing details." },
+    { title: "How It Works", content: "1. Contact V-Hub to set up your provider profile\n2. Choose your service areas (select the villages you serve)\n3. Add your services, contact info, and business description\n4. Go live and start receiving inquiries from residents in your area" },
   ];
-
   return (
     <div style={{ marginBottom: 20 }}>
       {items.map((item, i) => (
         <div key={i} style={{ background: "#fff", borderRadius: 14, marginBottom: 8, boxShadow: "0 2px 10px rgba(0,0,0,0.07)", overflow: "hidden" }}>
-          <button
-            onClick={() => setOpen(open === i ? null : i)}
-            style={{ width: "100%", background: "none", border: "none", padding: "18px 20px", display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer", fontSize: 16, fontWeight: 700, color: BRAND.text }}
-          >
+          <button onClick={() => setOpen(open === i ? null : i)}
+            style={{ width: "100%", background: "none", border: "none", padding: "18px 20px", display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer", fontSize: 16, fontWeight: 700, color: BRAND.text }}>
             {item.title}
             <span style={{ fontSize: 18, color: BRAND.teal }}>{open === i ? "▲" : "▼"}</span>
           </button>
-          {open === i && (
-            <div style={{ padding: "4px 20px 18px", fontSize: 15, color: BRAND.subtext, lineHeight: 1.8, whiteSpace: "pre-line" }}>
-              {item.content}
-            </div>
-          )}
+          {open === i && <div style={{ padding: "4px 20px 18px", fontSize: 15, color: BRAND.subtext, lineHeight: 1.8, whiteSpace: "pre-line" }}>{item.content}</div>}
         </div>
       ))}
     </div>
   );
 }
 
-// ── Provider Card ─────────────────────────────────────────────────────────────
 function ProviderCard({ provider, categories, services, onClick }) {
   const cat = categories.find(c => c.id === provider.category_id);
   const providerServices = services.filter(s => provider.services && provider.services.includes(s.id));
   const isFeatured = provider.subscription_tier === "premium" || provider.subscription_tier === "featured";
-
   return (
     <div onClick={onClick} style={{ background: "#fff", borderRadius: 18, padding: "22px", marginBottom: 16, boxShadow: "0 4px 18px rgba(0,0,0,0.08)", cursor: "pointer", borderLeft: `5px solid ${isFeatured ? BRAND.orange : BRAND.teal}` }}>
       <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 10 }}>
@@ -549,26 +517,67 @@ function ProviderCard({ provider, categories, services, onClick }) {
   );
 }
 
-// ── Provider Profile ──────────────────────────────────────────────────────────
 function ProviderProfile({ provider, areas, categories, services, onBack }) {
+  const [menuOpen, setMenuOpen] = useState(false);
   const cat = categories.find(c => c.id === provider.category_id);
   const providerServices = services.filter(s => provider.services && provider.services.includes(s.id));
   const providerAreas = areas.filter(a => provider.service_areas && provider.service_areas.includes(a.id));
 
+  const navLinks = [
+    { label: "🏠 Home", href: "/" },
+    { label: "🔍 Find Services", href: "/?mode=find" },
+    { label: "📋 List Your Service", href: "/list-service" },
+  ];
+
   return (
     <div style={{ minHeight: "100vh", background: BRAND.lightBg, fontFamily: "'Segoe UI', sans-serif" }}>
-      <div style={{ background: `linear-gradient(135deg, #001F3F, #003F6B)`, padding: "20px 24px", display: "flex", alignItems: "center", gap: 12, boxShadow: "0 4px 12px rgba(0,0,0,0.2)" }}>
-        <button onClick={onBack} style={{ background: "rgba(255,255,255,0.15)", border: "none", color: "#fff", borderRadius: 10, padding: "8px 16px", fontSize: 16, cursor: "pointer", fontWeight: 600 }}>← Back</button>
-        <img src="https://media.base44.com/images/public/69d062aca815ce8e697894b1/f418f4c1d_V-Hublogo.png" style={{ height: 38, width: 38, borderRadius: "50%", objectFit: "contain" }} alt="V-Hub" />
-        <div style={{ color: "#fff", fontSize: 19, fontWeight: 700 }}>Provider Profile</div>
+      {/* Header bar */}
+      <div style={{ background: `linear-gradient(135deg, #001F3F, #003F6B)`, padding: "14px 20px", display: "flex", alignItems: "center", justifyContent: "space-between", boxShadow: "0 4px 12px rgba(0,0,0,0.2)" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <button onClick={onBack} style={{ background: "rgba(255,255,255,0.15)", border: "1.5px solid rgba(255,255,255,0.3)", color: "#fff", borderRadius: 10, padding: "8px 16px", fontSize: 15, cursor: "pointer", fontWeight: 700 }}>← Home</button>
+          <img src="https://media.base44.com/images/public/69d062aca815ce8e697894b1/f418f4c1d_V-Hublogo.png" style={{ height: 38, width: 38, borderRadius: "50%", objectFit: "contain" }} alt="V-Hub" />
+          <div style={{ color: "#fff", fontSize: 18, fontWeight: 700 }}>Provider Profile</div>
+        </div>
+        {/* Burger */}
+        <button onClick={() => setMenuOpen(true)}
+          style={{ background: "rgba(255,255,255,0.15)", border: "1.5px solid rgba(255,255,255,0.3)", borderRadius: 10, padding: "10px 14px", cursor: "pointer", display: "flex", flexDirection: "column", gap: 5 }}>
+          <span style={{ display: "block", width: 22, height: 2.5, background: "#fff", borderRadius: 2 }} />
+          <span style={{ display: "block", width: 22, height: 2.5, background: "#fff", borderRadius: 2 }} />
+          <span style={{ display: "block", width: 22, height: 2.5, background: "#fff", borderRadius: 2 }} />
+        </button>
       </div>
+
+      {/* Burger menu drawer */}
+      {menuOpen && (
+        <>
+          <div onClick={() => setMenuOpen(false)} style={{ position: "fixed", inset: 0, zIndex: 199, background: "rgba(0,0,0,0.4)" }} />
+          <div style={{ position: "fixed", top: 0, right: 0, bottom: 0, width: 280, background: "#fff", zIndex: 200, boxShadow: "-4px 0 30px rgba(0,0,0,0.2)", display: "flex", flexDirection: "column", fontFamily: "'Segoe UI', sans-serif" }}>
+            <div style={{ background: `linear-gradient(135deg, #001F3F, #003F6B)`, padding: "24px 20px 20px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                <img src="https://media.base44.com/images/public/69d062aca815ce8e697894b1/f418f4c1d_V-Hublogo.png" style={{ width: 38, height: 38, borderRadius: "50%", objectFit: "contain" }} alt="V-Hub" />
+                <div style={{ color: "#fff", fontWeight: 800, fontSize: 17 }}>V-HUB</div>
+              </div>
+              <button onClick={() => setMenuOpen(false)} style={{ background: "rgba(255,255,255,0.15)", border: "none", color: "#fff", borderRadius: 8, width: 32, height: 32, fontSize: 18, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>✕</button>
+            </div>
+            <div style={{ padding: "16px 12px", flex: 1 }}>
+              {navLinks.map((link, i) => (
+                <a key={i} href={link.href} style={{ textDecoration: "none" }}>
+                  <div style={{ padding: "16px", borderRadius: 12, fontSize: 17, fontWeight: 600, color: BRAND.text, marginBottom: 6, background: "#f8f8f8", borderLeft: `4px solid ${[BRAND.teal, BRAND.orange, BRAND.blue][i]}` }}>{link.label}</div>
+                </a>
+              ))}
+            </div>
+            <div style={{ padding: "16px 20px", borderTop: "1px solid #eee", textAlign: "center" }}>
+              <div style={{ fontSize: 12, color: BRAND.subtext }}>V-HUB — The Villages, FL</div>
+            </div>
+          </div>
+        </>
+      )}
+
       <div style={{ maxWidth: 720, margin: "0 auto", padding: "24px 20px" }}>
         <div style={{ background: `linear-gradient(135deg, ${BRAND.blue}15, ${BRAND.teal}08)`, borderRadius: 20, padding: "26px", boxShadow: "0 6px 24px rgba(0,0,0,0.09)", marginBottom: 18, border: `2px solid ${BRAND.blue}20` }}>
           <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 14 }}>
-            {provider.logo_url
-              ? <img src={provider.logo_url} style={{ width: 76, height: 76, borderRadius: 14, objectFit: "cover" }} alt="" />
-              : <div style={{ width: 76, height: 76, borderRadius: 14, background: `linear-gradient(135deg, ${BRAND.orange}, ${BRAND.teal})`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 30, color: "#fff", fontWeight: 700 }}>{provider.business_name?.[0] || "?"}</div>
-            }
+            {provider.logo_url ? <img src={provider.logo_url} style={{ width: 76, height: 76, borderRadius: 14, objectFit: "cover" }} alt="" />
+              : <div style={{ width: 76, height: 76, borderRadius: 14, background: `linear-gradient(135deg, ${BRAND.orange}, ${BRAND.teal})`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 30, color: "#fff", fontWeight: 700 }}>{provider.business_name?.[0] || "?"}</div>}
             <div>
               <div style={{ fontSize: 22, fontWeight: 800, color: BRAND.text }}>{provider.business_name}</div>
               {cat && <div style={{ fontSize: 15, color: BRAND.teal, fontWeight: 600 }}>{cat.icon} {cat.name}</div>}
@@ -580,9 +589,9 @@ function ProviderProfile({ provider, areas, categories, services, onBack }) {
 
         <div style={{ background: `linear-gradient(135deg, ${BRAND.orange}10, ${BRAND.yellow}08)`, borderRadius: 20, padding: "26px", boxShadow: "0 6px 24px rgba(0,0,0,0.08)", marginBottom: 18, border: `2px solid ${BRAND.orange}20` }}>
           <div style={{ fontSize: 19, fontWeight: 700, color: BRAND.orange, marginBottom: 16 }}>📞 Contact This Provider</div>
-          {provider.phone && <a href={`tel:${provider.phone}`} style={{ textDecoration: "none" }}><div style={contactRow(BRAND.orange)}><span>📱</span><span style={{ fontSize: 21, fontWeight: 700 }}>{provider.phone}</span></div></a>}
-          {provider.email && <a href={`mailto:${provider.email}`} style={{ textDecoration: "none" }}><div style={contactRow(BRAND.teal)}><span>✉️</span><span style={{ fontSize: 17, fontWeight: 600 }}>{provider.email}</span></div></a>}
-          {provider.website && <a href={provider.website.startsWith("http") ? provider.website : `https://${provider.website}`} target="_blank" rel="noreferrer" style={{ textDecoration: "none" }}><div style={contactRow(BRAND.blue)}><span>🌐</span><span style={{ fontSize: 17, fontWeight: 600 }}>{provider.website}</span></div></a>}
+          {provider.phone && <a href={`tel:${provider.phone}`} style={{ textDecoration: "none" }}><div style={cRow(BRAND.orange)}><span>📱</span><span style={{ fontSize: 21, fontWeight: 700 }}>{provider.phone}</span></div></a>}
+          {provider.email && <a href={`mailto:${provider.email}`} style={{ textDecoration: "none" }}><div style={cRow(BRAND.teal)}><span>✉️</span><span style={{ fontSize: 17, fontWeight: 600 }}>{provider.email}</span></div></a>}
+          {provider.website && <a href={provider.website.startsWith("http") ? provider.website : `https://${provider.website}`} target="_blank" rel="noreferrer" style={{ textDecoration: "none" }}><div style={cRow(BRAND.blue)}><span>🌐</span><span style={{ fontSize: 17, fontWeight: 600 }}>{provider.website}</span></div></a>}
           {!provider.phone && !provider.email && !provider.website && <div style={{ color: BRAND.subtext }}>No contact info available yet.</div>}
         </div>
 
@@ -608,4 +617,4 @@ function ProviderProfile({ provider, areas, categories, services, onBack }) {
   );
 }
 
-const contactRow = (color) => ({ display: "flex", alignItems: "center", gap: 12, background: `${color}12`, border: `2px solid ${color}30`, borderRadius: 12, padding: "14px 18px", marginBottom: 10, color, fontSize: 20 });
+const cRow = (color) => ({ display: "flex", alignItems: "center", gap: 12, background: `${color}12`, border: `2px solid ${color}30`, borderRadius: 12, padding: "14px 18px", marginBottom: 10, color, fontSize: 20 });
