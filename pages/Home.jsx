@@ -10,16 +10,58 @@ const BROWN_BTN = "#7A4820";
 const BROWN_HL  = "#6B3010";
 const YELLOW    = "#FFDB00";
 
-const FILLER = [
-  "Residents across The Villages seek quality local services every day. From landscaping to home repair, demand for trusted neighborhood providers has never been stronger.",
-  "Trusted providers in The Villages have served the community for decades. From Spanish Springs to Fenney, skilled professionals are ready to serve you. Our verified directory ensures every listing meets community standards.",
-  "New listings are added daily as V-Hub grows its network of verified providers. Whether you need a plumber, a pet sitter, or a personal trainer, The Villages has world-class options right in your backyard.",
-  "Community leaders gathered last week to discuss expanded support for local entrepreneurs. The Villages remains one of Florida's fastest-growing communities, drawing new residents every year.",
-  "V-Hub makes discovery simple — search by village, browse by category, and contact providers directly. No fees, no middlemen, no hassle. Just neighbors helping neighbors.",
-  "Service excellence defines The Villages. Providers here understand the lifestyle and needs of active adults. Whether it's technology help, home maintenance, pet care, or personal wellness, you'll find trusted professionals nearby.",
-  "Local businesses report record inquiries as the community grows. Families and retirees depend on reliable professionals who understand the Villages lifestyle and the values we share.",
-  "With tens of thousands of active members, local providers enjoy unmatched access to a loyal customer base. Support local businesses and build the community we all cherish together.",
-];
+// Newspaper stories — each has headline, subhead, paragraphs
+const STORIES = {
+  neighborhoodWatch: {
+    headline: "LOCAL SERVICES ON THE RISE",
+    subhead: "Demand surges as Villages community expands southward",
+    body: [
+      "Residents across The Villages report record demand for trusted local service providers this season. From landscaping crews working the new Eastport neighborhoods to home repair specialists fielding calls from Brownwood to Spanish Springs, the marketplace has never been more active.",
+      "Community association leaders say the growth reflects the Villages' continued expansion. 'We need reliable, vetted professionals who understand our lifestyle,' said one resident near Lake Sumter Landing.",
+    ]
+  },
+  providerSpotlight: {
+    headline: "TRUSTED NAMES, LOCAL ROOTS",
+    subhead: "Established providers bring decades of expertise to your door",
+    body: [
+      "Many of The Villages' most beloved service providers have called this community home for over a decade. From family-owned landscaping operations to licensed electricians who know every neighborhood street by name, local expertise makes all the difference.",
+      "V-Hub's verified directory ensures every listing meets the community's high standards. Browse categories from home repair to personal wellness and connect directly — no fees, no middlemen.",
+    ]
+  },
+  howItWorks: {
+    headline: "FIND YOUR PROVIDER IN SECONDS",
+    subhead: "Search by service, then by your village — results appear instantly",
+    body: [
+      "Simply select the service you need from the dropdown — choose a specific subcategory like 'Window Replacement' or 'Pet Grooming' — then pick your village from the list. Hit Find Services and see every matching provider who serves your area.",
+    ]
+  },
+  growthStory: {
+    headline: "VILLAGES ECONOMY THRIVES",
+    subhead: "Small businesses flourish as new residents arrive weekly",
+    body: [
+      "The Villages remains one of Florida's fastest-growing communities, drawing hundreds of new residents every month. With that growth comes opportunity — for local entrepreneurs, tradespeople, and service professionals eager to build their client base.",
+      "Community leaders gathered recently to discuss expanded support for small business owners. New listing tiers on V-Hub allow providers to reach exactly the neighborhoods they serve.",
+    ]
+  },
+  classifieds: {
+    headline: "CLASSIFIEDS & NOTICES",
+    subhead: "Local announcements from across the community",
+    body: [
+      "HANDYMAN SERVICES — Experienced, licensed contractor available for all interior and exterior repairs. Serving Historic Side and Established Villages. Call for free estimate.",
+      "PET SITTING — Loving, attentive care while you travel. References available. Villages of Poinciana area.",
+      "TECH HELP — Smartphone, tablet, and computer setup for seniors. Patient, friendly instruction at your home.",
+      "LANDSCAPING — Weekly lawn maintenance, seasonal cleanup, and irrigation inspection. All Villages areas served.",
+    ]
+  },
+  wellness: {
+    headline: "WELLNESS IN THE VILLAGES",
+    subhead: "Personal care providers expand services for active adults",
+    body: [
+      "From personal trainers to in-home physical therapists, wellness professionals are meeting residents where they live. Mobile services, home visits, and flexible scheduling make it easier than ever to stay active and healthy.",
+      "Search V-Hub's Health & Wellness category to find certified professionals throughout all five village regions.",
+    ]
+  },
+};
 
 const SECTIONS = [
   { key: "Historic Side | Spanish Springs",         label: "Historic Side" },
@@ -348,6 +390,12 @@ export default function Home() {
     setSelAreaR(null); setSelCatR(null);
   };
 
+  // Newspaper typography
+  const hd  = { margin: "0 0 2px 0", fontWeight: 900, fontSize: 9, textTransform: "uppercase", letterSpacing: 1, color: INK, fontFamily: "'Times New Roman', serif" };
+  const sub = { margin: "0 0 5px 0", fontStyle: "italic", fontSize: 8, color: BROWN_BTN, fontFamily: "'Times New Roman', serif", lineHeight: 1.4 };
+  const para = { margin: "0 0 7px 0", fontSize: 8.5, color: INK_FADE, fontFamily: "'Times New Roman', serif", lineHeight: 1.9, textAlign: "justify" };
+  const rule = { height: 1, background: INK_FADE, margin: "8px 0", opacity: 0.4 };
+
   if (selProv)  return <ProvDetail prov={selProv} areas={areas} cats={cats} onBack={() => setSelProv(null)} />;
   if (searched) return <Results results={results} areas={areas} cats={cats} onReset={reset} onSel={setSelProv} selArea={selAreaR} selCatId={selCatR} />;
 
@@ -465,50 +513,51 @@ export default function Home() {
         {/* ── NEWSPAPER BODY ── */}
         <div className="np-grid">
 
-          {/* LEFT COLUMN — desktop only */}
+          {/* ── LEFT COLUMN ── */}
           <div className="np-side-left np-col">
-            <p style={{ margin: "0 0 8px 0", fontWeight: 700, fontSize: 9, textTransform: "uppercase", letterSpacing: 1, color: INK, borderBottom: `1px solid ${INK_FADE}`, paddingBottom: 3 }}>Community News</p>
-            <p style={{ margin: "0 0 8px 0" }}>{FILLER[0]}</p>
-            <p style={{ margin: "0 0 8px 0" }}>{FILLER[6]}</p>
-            <p style={{ margin: 0 }}>{FILLER[4]}</p>
+            {/* Story 1 */}
+            <p style={hd}>{STORIES.neighborhoodWatch.headline}</p>
+            <p style={sub}>{STORIES.neighborhoodWatch.subhead}</p>
+            {STORIES.neighborhoodWatch.body.map((p,i) => <p key={i} style={para}>{p}</p>)}
+            <div style={rule} />
+            {/* Story 2 */}
+            <p style={hd}>{STORIES.growthStory.headline}</p>
+            <p style={sub}>{STORIES.growthStory.subhead}</p>
+            {STORIES.growthStory.body.map((p,i) => <p key={i} style={para}>{p}</p>)}
           </div>
 
-          {/* CENTER COLUMN */}
+          {/* ── CENTER COLUMN ── */}
           <div className="np-center">
-
-            {/* Mobile-only news strip above search */}
-            <div className="np-mobile-top np-col" style={{ marginBottom: 10 }}>
-              {FILLER[2]}
-            </div>
+            {/* Story above search — visible on mobile too */}
+            <p style={hd}>{STORIES.howItWorks.headline}</p>
+            <p style={sub}>{STORIES.howItWorks.subhead}</p>
+            {STORIES.howItWorks.body.map((p,i) => <p key={i} style={{...para, marginBottom: 10}}>{p}</p>)}
 
             {/* Search box */}
             <SearchBox cats={cats} svcs={svcs} grouped={grouped} onSearch={doSearch} />
 
-            {/* Mobile-only news strip below search */}
-            <div className="np-mobile-bot np-col" style={{ marginTop: 10 }}>
-              {FILLER[5]}
+            {/* Story below search */}
+            <div style={{ marginTop: 12 }}>
+              <p style={hd}>{STORIES.wellness.headline}</p>
+              <p style={sub}>{STORIES.wellness.subhead}</p>
+              {STORIES.wellness.body.map((p,i) => <p key={i} style={para}>{p}</p>)}
             </div>
-
-            {/* Desktop-only second strip below search */}
-            <p className="np-col" style={{ margin: "10px 0 0 0", display: "none" }} id="desk-below">{FILLER[5]}</p>
           </div>
 
-          {/* RIGHT COLUMN — desktop only */}
+          {/* ── RIGHT COLUMN ── */}
           <div className="np-side-right np-col">
-            <p style={{ margin: "0 0 8px 0", fontWeight: 700, fontSize: 9, textTransform: "uppercase", letterSpacing: 1, color: INK, borderBottom: `1px solid ${INK_FADE}`, paddingBottom: 3 }}>Provider Spotlight</p>
-            <p style={{ margin: "0 0 8px 0" }}>{FILLER[1]}</p>
-            <p style={{ margin: "0 0 8px 0" }}>{FILLER[3]}</p>
-            <p style={{ margin: 0 }}>{FILLER[7]}</p>
+            {/* Story 1 */}
+            <p style={hd}>{STORIES.providerSpotlight.headline}</p>
+            <p style={sub}>{STORIES.providerSpotlight.subhead}</p>
+            {STORIES.providerSpotlight.body.map((p,i) => <p key={i} style={para}>{p}</p>)}
+            <div style={rule} />
+            {/* Classifieds */}
+            <p style={hd}>{STORIES.classifieds.headline}</p>
+            <p style={sub}>{STORIES.classifieds.subhead}</p>
+            {STORIES.classifieds.body.map((p,i) => <p key={i} style={{...para, borderBottom: `1px dotted ${PAPER_DK}`, paddingBottom: 5}}>{p}</p>)}
           </div>
 
         </div>
-
-        {/* Extra desktop filler row — fills space below search in center col */}
-        <style>{`
-          @media (min-width: 580px) {
-            #desk-below { display: block !important; }
-          }
-        `}</style>
 
         <Rule style={{ marginTop: 8 }} />
 
