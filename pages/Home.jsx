@@ -25,7 +25,7 @@ const STORIES = {
     subhead: "Established providers bring decades of expertise to your door",
     body: [
       "Many of The Villages' most beloved service providers have called this community home for over a decade. From family-owned landscaping operations to licensed electricians who know every neighborhood street by name, local expertise makes all the difference.",
-      "V-Hub's verified directory ensures every listing meets the community's high standards. Browse categories from home repair to personal wellness and connect directly — no fees, no middlemen.",
+      "V-Hub's verified directory ensures every listing meets the community's high standards. Browse by home repair, landscaping, pet care, tech help, cleaning, transportation, and more — contact providers directly, no fees, no middlemen.",
     ]
   },
   howItWorks: {
@@ -53,12 +53,12 @@ const STORIES = {
       "LANDSCAPING — Weekly lawn maintenance, seasonal cleanup, and irrigation inspection. All Villages areas served.",
     ]
   },
-  wellness: {
-    headline: "WELLNESS IN THE VILLAGES",
-    subhead: "Personal care providers expand services for active adults",
+  homeServices: {
+    headline: "HOME SERVICES AT YOUR DOOR",
+    subhead: "From repairs to landscaping — trusted pros serve every village",
     body: [
-      "From personal trainers to in-home physical therapists, wellness professionals are meeting residents where they live. Mobile services, home visits, and flexible scheduling make it easier than ever to stay active and healthy.",
-      "Search V-Hub's Health & Wellness category to find certified professionals throughout all five village regions.",
+      "Whether you need a leaky faucet fixed, windows replaced, or your lawn trimmed before the weekend, V-Hub connects you with licensed, vetted professionals across every neighborhood.",
+      "Categories include Home Repair, Landscaping, Cleaning, Pet Care, Tech Help, Transportation, and Personal Assistance. Find the right provider for your village today.",
     ]
   },
 };
@@ -537,9 +537,9 @@ export default function Home() {
 
             {/* Story below search */}
             <div style={{ marginTop: 12 }}>
-              <p style={hd}>{STORIES.wellness.headline}</p>
-              <p style={sub}>{STORIES.wellness.subhead}</p>
-              {STORIES.wellness.body.map((p,i) => <p key={i} style={para}>{p}</p>)}
+              <p style={hd}>{STORIES.homeServices.headline}</p>
+              <p style={sub}>{STORIES.homeServices.subhead}</p>
+              {STORIES.homeServices.body.map((p,i) => <p key={i} style={para}>{p}</p>)}
             </div>
           </div>
 
