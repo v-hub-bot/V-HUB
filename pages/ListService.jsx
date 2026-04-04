@@ -460,9 +460,11 @@ export default function ListService() {
                 <textarea
                   style={{ ...inS, resize: "vertical", minHeight: 100, lineHeight: 1.6 }}
                   value={description}
-                  onChange={e => setDescription(e.target.value)}
+                  onChange={e => setDescription(e.target.value.slice(0, 150))}
+                  maxLength={150}
                   placeholder="Tell residents what makes your business special — experience, specialties, values..."
                 />
+                <div style={{ textAlign: "right", fontSize: 11, color: description.length >= 140 ? "#cc0000" : INK_FADE, marginTop: 3 }}>{description.length}/150</div>
               </div>
             </div>
           </div>
@@ -670,7 +672,8 @@ export default function ListService() {
             </div>
             <div>
               <label style={lbS}>About Your Business</label>
-              <textarea style={{ ...inS, resize: "vertical", minHeight: 90, lineHeight: 1.6 }} value={description} onChange={e => setDescription(e.target.value)} placeholder="Tell residents what makes your business special..." />
+              <textarea style={{ ...inS, resize: "vertical", minHeight: 90, lineHeight: 1.6 }} value={description} onChange={e => setDescription(e.target.value.slice(0, 150))} maxLength={150} placeholder="Tell residents what makes your business special..." />
+              <div style={{ textAlign: "right", fontSize: 11, color: description.length >= 140 ? "#cc0000" : INK_FADE, marginTop: 3 }}>{description.length}/150</div>
             </div>
           </div>
 
