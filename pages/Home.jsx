@@ -133,7 +133,7 @@ export default function Home() {
   return (
     <>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link href="https://fonts.googleapis.com/css2?family=UnifrakturMaguntia&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet" />
     <div onClick={closeAll} style={{
       minHeight: "100vh",
       background: PAPER,
@@ -166,7 +166,7 @@ export default function Home() {
             textShadow: "none",
             lineHeight: 1,
             fontStyle: "italic",
-          }}><span style={{ fontStyle: "normal", fontWeight: 900, fontFamily: "'UnifrakturMaguntia', 'MedievalSharp', cursive", fontSize: "1.2em", letterSpacing: 2, WebkitTextFillColor: "transparent", background: "linear-gradient(180deg, #C8860A 0%, #7A4820 40%, #3A1800 100%)", WebkitBackgroundClip: "text", backgroundClip: "text" }}>V</span><span style={{ fontStyle: "normal" }}>&#8209;Hub</span></span>
+          }}><span style={{ fontStyle: "normal", fontWeight: 900, fontFamily: "'Great Vibes', cursive", fontSize: "1.35em", letterSpacing: 1, fontStyle: "italic", WebkitTextFillColor: "transparent", background: "linear-gradient(180deg, #C8860A 0%, #7A4820 40%, #3A1800 100%)", WebkitBackgroundClip: "text", backgroundClip: "text" }}>V</span><span style={{ fontStyle: "normal" }}>&#8209;Hub</span></span>
         </div>
 
         {/* Tagline */}
