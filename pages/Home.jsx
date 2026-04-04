@@ -692,7 +692,7 @@ function SearchBox({ cats, svcs, grouped, onSearch, selSvc, setSelSvc, selArea, 
   const sBtnRef = useRef(null);
   const vBtnRef = useRef(null);
 
-  const closeAll = () => { setSOpen(false); setVOpen(false); };
+  const closeAll = () => { setSOpen(false); setVOpen(false); setOpenCat(null); setOpenSec(null); };
 
   // Build display label: show selected service name
   const svcLabel = selSvc ? selSvc.name : "Select a Service...";
@@ -724,11 +724,11 @@ function SearchBox({ cats, svcs, grouped, onSearch, selSvc, setSelSvc, selArea, 
       </div>
       <div style={{ display: "flex", gap: 8 }}>
         <div style={{ flex: 1, minWidth: 0, position: "relative" }} ref={sBtnRef}>
-          <DropBtn label={svcLabel} isOpen={sOpen} onClick={e => { e.stopPropagation(); setSOpen(!sOpen); setVOpen(false); }} />
+          <DropBtn label={svcLabel} isOpen={sOpen} onClick={e => { e.stopPropagation(); if (sOpen) { setSOpen(false); setOpenCat(null); } else { setSOpen(true); setVOpen(false); setOpenSec(null); } }} />
           <SvcDropdown open={sOpen} cats={cats} svcs={svcs} openCat={openCat} selSvc={selSvc} setOpenCat={setOpenCat} setSelSvc={s => { setSelSvc(s); }} setSOpen={setSOpen} />
         </div>
         <div style={{ flex: 1, minWidth: 0, position: "relative" }} ref={vBtnRef}>
-          <DropBtn label={selArea ? vName(selArea) : "Select a Village..."} isOpen={vOpen} onClick={e => { e.stopPropagation(); setVOpen(!vOpen); setSOpen(false); }} />
+          <DropBtn label={selArea ? vName(selArea) : "Select a Village..."} isOpen={vOpen} onClick={e => { e.stopPropagation(); if (vOpen) { setVOpen(false); setOpenSec(null); } else { setVOpen(true); setSOpen(false); setOpenCat(null); } }} />
           <VilDropdown open={vOpen} grouped={grouped} openSec={openSec} selArea={selArea} setOpenSec={setOpenSec} setSelArea={a => { setSelArea(a); }} setVOpen={setVOpen} />
         </div>
       </div>
