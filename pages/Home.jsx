@@ -315,28 +315,29 @@ function SearchBox({ cats, svcs, grouped, onSearch }) {
 
   return (
     <div onClick={closeAll} style={{ background: PAPER_MID, border: `2px solid ${PAPER_DK}`, borderRadius: 6, padding: "14px 12px", width: "100%", boxSizing: "border-box" }}>
-      <div style={{ display: "flex", gap: 8, marginBottom: 5 }}>
-        <div style={{ flex: 1, fontSize: 11, fontWeight: 700, color: INK, fontFamily: "'Times New Roman', serif" }}>What service do you need?</div>
-        <div style={{ flex: 1, fontSize: 11, fontWeight: 700, color: INK, fontFamily: "'Times New Roman', serif" }}>Where do you need it?</div>
-      </div>
-      <div style={{ display: "flex", gap: 8, marginBottom: 10 }}>
-        <div style={{ flex: 1, minWidth: 0, position: "relative" }} ref={sBtnRef}>
-          <DropBtn label={svcLabel} isOpen={sOpen} onClick={e => { e.stopPropagation(); setSOpen(!sOpen); setVOpen(false); }} />
-          <SvcDropdown open={sOpen} cats={cats} svcs={svcs} openCat={openCat} selSvc={selSvc} setOpenCat={setOpenCat} setSelSvc={s => { setSelSvc(s); }} setSOpen={setSOpen} />
-        </div>
-        <div style={{ flex: 1, minWidth: 0, position: "relative" }} ref={vBtnRef}>
-          <DropBtn label={selArea ? vName(selArea) : "Select a Villa..."} isOpen={vOpen} onClick={e => { e.stopPropagation(); setVOpen(!vOpen); setSOpen(false); }} />
-          <VilDropdown open={vOpen} grouped={grouped} openSec={openSec} selArea={selArea} setOpenSec={setOpenSec} setSelArea={a => { setSelArea(a); }} setVOpen={setVOpen} />
-        </div>
-      </div>
       <button onClick={e => { e.stopPropagation(); onSearch(selSvc, selArea); }} style={{
         width: "100%", background: `linear-gradient(180deg,#9A6030,${BROWN_BTN} 60%,#5A3010)`,
         border: `3px solid ${YELLOW}`, boxShadow: `0 0 0 1.5px ${YELLOW}, 0 0 10px 2px rgba(255,220,0,0.35)`,
         borderRadius: 5, color: "#F5E8CC", fontFamily: "'Times New Roman', serif",
         fontWeight: 700, fontSize: 14, letterSpacing: 3, padding: "13px", cursor: "pointer", boxSizing: "border-box",
+        marginBottom: 12,
       }}>
         FIND SERVICES
       </button>
+      <div style={{ display: "flex", gap: 8, marginBottom: 5 }}>
+        <div style={{ flex: 1, fontSize: 11, fontWeight: 700, color: INK, fontFamily: "'Times New Roman', serif" }}>What service do you need?</div>
+        <div style={{ flex: 1, fontSize: 11, fontWeight: 700, color: INK, fontFamily: "'Times New Roman', serif" }}>Where do you need it?</div>
+      </div>
+      <div style={{ display: "flex", gap: 8 }}>
+        <div style={{ flex: 1, minWidth: 0, position: "relative" }} ref={sBtnRef}>
+          <DropBtn label={svcLabel} isOpen={sOpen} onClick={e => { e.stopPropagation(); setSOpen(!sOpen); setVOpen(false); }} />
+          <SvcDropdown open={sOpen} cats={cats} svcs={svcs} openCat={openCat} selSvc={selSvc} setOpenCat={setOpenCat} setSelSvc={s => { setSelSvc(s); }} setSOpen={setSOpen} />
+        </div>
+        <div style={{ flex: 1, minWidth: 0, position: "relative" }} ref={vBtnRef}>
+          <DropBtn label={selArea ? vName(selArea) : "Select a Village..."} isOpen={vOpen} onClick={e => { e.stopPropagation(); setVOpen(!vOpen); setSOpen(false); }} />
+          <VilDropdown open={vOpen} grouped={grouped} openSec={openSec} selArea={selArea} setOpenSec={setOpenSec} setSelArea={a => { setSelArea(a); }} setVOpen={setVOpen} />
+        </div>
+      </div>
     </div>
   );
 }
@@ -432,7 +433,69 @@ export default function Home() {
   useEffect(() => {
     setCats(CATS_STATIC);
     setSvcs(SVCS_STATIC);
-    ServiceArea.filter({ is_active: true }).then(setAreas).catch(() => {});
+    // Hardcoded villages — no auth needed
+    const VILLAGE_DATA = [
+      { id: "v01", name: "Historic Side | Spanish Springs — Spanish Springs Town Square", description: "Historic Side | Spanish Springs" },
+      { id: "v02", name: "Historic Side | Spanish Springs — De La Vista", description: "Historic Side | Spanish Springs" },
+      { id: "v03", name: "Historic Side | Spanish Springs — Springdale", description: "Historic Side | Spanish Springs" },
+      { id: "v04", name: "Historic Side | Spanish Springs — El Santiago", description: "Historic Side | Spanish Springs" },
+      { id: "v05", name: "Historic Side | Spanish Springs — Duval", description: "Historic Side | Spanish Springs" },
+      { id: "v06", name: "Historic Side | Spanish Springs — Hillsborough", description: "Historic Side | Spanish Springs" },
+      { id: "v07", name: "Historic Side | Spanish Springs — Orange Blossom Gardens", description: "Historic Side | Spanish Springs" },
+      { id: "v08", name: "Historic Side | Spanish Springs — Tamarind Grove", description: "Historic Side | Spanish Springs" },
+      { id: "v09", name: "Historic Side | Spanish Springs — Tierra del Sol", description: "Historic Side | Spanish Springs" },
+      { id: "v10", name: "Historic Side | Spanish Springs — Santo Domingo", description: "Historic Side | Spanish Springs" },
+      { id: "v11", name: "Established Villages | North of SR-466A — Lake Sumter Landing", description: "Established Villages | North of SR-466A" },
+      { id: "v12", name: "Established Villages | North of SR-466A — Buttonwood", description: "Established Villages | North of SR-466A" },
+      { id: "v13", name: "Established Villages | North of SR-466A — Hadley", description: "Established Villages | North of SR-466A" },
+      { id: "v14", name: "Established Villages | North of SR-466A — Bonnybrook", description: "Established Villages | North of SR-466A" },
+      { id: "v15", name: "Established Villages | North of SR-466A — Chatham", description: "Established Villages | North of SR-466A" },
+      { id: "v16", name: "Established Villages | North of SR-466A — Glenbrook", description: "Established Villages | North of SR-466A" },
+      { id: "v17", name: "Established Villages | North of SR-466A — Piedmont", description: "Established Villages | North of SR-466A" },
+      { id: "v18", name: "Established Villages | North of SR-466A — Fernandina", description: "Established Villages | North of SR-466A" },
+      { id: "v19", name: "Established Villages | North of SR-466A — Amelia", description: "Established Villages | North of SR-466A" },
+      { id: "v20", name: "Established Villages | North of SR-466A — Sanibel", description: "Established Villages | North of SR-466A" },
+      { id: "v21", name: "Established Villages | North of SR-466A — Gilchrist", description: "Established Villages | North of SR-466A" },
+      { id: "v22", name: "Established Villages | North of SR-466A — Pinellas", description: "Established Villages | North of SR-466A" },
+      { id: "v23", name: "Established Villages | North of SR-466A — Sabal Chase", description: "Established Villages | North of SR-466A" },
+      { id: "v24", name: "Established Villages | North of SR-466A — Sunset Pointe", description: "Established Villages | North of SR-466A" },
+      { id: "v25", name: "Newer Villages | South of SR-44 — Brownwood", description: "Newer Villages | South of SR-44" },
+      { id: "v26", name: "Newer Villages | South of SR-44 — Fenney", description: "Newer Villages | South of SR-44" },
+      { id: "v27", name: "Newer Villages | South of SR-44 — Dabney", description: "Newer Villages | South of SR-44" },
+      { id: "v28", name: "Newer Villages | South of SR-44 — Hawkins", description: "Newer Villages | South of SR-44" },
+      { id: "v29", name: "Newer Villages | South of SR-44 — Marsh Bend", description: "Newer Villages | South of SR-44" },
+      { id: "v30", name: "Newer Villages | South of SR-44 — Osceola Hills", description: "Newer Villages | South of SR-44" },
+      { id: "v31", name: "Newer Villages | South of SR-44 — DeSoto", description: "Newer Villages | South of SR-44" },
+      { id: "v32", name: "Newer Villages | South of SR-44 — Middleton", description: "Newer Villages | South of SR-44" },
+      { id: "v33", name: "Newer Villages | South of SR-44 — Monarch Grove", description: "Newer Villages | South of SR-44" },
+      { id: "v34", name: "Newer Villages | South of SR-44 — McClure", description: "Newer Villages | South of SR-44" },
+      { id: "v35", name: "Newer Villages | South of SR-44 — Newell", description: "Newer Villages | South of SR-44" },
+      { id: "v36", name: "Newer Villages | South of SR-44 — Richmond", description: "Newer Villages | South of SR-44" },
+      { id: "v37", name: "Newer Villages | South of SR-44 — Linden", description: "Newer Villages | South of SR-44" },
+      { id: "v38", name: "Newer Villages | South of SR-44 — Santiago", description: "Newer Villages | South of SR-44" },
+      { id: "v39", name: "Newer Villages | South of SR-44 — Liberty Park", description: "Newer Villages | South of SR-44" },
+      { id: "v40", name: "Newer Villages | South of SR-44 — Tall Trees", description: "Newer Villages | South of SR-44" },
+      { id: "v41", name: "Eastport | Newest Development Area — Eastport Town Center", description: "Eastport | Newest Development Area" },
+      { id: "v42", name: "Eastport | Newest Development Area — Bradford", description: "Eastport | Newest Development Area" },
+      { id: "v43", name: "Eastport | Newest Development Area — Tysen", description: "Eastport | Newest Development Area" },
+      { id: "v44", name: "Eastport | Newest Development Area — Wasatch", description: "Eastport | Newest Development Area" },
+      { id: "v45", name: "Eastport | Newest Development Area — Winifred", description: "Eastport | Newest Development Area" },
+      { id: "v46", name: "Eastport | Newest Development Area — Eastmoor", description: "Eastport | Newest Development Area" },
+      { id: "v47", name: "Eastport | Newest Development Area — Collier", description: "Eastport | Newest Development Area" },
+      { id: "v48", name: "Eastport | Newest Development Area — Magnolia", description: "Eastport | Newest Development Area" },
+      { id: "v49", name: "Family & Non-Age-Restricted Villages — Sumter Landing", description: "Family & Non-Age-Restricted Villages" },
+      { id: "v50", name: "Family & Non-Age-Restricted Villages — Pinecrest", description: "Family & Non-Age-Restricted Villages" },
+      { id: "v51", name: "Family & Non-Age-Restricted Villages — Briar Meadow", description: "Family & Non-Age-Restricted Villages" },
+      { id: "v52", name: "Family & Non-Age-Restricted Villages — Lake Deaton", description: "Family & Non-Age-Restricted Villages" },
+      { id: "v53", name: "Family & Non-Age-Restricted Villages — Dunedin", description: "Family & Non-Age-Restricted Villages" },
+      { id: "v54", name: "Family & Non-Age-Restricted Villages — Hacienda East", description: "Family & Non-Age-Restricted Villages" },
+      { id: "v55", name: "Family & Non-Age-Restricted Villages — Hacienda Hills", description: "Family & Non-Age-Restricted Villages" },
+      { id: "v56", name: "Family & Non-Age-Restricted Villages — Captiva", description: "Family & Non-Age-Restricted Villages" },
+      { id: "v57", name: "Family & Non-Age-Restricted Villages — Pine Hills", description: "Family & Non-Age-Restricted Villages" },
+      { id: "v58", name: "Family & Non-Age-Restricted Villages — Mercer", description: "Family & Non-Age-Restricted Villages" },
+      { id: "v59", name: "Family & Non-Age-Restricted Villages — Mallory Square", description: "Family & Non-Age-Restricted Villages" },
+    ];
+    setAreas(VILLAGE_DATA);
   }, []);
 
   const grouped = groupAreas(areas);
