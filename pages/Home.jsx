@@ -252,30 +252,11 @@ export default function Home() {
           {/* ── Search panel ── */}
           <div style={{ border: `1.5px solid ${INK}`, background: PAPER_MID }}>
             {/* FIND SERVICES button — TOP */}
-            <div style={{ position: "relative", display: "block", padding: "6px 6px 4px" }}>
+            <div style={{ position: "relative", display: "block", padding: "5px" }}>
               <button onClick={doSearch} disabled={!selArea || !selCat}
-                style={{ width: "100%", background: `linear-gradient(180deg, #9A6030 0%, ${BROWN_BTN} 50%, #5A3010 100%)`, color: "#F5E8CC", border: `1px solid #3A1800`, borderRadius: 5, padding: "9px 20px", fontSize: 13, fontWeight: 900, fontFamily: "'Times New Roman', serif", letterSpacing: 4, boxShadow: "0 2px 6px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.15)", outline: "none", textTransform: "uppercase", cursor: (selArea && selCat) ? "pointer" : "not-allowed", position: "relative", zIndex: 1 }}>
+                style={{ width: "100%", background: `linear-gradient(180deg, #9A6030 0%, ${BROWN_BTN} 50%, #5A3010 100%)`, color: "#F5E8CC", border: `3px solid #E8C840`, borderRadius: 5, padding: "9px 20px", fontSize: 13, fontWeight: 900, fontFamily: "'Times New Roman', serif", letterSpacing: 4, boxShadow: "0 2px 6px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.15), 0 0 0 2px #F5D800", outline: "none", textTransform: "uppercase", cursor: (selArea && selCat) ? "pointer" : "not-allowed", position: "relative", zIndex: 1 }}>
                 Find Services
               </button>
-              {/* Hand-drawn marker circle around button only */}
-              <svg viewBox="0 0 300 48" preserveAspectRatio="none" aria-hidden="true"
-                style={{ position: "absolute", top: -2, left: -4, width: "calc(100% + 8px)", height: "calc(100% + 4px)", pointerEvents: "none", zIndex: 5, overflow: "visible" }}>
-                <defs>
-                  <filter id="fh" x="-15%" y="-30%" width="130%" height="160%">
-                    <feTurbulence type="fractalNoise" baseFrequency="0.018 0.09" numOctaves="3" seed="42" result="n"/>
-                    <feDisplacementMap in="SourceGraphic" in2="n" scale="2.8" xChannelSelector="R" yChannelSelector="G"/>
-                  </filter>
-                </defs>
-                {/* Warm yellow fill — not neon, like a Stabilo */}
-                <path d="M 14,10 C 30,2 80,-2 152,1 C 224,4 272,6 288,13 C 298,19 299,30 297,36 C 295,43 278,49 210,50 C 148,51 50,51 18,45 C 6,42 2,35 3,26 C 3,18 6,14 14,10 Z"
-                  fill="rgba(240,210,30,0.2)" filter="url(#fh)" />
-                {/* Main stroke — one confident loop, slightly uneven */}
-                <path d="M 16,9 C 50,0 110,-3 158,0 C 210,3 268,5 289,14 C 300,20 301,32 298,38 C 295,45 260,51 190,52 C 130,53 55,52 20,46 C 6,43 1,35 2,25 C 2,16 7,13 16,9"
-                  fill="none" stroke="#D4A800" strokeWidth="3.8" strokeLinecap="round" strokeLinejoin="round" filter="url(#fh)" opacity="0.9"/>
-                {/* Second looser pass — like the pen lifted and came back */}
-                <path d="M 22,7 C 60,-2 118,-4 162,0 C 215,3 271,7 291,16 C 301,22 300,35 296,41 C 291,48 248,53 175,54 C 112,54 48,53 18,47 C 5,44 0,37 1,27 C 1,17 10,10 22,7"
-                  fill="none" stroke="#EDD000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" filter="url(#fh)" opacity="0.55"/>
-              </svg>
 
             </div>
 
