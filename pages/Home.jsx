@@ -5,6 +5,8 @@ const BRAND = {
   orange: "#E8431A",
   teal: "#00BFA5",
   blue: "#0077B6",
+  deepBlue: "#003F6B",
+  navyBlue: "#001F3F",
   lightBg: "#F8FFFE",
   cardBg: "#FFFFFF",
   text: "#1A1A2E",
@@ -39,7 +41,6 @@ function groupAreas(areas) {
 }
 
 function getVillageName(area) {
-  // Extract just the village name after the "—"
   const parts = area.name.split("—");
   return parts.length > 1 ? parts[1].trim() : area.name;
 }
@@ -48,7 +49,6 @@ export default function Home() {
   const [areas, setAreas] = useState([]);
   const [categories, setCategories] = useState([]);
   const [services, setServices] = useState([]);
-
   const [selectedArea, setSelectedArea] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
   const [selectedService, setSelectedService] = useState("");
@@ -73,14 +73,10 @@ export default function Home() {
     const all = await Provider.filter({ is_visible: true });
     const filtered = all.filter((p) => {
       const areaMatch = p.service_areas && p.service_areas.includes(selectedArea);
-      const serviceMatch =
-        !selectedService ||
-        (p.services && p.services.includes(selectedService));
-      const statusMatch =
-        p.subscription_status === "active" || p.subscription_status === "trial";
+      const serviceMatch = !selectedService || (p.services && p.services.includes(selectedService));
+      const statusMatch = p.subscription_status === "active" || p.subscription_status === "trial";
       return areaMatch && serviceMatch && statusMatch;
     });
-    // Sort: premium first, then featured, then basic
     filtered.sort((a, b) => {
       const tierOrder = { premium: 0, featured: 1, basic: 2 };
       return (tierOrder[a.subscription_tier] ?? 3) - (tierOrder[b.subscription_tier] ?? 3);
@@ -112,49 +108,106 @@ export default function Home() {
 
   return (
     <div style={{ minHeight: "100vh", background: BRAND.lightBg, fontFamily: "'Segoe UI', sans-serif" }}>
-      {/* Header */}
+
+      {/* ── HERO SECTION ── */}
       <div style={{
-        background: `linear-gradient(135deg, ${BRAND.orange}, ${BRAND.teal})`,
-        padding: "20px 24px",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-        boxShadow: "0 4px 12px rgba(0,0,0,0.15)"
+        background: `linear-gradient(170deg, #001F3F 0%, #003F6B 50%, #005f99 100%)`,
+        padding: "48px 24px 56px",
+        textAlign: "center",
+        position: "relative",
+        overflow: "hidden",
       }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-          <img src="https://media.base44.com/images/public/69d062aca815ce8e697894b1/a9af95bc3_V-Hublogo.png"
-            style={{ height: 54, width: 54, borderRadius: 8 }} alt="V-Hub Logo" />
-          <div>
-            <div style={{ color: "#fff", fontSize: 28, fontWeight: 800, letterSpacing: 1 }}>V-HUB</div>
-            <div style={{ color: "rgba(255,255,255,0.88)", fontSize: 13 }}>The Villages Local Services</div>
-          </div>
+        {/* Decorative background circles */}
+        <div style={{
+          position: "absolute", top: -60, left: -60,
+          width: 220, height: 220, borderRadius: "50%",
+          background: "rgba(0,191,165,0.08)", pointerEvents: "none"
+        }} />
+        <div style={{
+          position: "absolute", bottom: -40, right: -40,
+          width: 260, height: 260, borderRadius: "50%",
+          background: "rgba(232,67,26,0.07)", pointerEvents: "none"
+        }} />
+        <div style={{
+          position: "absolute", top: 20, right: 80,
+          width: 120, height: 120, borderRadius: "50%",
+          background: "rgba(0,119,182,0.10)", pointerEvents: "none"
+        }} />
+
+        {/* Logo */}
+        <div style={{
+          display: "inline-block",
+          background: "rgba(255,255,255,0.06)",
+          borderRadius: 32,
+          padding: "20px 28px",
+          backdropFilter: "blur(8px)",
+          border: "1.5px solid rgba(255,255,255,0.12)",
+          boxShadow: "0 20px 60px rgba(0,0,0,0.35), 0 0 40px rgba(0,191,165,0.15)",
+          marginBottom: 28,
+        }}>
+          <img
+            src="https://media.base44.com/images/public/69d062aca815ce8e697894b1/f418f4c1d_V-Hublogo.png"
+            alt="V-Hub"
+            style={{
+              width: 220,
+              height: 220,
+              objectFit: "contain",
+              display: "block",
+              filter: "drop-shadow(0 8px 24px rgba(0,0,0,0.4))",
+            }}
+          />
         </div>
+
+        {/* Tagline */}
+        <div style={{
+          color: "#ffffff",
+          fontSize: 32,
+          fontWeight: 800,
+          letterSpacing: 0.5,
+          marginBottom: 10,
+          textShadow: "0 2px 12px rgba(0,0,0,0.4)",
+        }}>
+          The Villages Local Services
+        </div>
+        <div style={{
+          color: "rgba(255,255,255,0.75)",
+          fontSize: 18,
+          fontWeight: 400,
+          maxWidth: 480,
+          margin: "0 auto",
+          lineHeight: 1.6,
+        }}>
+          Find trusted providers in your neighborhood — fast, simple, and free
+        </div>
+
+        {/* Decorative divider */}
+        <div style={{
+          width: 80, height: 4, borderRadius: 4,
+          background: `linear-gradient(90deg, ${BRAND.orange}, ${BRAND.teal})`,
+          margin: "22px auto 0",
+        }} />
       </div>
 
-      {/* Hero */}
-      <div style={{ background: `linear-gradient(135deg, ${BRAND.orange}15, ${BRAND.teal}15)`, padding: "36px 24px 28px", textAlign: "center" }}>
-        <div style={{ fontSize: 30, fontWeight: 800, color: BRAND.text, marginBottom: 8 }}>
-          Find Local Services in The Villages
-        </div>
-        <div style={{ fontSize: 18, color: BRAND.subtext }}>
-          Trusted providers in your neighborhood — just a tap away
-        </div>
-      </div>
-
-      {/* Search Card */}
+      {/* ── SEARCH SECTION ── */}
       <div style={{ maxWidth: 720, margin: "0 auto", padding: "0 20px 40px" }}>
         <div style={{
           background: BRAND.cardBg,
-          borderRadius: 20,
-          padding: "32px 28px",
-          boxShadow: "0 6px 30px rgba(0,0,0,0.10)",
-          marginTop: -10
+          borderRadius: 24,
+          padding: "36px 30px",
+          boxShadow: "0 10px 40px rgba(0,0,0,0.12)",
+          marginTop: -28,
+          position: "relative",
+          zIndex: 10,
+          border: "1px solid rgba(0,0,0,0.06)"
         }}>
-          <div style={{ fontSize: 20, fontWeight: 700, color: BRAND.text, marginBottom: 24 }}>
-            🔍 Search for a Service
+          <div style={{ fontSize: 22, fontWeight: 800, color: BRAND.text, marginBottom: 6 }}>
+            🔍 Find a Service Provider
+          </div>
+          <div style={{ fontSize: 15, color: BRAND.subtext, marginBottom: 24 }}>
+            Select your village, then choose a service to find providers near you.
           </div>
 
-          {/* Area grouped dropdown */}
+          {/* Village Dropdown */}
           <label style={labelStyle}>📍 Your Village *</label>
           <select
             value={selectedArea}
@@ -206,17 +259,20 @@ export default function Home() {
             disabled={!selectedArea}
             style={{
               width: "100%",
-              background: selectedArea ? `linear-gradient(135deg, ${BRAND.orange}, ${BRAND.teal})` : "#ccc",
+              background: selectedArea
+                ? `linear-gradient(135deg, ${BRAND.orange}, ${BRAND.teal})`
+                : "#ddd",
               color: "#fff",
               border: "none",
               borderRadius: 14,
-              padding: "18px",
+              padding: "20px",
               fontSize: 20,
               fontWeight: 700,
               cursor: selectedArea ? "pointer" : "not-allowed",
-              marginTop: 16,
+              marginTop: 20,
               letterSpacing: 0.5,
-              boxShadow: selectedArea ? "0 4px 16px rgba(232,67,26,0.35)" : "none"
+              boxShadow: selectedArea ? "0 6px 20px rgba(232,67,26,0.35)" : "none",
+              transition: "all 0.2s"
             }}
           >
             Search Providers
@@ -228,7 +284,9 @@ export default function Home() {
           <div style={{ marginTop: 32 }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
               <div style={{ fontSize: 22, fontWeight: 700, color: BRAND.text }}>
-                {results.length > 0 ? `${results.length} Provider${results.length > 1 ? "s" : ""} Found` : "No Providers Found"}
+                {results.length > 0
+                  ? `${results.length} Provider${results.length > 1 ? "s" : ""} Found`
+                  : "No Providers Found"}
               </div>
               <button onClick={handleReset} style={{ color: BRAND.teal, background: "none", border: "none", fontSize: 16, cursor: "pointer", fontWeight: 600 }}>
                 ← New Search
@@ -237,7 +295,7 @@ export default function Home() {
 
             {results.length === 0 && (
               <div style={{ textAlign: "center", padding: "40px 20px", background: "#fff", borderRadius: 16, color: BRAND.subtext, fontSize: 18 }}>
-                😔 No providers found for this area and service yet.<br />
+                😔 No providers found for this area yet.<br />
                 <span style={{ fontSize: 15 }}>Check back soon as more providers join V-Hub!</span>
               </div>
             )}
@@ -254,29 +312,33 @@ export default function Home() {
           </div>
         )}
 
-        {/* Categories grid when not searched */}
+        {/* Category Grid */}
         {!searched && (
-          <div style={{ marginTop: 36 }}>
-            <div style={{ fontSize: 20, fontWeight: 700, color: BRAND.text, marginBottom: 16 }}>Browse by Category</div>
+          <div style={{ marginTop: 40 }}>
+            <div style={{ fontSize: 20, fontWeight: 700, color: BRAND.text, marginBottom: 4 }}>Browse by Category</div>
+            <div style={{ fontSize: 15, color: BRAND.subtext, marginBottom: 18 }}>Tap a category to filter your search</div>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(140px, 1fr))", gap: 14 }}>
               {categories.map((c) => (
                 <div
                   key={c.id}
                   onClick={() => setSelectedCategory(c.id)}
                   style={{
-                    background: selectedCategory === c.id ? `linear-gradient(135deg, ${BRAND.orange}, ${BRAND.teal})` : "#fff",
+                    background: selectedCategory === c.id
+                      ? `linear-gradient(135deg, ${BRAND.orange}, ${BRAND.teal})`
+                      : "#fff",
                     color: selectedCategory === c.id ? "#fff" : BRAND.text,
-                    borderRadius: 14,
-                    padding: "18px 12px",
+                    borderRadius: 16,
+                    padding: "20px 12px",
                     textAlign: "center",
                     cursor: "pointer",
-                    boxShadow: "0 3px 12px rgba(0,0,0,0.08)",
+                    boxShadow: "0 3px 14px rgba(0,0,0,0.08)",
                     fontSize: 15,
                     fontWeight: 600,
-                    border: `2px solid ${selectedCategory === c.id ? "transparent" : "#eee"}`
+                    border: `2px solid ${selectedCategory === c.id ? "transparent" : "#eee"}`,
+                    transition: "all 0.15s"
                   }}
                 >
-                  <div style={{ fontSize: 28, marginBottom: 6 }}>{c.icon}</div>
+                  <div style={{ fontSize: 30, marginBottom: 8 }}>{c.icon}</div>
                   {c.name}
                 </div>
               ))}
@@ -288,6 +350,7 @@ export default function Home() {
   );
 }
 
+// ── Provider Card ─────────────────────────────────────────────────────────────
 function ProviderCard({ provider, categories, services, onClick }) {
   const cat = categories.find((c) => c.id === provider.category_id);
   const providerServices = services.filter((s) => provider.services && provider.services.includes(s.id));
@@ -337,7 +400,7 @@ function ProviderCard({ provider, categories, services, onClick }) {
           </span>
         ))}
         {providerServices.length > 4 && (
-          <span style={{ color: BRAND.subtext, fontSize: 13, padding: "4px 4px" }}>+{providerServices.length - 4} more</span>
+          <span style={{ color: BRAND.subtext, fontSize: 13 }}>+{providerServices.length - 4} more</span>
         )}
       </div>
 
@@ -348,6 +411,7 @@ function ProviderCard({ provider, categories, services, onClick }) {
   );
 }
 
+// ── Provider Profile ──────────────────────────────────────────────────────────
 function ProviderProfile({ provider, areas, categories, services, onBack }) {
   const cat = categories.find((c) => c.id === provider.category_id);
   const providerServices = services.filter((s) => provider.services && provider.services.includes(s.id));
@@ -356,18 +420,18 @@ function ProviderProfile({ provider, areas, categories, services, onBack }) {
   return (
     <div style={{ minHeight: "100vh", background: BRAND.lightBg, fontFamily: "'Segoe UI', sans-serif" }}>
       <div style={{
-        background: `linear-gradient(135deg, ${BRAND.orange}, ${BRAND.teal})`,
+        background: `linear-gradient(135deg, #001F3F, #003F6B)`,
         padding: "20px 24px",
         display: "flex",
         alignItems: "center",
         gap: 12,
-        boxShadow: "0 4px 12px rgba(0,0,0,0.15)"
+        boxShadow: "0 4px 12px rgba(0,0,0,0.2)"
       }}>
-        <button onClick={onBack} style={{ background: "rgba(255,255,255,0.2)", border: "none", color: "#fff", borderRadius: 10, padding: "8px 14px", fontSize: 16, cursor: "pointer", fontWeight: 600 }}>
+        <button onClick={onBack} style={{ background: "rgba(255,255,255,0.15)", border: "none", color: "#fff", borderRadius: 10, padding: "8px 16px", fontSize: 16, cursor: "pointer", fontWeight: 600 }}>
           ← Back
         </button>
-        <img src="https://media.base44.com/images/public/69d062aca815ce8e697894b1/a9af95bc3_V-Hublogo.png"
-          style={{ height: 40, width: 40, borderRadius: 6 }} alt="V-Hub" />
+        <img src="https://media.base44.com/images/public/69d062aca815ce8e697894b1/f418f4c1d_V-Hublogo.png"
+          style={{ height: 40, width: 40, borderRadius: 6, objectFit: "contain" }} alt="V-Hub" />
         <div style={{ color: "#fff", fontSize: 20, fontWeight: 700 }}>Provider Profile</div>
       </div>
 
