@@ -170,7 +170,7 @@ export default function Home() {
             🔍 Find Services
           </button>
           <button
-            onClick={() => setMode("list")}
+            onClick={() => window.location.href = "/list-service"}
             style={{
               background: mode === "list" ? "#fff" : "transparent",
               color: mode === "list" ? BRAND.teal : "#fff",

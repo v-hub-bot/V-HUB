@@ -7,6 +7,9 @@
     },
     "Admin": {
       "title": "Admin"
+    },
+    "ListService": {
+      "title": "ListService"
     }
   }
 }
