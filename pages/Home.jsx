@@ -137,6 +137,27 @@ const newsStyle = {
 
 function Burger() {
   const [open, setOpen] = useState(false);
+  const [pinMode, setPinMode] = useState(false);
+  const [pin, setPin] = useState("");
+  const [adminUnlocked, setAdminUnlocked] = useState(false);
+  const [pinError, setPinError] = useState(false);
+
+  const handlePinKey = (digit) => {
+    const next = pin + digit;
+    setPin(next);
+    setPinError(false);
+    if (next.length === 4) {
+      if (next === "6185") {
+        setAdminUnlocked(true);
+        setPinMode(false);
+        setPin("");
+      } else {
+        setPinError(true);
+        setTimeout(() => { setPin(""); setPinError(false); }, 800);
+      }
+    }
+  };
+
   return (
     <>
       <button onClick={() => setOpen(true)} style={{ background: "rgba(28,15,0,0.12)", border: `1px solid ${INK}44`, borderRadius: 4, width: 72, height: 72, cursor: "pointer", display: "flex", flexDirection: "column", gap: 6, justifyContent: "center", alignItems: "center", flexShrink: 0, padding: 0, boxSizing: "border-box" }}>
@@ -144,13 +165,13 @@ function Burger() {
       </button>
       {open && (
         <>
-          <div onClick={() => setOpen(false)} style={{ position: "fixed", inset: 0, zIndex: 299, background: "rgba(0,0,0,0.55)" }} />
-          <div style={{ position: "fixed", top: 0, right: 0, bottom: 0, width: 235, background: PAPER, zIndex: 300, boxShadow: "-3px 0 20px rgba(0,0,0,0.3)", fontFamily: "'Times New Roman', serif" }}>
+          <div onClick={() => { setOpen(false); setPinMode(false); setPin(""); }} style={{ position: "fixed", inset: 0, zIndex: 299, background: "rgba(0,0,0,0.55)" }} />
+          <div style={{ position: "fixed", top: 0, right: 0, bottom: 0, width: 235, background: PAPER, zIndex: 300, boxShadow: "-3px 0 20px rgba(0,0,0,0.3)", fontFamily: "'Times New Roman', serif", display: "flex", flexDirection: "column" }}>
             <div style={{ background: INK, padding: "13px 12px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
               <span style={{ color: PAPER, fontWeight: 900, fontSize: 14, letterSpacing: 2 }}>🌴 V-HUB</span>
-              <button onClick={() => setOpen(false)} style={{ background: "rgba(255,255,255,0.1)", border: "none", color: "#fff", borderRadius: 3, width: 22, height: 22, fontSize: 12, cursor: "pointer" }}>✕</button>
+              <button onClick={() => { setOpen(false); setPinMode(false); setPin(""); }} style={{ background: "rgba(255,255,255,0.1)", border: "none", color: "#fff", borderRadius: 3, width: 22, height: 22, fontSize: 12, cursor: "pointer" }}>✕</button>
             </div>
-            <div style={{ padding: "8px 7px" }}>
+            <div style={{ padding: "8px 7px", flex: 1, overflowY: "auto" }}>
               {[
                 { label: "🏠 Home", href: "/" },
                 { label: "📋 List Your Business", href: "/ListService" },
@@ -164,6 +185,43 @@ function Burger() {
               <div style={{ padding: "6px 12px", fontSize: 10, color: INK_FADE, fontStyle: "italic", fontFamily: "Georgia, serif", lineHeight: 1.5 }}>
                 Already listed? Visit the <strong>Provider Hub</strong> to manage your profile, view your stats, and read your reviews.
               </div>
+
+              {/* Admin unlock — PIN keypad */}
+              {pinMode && !adminUnlocked && (
+                <div style={{ margin: "16px 7px 0", padding: "12px", background: PAPER_MID, borderRadius: 6, border: `1px solid ${PAPER_DK}` }}>
+                  <div style={{ fontSize: 11, fontWeight: 700, color: INK, textAlign: "center", marginBottom: 8, letterSpacing: 1 }}>ENTER PIN</div>
+                  <div style={{ display: "flex", justifyContent: "center", gap: 8, marginBottom: 10 }}>
+                    {[0,1,2,3].map(i => (
+                      <div key={i} style={{ width: 14, height: 14, borderRadius: "50%", border: `2px solid ${BROWN_BTN}`, background: pin.length > i ? (pinError ? "#cc0000" : BROWN_BTN) : "transparent" }} />
+                    ))}
+                  </div>
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 6 }}>
+                    {["1","2","3","4","5","6","7","8","9","","0","⌫"].map((d, i) => (
+                      <button key={i} onClick={() => { if (d === "⌫") { setPin(p => p.slice(0,-1)); setPinError(false); } else if (d !== "") handlePinKey(d); }}
+                        style={{ padding: "9px 0", fontSize: 15, fontWeight: 700, fontFamily: "'Times New Roman', serif", color: INK, background: d === "" ? "transparent" : PAPER, border: d === "" ? "none" : `1px solid ${PAPER_DK}`, borderRadius: 4, cursor: d === "" ? "default" : "pointer" }}>
+                        {d}
+                      </button>
+                    ))}
+                  </div>
+                  {pinError && <div style={{ textAlign: "center", color: "#cc0000", fontSize: 10, marginTop: 6, fontStyle: "italic" }}>Incorrect PIN</div>}
+                </div>
+              )}
+
+              {/* Admin link — only visible after unlock */}
+              {adminUnlocked && (
+                <a href="/Admin" style={{ textDecoration: "none" }}>
+                  <div style={{ margin: "12px 0 0", padding: "10px 12px", borderRadius: 3, fontSize: 13, fontWeight: 700, color: PAPER, background: "#1A3F70", borderLeft: "4px solid #0D2545" }}>⚙️ Admin Dashboard</div>
+                </a>
+              )}
+            </div>
+
+            {/* Hidden lock icon at very bottom */}
+            <div style={{ padding: "8px 12px", borderTop: `1px solid ${PAPER_DK}`, display: "flex", justifyContent: "flex-end" }}>
+              <button onClick={() => { setPinMode(m => !m); setPin(""); setPinError(false); }}
+                style={{ background: "none", border: "none", cursor: "pointer", opacity: 0.25, fontSize: 16, color: INK, padding: 4 }}
+                title="">
+                🔒
+              </button>
             </div>
           </div>
         </>
