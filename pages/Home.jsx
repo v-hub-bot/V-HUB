@@ -666,10 +666,15 @@ function SvcDropdown({ open, cats, svcs, openCat, selSvc, setOpenCat, setSelSvc,
         const parentSelected = selSvc?.category_id === c.id;
         return (
           <div key={c.id}>
-            <div onClick={e => { e.stopPropagation(); setOpenCat(isExpanded ? null : c.id); }}
-              style={{ padding: "10px 14px", fontSize: 13, fontWeight: 700, color: parentSelected ? "#fff" : INK, background: parentSelected ? BROWN_HL : PAPER, borderBottom: `1px solid ${PAPER_DK}`, cursor: "pointer", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <span>{c.icon} {c.name}</span>
-              <span style={{ fontSize: 10 }}>{isExpanded ? "▲" : "▼"}</span>
+            <div style={{ display: "flex", borderBottom: `1px solid ${PAPER_DK}`, background: parentSelected ? BROWN_HL : PAPER }}>
+              <div onClick={e => { e.stopPropagation(); setSelSvc({ id: c.id, name: c.name, category_id: c.id, icon: c.icon, _isCat: true }); setSOpen(false); setOpenCat(null); }}
+                style={{ flex: 1, padding: "10px 14px", fontSize: 13, fontWeight: 700, color: parentSelected ? "#fff" : INK, cursor: "pointer" }}>
+                {c.icon} {c.name}
+              </div>
+              <div onClick={e => { e.stopPropagation(); setOpenCat(isExpanded ? null : c.id); }}
+                style={{ padding: "10px 14px", fontSize: 10, color: parentSelected ? "#fff" : INK, cursor: "pointer", borderLeft: `1px solid ${PAPER_DK}` }}>
+                {isExpanded ? "▲" : "▼"}
+              </div>
             </div>
             {isExpanded && catSvcs.map(s => {
               const isSvcSelected = selSvc?.id === s.id;
@@ -729,7 +734,7 @@ function SearchBox({ cats, svcs, grouped, onSearch, selSvc, setSelSvc, selArea, 
   const closeAll = () => { setSOpen(false); setVOpen(false); setOpenCat(null); setOpenSec(null); };
 
   // Build display label: show selected service name
-  const svcLabel = selSvc ? selSvc.name : "Select a Service...";
+  const svcLabel = selSvc ? (selSvc._isCat ? `${selSvc.icon || ""} ${selSvc.name}` : selSvc.name) : "Select a Service...";
 
   return (
     <div onClick={closeAll} style={{ background: PAPER_MID, border: `2px solid ${PAPER_DK}`, borderRadius: 6, padding: "14px 12px", width: "100%", boxSizing: "border-box" }}>
@@ -938,25 +943,27 @@ export default function Home() {
     try { all = await Provider.list(); } catch(e) { all = []; }
     // Map village description (section key like "Historic Side | Spanish Springs") to
     // the short macro key stored in provider.service_areas
+    // Map village description to the short lowercase key stored in provider.service_areas
     const SECTION_TO_MACRO = {
-      "Historic Side | Spanish Springs":         "Historic Side",
-      "Established Villages | North of SR-466A": "Established Villages",
-      "Newer Villages | South of SR-44":          "Newer Villages",
-      "Eastport | Newest Development Area":       "Eastport",
-      "Family & Non-Age-Restricted Villages":     "Family Villages",
+      "Historic Side | Spanish Springs":         "historic",
+      "Established Villages | North of SR-466A": "established",
+      "Newer Villages | South of SR-44":         "newer",
+      "Eastport | Newest Development Area":      "eastport",
+      "Family & Non-Age-Restricted Villages":    "family",
     };
     const macroKey = selArea ? SECTION_TO_MACRO[selArea.description] || null : null;
     const out = all.filter(p => {
       if (p.is_visible === false) return false;
-      // Area match: provider serves this macro area OR "All Villages"
+      // Area match: provider serves this macro area OR no area filter
       const areaMatch = !selArea || !macroKey ||
-        (p.service_areas || []).includes(macroKey) ||
-        (p.service_areas || []).includes("All Villages");
-      // Service match: provider lists this service name OR no filter
-      const svcMatch = !selSvc ||
+        (p.service_areas || []).some(a => a.toLowerCase() === macroKey) ||
+        (p.service_areas || []).some(a => a.toLowerCase() === "all villages");
+      // Service match: by sub-service name OR by category_id (when category selected)
+      const provCatId = selSvc?.category_id || selSvc?.id;
+      const svcMatch = !selSvc || (
         (p.services || []).includes(selSvc.name) ||
-        // fallback: match by category if no specific services listed
-        (!p.services?.length && p.category_id === selSvc.category_id);
+        p.category_id === provCatId
+      );
       return areaMatch && svcMatch;
     });
     // Fetch approved V-Hub reviews for matched providers and sort by rating
