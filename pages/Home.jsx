@@ -118,7 +118,7 @@ function Burger() {
             <div style={{ padding: "8px 7px" }}>
               {[
                 { label: "🏠 Home", href: "/" },
-                { label: "📋 List Your Service", href: "/list-service" },
+                { label: "📋 List Your Service", href: "/ListService" },
               ].map((l, i) => (
                 <a key={i} href={l.href} style={{ textDecoration: "none" }}>
                   <div style={{ padding: "10px 12px", borderRadius: 3, fontSize: 13, fontWeight: 700, color: INK, marginBottom: 4, background: PAPER_MID, borderLeft: `4px solid ${BROWN_BTN}` }}>{l.label}</div>
@@ -440,7 +440,7 @@ function SearchBox({ cats, svcs, grouped, onSearch }) {
 
   return (
     <div onClick={closeAll} style={{ background: PAPER_MID, border: `2px solid ${PAPER_DK}`, borderRadius: 6, padding: "14px 12px", width: "100%", boxSizing: "border-box" }}>
-      <a href="/list-service" style={{ textDecoration: "none", display: "block", marginBottom: 8 }} onClick={e => e.stopPropagation()}>
+      <a href="/ListService" style={{ textDecoration: "none", display: "block", marginBottom: 8 }} onClick={e => e.stopPropagation()}>
         <button style={{
           width: "100%", background: `linear-gradient(180deg,#9A6030,${BROWN_BTN} 60%,#5A3010)`,
           border: `3px solid ${BROWN_BTN}`,
@@ -753,7 +753,7 @@ export default function Home() {
           </div>
           {/* List Your Service button */}
           <div style={{ textAlign: "center" }}>
-            <a href="/list-service" style={{ textDecoration: "none" }}>
+            <a href="/ListService" style={{ textDecoration: "none" }}>
               <button style={{ background: `linear-gradient(180deg,#9A6030,${BROWN_BTN} 60%,#5A3010)`, color: "#F5E8CC", border: "none", borderRadius: 5, padding: "9px 28px", fontSize: 13, fontWeight: 700, fontFamily: "'Times New Roman', serif", letterSpacing: 2, cursor: "pointer", boxShadow: "0 2px 8px rgba(0,0,0,0.3)" }}>
                 List Your Service
               </button>
