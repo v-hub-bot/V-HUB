@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { ServiceArea, Category, Service, Provider } from "@/api/entities";
 
 const INK       = "#1C0F00";
@@ -83,6 +83,56 @@ function Burger() {
             </div>
           </div>
         </>
+      )}
+
+      {/* ── ROOT LEVEL DROPDOWNS (fixed position, escape all stacking contexts) ── */}
+      {sOpen && sRect && (
+        <div onClick={e => e.stopPropagation()} style={{ position: "fixed", top: sRect.bottom + 3, left: sRect.left, width: Math.max(sRect.width, 160), background: PAPER, border: `2px solid ${INK}`, borderRadius: 4, zIndex: 99999, boxShadow: "0 8px 28px rgba(0,0,0,0.4)", maxHeight: 300, overflowY: "auto" }}>
+          {cats.map(c => {
+            const catSvcs = svcs.filter(s => s.category_id === c.id);
+            const isExpanded = openCat === c.id;
+            const isSelected = selCat?.id === c.id;
+            return (
+              <div key={c.id}>
+                <div onClick={e => { e.stopPropagation(); setOpenCat(isExpanded ? null : c.id); }}
+                  style={{ padding: "10px 14px", fontSize: 13, fontWeight: 600, color: isSelected ? "#fff" : INK, background: isSelected ? BROWN_HL : PAPER, borderBottom: `1px solid ${PAPER_DK}`, cursor: "pointer", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <span>{c.icon} {c.name}</span>
+                  <span style={{ fontSize: 9, color: isSelected ? "#fff" : INK_FADE }}>{isExpanded ? "▲" : "▼"}</span>
+                </div>
+                {isExpanded && catSvcs.map(s => (
+                  <div key={s.id} onClick={e => { e.stopPropagation(); setSelCat(c); setSOpen(false); setOpenCat(null); }}
+                    style={{ padding: "9px 14px 9px 28px", fontSize: 13, color: INK, background: PAPER_MID, borderBottom: `1px solid ${PAPER_DK}`, cursor: "pointer" }}>
+                    {s.name}
+                  </div>
+                ))}
+              </div>
+            );
+          })}
+        </div>
+      )}
+      {vOpen && vRect && (
+        <div onClick={e => e.stopPropagation()} style={{ position: "fixed", top: vRect.bottom + 3, left: vRect.left, width: Math.max(vRect.width, 160), background: PAPER, border: `2px solid ${INK}`, borderRadius: 4, zIndex: 99999, boxShadow: "0 8px 28px rgba(0,0,0,0.4)", maxHeight: 300, overflowY: "auto" }}>
+          {SECTIONS.map(sec => {
+            const vils = grouped[sec.key] || [];
+            const isExpanded = openSec === sec.key;
+            const secSelected = selArea && vils.some(v => v.id === selArea.id);
+            return (
+              <div key={sec.key}>
+                <div onClick={e => { e.stopPropagation(); setOpenSec(isExpanded ? null : sec.key); }}
+                  style={{ padding: "10px 14px", fontSize: 13, fontWeight: 600, color: secSelected ? "#fff" : INK, background: secSelected ? BROWN_HL : PAPER, borderBottom: `1px solid ${PAPER_DK}`, cursor: "pointer", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <span>{sec.label}</span>
+                  <span style={{ fontSize: 9, color: secSelected ? "#fff" : INK_FADE }}>{isExpanded ? "▲" : "▼"}</span>
+                </div>
+                {isExpanded && vils.map(v => (
+                  <div key={v.id} onClick={e => { e.stopPropagation(); setSelArea(v); setVOpen(false); setOpenSec(null); }}
+                    style={{ padding: "9px 14px 9px 28px", fontSize: 13, color: selArea?.id === v.id ? "#fff" : INK, background: selArea?.id === v.id ? BROWN_HL : PAPER_MID, borderBottom: `1px solid ${PAPER_DK}`, cursor: "pointer" }}>
+                    {vName(v)}
+                  </div>
+                ))}
+              </div>
+            );
+          })}
+        </div>
       )}
     </>
   );
@@ -212,6 +262,23 @@ export default function Home() {
   const [vOpen,    setVOpen]    = useState(false);
   const [openCat,  setOpenCat]  = useState(null);
   const [openSec,  setOpenSec]  = useState(null);
+  const [sRect,    setSRect]    = useState(null);
+  const [vRect,    setVRect]    = useState(null);
+  const sBtnRef = useRef(null);
+  const vBtnRef = useRef(null);
+
+  // Measure button rects when dropdowns open
+  useEffect(() => {
+    if (sOpen && sBtnRef.current) {
+      setSRect(sBtnRef.current.getBoundingClientRect());
+    }
+  }, [sOpen]);
+
+  useEffect(() => {
+    if (vOpen && vBtnRef.current) {
+      setVRect(vBtnRef.current.getBoundingClientRect());
+    }
+  }, [vOpen]);
   const [results,  setResults]  = useState([]);
   const [searched, setSearched] = useState(false);
   const [selProv,  setSelProv]  = useState(null);
@@ -302,7 +369,7 @@ export default function Home() {
         <Rule />
 
         {/* ── THREE COLUMN BODY ── */}
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1.8fr 1fr", gap: 0 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1.8fr 1fr", gap: 0, overflow: "visible" }}>
 
           {/* Left */}
           <div style={{ padding: "12px 10px", borderRight: `1px solid ${INK}` }}>
@@ -310,11 +377,11 @@ export default function Home() {
           </div>
 
           {/* Centre — search */}
-          <div style={{ padding: "12px 14px", borderRight: `1px solid ${INK}` }}>
+          <div style={{ padding: "12px 14px", borderRight: `1px solid ${INK}`, overflow: "visible", position: "relative" }}>
             <NewsCol idx={2} lines={1} style={{ marginBottom: 12, fontSize: 8 }} />
 
             {/* ══ SEARCH PANEL ══ */}
-            <div onClick={e => e.stopPropagation()} style={{ border: `2px solid ${INK}`, borderRadius: 5, background: PAPER_MID, padding: "8px 8px 10px" }}>
+            <div onClick={e => e.stopPropagation()} style={{ border: `2px solid ${INK}`, borderRadius: 5, background: PAPER_MID, padding: "8px 8px 10px", position: "relative", overflow: "visible" }}>
 
               {/* Labels row */}
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 4 }}>
@@ -323,138 +390,26 @@ export default function Home() {
               </div>
 
               {/* Buttons + open dropdowns row */}
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, position: "relative" }}>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6, position: "relative", minWidth: 0 }}>
 
                 {/* ── SERVICE column ── */}
                 <div style={{ position: "relative" }}>
+                  <div ref={sBtnRef}>
                   <DropBtn
                     label={selCat ? selCat.name : "Select a Service"}
                     isOpen={sOpen}
                     onClick={e => { e.stopPropagation(); setSOpen(o => !o); setVOpen(false); }}
                   />
-                  {sOpen && (
-                    <div
-                      onClick={e => e.stopPropagation()}
-                      style={{
-                        position: "absolute",
-                        top: "calc(100% + 3px)",
-                        left: 0,
-                        right: 0,
-                        background: PAPER,
-                        border: `2px solid ${INK}`,
-                        borderRadius: 4,
-                        zIndex: 9999,
-                        boxShadow: "0 8px 28px rgba(0,0,0,0.4)",
-                        maxHeight: 300,
-                        overflowY: "auto",
-                      }}>
-                      <div
-                        onClick={() => { setSelCat(null); setOpenCat(null); setSOpen(false); }}
-                        style={{ padding: "9px 12px", fontSize: 11, color: INK_FADE, fontStyle: "italic", borderBottom: `1px solid ${PAPER_DK}`, cursor: "pointer", background: !selCat ? PAPER_MID : PAPER }}>
-                        — All Services —
-                      </div>
-                      {cats.map(c => {
-                        const catSvcs = svcs.filter(s => s.category_id === c.id);
-                        const isExpanded = openCat === c.id;
-                        return (
-                          <div key={c.id}>
-                            {/* Category header row */}
-                            <div
-                              onClick={e => { e.stopPropagation(); setOpenCat(isExpanded ? null : c.id); }}
-                              style={{
-                                padding: "10px 12px",
-                                fontSize: 12,
-                                fontWeight: 700,
-                                color: "#fff",
-                                background: selCat?.id === c.id ? BROWN_HL : "#5C2E0E",
-                                borderBottom: `1px solid rgba(255,255,255,0.12)`,
-                                cursor: "pointer",
-                                display: "flex",
-                                justifyContent: "space-between",
-                                alignItems: "center",
-                              }}>
-                              <span>{c.icon} {c.name}</span>
-                              <span style={{ fontSize: 9 }}>{isExpanded ? "▲" : "▼"}</span>
-                            </div>
-                            {/* Subcategory rows */}
-                            {isExpanded && catSvcs.map(s => (
-                              <div
-                                key={s.id}
-                                onClick={e => { e.stopPropagation(); setSelCat(c); setSOpen(false); setOpenCat(null); }}
-                                style={{
-                                  padding: "9px 12px 9px 22px",
-                                  fontSize: 12,
-                                  color: selCat?.id === c.id ? "#fff" : INK,
-                                  background: selCat?.id === c.id ? BROWN_HL : PAPER,
-                                  borderBottom: `1px solid ${PAPER_DK}`,
-                                  cursor: "pointer",
-                                }}>
-                                {s.name}
-                              </div>
-                            ))}
-                          </div>
-                        );
-                      })}
-                    </div>
-                  )}
                 </div>
-
+                  
                 {/* ── VILLAGE column ── */}
-                <div style={{ position: "relative" }}>
+                <div style={{ position: "relative" }} ref={vBtnRef}>
                   <DropBtn
                     label={selArea ? vName(selArea) : "Select a Village"}
                     isOpen={vOpen}
                     onClick={e => { e.stopPropagation(); setVOpen(o => !o); setSOpen(false); }}
                   />
-                  {vOpen && (
-                    <div
-                      onClick={e => e.stopPropagation()}
-                      style={{
-                        position: "absolute",
-                        top: "calc(100% + 3px)",
-                        left: 0,
-                        right: 0,
-                        background: PAPER,
-                        border: `2px solid ${INK}`,
-                        borderRadius: 4,
-                        zIndex: 9999,
-                        boxShadow: "0 8px 28px rgba(0,0,0,0.4)",
-                        maxHeight: 300,
-                        overflowY: "auto",
-                      }}>
-                      <div
-                        onClick={() => { setSelArea(null); setOpenSec(null); setVOpen(false); }}
-                        style={{ padding: "9px 12px", fontSize: 11, color: INK_FADE, fontStyle: "italic", borderBottom: `1px solid ${PAPER_DK}`, cursor: "pointer", background: !selArea ? PAPER_MID : PAPER }}>
-                        — All Villages —
-                      </div>
-                      {SECTIONS.map(sec => {
-                        const vils = grouped[sec.key] || [];
-                        const isExpanded = openSec === sec.key;
-                        const secColors = { "Historic Side | Spanish Springs": "#5C2E0E", "Established Villages | North of SR-466A": "#2E4E1A", "Newer Villages | South of SR-44": "#1E4E1E", "Eastport | Newest Development Area": "#1A3060", "Family & Non-Age-Restricted Villages": "#3A1E5C" };
-                        const hdrColor = secColors[sec.key] || "#5C2E0E";
-                        return (
-                          <div key={sec.key}>
-                            <div
-                              onClick={e => { e.stopPropagation(); setOpenSec(isExpanded ? null : sec.key); }}
-                              style={{ padding: "10px 12px", fontSize: 12, fontWeight: 700, color: "#fff", background: hdrColor, borderBottom: "1px solid rgba(255,255,255,0.12)", cursor: "pointer", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                              <span>{sec.label}</span>
-                              <span style={{ fontSize: 9 }}>{isExpanded ? "▲" : "▼"}</span>
-                            </div>
-                            {isExpanded && vils.map(v => (
-                              <div
-                                key={v.id}
-                                onClick={e => { e.stopPropagation(); setSelArea(v); setVOpen(false); setOpenSec(null); }}
-                                style={{ padding: "9px 12px 9px 22px", fontSize: 12, color: selArea?.id === v.id ? "#fff" : INK, background: selArea?.id === v.id ? BROWN_HL : PAPER, borderBottom: `1px solid ${PAPER_DK}`, cursor: "pointer" }}>
-                                {vName(v)}
-                              </div>
-                            ))}
-                          </div>
-                        );
-                      })}
-                    </div>
-                  )}
-                </div>
-
+                  
               </div>
 
               {/* FIND SERVICES button — below dropdowns */}
@@ -501,6 +456,56 @@ export default function Home() {
         </div>
 
       </div>
+
+      {/* ── ROOT LEVEL DROPDOWNS (fixed position, escape all stacking contexts) ── */}
+      {sOpen && sRect && (
+        <div onClick={e => e.stopPropagation()} style={{ position: "fixed", top: sRect.bottom + 3, left: sRect.left, width: Math.max(sRect.width, 160), background: PAPER, border: `2px solid ${INK}`, borderRadius: 4, zIndex: 99999, boxShadow: "0 8px 28px rgba(0,0,0,0.4)", maxHeight: 300, overflowY: "auto" }}>
+          {cats.map(c => {
+            const catSvcs = svcs.filter(s => s.category_id === c.id);
+            const isExpanded = openCat === c.id;
+            const isSelected = selCat?.id === c.id;
+            return (
+              <div key={c.id}>
+                <div onClick={e => { e.stopPropagation(); setOpenCat(isExpanded ? null : c.id); }}
+                  style={{ padding: "10px 14px", fontSize: 13, fontWeight: 600, color: isSelected ? "#fff" : INK, background: isSelected ? BROWN_HL : PAPER, borderBottom: `1px solid ${PAPER_DK}`, cursor: "pointer", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <span>{c.icon} {c.name}</span>
+                  <span style={{ fontSize: 9, color: isSelected ? "#fff" : INK_FADE }}>{isExpanded ? "▲" : "▼"}</span>
+                </div>
+                {isExpanded && catSvcs.map(s => (
+                  <div key={s.id} onClick={e => { e.stopPropagation(); setSelCat(c); setSOpen(false); setOpenCat(null); }}
+                    style={{ padding: "9px 14px 9px 28px", fontSize: 13, color: INK, background: PAPER_MID, borderBottom: `1px solid ${PAPER_DK}`, cursor: "pointer" }}>
+                    {s.name}
+                  </div>
+                ))}
+              </div>
+            );
+          })}
+        </div>
+      )}
+      {vOpen && vRect && (
+        <div onClick={e => e.stopPropagation()} style={{ position: "fixed", top: vRect.bottom + 3, left: vRect.left, width: Math.max(vRect.width, 160), background: PAPER, border: `2px solid ${INK}`, borderRadius: 4, zIndex: 99999, boxShadow: "0 8px 28px rgba(0,0,0,0.4)", maxHeight: 300, overflowY: "auto" }}>
+          {SECTIONS.map(sec => {
+            const vils = grouped[sec.key] || [];
+            const isExpanded = openSec === sec.key;
+            const secSelected = selArea && vils.some(v => v.id === selArea.id);
+            return (
+              <div key={sec.key}>
+                <div onClick={e => { e.stopPropagation(); setOpenSec(isExpanded ? null : sec.key); }}
+                  style={{ padding: "10px 14px", fontSize: 13, fontWeight: 600, color: secSelected ? "#fff" : INK, background: secSelected ? BROWN_HL : PAPER, borderBottom: `1px solid ${PAPER_DK}`, cursor: "pointer", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <span>{sec.label}</span>
+                  <span style={{ fontSize: 9, color: secSelected ? "#fff" : INK_FADE }}>{isExpanded ? "▲" : "▼"}</span>
+                </div>
+                {isExpanded && vils.map(v => (
+                  <div key={v.id} onClick={e => { e.stopPropagation(); setSelArea(v); setVOpen(false); setOpenSec(null); }}
+                    style={{ padding: "9px 14px 9px 28px", fontSize: 13, color: selArea?.id === v.id ? "#fff" : INK, background: selArea?.id === v.id ? BROWN_HL : PAPER_MID, borderBottom: `1px solid ${PAPER_DK}`, cursor: "pointer" }}>
+                    {vName(v)}
+                  </div>
+                ))}
+              </div>
+            );
+          })}
+        </div>
+      )}
     </>
   );
 }
