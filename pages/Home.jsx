@@ -683,9 +683,7 @@ function VilDropdown({ open, grouped, openSec, selArea, setOpenSec, setSelArea, 
 }
 
 // ── Search Box ────────────────────────────────────────────────────────────────
-function SearchBox({ cats, svcs, grouped, onSearch }) {
-  const [selSvc,  setSelSvc]  = useState(null);   // selected Service (subcategory)
-  const [selArea, setSelArea] = useState(null);
+function SearchBox({ cats, svcs, grouped, onSearch, selSvc, setSelSvc, selArea, setSelArea }) {
   const [sOpen,   setSOpen]   = useState(false);
   const [vOpen,   setVOpen]   = useState(false);
   const [openCat, setOpenCat] = useState(null);
@@ -747,6 +745,8 @@ export default function Home() {
   const [selProv,  setSelProv]  = useState(null);
   const [selAreaR, setSelAreaR] = useState(null);
   const [selCatR,  setSelCatR]  = useState(null);
+  const [selSvc,   setSelSvc]   = useState(null);
+  const [selArea,  setSelArea]  = useState(null);
 
   // Hardcoded categories & services (no auth needed on homepage)
   const CATS_STATIC = [
@@ -939,6 +939,7 @@ export default function Home() {
   const reset = () => {
     setResults([]); setSearched(false); setSelProv(null);
     setSelAreaR(null); setSelCatR(null);
+    setSelSvc(null); setSelArea(null);
   };
 
   useMeta({
@@ -1101,7 +1102,7 @@ export default function Home() {
             {STORIES.howItWorks.body.map((p,i) => <p key={i} style={{...para, marginBottom: 10}}>{p}</p>)}
 
             {/* Search box */}
-            <SearchBox cats={cats} svcs={svcs} grouped={grouped} onSearch={doSearch} />
+            <SearchBox cats={cats} svcs={svcs} grouped={grouped} onSearch={doSearch} selSvc={selSvc} setSelSvc={setSelSvc} selArea={selArea} setSelArea={setSelArea} />
 
             {/* Story below search */}
             <div style={{ marginTop: 12 }}>
