@@ -132,8 +132,8 @@ export default function Home() {
         <div style={{
           display: "inline-block",
           background: "rgba(255,255,255,0.07)",
-          borderRadius: 36,
-          padding: "24px 32px",
+          borderRadius: "50%",
+          padding: "16px",
           backdropFilter: "blur(10px)",
           border: "1.5px solid rgba(255,255,255,0.13)",
           boxShadow: "0 24px 70px rgba(0,0,0,0.4), 0 0 50px rgba(0,191,165,0.12)",
@@ -142,7 +142,7 @@ export default function Home() {
           <img
             src="https://media.base44.com/images/public/69d062aca815ce8e697894b1/f418f4c1d_V-Hublogo.png"
             alt="V-Hub"
-            style={{ width: 230, height: 230, objectFit: "contain", display: "block", filter: "drop-shadow(0 10px 28px rgba(0,0,0,0.45))" }}
+            style={{ width: 280, height: 280, objectFit: "contain", display: "block", filter: "drop-shadow(0 10px 28px rgba(0,0,0,0.45))" }}
           />
         </div>
 
