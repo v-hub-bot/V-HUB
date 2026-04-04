@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react"; // v2
 import { ServiceArea, Category, Service, Provider } from "@/api/entities";
 
 const INK       = "#1C0F00";
@@ -513,7 +513,8 @@ export default function Home() {
   const doSearch = async (selSvc, selArea) => {
     setSelAreaR(selArea);
     setSelCatR(selSvc);  // store the service object for display in Results header
-    const all = await Provider.filter({ is_visible: true });
+    let all = [];
+    try { all = await Provider.filter({ is_visible: true }); } catch(e) { all = []; }
     const out = all.filter(p => {
       const areaMatch = !selArea || p.service_areas?.includes(selArea.id);
       // Match by specific service ID in provider's services array, OR by category if no services listed
