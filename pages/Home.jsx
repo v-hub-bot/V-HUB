@@ -166,7 +166,7 @@ export default function Home() {
             textShadow: "none",
             lineHeight: 1,
             fontStyle: "italic",
-          }}><span style={{ fontStyle: "italic", fontWeight: 400, fontFamily: "'Great Vibes', cursive", fontSize: "1.4em", letterSpacing: 1, color: "#7A4820", WebkitTextFillColor: "#7A4820", background: "none" }}>V</span><span style={{ fontStyle: "normal" }}>&#8209;Hub</span></span>
+          }}><span style={{ fontStyle: "italic", fontWeight: 400, fontFamily: "'Great Vibes', cursive", fontSize: "1.45em", letterSpacing: 1, color: "#7A4820", WebkitTextFillColor: "#7A4820 !important", background: "none", display: "inline-block" }}>V</span><span style={{ fontStyle: "normal" }}>&#8209;Hub</span></span>
         </div>
 
         {/* Tagline */}
@@ -275,11 +275,11 @@ export default function Home() {
             </div>
 
             {/* Dropdowns row */}
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", borderBottom: `1px solid ${INK}` }}>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "6px", padding: "6px", background: PAPER_MID }}>
               {/* Service dropdown */}
-              <div style={{ borderRight: `1px solid ${INK}`, position: "relative" }}>
+              <div style={{ position: "relative", border: "3px solid #FFDB00", boxShadow: "0 0 0 2px #FFE800, 0 0 8px 2px rgba(255,224,0,0.35)", borderRadius: 4 }}>
                 <button onClick={e => { e.stopPropagation(); setSOpen(!sOpen); setVOpen(false); }}
-                  style={{ width: "100%", background: PAPER, border: "3px solid #FFDB00", boxShadow: "0 0 0 2px #FFE800, 0 0 8px 1px rgba(255,224,0,0.3)", padding: "8px 10px", fontSize: 12, fontFamily: "'Times New Roman', serif", color: selCat ? INK : INK_FADE, cursor: "pointer", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  style={{ width: "100%", background: PAPER, border: "none", padding: "8px 10px", fontSize: 12, fontFamily: "'Times New Roman', serif", color: selCat ? INK : INK_FADE, cursor: "pointer", display: "flex", justifyContent: "space-between", alignItems: "center", borderRadius: 2 }}>
                   <span>{selCat ? (cats.find(c => c.id === selCat)?.name || "Select a Service") : "Select a Service"}</span>
                   <span style={{ fontSize: 9, color: INK_FADE, flexShrink: 0 }}>▼</span>
                 </button>
@@ -299,9 +299,9 @@ export default function Home() {
               </div>
 
               {/* Village dropdown */}
-              <div style={{ position: "relative" }}>
+              <div style={{ position: "relative", border: "3px solid #FFDB00", boxShadow: "0 0 0 2px #FFE800, 0 0 8px 2px rgba(255,224,0,0.35)", borderRadius: 4 }}>
                 <button onClick={e => { e.stopPropagation(); setVOpen(!vOpen); setSOpen(false); }}
-                  style={{ width: "100%", background: PAPER, border: "3px solid #FFDB00", boxShadow: "0 0 0 2px #FFE800, 0 0 8px 1px rgba(255,224,0,0.3)", padding: "8px 10px", fontSize: 12, fontFamily: "'Times New Roman', serif", color: selArea ? INK : INK_FADE, cursor: "pointer", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  style={{ width: "100%", background: PAPER, border: "none", padding: "8px 10px", fontSize: 12, fontFamily: "'Times New Roman', serif", color: selArea ? INK : INK_FADE, cursor: "pointer", display: "flex", justifyContent: "space-between", alignItems: "center", borderRadius: 2 }}>
                   <span>{selArea ? vName(selArea) : "Select a Village"}</span>
                   <span style={{ fontSize: 9, color: INK_FADE, flexShrink: 0 }}>▼</span>
                 </button>
