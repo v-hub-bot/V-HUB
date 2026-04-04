@@ -210,7 +210,7 @@ export default function Home() {
         <img
           src="https://media.base44.com/images/public/69d062aca815ce8e697894b1/a3c8839d1_generated_image.png"
           alt=""
-          style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center 40%", display: "block", filter: "saturate(1.2) brightness(1.05)" }}
+          style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center 40%", display: "block", filter: "saturate(0.85) brightness(0.97)" }}
         />
       </div>
 
