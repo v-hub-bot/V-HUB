@@ -940,42 +940,120 @@ export default function Home() {
     setSelCatR(selSvc);
     let all = [];
     try { all = await Provider.list(); } catch(e) { all = []; }
-    // Map village description → macro key, and village name (from dropdown)
-    const SECTION_TO_MACRO = {
-      "Historic Side | Spanish Springs":         "historic",
-      "Established Villages | North of SR-466A": "established",
-      "Newer Villages | South of SR-44":         "newer",
-      "Eastport | Newest Development Area":      "eastport",
-      "Family & Non-Age-Restricted Villages":    "family",
+
+    // Real ServiceArea entity IDs per macro group (stable DB IDs)
+    // Individual village IDs → their macro group ID
+    const VILLAGE_TO_MACRO_ID = {
+      // Historic Side villages → macro ID 69d06c4a4f1e1017a77a7018
+      "69d06c54c9c22e67aed3c0ff": "69d06c4a4f1e1017a77a7018",
+      "69d06c54c9c22e67aed3c100": "69d06c4a4f1e1017a77a7018",
+      "69d06c54c9c22e67aed3c101": "69d06c4a4f1e1017a77a7018",
+      "69d06c54c9c22e67aed3c102": "69d06c4a4f1e1017a77a7018",
+      "69d06c54c9c22e67aed3c103": "69d06c4a4f1e1017a77a7018",
+      "69d06c54c9c22e67aed3c104": "69d06c4a4f1e1017a77a7018",
+      "69d06c54c9c22e67aed3c105": "69d06c4a4f1e1017a77a7018",
+      "69d06c54c9c22e67aed3c106": "69d06c4a4f1e1017a77a7018",
+      "69d06c54c9c22e67aed3c107": "69d06c4a4f1e1017a77a7018",
+      "69d06c54c9c22e67aed3c108": "69d06c4a4f1e1017a77a7018",
+      "69d06c54c9c22e67aed3c109": "69d06c4a4f1e1017a77a7018",
+      "69d06c54c9c22e67aed3c10a": "69d06c4a4f1e1017a77a7018",
+      // Established Villages → macro ID 69d06c4a4f1e1017a77a7019
+      "69d06c54c9c22e67aed3c10b": "69d06c4a4f1e1017a77a7019",
+      "69d06c54c9c22e67aed3c10c": "69d06c4a4f1e1017a77a7019",
+      "69d06c54c9c22e67aed3c10d": "69d06c4a4f1e1017a77a7019",
+      "69d06c54c9c22e67aed3c10e": "69d06c4a4f1e1017a77a7019",
+      "69d06c54c9c22e67aed3c10f": "69d06c4a4f1e1017a77a7019",
+      "69d06c54c9c22e67aed3c110": "69d06c4a4f1e1017a77a7019",
+      "69d06c54c9c22e67aed3c111": "69d06c4a4f1e1017a77a7019",
+      "69d06c54c9c22e67aed3c112": "69d06c4a4f1e1017a77a7019",
+      "69d06c54c9c22e67aed3c113": "69d06c4a4f1e1017a77a7019",
+      "69d06c54c9c22e67aed3c114": "69d06c4a4f1e1017a77a7019",
+      "69d06c54c9c22e67aed3c115": "69d06c4a4f1e1017a77a7019",
+      "69d06c54c9c22e67aed3c116": "69d06c4a4f1e1017a77a7019",
+      "69d06c54c9c22e67aed3c117": "69d06c4a4f1e1017a77a7019",
+      "69d06c54c9c22e67aed3c118": "69d06c4a4f1e1017a77a7019",
+      "69d06c54c9c22e67aed3c119": "69d06c4a4f1e1017a77a7019",
+      "69d06c54c9c22e67aed3c11a": "69d06c4a4f1e1017a77a7019",
+      "69d06c54c9c22e67aed3c11b": "69d06c4a4f1e1017a77a7019",
+      "69d06c54c9c22e67aed3c11c": "69d06c4a4f1e1017a77a7019",
+      "69d06c54c9c22e67aed3c11d": "69d06c4a4f1e1017a77a7019",
+      "69d06c54c9c22e67aed3c11e": "69d06c4a4f1e1017a77a7019",
+      "69d06c54c9c22e67aed3c11f": "69d06c4a4f1e1017a77a7019",
+      "69d06c54c9c22e67aed3c120": "69d06c4a4f1e1017a77a7019",
+      "69d06c54c9c22e67aed3c121": "69d06c4a4f1e1017a77a7019",
+      // Newer Villages → macro ID 69d06c4a4f1e1017a77a701a
+      "69d06c54c9c22e67aed3c122": "69d06c4a4f1e1017a77a701a",
+      "69d06c54c9c22e67aed3c123": "69d06c4a4f1e1017a77a701a",
+      "69d06c54c9c22e67aed3c124": "69d06c4a4f1e1017a77a701a",
+      "69d06c54c9c22e67aed3c125": "69d06c4a4f1e1017a77a701a",
+      "69d06c54c9c22e67aed3c126": "69d06c4a4f1e1017a77a701a",
+      "69d06c54c9c22e67aed3c127": "69d06c4a4f1e1017a77a701a",
+      "69d06c54c9c22e67aed3c128": "69d06c4a4f1e1017a77a701a",
+      "69d06c54c9c22e67aed3c129": "69d06c4a4f1e1017a77a701a",
+      "69d06c54c9c22e67aed3c12a": "69d06c4a4f1e1017a77a701a",
+      "69d06c54c9c22e67aed3c12b": "69d06c4a4f1e1017a77a701a",
+      "69d06c54c9c22e67aed3c12c": "69d06c4a4f1e1017a77a701a",
+      "69d06c54c9c22e67aed3c12d": "69d06c4a4f1e1017a77a701a",
+      "69d06c54c9c22e67aed3c12e": "69d06c4a4f1e1017a77a701a",
+      "69d06c54c9c22e67aed3c12f": "69d06c4a4f1e1017a77a701a",
+      "69d06c54c9c22e67aed3c130": "69d06c4a4f1e1017a77a701a",
+      // Eastport → macro ID 69d06c4a4f1e1017a77a701b
+      "69d06c54c9c22e67aed3c131": "69d06c4a4f1e1017a77a701b",
+      "69d06c54c9c22e67aed3c132": "69d06c4a4f1e1017a77a701b",
+      "69d06c54c9c22e67aed3c133": "69d06c4a4f1e1017a77a701b",
+      "69d06c54c9c22e67aed3c134": "69d06c4a4f1e1017a77a701b",
+      "69d06c54c9c22e67aed3c135": "69d06c4a4f1e1017a77a701b",
+      // Family → macro ID 69d06c4a4f1e1017a77a701c
+      "69d06c54c9c22e67aed3c136": "69d06c4a4f1e1017a77a701c",
+      "69d06c54c9c22e67aed3c137": "69d06c4a4f1e1017a77a701c",
+      "69d06c54c9c22e67aed3c138": "69d06c4a4f1e1017a77a701c",
+      "69d06c54c9c22e67aed3c139": "69d06c4a4f1e1017a77a701c",
     };
-    const macroKey = selArea ? SECTION_TO_MACRO[selArea.description] || null : null;
-    // Village name as selected (e.g. "Spanish Springs", "Buttonwood")
-    const villageName = selArea ? selArea.name.split("—").pop().trim() : null;
-    // Macro aliases — all known string variants per macro key
-    const MACRO_ALIASES = {
-      "historic":    ["historic", "historic side"],
-      "established": ["established", "established villages"],
-      "newer":       ["newer", "newer villages"],
-      "eastport":    ["eastport"],
-      "family":      ["family", "family villages", "family & non-age-restricted villages"],
+
+    // Macro group IDs per description key
+    const DESC_TO_MACRO_ID = {
+      "Historic Side | Spanish Springs":         "69d06c4a4f1e1017a77a7018",
+      "Established Villages | North of SR-466A": "69d06c4a4f1e1017a77a7019",
+      "Newer Villages | South of SR-44":         "69d06c4a4f1e1017a77a701a",
+      "Eastport | Newest Development Area":      "69d06c4a4f1e1017a77a701b",
+      "Family & Non-Age-Restricted Villages":    "69d06c4a4f1e1017a77a701c",
     };
+
+    // The macro ID the user is searching in
+    const searchMacroId = selArea ? DESC_TO_MACRO_ID[selArea.description] || null : null;
+
     const out = all.filter(p => {
       if (p.is_visible === false) return false;
       const provAreas = (p.service_areas || []);
-      const provAreasLower = provAreas.map(a => a.toLowerCase());
-      // All Villages — always match
-      const allVillages = provAreasLower.some(a => a === "all villages");
-      // Match by specific village name (new providers store individual villages)
-      const villageMatch = villageName && provAreas.some(a => a.toLowerCase() === villageName.toLowerCase());
-      // Match by macro key (legacy providers store macro keys like "historic")
-      const macroMatch = macroKey && provAreasLower.some(a => (MACRO_ALIASES[macroKey] || [macroKey]).includes(a));
-      const areaMatch = !selArea || allVillages || villageMatch || macroMatch;
-      // Service match: by sub-service name OR by category_id (when category selected)
+
+      // Macro aliases for legacy providers that store text keys
+      const LEGACY_ALIASES = {
+        "69d06c4a4f1e1017a77a7018": ["historic", "historic side"],
+        "69d06c4a4f1e1017a77a7019": ["established", "established villages"],
+        "69d06c4a4f1e1017a77a701a": ["newer", "newer villages", "south"],
+        "69d06c4a4f1e1017a77a701b": ["eastport"],
+        "69d06c4a4f1e1017a77a701c": ["family", "family villages", "family & non-age-restricted villages"],
+      };
+
+      // Area match: check if any of the provider's area IDs belong to the selected macro group
+      let areaMatch = true;
+      if (selArea && searchMacroId) {
+        const legacyKeys = LEGACY_ALIASES[searchMacroId] || [];
+        areaMatch = provAreas.some(areaId => {
+          // Direct match to macro ID (provider covers whole group)
+          if (areaId === searchMacroId) return true;
+          // Individual village that maps to this macro
+          if (VILLAGE_TO_MACRO_ID[areaId] === searchMacroId) return true;
+          // Legacy text match (older providers store strings like "historic", "established")
+          if (legacyKeys.includes(areaId.toLowerCase())) return true;
+          return false;
+        });
+      }
+
+      // Service match: provider's category_id matches the selected service/category
       const provCatId = selSvc?.category_id || selSvc?.id;
-      const svcMatch = !selSvc || (
-        (p.services || []).includes(selSvc.name) ||
-        p.category_id === provCatId
-      );
+      const svcMatch = !selSvc || p.category_id === provCatId;
+
       return areaMatch && svcMatch;
     });
     // Fetch approved V-Hub reviews for matched providers and sort by rating
