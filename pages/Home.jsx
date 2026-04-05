@@ -703,44 +703,34 @@ function SvcDropdown({ open, cats, svcs, openCat, selSvc, setOpenCat, setSelSvc,
 }
 
 // ── Village Dropdown ──────────────────────────────────────────────────────────
-function VilDropdown({ open, grouped, openSec, selArea, setOpenSec, setSelArea, setVOpen }) {
+function VilDropdown({ open, areas, selArea, setSelArea, setVOpen }) {
   if (!open) return null;
+  // Extract micro village names, sort A-Z
+  const sorted = [...areas]
+    .filter(a => a.name && a.name.includes("—"))
+    .map(a => ({ ...a, micro: a.name.split("—").pop().trim() }))
+    .sort((a, b) => a.micro.localeCompare(b.micro));
   return (
     <div onClick={e => e.stopPropagation()} style={{ position: "absolute", top: "100%", left: 0, right: 0, background: PAPER, border: `2px solid ${INK}`, borderRadius: 4, zIndex: 99999, boxShadow: "0 8px 28px rgba(0,0,0,0.4)", maxHeight: 300, overflowY: "auto", marginTop: 2 }}>
-      {SECTIONS.map(sec => {
-        const vils = grouped[sec.key] || [];
-        const isExpanded = openSec === sec.key;
-        const secSelected = selArea && vils.some(v => v.id === selArea.id);
-        return (
-          <div key={sec.key}>
-            <div onClick={e => { e.stopPropagation(); setOpenSec(isExpanded ? null : sec.key); }}
-              style={{ padding: "10px 14px", fontSize: 13, fontWeight: 600, color: secSelected ? "#fff" : INK, background: secSelected ? BROWN_HL : PAPER, borderBottom: `1px solid ${PAPER_DK}`, cursor: "pointer", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <span>{sec.label}</span>
-              <span style={{ fontSize: 9 }}>{isExpanded ? "▲" : "▼"}</span>
-            </div>
-            {isExpanded && vils.map(v => (
-              <div key={v.id} onClick={e => { e.stopPropagation(); setSelArea(v); setVOpen(false); setOpenSec(null); }}
-                style={{ padding: "9px 14px 9px 28px", fontSize: 13, color: selArea?.id === v.id ? "#fff" : INK, background: selArea?.id === v.id ? BROWN_HL : PAPER_MID, borderBottom: `1px solid ${PAPER_DK}`, cursor: "pointer" }}>
-                {vName(v)}
-              </div>
-            ))}
-          </div>
-        );
-      })}
+      {sorted.map(v => (
+        <div key={v.id} onClick={e => { e.stopPropagation(); setSelArea(v); setVOpen(false); }}
+          style={{ padding: "9px 14px", fontSize: 13, color: selArea?.id === v.id ? "#fff" : INK, background: selArea?.id === v.id ? BROWN_HL : PAPER, borderBottom: `1px solid ${PAPER_DK}`, cursor: "pointer" }}>
+          {v.micro}
+        </div>
+      ))}
     </div>
   );
 }
 
 // ── Search Box ────────────────────────────────────────────────────────────────
-function SearchBox({ cats, svcs, grouped, onSearch, selSvc, setSelSvc, selArea, setSelArea }) {
+function SearchBox({ cats, svcs, areas, onSearch, selSvc, setSelSvc, selArea, setSelArea }) {
   const [sOpen,   setSOpen]   = useState(false);
   const [vOpen,   setVOpen]   = useState(false);
   const [openCat, setOpenCat] = useState(null);
-  const [openSec, setOpenSec] = useState(null);
   const sBtnRef = useRef(null);
   const vBtnRef = useRef(null);
 
-  const closeAll = () => { setSOpen(false); setVOpen(false); setOpenCat(null); setOpenSec(null); };
+  const closeAll = () => { setSOpen(false); setVOpen(false); setOpenCat(null); };
 
   // Build display label: show selected service name
   const svcLabel = selSvc ? (selSvc._isCat ? `${selSvc.icon || ""} ${selSvc.name}` : selSvc.name) : "Select a Service...";
@@ -772,12 +762,12 @@ function SearchBox({ cats, svcs, grouped, onSearch, selSvc, setSelSvc, selArea, 
       </div>
       <div style={{ display: "flex", gap: 8 }}>
         <div style={{ flex: 1, minWidth: 0, position: "relative" }} ref={sBtnRef}>
-          <DropBtn label={svcLabel} isOpen={sOpen} onClick={e => { e.stopPropagation(); if (sOpen) { setSOpen(false); setOpenCat(null); } else { setSOpen(true); setVOpen(false); setOpenSec(null); } }} />
+          <DropBtn label={svcLabel} isOpen={sOpen} onClick={e => { e.stopPropagation(); if (sOpen) { setSOpen(false); setOpenCat(null); } else { setSOpen(true); setVOpen(false); } }} />
           <SvcDropdown open={sOpen} cats={cats} svcs={svcs} openCat={openCat} selSvc={selSvc} setOpenCat={setOpenCat} setSelSvc={s => { setSelSvc(s); }} setSOpen={setSOpen} />
         </div>
         <div style={{ flex: 1, minWidth: 0, position: "relative" }} ref={vBtnRef}>
-          <DropBtn label={selArea ? vName(selArea) : "Select a Village..."} isOpen={vOpen} onClick={e => { e.stopPropagation(); if (vOpen) { setVOpen(false); setOpenSec(null); } else { setVOpen(true); setSOpen(false); setOpenCat(null); } }} />
-          <VilDropdown open={vOpen} grouped={grouped} openSec={openSec} selArea={selArea} setOpenSec={setOpenSec} setSelArea={a => { setSelArea(a); }} setVOpen={setVOpen} />
+          <DropBtn label={selArea ? vName(selArea) : "Select a Village..."} isOpen={vOpen} onClick={e => { e.stopPropagation(); if (vOpen) { setVOpen(false); } else { setVOpen(true); setSOpen(false); setOpenCat(null); } }} />
+          <VilDropdown open={vOpen} areas={areas} selArea={selArea} setSelArea={a => { setSelArea(a); }} setVOpen={setVOpen} />
         </div>
       </div>
     </div>
@@ -1190,7 +1180,7 @@ export default function Home() {
             {STORIES.howItWorks.body.map((p,i) => <p key={i} style={{...para, marginBottom: 10}}>{p}</p>)}
 
             {/* Search box */}
-            <SearchBox cats={cats} svcs={svcs} grouped={grouped} onSearch={doSearch} selSvc={selSvc} setSelSvc={setSelSvc} selArea={selArea} setSelArea={setSelArea} />
+            <SearchBox cats={cats} svcs={svcs} areas={areas} onSearch={doSearch} selSvc={selSvc} setSelSvc={setSelSvc} selArea={selArea} setSelArea={setSelArea} />
 
             {/* Story below search */}
             <div style={{ marginTop: 12 }}>
