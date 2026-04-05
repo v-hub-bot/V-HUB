@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react"; // v2
+import React, { useState, useEffect, useRef } from "react"; // v2
 import { ServiceArea, Category, Service, Provider, ProviderReview } from "@/api/entities";
 
 // ── SEO Meta Tags ──────────────────────────────────────────────────────────
@@ -483,7 +483,7 @@ function ProviderRatingBadge({ providerId, googleRating }) {
 }
 
 
-function ClassifiedAd({ p, onSel }) {
+function ClassifiedAd({ p, onSel, svcs }) {
   const tier = p.subscription_tier;
   const isPremium = tier === "premium";
   const isFeatured = tier === "featured";
@@ -554,9 +554,12 @@ function ClassifiedAd({ p, onSel }) {
       {/* Services chips */}
       {(p.services || []).length > 0 && (
         <div style={{ display: "flex", flexWrap: "wrap", gap: 4, marginTop: 8 }}>
-          {(p.services || []).slice(0, 5).map(s => (
-            <span key={s} style={{ background: PAPER_MID, border: `1px solid ${PAPER_DK}`, borderRadius: 3, padding: "1px 7px", fontSize: 10, color: INK, fontFamily: "Georgia, serif" }}>{s}</span>
-          ))}
+          {(p.services || []).slice(0, 5).map(s => {
+            const svcObj = (svcs || []).find(sv => sv.id === s);
+            const label = svcObj ? svcObj.name : null;
+            if (!label) return null;
+            return <span key={s} style={{ background: PAPER_MID, border: `1px solid ${PAPER_DK}`, borderRadius: 3, padding: "1px 7px", fontSize: 10, color: INK, fontFamily: "Georgia, serif" }}>{label}</span>;
+          })}
           {(p.services || []).length > 5 && <span style={{ fontSize: 10, color: INK_FADE, fontStyle: "italic", alignSelf: "center" }}>+{(p.services || []).length - 5} more</span>}
         </div>
       )}
@@ -577,7 +580,7 @@ function ClassifiedAd({ p, onSel }) {
   );
 }
 
-function Results({ results, areas, cats, onReset, onSel, selArea, selCatId }) {
+function Results({ results, areas, cats, svcs, onReset, onSel, selArea, selCatId }) {
   const areaName = selArea ? selArea.name.split("—").pop()?.trim() || selArea.name : "All Villages";
   const svcName  = selCatId ? selCatId.name : "All Services";
 
@@ -630,7 +633,7 @@ function Results({ results, areas, cats, onReset, onSel, selArea, selCatId }) {
             <div style={{ textAlign: "center", padding: "60px 20px", color: INK_FADE, fontSize: 14, fontStyle: "italic" }}>
               No providers found for this search.<br />Try a different village or service.
             </div>
-          ) : results.map((p, i) => <ClassifiedAd key={p.id || i} p={p} onSel={onSel} />)}
+          ) : results.map((p, i) => <ClassifiedAd key={p.id || i} p={p} onSel={onSel} svcs={svcs} />)}
         </div>
 
         {/* ── FOOTER ── */}
@@ -1119,7 +1122,7 @@ export default function Home() {
   const rule = { height: 1, background: INK_FADE, margin: "8px 0", opacity: 0.4 };
 
   if (selProv)  return <ProvDetail prov={selProv} areas={areas} cats={cats} onBack={() => setSelProv(null)} />;
-  if (searched) return <Results results={results} areas={areas} cats={cats} onReset={reset} onSel={setSelProv} selArea={selAreaR} selCatId={selCatR} />;
+  if (searched) return <Results results={results} areas={areas} cats={cats} svcs={svcs} onReset={reset} onSel={setSelProv} selArea={selAreaR} selCatId={selCatR} />;
 
   return (
     <>
