@@ -275,7 +275,7 @@ export default function ListService() {
 
   useMeta({
     title: "List Your Business | V-Hub — The Villages, FL",
-    description: "List your local service business on V-Hub and get discovered by thousands of Villages residents. Free listing review by William Evans. No commissions.",
+    description: "List your local service business on V-Hub and get discovered by thousands of Villages residents. Free listing review by Admin. No commissions.",
     keywords: "list local business The Villages FL, V-Hub provider listing, Villages Florida directory, advertise services Villages",
     canonical: "https://v-hub-app-edf7f8e8.base44.app/ListService",
   });
@@ -407,13 +407,13 @@ export default function ListService() {
 
           <div style={{ fontSize: isMobile ? 14 : 13, color: INK_FADE, lineHeight: 1.8, marginBottom: 10, textAlign: "left", background: PAPER_MID, border: `1px solid ${PAPER_DK}`, borderRadius: 6, padding: "14px 18px" }}>
             <div style={{ fontWeight: 700, color: INK, marginBottom: 8, fontSize: 13 }}>What happens next:</div>
-            <div>📋 <strong>Step 1</strong> — Your listing is now pending review by William Evans.</div>
+            <div>📋 <strong>Step 1</strong> — Your listing is now pending review by our Admin.</div>
             <div style={{ marginTop: 6 }}>✅ <strong>Step 2</strong> — Once approved, you'll receive an email at <strong>{email || "the address you provided"}</strong> with your sign-in information and instructions to access your <strong>Provider Hub</strong>.</div>
             <div style={{ marginTop: 6 }}>🗂 <strong>Step 3</strong> — Log into your Provider Hub to manage your profile, view inquiries, and update your listing at any time.</div>
           </div>
 
           <div style={{ fontSize: 12, color: INK_FADE, fontStyle: "italic", marginBottom: 24 }}>
-            Questions? Contact William Evans at <span style={{ color: BROWN_BTN }}>william@v-hub.com</span>
+            Questions? Contact Admin at <span style={{ color: BROWN_BTN }}>william@v-hub.com</span>
           </div>
 
           <a href="/" style={{ textDecoration: "none" }}>
@@ -449,7 +449,7 @@ export default function ListService() {
           <div style={{ fontSize: 28, fontWeight: 900, color: INK, letterSpacing: 2, textTransform: "uppercase", lineHeight: 1.1 }}>List Your Business</div>
           <div style={{ height: 2, background: RED_RULE, margin: "10px auto", width: "50%" }} />
           <div style={{ fontSize: 13, color: INK_FADE, fontStyle: "italic", lineHeight: 1.6 }}>
-            Complete the form below — William Evans will review and activate your listing.
+            Complete the form below — Admin will review and activate your listing.
           </div>
           <div style={{ fontSize: 11, color: INK_FADE, fontStyle: "italic", marginTop: 3 }}>You may return and edit your profile at any time.</div>
         </div>
@@ -662,7 +662,7 @@ export default function ListService() {
           <div style={{ borderTop: `2px solid ${INK}`, paddingTop: 22, textAlign: "center" }}>
             <div style={{ fontSize: 13, color: INK_FADE, fontStyle: "italic", marginBottom: 16, lineHeight: 1.6 }}>
               By submitting, you agree to be listed in V-Hub's public directory.<br />
-              William Evans will contact you to confirm and activate your profile.
+              Admin will contact you to confirm and activate your profile.
             </div>
             <button
               onClick={handleSubmit}
@@ -714,7 +714,7 @@ export default function ListService() {
         <div style={{ fontSize: 32, fontWeight: 900, color: INK, letterSpacing: 3, textTransform: "uppercase", lineHeight: 1 }}>List Your Business</div>
         <div style={{ height: 2, background: RED_RULE, margin: "8px auto", width: "60%", maxWidth: 320 }} />
         <div style={{ fontSize: 13, color: INK_FADE, fontStyle: "italic", lineHeight: 1.6 }}>
-          Complete the form below — William Evans will review and activate your listing.
+          Complete the form below — Admin will review and activate your listing.
         </div>
         <div style={{ fontSize: 11, color: INK_FADE, fontStyle: "italic", marginTop: 3 }}>You may return and edit your profile at any time.</div>
       </div>
@@ -741,7 +741,7 @@ export default function ListService() {
           ))}
           <div style={{ border: `2px solid ${BROWN_BTN}`, borderRadius: 4, padding: "12px 10px", textAlign: "center", background: PAPER_MID }}>
             <div style={{ fontSize: 14, fontWeight: 900, color: BROWN_BTN, marginBottom: 4 }}>🏆 Verified Provider</div>
-            <div style={{ fontSize: 11, color: INK_FADE, fontStyle: "italic", lineHeight: 1.5 }}>All V-Hub listings are manually reviewed by William Evans before going live.</div>
+            <div style={{ fontSize: 11, color: INK_FADE, fontStyle: "italic", lineHeight: 1.5 }}>All V-Hub listings are manually reviewed by Admin before going live.</div>
           </div>
         </div>
 
@@ -863,7 +863,7 @@ export default function ListService() {
           <div style={{ borderTop: `2px solid ${INK}`, paddingTop: 20, textAlign: "center" }}>
             <div style={{ fontSize: 12, color: INK_FADE, fontStyle: "italic", marginBottom: 14, lineHeight: 1.6 }}>
               By submitting, you agree to be listed in V-Hub's public directory.<br />
-              William Evans will contact you to confirm and activate your profile.
+              Admin will contact you to confirm and activate your profile.
             </div>
             <button onClick={handleSubmit} disabled={submitting} style={{
               background: submitting ? PAPER_DK : `linear-gradient(180deg,#9A6030,${BROWN_BTN} 60%,#5A3010)`,
@@ -890,7 +890,7 @@ export default function ListService() {
           ))}
           <div style={{ border: `2px solid ${BROWN_BTN}`, borderRadius: 4, padding: "14px 12px", textAlign: "center", background: PAPER_MID, marginBottom: 16 }}>
             <div style={{ fontSize: 13, fontWeight: 900, color: INK, marginBottom: 6, textTransform: "uppercase", letterSpacing: 1 }}>Questions?</div>
-            <div style={{ fontSize: 12, color: INK_FADE, fontStyle: "italic", lineHeight: 1.6, marginBottom: 8 }}>Contact William Evans directly.</div>
+            <div style={{ fontSize: 12, color: INK_FADE, fontStyle: "italic", lineHeight: 1.6, marginBottom: 8 }}>Contact Admin directly.</div>
             <a href="mailto:william@v-hub.com" style={{ textDecoration: "none" }}>
               <div style={{ background: BROWN_BTN, color: PAPER, borderRadius: 4, padding: "8px 12px", fontSize: 12, fontWeight: 700, fontFamily: "'Times New Roman', serif", letterSpacing: 1 }}>william@v-hub.com</div>
             </a>

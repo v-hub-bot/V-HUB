@@ -246,7 +246,7 @@ export default function ProviderDashboard() {
     try {
       const results = await Provider.filter({ provider_id: q });
       if (results.length === 0) {
-        setLookupErr("No provider found with that ID. Contact William Evans if you need help.");
+        setLookupErr("No provider found with that ID. Contact Admin if you need help.");
         return;
       }
       loadProvider(results[0]);
@@ -323,7 +323,7 @@ export default function ProviderDashboard() {
             <div style={{ fontSize: 16, fontWeight: 900, color: INK, textTransform: "uppercase", letterSpacing: 2, marginBottom: 6 }}>Provider Sign-In</div>
             <div style={{ fontSize: 12, color: INK_FADE, fontStyle: "italic", marginBottom: 20, lineHeight: 1.6 }}>
               Enter your V-Hub Provider ID to access your dashboard.<br />
-              Your ID was assigned by William Evans when your listing was activated.<br />
+              Your ID was assigned by Admin when your listing was activated.<br />
               <span style={{ fontWeight: 700 }}>Format: VH-XXXXX</span>
             </div>
             <input
@@ -506,7 +506,7 @@ export default function ProviderDashboard() {
                   Cancel
                 </button>
               </div>
-              <div style={{ fontSize: 11, color: INK_FADE, fontStyle: "italic", marginTop: 8 }}>Reviews are reviewed by William Evans before appearing publicly.</div>
+              <div style={{ fontSize: 11, color: INK_FADE, fontStyle: "italic", marginTop: 8 }}>Reviews are reviewed by Admin before appearing publicly.</div>
             </div>
           )}
 
