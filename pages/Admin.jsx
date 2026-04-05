@@ -80,6 +80,67 @@ function getVillageName(area) {
   return parts.length > 1 ? parts[1].trim() : area.name;
 }
 
+const VALID_PINS = ["6185", "1357"];
+
+function AdminPinGate({ onUnlock }) {
+  const [pin, setPin] = useState("");
+  const [error, setError] = useState(false);
+
+  const handleKey = (digit) => {
+    const next = pin + digit;
+    setPin(next);
+    setError(false);
+    if (next.length === 4) {
+      if (VALID_PINS.includes(next)) {
+        sessionStorage.setItem("vhub_admin_pin", next);
+        onUnlock(next);
+      } else {
+        setError(true);
+        setTimeout(() => { setPin(""); setError(false); }, 900);
+      }
+    }
+  };
+
+  const INK = "#1A0A00";
+  const BROWN = "#8B4513";
+  const PAPER = "#F5E8CC";
+
+  return (
+    <div style={{ minHeight: "100vh", background: "#1A0A00", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", fontFamily: "'Times New Roman', Georgia, serif" }}>
+      <img src="https://media.base44.com/images/public/69d062aca815ce8e697894b1/a9af95bc3_V-Hublogo.png" style={{ width: 80, height: 80, borderRadius: 12, marginBottom: 20 }} alt="V-Hub" />
+      <div style={{ color: PAPER, fontSize: 22, fontWeight: 900, letterSpacing: 3, marginBottom: 4 }}>V-HUB ADMIN</div>
+      <div style={{ color: "rgba(245,232,204,0.5)", fontSize: 12, marginBottom: 32, letterSpacing: 1 }}>RESTRICTED ACCESS</div>
+      <div style={{ background: "#2A1500", border: `1px solid ${BROWN}`, borderRadius: 12, padding: "28px 32px", width: 220, boxSizing: "border-box" }}>
+        <div style={{ fontSize: 11, fontWeight: 700, color: PAPER, textAlign: "center", marginBottom: 14, letterSpacing: 2 }}>ENTER PIN</div>
+        <div style={{ display: "flex", justifyContent: "center", gap: 10, marginBottom: 20 }}>
+          {[0,1,2,3].map(i => (
+            <div key={i} style={{ width: 16, height: 16, borderRadius: "50%", border: `2px solid ${BROWN}`, background: pin.length > i ? (error ? "#cc0000" : BROWN) : "transparent", transition: "background 0.15s" }} />
+          ))}
+        </div>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 8 }}>
+          {["1","2","3","4","5","6","7","8","9"].map(d => (
+            <button key={d} onClick={() => handleKey(d)}
+              style={{ padding: "12px 0", fontSize: 18, fontWeight: 700, color: PAPER, background: "#3A1A00", border: `1px solid ${BROWN}`, borderRadius: 6, cursor: "pointer", fontFamily: "'Times New Roman', serif" }}>
+              {d}
+            </button>
+          ))}
+          <button onClick={() => { setPin(p => p.slice(0,-1)); setError(false); }}
+            style={{ padding: "12px 0", fontSize: 14, color: PAPER, background: "#3A1A00", border: `1px solid ${BROWN}`, borderRadius: 6, cursor: "pointer" }}>
+            ⌫
+          </button>
+          <button onClick={() => handleKey("0")}
+            style={{ padding: "12px 0", fontSize: 18, fontWeight: 700, color: PAPER, background: "#3A1A00", border: `1px solid ${BROWN}`, borderRadius: 6, cursor: "pointer", fontFamily: "'Times New Roman', serif" }}>
+            0
+          </button>
+          <div />
+        </div>
+        {error && <div style={{ textAlign: "center", color: "#cc4444", fontSize: 11, marginTop: 10, fontStyle: "italic" }}>Incorrect PIN</div>}
+      </div>
+      <a href="/" style={{ color: "rgba(245,232,204,0.35)", fontSize: 11, marginTop: 28, textDecoration: "none" }}>← Back to V-Hub</a>
+    </div>
+  );
+}
+
 export default function Admin() {
   useMeta({
     title: "V-Hub Admin | William Evans",
@@ -98,8 +159,10 @@ export default function Admin() {
 
   const [reviews, setReviews] = useState([]);
 
-  // Get PIN from sessionStorage (set by Home.jsx when unlocking admin)
-  const adminPin = sessionStorage.getItem("vhub_admin_pin") || "";
+  // PIN gate state
+  const storedPin = sessionStorage.getItem("vhub_admin_pin") || "";
+  const [adminPin, setAdminPin] = useState(storedPin);
+  const isUnlocked = VALID_PINS.includes(adminPin);
 
   const loadAll = async () => {
     try {
@@ -120,7 +183,7 @@ export default function Admin() {
     }
   };
 
-  useEffect(() => { loadAll(); }, []);
+  useEffect(() => { if (isUnlocked) loadAll(); }, [adminPin]);
 
   const openAdd = () => { setEditItem(null); setShowForm(true); };
   const openEdit = (item) => { setEditItem(item); setShowForm(true); };
@@ -131,6 +194,11 @@ export default function Admin() {
     await entity.delete(id);
     loadAll();
   };
+
+  // Show PIN gate if not unlocked
+  if (!isUnlocked) {
+    return <AdminPinGate onUnlock={(pin) => setAdminPin(pin)} />;
+  }
 
   return (
     <div style={{ minHeight: "100vh", background: BRAND.lightBg, fontFamily: "'Segoe UI', sans-serif" }}>

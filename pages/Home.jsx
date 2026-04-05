@@ -197,12 +197,21 @@ function Burger() {
                     ))}
                   </div>
                   <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 6 }}>
-                    {["1","2","3","4","5","6","7","8","9","","0","⌫"].map((d, i) => (
-                      <button key={i} onClick={() => { if (d === "⌫") { setPin(p => p.slice(0,-1)); setPinError(false); } else if (d !== "") handlePinKey(d); }}
-                        style={{ padding: "9px 0", fontSize: 15, fontWeight: 700, fontFamily: "'Times New Roman', serif", color: INK, background: d === "" ? "transparent" : PAPER, border: d === "" ? "none" : `1px solid ${PAPER_DK}`, borderRadius: 4, cursor: d === "" ? "default" : "pointer" }}>
+                    {["1","2","3","4","5","6","7","8","9"].map(d => (
+                      <button key={d} onClick={() => handlePinKey(d)}
+                        style={{ padding: "9px 0", fontSize: 15, fontWeight: 700, fontFamily: "'Times New Roman', serif", color: INK, background: PAPER, border: `1px solid ${PAPER_DK}`, borderRadius: 4, cursor: "pointer" }}>
                         {d}
                       </button>
                     ))}
+                    <button onClick={() => { setPin(p => p.slice(0,-1)); setPinError(false); }}
+                      style={{ padding: "9px 0", fontSize: 14, fontWeight: 700, fontFamily: "'Times New Roman', serif", color: INK, background: PAPER, border: `1px solid ${PAPER_DK}`, borderRadius: 4, cursor: "pointer" }}>
+                      ⌫
+                    </button>
+                    <button onClick={() => handlePinKey("0")}
+                      style={{ padding: "9px 0", fontSize: 15, fontWeight: 700, fontFamily: "'Times New Roman', serif", color: INK, background: PAPER, border: `1px solid ${PAPER_DK}`, borderRadius: 4, cursor: "pointer" }}>
+                      0
+                    </button>
+                    <div />
                   </div>
                   {pinError && <div style={{ textAlign: "center", color: "#cc0000", fontSize: 10, marginTop: 6, fontStyle: "italic" }}>Incorrect PIN</div>}
                 </div>
