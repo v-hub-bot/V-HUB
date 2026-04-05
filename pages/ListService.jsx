@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+import { Provider } from "@/api/entities";
 
 // ── SEO Meta Tags ──────────────────────────────────────────────────────────
 function useMeta({ title, description, keywords, ogTitle, ogDescription, ogImage, canonical }) {
@@ -298,8 +299,10 @@ export default function ListService() {
   const [openMacro, setOpenMacro] = useState(null); // which macro is expanded
 
   // Submission
-  const [submitted, setSubmitted] = useState(false);
-  const [errors,    setErrors]    = useState({});
+  const [submitted,  setSubmitted]  = useState(false);
+  const [errors,     setErrors]     = useState({});
+  const [accountNum, setAccountNum] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
   const toggleSvc = (name) =>
     setSelSvcs(prev => prev.includes(name) ? prev.filter(s => s !== name) : [...prev, name]);
@@ -333,21 +336,47 @@ export default function ListService() {
     return Object.keys(e).length === 0;
   };
 
-  const handleSubmit = () => {
+  const genAccountNum = () => {
+    const letters = "ABCDEFGHJKLMNPQRSTUVWXYZ";
+    const L1 = letters[Math.floor(Math.random() * letters.length)];
+    const L2 = letters[Math.floor(Math.random() * letters.length)];
+    const digits = String(Math.floor(100000 + Math.random() * 900000));
+    return L1 + L2 + digits;
+  };
+
+  const handleSubmit = async () => {
     if (!validate()) {
       window.scrollTo({ top: 0, behavior: "smooth" });
       return;
     }
-    const body = encodeURIComponent(
-      `Hi William,\n\nI'd like to list my business on V-Hub.\n\n` +
-      `Business Name: ${businessName}\nOwner / Contact: ${ownerName}\n` +
-      `Phone: ${phone}\nEmail: ${email}\nWebsite: ${website || "N/A"}\n` +
-      `Address: ${address || "N/A"}\nYears in Business: ${years || "N/A"}\n` +
-      `License #: ${license || "N/A"}\n\nAbout:\n${description || "N/A"}\n\n` +
-      `Services:\n${selSvcs.join(", ")}\n\nAreas:\n${selAreas.join(", ")}\n\nThank you!`
-    );
-    window.location.href = `mailto:william@v-hub.com?subject=V-Hub Listing — ${businessName}&body=${body}`;
-    setSubmitted(true);
+    setSubmitting(true);
+    try {
+      const acct = genAccountNum();
+      // Save provider record with pending status
+      await Provider.create({
+        business_name:     businessName,
+        owner_name:        ownerName,
+        phone:             phone,
+        email:             email,
+        website:           website || "",
+        address:           address || "",
+        description:       description || "",
+        years_in_business: years ? Number(years) : 0,
+        license_number:    license || "",
+        services:          selSvcs,
+        service_areas:     selAreas,
+        provider_id:       acct,
+        subscription_status: "pending",
+        is_visible:        false,
+      });
+      setAccountNum(acct);
+      setSubmitted(true);
+    } catch(err) {
+      console.error("Submission error:", err);
+      alert("There was a problem submitting your listing. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const errBox = (key, msg) => errors[key]
@@ -362,13 +391,31 @@ export default function ListService() {
   if (submitted) {
     return (
       <div style={{ minHeight: "100vh", background: PAPER, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Times New Roman', serif", padding: 20 }}>
-        <div style={{ textAlign: "center", maxWidth: 460 }}>
-          <div style={{ fontSize: 52, marginBottom: 14 }}>📬</div>
-          <div style={{ fontSize: isMobile ? 20 : 24, fontWeight: 900, color: INK, textTransform: "uppercase", letterSpacing: 2 }}>Listing Request Sent!</div>
-          <div style={{ height: 2, background: INK, margin: "10px auto", width: 120, opacity: 0.25 }} />
-          <div style={{ fontSize: isMobile ? 15 : 14, color: INK_FADE, fontStyle: "italic", marginBottom: 28, lineHeight: 1.7 }}>
-            William Evans will review your information and reach out to complete your V-Hub listing. Welcome to the community!
+        <div style={{ textAlign: "center", maxWidth: 500 }}>
+          <div style={{ fontSize: 52, marginBottom: 14 }}>🎉</div>
+          <div style={{ fontSize: isMobile ? 22 : 26, fontWeight: 900, color: INK, textTransform: "uppercase", letterSpacing: 2, marginBottom: 6 }}>
+            Thank You for Your Listing!
           </div>
+          <div style={{ height: 2, background: INK, margin: "10px auto 20px", width: 140, opacity: 0.25 }} />
+
+          {/* Account Number Box */}
+          <div style={{ background: PAPER_MID, border: `2px solid ${BROWN_BTN}`, borderRadius: 8, padding: "20px 24px", marginBottom: 22, boxShadow: "0 3px 12px rgba(0,0,0,0.12)" }}>
+            <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 3, textTransform: "uppercase", color: INK_FADE, marginBottom: 8 }}>Your V-Hub Account Number</div>
+            <div style={{ fontSize: isMobile ? 32 : 38, fontWeight: 900, color: BROWN_BTN, letterSpacing: 6, fontFamily: "'Courier New', monospace", marginBottom: 6 }}>{accountNum}</div>
+            <div style={{ fontSize: 11, color: INK_FADE, fontStyle: "italic" }}>Save this number — it identifies your provider account</div>
+          </div>
+
+          <div style={{ fontSize: isMobile ? 14 : 13, color: INK_FADE, lineHeight: 1.8, marginBottom: 10, textAlign: "left", background: PAPER_MID, border: `1px solid ${PAPER_DK}`, borderRadius: 6, padding: "14px 18px" }}>
+            <div style={{ fontWeight: 700, color: INK, marginBottom: 8, fontSize: 13 }}>What happens next:</div>
+            <div>📋 <strong>Step 1</strong> — Your listing is now pending review by William Evans.</div>
+            <div style={{ marginTop: 6 }}>✅ <strong>Step 2</strong> — Once approved, you'll receive an email at <strong>{email || "the address you provided"}</strong> with your sign-in information and instructions to access your <strong>Provider Hub</strong>.</div>
+            <div style={{ marginTop: 6 }}>🗂 <strong>Step 3</strong> — Log into your Provider Hub to manage your profile, view inquiries, and update your listing at any time.</div>
+          </div>
+
+          <div style={{ fontSize: 12, color: INK_FADE, fontStyle: "italic", marginBottom: 24 }}>
+            Questions? Contact William Evans at <span style={{ color: BROWN_BTN }}>william@v-hub.com</span>
+          </div>
+
           <a href="/" style={{ textDecoration: "none" }}>
             <button style={{ background: BROWN_BTN, color: PAPER, border: "none", borderRadius: 5, padding: isMobile ? "15px 36px" : "13px 32px", fontSize: isMobile ? 15 : 14, fontWeight: 700, cursor: "pointer", fontFamily: "'Times New Roman', serif", letterSpacing: 2, textTransform: "uppercase" }}>
               ← Back to Home
@@ -619,17 +666,18 @@ export default function ListService() {
             </div>
             <button
               onClick={handleSubmit}
+              disabled={submitting}
               style={{
                 width: "100%",
-                background: `linear-gradient(180deg,#9A6030,${BROWN_BTN} 60%,#5A3010)`,
-                color: PAPER, border: `3px solid ${YELLOW}`,
+                background: submitting ? PAPER_DK : `linear-gradient(180deg,#9A6030,${BROWN_BTN} 60%,#5A3010)`,
+                color: submitting ? INK_FADE : PAPER, border: `3px solid ${YELLOW}`,
                 boxShadow: `0 0 0 1.5px ${YELLOW}, 0 0 14px 4px rgba(255,220,0,0.3)`,
                 borderRadius: 8, padding: "18px 20px",
-                fontSize: 17, fontWeight: 900, cursor: "pointer",
+                fontSize: 17, fontWeight: 900, cursor: submitting ? "not-allowed" : "pointer",
                 fontFamily: "'Times New Roman', serif", letterSpacing: 2, textTransform: "uppercase",
               }}
             >
-              Submit My Listing →
+              {submitting ? "Submitting..." : "Submit My Listing →"}
             </button>
           </div>
         </div>
@@ -817,15 +865,15 @@ export default function ListService() {
               By submitting, you agree to be listed in V-Hub's public directory.<br />
               William Evans will contact you to confirm and activate your profile.
             </div>
-            <button onClick={handleSubmit} style={{
-              background: `linear-gradient(180deg,#9A6030,${BROWN_BTN} 60%,#5A3010)`,
-              color: PAPER, border: `3px solid ${YELLOW}`,
+            <button onClick={handleSubmit} disabled={submitting} style={{
+              background: submitting ? PAPER_DK : `linear-gradient(180deg,#9A6030,${BROWN_BTN} 60%,#5A3010)`,
+              color: submitting ? INK_FADE : PAPER, border: `3px solid ${YELLOW}`,
               boxShadow: `0 0 0 1.5px ${YELLOW}, 0 0 12px 3px rgba(255,220,0,0.3)`,
               borderRadius: 6, padding: "15px 48px",
-              fontSize: 15, fontWeight: 900, cursor: "pointer",
+              fontSize: 15, fontWeight: 900, cursor: submitting ? "not-allowed" : "pointer",
               fontFamily: "'Times New Roman', serif", letterSpacing: 3, textTransform: "uppercase",
             }}>
-              Submit My Listing →
+              {submitting ? "Submitting..." : "Submit My Listing →"}
             </button>
           </div>
         </div>
