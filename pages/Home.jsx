@@ -941,9 +941,7 @@ export default function Home() {
     setSelCatR(selSvc);
     let all = [];
     try { all = await Provider.list(); } catch(e) { all = []; }
-    // Map village description (section key like "Historic Side | Spanish Springs") to
-    // the short macro key stored in provider.service_areas
-    // Map village description to the short lowercase key stored in provider.service_areas
+    // Map village description → macro key, and village name (from dropdown)
     const SECTION_TO_MACRO = {
       "Historic Side | Spanish Springs":         "historic",
       "Established Villages | North of SR-466A": "established",
@@ -952,7 +950,9 @@ export default function Home() {
       "Family & Non-Age-Restricted Villages":    "family",
     };
     const macroKey = selArea ? SECTION_TO_MACRO[selArea.description] || null : null;
-    // All possible stored variants for each macro key (lowercase for comparison)
+    // Village name as selected (e.g. "Spanish Springs", "Buttonwood")
+    const villageName = selArea ? selArea.name.split("—").pop().trim() : null;
+    // Macro aliases — all known string variants per macro key
     const MACRO_ALIASES = {
       "historic":    ["historic", "historic side"],
       "established": ["established", "established villages"],
@@ -962,11 +962,15 @@ export default function Home() {
     };
     const out = all.filter(p => {
       if (p.is_visible === false) return false;
-      // Area match: normalize stored keys to lowercase, match against all known aliases
-      const provAreas = (p.service_areas || []).map(a => a.toLowerCase());
-      const allVillages = provAreas.some(a => a === "all villages");
-      const areaMatch = !selArea || !macroKey || allVillages ||
-        provAreas.some(a => (MACRO_ALIASES[macroKey] || [macroKey]).includes(a));
+      const provAreas = (p.service_areas || []);
+      const provAreasLower = provAreas.map(a => a.toLowerCase());
+      // All Villages — always match
+      const allVillages = provAreasLower.some(a => a === "all villages");
+      // Match by specific village name (new providers store individual villages)
+      const villageMatch = villageName && provAreas.some(a => a.toLowerCase() === villageName.toLowerCase());
+      // Match by macro key (legacy providers store macro keys like "historic")
+      const macroMatch = macroKey && provAreasLower.some(a => (MACRO_ALIASES[macroKey] || [macroKey]).includes(a));
+      const areaMatch = !selArea || allVillages || villageMatch || macroMatch;
       // Service match: by sub-service name OR by category_id (when category selected)
       const provCatId = selSvc?.category_id || selSvc?.id;
       const svcMatch = !selSvc || (

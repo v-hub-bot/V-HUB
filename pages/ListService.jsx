@@ -81,12 +81,23 @@ const CATS = [
 
 // ── Macro service areas ────────────────────────────────────────────────────
 const MACRO_AREAS = [
-  { key: "historic",    label: "Historic Side" },
-  { key: "established", label: "Established Villages" },
-  { key: "newer",       label: "Newer Villages" },
-  { key: "eastport",    label: "Eastport" },
-  { key: "family",      label: "Family & Non-Age-Restricted Villages" },
-  { key: "all villages",label: "All Villages (Entire Community)" },
+  { key: "historic",    label: "🌴 Historic Side", villages: [
+    "Spanish Springs","Buttonwood","Calumet Grove","Duval","El Cortez","Largo","Lady Lake","Pennecamp","Piedmont","Pine Ridge","Tamarind Grove",
+  ]},
+  { key: "established", label: "🏡 Established Villages", villages: [
+    "Amelia","Bonnybrook","Buttonwood","DeSoto","Dunedin (age-restricted)","Fernandina","Glenbrook","Hadley","Lake Deaton (age-restricted)",
+    "Lakeside Landings","Mallory Hill","Mira Mesa","Orange Blossom Gardens","Palo Alto","Pennecamp","Pine Hills (age-restricted)",
+    "Rio Grande","Rio Ponderosa","Sabal Chase","Silver Lake","Summerhill","Sunset Pointe","Tierra Del Sol","Woodbury",
+  ]},
+  { key: "newer",       label: "🌿 Newer Villages", villages: [
+    "Duval","Fenney","福Tall Trees","Linden","Liberty Park","McClure","Middleton","Monarch Grove","Newell","Richmond","Santiago",
+  ]},
+  { key: "eastport",    label: "🌊 Eastport", villages: [
+    "Bradford","Collier","Eastmoor","Eastport Town Center","Magnolia","Tysen","Wasatch","Winifred",
+  ]},
+  { key: "family",      label: "🏠 Family & Non-Age-Restricted Villages", villages: [
+    "Briar Meadow","Captiva","Dunedin","Hacienda East","Hacienda Hills","Lake Deaton","Mallory Square","Mercer","Pine Hills","Pinecrest","Sumter Landing",
+  ]},
 ];
 
 // ── Sidebar stories ────────────────────────────────────────────────────────
@@ -284,6 +295,7 @@ export default function ListService() {
   const [selSvcs,  setSelSvcs]  = useState([]);
   const [selAreas, setSelAreas] = useState([]);
   const [areaOpen, setAreaOpen] = useState(false);
+  const [openMacro, setOpenMacro] = useState(null); // which macro is expanded
 
   // Submission
   const [submitted, setSubmitted] = useState(false);
@@ -293,6 +305,21 @@ export default function ListService() {
     setSelSvcs(prev => prev.includes(name) ? prev.filter(s => s !== name) : [...prev, name]);
   const toggleArea = (key) =>
     setSelAreas(prev => prev.includes(key) ? prev.filter(a => a !== key) : [...prev, key]);
+  const toggleVillage = (vil) =>
+    setSelAreas(prev => prev.includes(vil) ? prev.filter(a => a !== vil) : [...prev, vil]);
+  const toggleMacro = (macroKey) => {
+    // Select/deselect entire macro area (selects the key itself, not individual villages)
+    // Use macroKey to mark "all in this section"
+    const macro = MACRO_AREAS.find(m => m.key === macroKey);
+    if (!macro) return;
+    const allVils = macro.villages;
+    const allChecked = allVils.every(v => selAreas.includes(v));
+    if (allChecked) {
+      setSelAreas(prev => prev.filter(a => !allVils.includes(a)));
+    } else {
+      setSelAreas(prev => [...new Set([...prev, ...allVils])]);
+    }
+  };
 
   const validate = () => {
     const e = {};
@@ -524,22 +551,46 @@ export default function ListService() {
                 <span>{selAreas.length === 0 ? "📍 Select areas you serve..." : `📍 ${selAreas.length} area${selAreas.length > 1 ? "s" : ""} selected`}</span>
                 <span style={{ fontSize: 14 }}>{areaOpen ? "▲" : "▼"}</span>
               </div>
-              {areaOpen && MACRO_AREAS.map(area => {
-                const checked = selAreas.includes(area.key);
+              {areaOpen && MACRO_AREAS.map(macro => {
+                const isExpanded = openMacro === macro.key;
+                const checkedVils = macro.villages.filter(v => selAreas.includes(v));
+                const allChecked = checkedVils.length === macro.villages.length;
+                const someChecked = checkedVils.length > 0 && !allChecked;
                 return (
-                  <div key={area.key} onClick={() => toggleArea(area.key)}
-                    style={{ display: "flex", alignItems: "center", gap: 14, padding: "14px 18px", cursor: "pointer", background: checked ? "rgba(122,72,32,0.09)" : PAPER, borderBottom: `1px solid ${PAPER_MID}`, minHeight: 54 }}>
-                    <div style={{ width: 24, height: 24, border: `2px solid ${checked ? BROWN_BTN : PAPER_DK}`, borderRadius: 4, background: checked ? BROWN_BTN : PAPER, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                      {checked && <span style={{ color: PAPER, fontSize: 14 }}>✓</span>}
+                  <div key={macro.key}>
+                    {/* Macro header row */}
+                    <div style={{ display: "flex", alignItems: "center", borderBottom: `1px solid ${PAPER_DK}`, background: someChecked || allChecked ? "rgba(122,72,32,0.08)" : "transparent" }}>
+                      <div onClick={() => toggleMacro(macro.key)} style={{ width: 20, height: 20, border: `2px solid ${allChecked ? BROWN_BTN : someChecked ? BROWN_BTN : PAPER_DK}`, borderRadius: 3, background: allChecked ? BROWN_BTN : PAPER, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, margin: "12px 10px 12px 14px", cursor: "pointer" }}>
+                        {allChecked && <span style={{ color: PAPER, fontSize: 11 }}>✓</span>}
+                        {someChecked && <span style={{ color: BROWN_BTN, fontSize: 11 }}>–</span>}
+                      </div>
+                      <div onClick={() => setOpenMacro(isExpanded ? null : macro.key)} style={{ flex: 1, padding: "12px 0", cursor: "pointer", fontWeight: 700, fontSize: 14, color: INK, fontFamily: "'Times New Roman', serif" }}>
+                        {macro.label} {checkedVils.length > 0 ? <span style={{ fontSize: 11, color: BROWN_BTN }}>({checkedVils.length} selected)</span> : ""}
+                      </div>
+                      <div onClick={() => setOpenMacro(isExpanded ? null : macro.key)} style={{ padding: "12px 14px", cursor: "pointer", fontSize: 11, color: INK }}>
+                        {isExpanded ? "▲" : "▼"}
+                      </div>
                     </div>
-                    <span style={{ fontSize: 15, color: INK, fontFamily: "'Times New Roman', serif", lineHeight: 1.3 }}>{area.label}</span>
+                    {/* Individual villages */}
+                    {isExpanded && macro.villages.map(vil => {
+                      const checked = selAreas.includes(vil);
+                      return (
+                        <div key={vil} onClick={() => toggleVillage(vil)}
+                          style={{ display: "flex", alignItems: "center", gap: 10, padding: "9px 14px 9px 44px", cursor: "pointer", background: checked ? "rgba(122,72,32,0.06)" : PAPER_MID, borderBottom: `1px solid ${PAPER_DK}` }}>
+                          <div style={{ width: 16, height: 16, border: `2px solid ${checked ? BROWN_BTN : PAPER_DK}`, borderRadius: 3, background: checked ? BROWN_BTN : PAPER, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                            {checked && <span style={{ color: PAPER, fontSize: 10 }}>✓</span>}
+                          </div>
+                          <span style={{ fontSize: 13, color: INK, fontFamily: "'Times New Roman', serif" }}>{vil}</span>
+                        </div>
+                      );
+                    })}
                   </div>
                 );
               })}
             </div>
             {selAreas.length > 0 && (
-              <div style={{ background: PAPER_MID, border: `1px solid ${PAPER_DK}`, borderRadius: 6, padding: "10px 14px", marginTop: 10, fontSize: 13, color: INK_FADE }}>
-                <strong style={{ color: INK }}>Serving:</strong> {selAreas.join(" · ")}
+              <div style={{ background: PAPER_MID, border: `1px solid ${PAPER_DK}`, borderRadius: 5, padding: "8px 12px", marginTop: 8, fontSize: 12, color: INK_FADE }}>
+                <strong style={{ color: INK }}>📍 {selAreas.length} village{selAreas.length > 1 ? "s" : ""} selected:</strong> {selAreas.join(", ")}
               </div>
             )}
           </div>
@@ -716,22 +767,46 @@ export default function ListService() {
                 <span>{selAreas.length === 0 ? "📍 Select areas you serve..." : `📍 ${selAreas.length} area${selAreas.length > 1 ? "s" : ""} selected`}</span>
                 <span style={{ fontSize: 11 }}>{areaOpen ? "▲" : "▼"}</span>
               </div>
-              {areaOpen && MACRO_AREAS.map(area => {
-                const checked = selAreas.includes(area.key);
+              {areaOpen && MACRO_AREAS.map(macro => {
+                const isExpanded = openMacro === macro.key;
+                const checkedVils = macro.villages.filter(v => selAreas.includes(v));
+                const allChecked = checkedVils.length === macro.villages.length;
+                const someChecked = checkedVils.length > 0 && !allChecked;
                 return (
-                  <div key={area.key} onClick={() => toggleArea(area.key)}
-                    style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 14px", cursor: "pointer", background: checked ? "rgba(122,72,32,0.09)" : "transparent", borderBottom: `1px solid ${PAPER_MID}` }}>
-                    <div style={{ width: 18, height: 18, border: `2px solid ${checked ? BROWN_BTN : PAPER_DK}`, borderRadius: 3, background: checked ? BROWN_BTN : PAPER, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                      {checked && <span style={{ color: PAPER, fontSize: 12 }}>✓</span>}
+                  <div key={macro.key}>
+                    {/* Macro header row */}
+                    <div style={{ display: "flex", alignItems: "center", borderBottom: `1px solid ${PAPER_DK}`, background: someChecked || allChecked ? "rgba(122,72,32,0.08)" : "transparent" }}>
+                      <div onClick={() => toggleMacro(macro.key)} style={{ width: 20, height: 20, border: `2px solid ${allChecked ? BROWN_BTN : someChecked ? BROWN_BTN : PAPER_DK}`, borderRadius: 3, background: allChecked ? BROWN_BTN : PAPER, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, margin: "12px 10px 12px 14px", cursor: "pointer" }}>
+                        {allChecked && <span style={{ color: PAPER, fontSize: 11 }}>✓</span>}
+                        {someChecked && <span style={{ color: BROWN_BTN, fontSize: 11 }}>–</span>}
+                      </div>
+                      <div onClick={() => setOpenMacro(isExpanded ? null : macro.key)} style={{ flex: 1, padding: "12px 0", cursor: "pointer", fontWeight: 700, fontSize: 14, color: INK, fontFamily: "'Times New Roman', serif" }}>
+                        {macro.label} {checkedVils.length > 0 ? <span style={{ fontSize: 11, color: BROWN_BTN }}>({checkedVils.length} selected)</span> : ""}
+                      </div>
+                      <div onClick={() => setOpenMacro(isExpanded ? null : macro.key)} style={{ padding: "12px 14px", cursor: "pointer", fontSize: 11, color: INK }}>
+                        {isExpanded ? "▲" : "▼"}
+                      </div>
                     </div>
-                    <span style={{ fontSize: 13, color: INK, fontFamily: "'Times New Roman', serif" }}>{area.label}</span>
+                    {/* Individual villages */}
+                    {isExpanded && macro.villages.map(vil => {
+                      const checked = selAreas.includes(vil);
+                      return (
+                        <div key={vil} onClick={() => toggleVillage(vil)}
+                          style={{ display: "flex", alignItems: "center", gap: 10, padding: "9px 14px 9px 44px", cursor: "pointer", background: checked ? "rgba(122,72,32,0.06)" : PAPER_MID, borderBottom: `1px solid ${PAPER_DK}` }}>
+                          <div style={{ width: 16, height: 16, border: `2px solid ${checked ? BROWN_BTN : PAPER_DK}`, borderRadius: 3, background: checked ? BROWN_BTN : PAPER, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                            {checked && <span style={{ color: PAPER, fontSize: 10 }}>✓</span>}
+                          </div>
+                          <span style={{ fontSize: 13, color: INK, fontFamily: "'Times New Roman', serif" }}>{vil}</span>
+                        </div>
+                      );
+                    })}
                   </div>
                 );
               })}
             </div>
             {selAreas.length > 0 && (
               <div style={{ background: PAPER_MID, border: `1px solid ${PAPER_DK}`, borderRadius: 5, padding: "8px 12px", marginTop: 8, fontSize: 12, color: INK_FADE }}>
-                <strong style={{ color: INK }}>Serving:</strong> {selAreas.join(" · ")}
+                <strong style={{ color: INK }}>📍 {selAreas.length} village{selAreas.length > 1 ? "s" : ""} selected:</strong> {selAreas.join(", ")}
               </div>
             )}
           </div>
