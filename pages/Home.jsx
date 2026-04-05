@@ -939,7 +939,11 @@ export default function Home() {
     setSelAreaR(selArea);
     setSelCatR(selSvc);
     let all = [];
-    try { all = await Provider.list(); } catch(e) { all = []; }
+    try {
+      const resp = await fetch('https://v-hub-697894b1.base44.app/functions/getProviders', { method: 'POST', headers: { 'Content-Type': 'application/json' } });
+      const data = await resp.json();
+      all = data.providers || [];
+    } catch(e) { all = []; }
 
     // Real ServiceArea entity IDs per macro group (stable DB IDs)
     // Individual village IDs → their macro group ID
