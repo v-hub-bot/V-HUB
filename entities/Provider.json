@@ -2,8 +2,7 @@
   "type": "object",
   "properties": {
     "provider_id": {
-      "type": "string",
-      "description": "Auto-generated unique provider ID e.g. VH-00142"
+      "type": "string"
     },
     "business_name": {
       "type": "string"
@@ -27,38 +26,25 @@
       "type": "string"
     },
     "service_areas": {
-      "type": "array",
-      "items": {
-        "type": "string"
-      },
-      "description": "Array of macro area keys"
+      "type": "array"
     },
     "category_id": {
       "type": "string"
     },
     "services": {
-      "type": "array",
-      "items": {
-        "type": "string"
-      },
-      "description": "Array of service name strings"
+      "type": "array"
     },
     "subscription_status": {
       "type": "string",
       "enum": [
-        "trial",
+        "pending",
         "active",
-        "inactive",
-        "pending"
+        "cancelled",
+        "past_due"
       ]
     },
     "subscription_tier": {
-      "type": "string",
-      "enum": [
-        "basic",
-        "featured",
-        "premium"
-      ]
+      "type": "string"
     },
     "is_visible": {
       "type": "boolean"
@@ -73,19 +59,22 @@
       "type": "number"
     },
     "google_review_url": {
-      "type": "string",
-      "description": "URL to Google Business review page"
+      "type": "string"
     },
     "address": {
       "type": "string"
     },
     "profile_views": {
-      "type": "number",
-      "description": "Total profile clicks"
+      "type": "number"
     },
     "search_appearances": {
-      "type": "number",
-      "description": "Total times appeared in search results"
+      "type": "number"
+    },
+    "stripe_subscription_id": {
+      "type": "string"
+    },
+    "stripe_customer_id": {
+      "type": "string"
     }
   },
   "required": [],

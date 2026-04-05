@@ -143,7 +143,7 @@ function AdminPinGate({ onUnlock }) {
 
 export default function Admin() {
   useMeta({
-    title: "V-Hub Admin | William Evans",
+    title: "V-Hub Admin",
     description: "V-Hub admin panel — manage providers, categories, services, and reviews.",
     keywords: "",
     canonical: "https://v-hub-app-edf7f8e8.base44.app/Admin",
@@ -216,7 +216,7 @@ export default function Admin() {
             style={{ height: 48, width: 48, borderRadius: 8 }} alt="V-Hub" />
           <div>
             <div style={{ color: "#fff", fontSize: 22, fontWeight: 800 }}>V-HUB Admin</div>
-            <div style={{ color: "rgba(255,255,255,0.85)", fontSize: 13 }}>William Evans · Manage Providers & Listings</div>
+            <div style={{ color: "rgba(255,255,255,0.85)", fontSize: 13 }}>Admin · Manage Providers & Listings</div>
           </div>
         </div>
         <a href="/" style={{ color: "#fff", textDecoration: "none", background: "rgba(255,255,255,0.2)", borderRadius: 10, padding: "8px 16px", fontSize: 14, fontWeight: 600 }}>
@@ -398,8 +398,62 @@ function ReviewsTab({ reviews, providers, onSaved }) {
 
 // ─── Providers Tab ────────────────────────────────────────────────────────────
 function ProvidersTab({ providers, categories, services, areas, onAdd, onEdit, onDelete, showForm, editItem, onClose, onSaved }) {
+  const [actionMsg, setActionMsg] = React.useState("");
+
+  const handleSendPaymentLink = async (p) => {
+    if (!p.email) { setActionMsg("❌ Provider has no email on file."); return; }
+    setActionMsg("⏳ Generating payment link...");
+    try {
+      const res = await fetch("/functions/createCheckoutSession", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ provider_id: p.provider_id, provider_email: p.email, provider_name: p.owner_name, business_name: p.business_name }),
+      });
+      const data = await res.json();
+      if (data.url) {
+        // Copy to clipboard
+        await navigator.clipboard.writeText(data.url).catch(() => {});
+        setActionMsg("✅ Payment link copied to clipboard! Send it to " + (p.email || p.business_name));
+        window.open(data.url, "_blank");
+      } else {
+        setActionMsg("❌ Failed to generate link.");
+      }
+    } catch (e) {
+      setActionMsg("❌ Error: " + e.message);
+    }
+    setTimeout(() => setActionMsg(""), 6000);
+  };
+
+  const handleCancelSubscription = async (p) => {
+    if (!p.stripe_subscription_id) { setActionMsg("❌ No active Stripe subscription found for this provider."); setTimeout(() => setActionMsg(""), 5000); return; }
+    if (!window.confirm(`Cancel subscription for ${p.business_name}? They will keep access until end of billing period.`)) return;
+    setActionMsg("⏳ Cancelling subscription...");
+    try {
+      const res = await fetch("/functions/cancelSubscription", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ stripe_subscription_id: p.stripe_subscription_id }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        await Provider.update(p.id, { subscription_status: "cancelled" });
+        setActionMsg("✅ Subscription cancelled. Access ends at billing period.");
+      } else {
+        setActionMsg("❌ " + (data.error || "Failed to cancel."));
+      }
+    } catch (e) {
+      setActionMsg("❌ Error: " + e.message);
+    }
+    setTimeout(() => setActionMsg(""), 6000);
+  };
+
   return (
     <div>
+      {actionMsg && (
+        <div style={{ background: actionMsg.startsWith("✅") ? "#e8f5e9" : actionMsg.startsWith("⏳") ? "#fff8e1" : "#ffebee", border: "1px solid #ccc", borderRadius: 8, padding: "10px 16px", marginBottom: 12, fontSize: 13, fontWeight: 600, color: "#333" }}>
+          {actionMsg}
+        </div>
+      )}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
         <div style={{ fontSize: 20, fontWeight: 700, color: BRAND.text }}>All Providers ({providers.length})</div>
         <button onClick={onAdd} style={addBtnStyle}>+ Add Provider</button>
@@ -434,7 +488,17 @@ function ProvidersTab({ providers, categories, services, areas, onAdd, onEdit, o
                 {cat && <div style={{ fontSize: 13, color: BRAND.teal, fontWeight: 600 }}>{cat.icon} {cat.name}</div>}
                 <div style={{ fontSize: 14, color: BRAND.subtext }}>{p.phone}{p.email ? ` · ${p.email}` : ""}</div>
               </div>
-              <div style={{ display: "flex", gap: 8 }}>
+              <div style={{ display: "flex", gap: 6, flexWrap: "wrap", justifyContent: "flex-end" }}>
+                {p.subscription_status !== "active" && (
+                  <button onClick={() => handleSendPaymentLink(p)} style={{ background: BRAND.teal, color: "#fff", border: "none", borderRadius: 8, padding: "8px 12px", fontSize: 12, fontWeight: 700, cursor: "pointer" }}>
+                    💳 Send Payment Link
+                  </button>
+                )}
+                {p.subscription_status === "active" && (
+                  <button onClick={() => handleCancelSubscription(p)} style={{ background: "#fff3e0", color: "#e65100", border: "1px solid #e65100", borderRadius: 8, padding: "8px 12px", fontSize: 12, fontWeight: 700, cursor: "pointer" }}>
+                    ✕ Cancel Sub
+                  </button>
+                )}
                 <button onClick={() => onEdit(p)} style={editBtnStyle}>Edit</button>
                 <button onClick={() => onDelete(p.id)} style={deleteBtnStyle}>Delete</button>
               </div>

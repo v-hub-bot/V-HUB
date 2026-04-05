@@ -572,6 +572,37 @@ export default function ProviderDashboard() {
               ✏ Edit My Profile →
             </button>
           </div>
+
+          {/* Danger Zone — Delete Account */}
+          <div style={{ marginTop: 40, borderTop: `1px solid rgba(139,26,26,0.3)`, paddingTop: 20 }}>
+            <div style={{ fontSize: 10, fontWeight: 900, letterSpacing: 3, textTransform: "uppercase", color: RED_RULE, marginBottom: 12, fontFamily: "'Times New Roman', serif" }}>
+              ⚠ Danger Zone
+            </div>
+            <div style={{ background: "#FFF5F5", border: `1.5px solid rgba(139,26,26,0.25)`, borderRadius: 8, padding: "16px 20px", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12 }}>
+              <div>
+                <div style={{ fontSize: 13, fontWeight: 700, color: INK, fontFamily: "'Times New Roman', serif" }}>Delete My Account</div>
+                <div style={{ fontSize: 11, color: INK_FADE, fontStyle: "italic", marginTop: 3 }}>Permanently removes your listing from V-Hub. This cannot be undone.</div>
+              </div>
+              <button onClick={async () => {
+                if (!window.confirm("Are you sure you want to permanently delete your V-Hub listing? This cannot be undone.")) return;
+                if (!window.confirm("Last warning: your listing, stats, and reviews will all be removed. Continue?")) return;
+                try {
+                  await Provider.delete(provider.id);
+                  setProvider(null);
+                  setView("lookup");
+                  alert("Your account has been deleted. Sorry to see you go!");
+                } catch(e) {
+                  alert("Error deleting account. Please contact Admin for help.");
+                }
+              }} style={{
+                background: RED_RULE, color: "#fff", border: "none", borderRadius: 6,
+                padding: "10px 20px", fontSize: 13, fontWeight: 700, cursor: "pointer",
+                fontFamily: "'Times New Roman', serif", letterSpacing: 1,
+              }}>
+                Delete Account
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     );
