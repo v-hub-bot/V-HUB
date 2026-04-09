@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 
 // ── SEO Meta Tags ──────────────────────────────────────────────────────────
 function useMeta({ title, description, keywords, ogTitle, ogDescription, ogImage, canonical }) {
@@ -164,22 +164,30 @@ export default function Admin() {
   const [adminPin, setAdminPin] = useState(storedPin);
   const isUnlocked = VALID_PINS.includes(adminPin);
 
+  const [loadError, setLoadError] = useState(null);
+  const [loading, setLoading] = useState(false);
+
   const loadAll = async () => {
+    setLoading(true);
+    setLoadError(null);
     try {
-      const [provList, catList, svcList, areaList, revList] = await Promise.all([
+      const [provList, catList, svcList, areaList, revList] = await Promise.allSettled([
         Provider.list(),
         Category.list(),
         Service.list(),
         ServiceArea.list(),
         ProviderReview.list(),
       ]);
-      setProviders(provList || []);
-      setCategories(catList || []);
-      setServices(svcList || []);
-      setAreas(areaList || []);
-      setReviews(revList || []);
+      setProviders(provList.status === "fulfilled" ? (provList.value || []) : []);
+      setCategories(catList.status === "fulfilled" ? (catList.value || []) : []);
+      setServices(svcList.status === "fulfilled" ? (svcList.value || []) : []);
+      setAreas(areaList.status === "fulfilled" ? (areaList.value || []) : []);
+      setReviews(revList.status === "fulfilled" ? (revList.value || []) : []);
     } catch (e) {
       console.error("loadAll error", e);
+      setLoadError(e.message);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -198,6 +206,15 @@ export default function Admin() {
   // Show PIN gate if not unlocked
   if (!isUnlocked) {
     return <AdminPinGate onUnlock={(pin) => setAdminPin(pin)} />;
+  }
+
+  if (loading) {
+    return (
+      <div style={{ minHeight: "100vh", background: "#1A0A00", display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", gap: 16 }}>
+        <img src="https://media.base44.com/images/public/69d062aca815ce8e697894b1/a9af95bc3_V-Hublogo.png" style={{ width: 64, borderRadius: 10 }} />
+        <div style={{ color: "#F5E8CC", fontSize: 16, fontFamily: "Georgia, serif" }}>Loading admin data...</div>
+      </div>
+    );
   }
 
   return (
