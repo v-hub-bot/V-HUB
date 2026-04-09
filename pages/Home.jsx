@@ -47,7 +47,7 @@ const BROWN_HL  = "#6B3010";
 const YELLOW    = "#FFDB00";
 
 // Newspaper stories — each has headline, subhead, paragraphs
-const STORIES = {
+const NEWSPAPER_CONTENT = {
   neighborhoodWatch: {
     headline: "LOCAL SERVICES ON THE RISE",
     subhead: "Demand surges as Villages community expands southward",
@@ -648,7 +648,7 @@ function Results({ results, areas, cats, svcs, onReset, onSel, selArea, selCatId
 
         {/* ── FOOTER ── */}
         <div style={{ borderTop: `2px solid ${INK}`, padding: "10px 16px", textAlign: "center", fontSize: 10, color: INK_FADE, fontStyle: "italic" }}>
-          © V-Hub · The Villages, Florida · All rights reserved
+          © 2026 V-Hub · The Villages, Florida · Find Local Services · All rights reserved
         </div>
 
       </div>
@@ -1235,50 +1235,50 @@ export default function Home() {
           {/* ── LEFT COLUMN ── */}
           <div className="np-side-left np-col">
             {/* Story 1 */}
-            <p style={hd}>{STORIES.neighborhoodWatch.headline}</p>
-            <p style={sub}>{STORIES.neighborhoodWatch.subhead}</p>
-            {STORIES.neighborhoodWatch.body.map((p,i) => <p key={i} style={para}>{p}</p>)}
+            <p style={hd}>{NEWSPAPER_CONTENT.neighborhoodWatch.headline}</p>
+            <p style={sub}>{NEWSPAPER_CONTENT.neighborhoodWatch.subhead}</p>
+            {NEWSPAPER_CONTENT.neighborhoodWatch.body.map((p,i) => <p key={i} style={para}>{p}</p>)}
             <div style={rule} />
             {/* Story 2 */}
-            <p style={hd}>{STORIES.growthStory.headline}</p>
-            <p style={sub}>{STORIES.growthStory.subhead}</p>
-            {STORIES.growthStory.body.map((p,i) => <p key={i} style={para}>{p}</p>)}
+            <p style={hd}>{NEWSPAPER_CONTENT.growthStory.headline}</p>
+            <p style={sub}>{NEWSPAPER_CONTENT.growthStory.subhead}</p>
+            {NEWSPAPER_CONTENT.growthStory.body.map((p,i) => <p key={i} style={para}>{p}</p>)}
           </div>
 
           {/* ── CENTER COLUMN ── */}
           <div className="np-center">
             {/* Story above search — visible on mobile too */}
-            <p style={hd}>{STORIES.howItWorks.headline}</p>
-            <p style={sub}>{STORIES.howItWorks.subhead}</p>
-            {STORIES.howItWorks.body.map((p,i) => <p key={i} style={{...para, marginBottom: 10}}>{p}</p>)}
+            <p style={hd}>{NEWSPAPER_CONTENT.howItWorks.headline}</p>
+            <p style={sub}>{NEWSPAPER_CONTENT.howItWorks.subhead}</p>
+            {NEWSPAPER_CONTENT.howItWorks.body.map((p,i) => <p key={i} style={{...para, marginBottom: 10}}>{p}</p>)}
 
             {/* Search box */}
             <SearchBox cats={cats} svcs={svcs} areas={areas} onSearch={doSearch} selSvc={selSvc} setSelSvc={setSelSvc} selArea={selArea} setSelArea={setSelArea} />
 
             {/* Story below search */}
             <div style={{ marginTop: 12 }}>
-              <p style={hd}>{STORIES.homeServices.headline}</p>
-              <p style={sub}>{STORIES.homeServices.subhead}</p>
-              {STORIES.homeServices.body.map((p,i) => <p key={i} style={para}>{p}</p>)}
+              <p style={hd}>{NEWSPAPER_CONTENT.homeServices.headline}</p>
+              <p style={sub}>{NEWSPAPER_CONTENT.homeServices.subhead}</p>
+              {NEWSPAPER_CONTENT.homeServices.body.map((p,i) => <p key={i} style={para}>{p}</p>)}
             </div>
           </div>
 
           {/* ── RIGHT COLUMN ── */}
           <div className="np-side-right np-col">
             {/* Story 1 */}
-            <p style={hd}>{STORIES.providerSpotlight.headline}</p>
-            <p style={sub}>{STORIES.providerSpotlight.subhead}</p>
-            {STORIES.providerSpotlight.body.map((p,i) => <p key={i} style={para}>{p}</p>)}
+            <p style={hd}>{NEWSPAPER_CONTENT.providerSpotlight.headline}</p>
+            <p style={sub}>{NEWSPAPER_CONTENT.providerSpotlight.subhead}</p>
+            {NEWSPAPER_CONTENT.providerSpotlight.body.map((p,i) => <p key={i} style={para}>{p}</p>)}
             <div style={rule} />
             {/* Classifieds */}
-            <p style={hd}>{STORIES.classifieds.headline}</p>
-            <p style={sub}>{STORIES.classifieds.subhead}</p>
-            {STORIES.classifieds.body.map((p,i) => <p key={i} style={{...para, borderBottom: `1px dotted ${PAPER_DK}`, paddingBottom: 5}}>{p}</p>)}
+            <p style={hd}>{NEWSPAPER_CONTENT.classifieds.headline}</p>
+            <p style={sub}>{NEWSPAPER_CONTENT.classifieds.subhead}</p>
+            {NEWSPAPER_CONTENT.classifieds.body.map((p,i) => <p key={i} style={{...para, borderBottom: `1px dotted ${PAPER_DK}`, paddingBottom: 5}}>{p}</p>)}
             <div style={rule} />
             {/* Safety & Trust */}
-            <p style={hd}>{STORIES.safetyTrust.headline}</p>
-            <p style={sub}>{STORIES.safetyTrust.subhead}</p>
-            {STORIES.safetyTrust.body.map((p,i) => <p key={i} style={para}>{p}</p>)}
+            <p style={hd}>{NEWSPAPER_CONTENT.safetyTrust.headline}</p>
+            <p style={sub}>{NEWSPAPER_CONTENT.safetyTrust.subhead}</p>
+            {NEWSPAPER_CONTENT.safetyTrust.body.map((p,i) => <p key={i} style={para}>{p}</p>)}
           </div>
 
         </div>
@@ -1307,7 +1307,7 @@ export default function Home() {
 
         {/* Footer */}
         <div style={{ padding: "10px 14px", textAlign: "center", fontSize: 10, color: INK_FADE, fontStyle: "italic" }}>
-          © V-Hub · The Villages, Florida · All rights reserved
+          © 2026 V-Hub · The Villages, Florida · Find Local Services · All rights reserved
         </div>
 
       </div>
