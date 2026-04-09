@@ -352,23 +352,27 @@ export default function ListService() {
     setSubmitting(true);
     try {
       const acct = genAccountNum();
-      // Save provider record with pending status
-      await Provider.create({
-        business_name:     businessName,
-        owner_name:        ownerName,
-        phone:             phone,
-        email:             email,
-        website:           website || "",
-        address:           address || "",
-        description:       description || "",
-        years_in_business: years ? Number(years) : 0,
-        license_number:    license || "",
-        services:          selSvcs,
-        service_areas:     selAreas,
-        provider_id:       acct,
-        subscription_status: "pending",
-        is_visible:        false,
+      // Use backend function to bypass RLS for unauthenticated submissions
+      const res = await fetch("https://v-hub-697894b1.base44.app/functions/submitListing", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          business_name:     businessName,
+          owner_name:        ownerName,
+          phone:             phone,
+          email:             email,
+          website:           website || "",
+          address:           address || "",
+          description:       description || "",
+          years_in_business: years ? Number(years) : 0,
+          license_number:    license || "",
+          services:          selSvcs,
+          service_areas:     selAreas,
+          provider_id:       acct,
+        }),
       });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Submission failed");
       setAccountNum(acct);
       setSubmitted(true);
     } catch(err) {
