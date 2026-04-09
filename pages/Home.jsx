@@ -98,23 +98,7 @@ const STORIES = {
   },
 };
 
-const SECTIONS = [
-  { key: "Historic Side | Spanish Springs",    label: "Historic Side" },
-  { key: "Established Villages | Lake Sumter", label: "Established Villages" },
-  { key: "Newer Villages | Brownwood",         label: "Newer Villages" },
-  { key: "Eastport | South of SR-44",          label: "Eastport" },
-];
-
-function isVillage(a) { return a.name && a.name.includes("—"); }
-function vName(a) { const p = a.name.split("—"); return p.length > 1 ? p[1].trim() : a.name; }
-function groupAreas(areas) {
-  const g = {};
-  SECTIONS.forEach(s => { g[s.key] = []; });
-  areas.filter(isVillage).forEach(a => {
-    if (g[a.description] !== undefined) g[a.description].push(a);
-  });
-  return g;
-}
+function vName(a) { return a.name || ""; }
 
 function Rule({ thick = false, style = {} }) {
   return (
@@ -707,17 +691,13 @@ function SvcDropdown({ open, cats, svcs, openCat, selSvc, setOpenCat, setSelSvc,
 // ── Village Dropdown ──────────────────────────────────────────────────────────
 function VilDropdown({ open, areas, selArea, setSelArea, setVOpen }) {
   if (!open) return null;
-  // Extract micro village names, sort A-Z
-  const sorted = [...areas]
-    .filter(a => a.name && a.name.includes("—"))
-    .map(a => ({ ...a, micro: a.name.split("—").pop().trim() }))
-    .sort((a, b) => a.micro.localeCompare(b.micro));
+  const sorted = [...areas].sort((a, b) => a.name.localeCompare(b.name));
   return (
     <div onClick={e => e.stopPropagation()} style={{ position: "absolute", top: "100%", left: 0, right: 0, background: PAPER, border: `2px solid ${INK}`, borderRadius: 4, zIndex: 99999, boxShadow: "0 8px 28px rgba(0,0,0,0.4)", maxHeight: 300, overflowY: "auto", marginTop: 2 }}>
       {sorted.map(v => (
         <div key={v.id} onClick={e => { e.stopPropagation(); setSelArea(v); setVOpen(false); }}
           style={{ padding: "9px 14px", fontSize: 13, color: selArea?.id === v.id ? "#fff" : INK, background: selArea?.id === v.id ? BROWN_HL : PAPER, borderBottom: `1px solid ${PAPER_DK}`, cursor: "pointer" }}>
-          {v.micro}
+          {v.name}
         </div>
       ))}
     </div>
@@ -870,113 +850,108 @@ export default function Home() {
     setCats(CATS_STATIC);
     setSvcs(SVCS_STATIC);
     // Hardcoded villages — no auth needed
-        const VILLAGE_DATA = [
-      // ── Historic Side | Spanish Springs ──
-      { id: "v001", name: "Historic Side | Spanish Springs — Alhambra",            description: "Historic Side | Spanish Springs" },
-      { id: "v002", name: "Historic Side | Spanish Springs — Belle Aire",           description: "Historic Side | Spanish Springs" },
-      { id: "v003", name: "Historic Side | Spanish Springs — Briar Meadow",        description: "Historic Side | Spanish Springs" },
-      { id: "v004", name: "Historic Side | Spanish Springs — Calumet Grove",       description: "Historic Side | Spanish Springs" },
-      { id: "v005", name: "Historic Side | Spanish Springs — Chatham",             description: "Historic Side | Spanish Springs" },
-      { id: "v006", name: "Historic Side | Spanish Springs — Country Club Hills",  description: "Historic Side | Spanish Springs" },
-      { id: "v007", name: "Historic Side | Spanish Springs — De Allende",          description: "Historic Side | Spanish Springs" },
-      { id: "v008", name: "Historic Side | Spanish Springs — De La Vista",         description: "Historic Side | Spanish Springs" },
-      { id: "v009", name: "Historic Side | Spanish Springs — Del Mar",             description: "Historic Side | Spanish Springs" },
-      { id: "v010", name: "Historic Side | Spanish Springs — El Cortez",           description: "Historic Side | Spanish Springs" },
-      { id: "v011", name: "Historic Side | Spanish Springs — Glenbrook",           description: "Historic Side | Spanish Springs" },
-      { id: "v012", name: "Historic Side | Spanish Springs — Hacienda",            description: "Historic Side | Spanish Springs" },
-      { id: "v013", name: "Historic Side | Spanish Springs — La Reynalda",         description: "Historic Side | Spanish Springs" },
-      { id: "v014", name: "Historic Side | Spanish Springs — La Zamora",           description: "Historic Side | Spanish Springs" },
-      { id: "v015", name: "Historic Side | Spanish Springs — Mira Mesa",           description: "Historic Side | Spanish Springs" },
-      { id: "v016", name: "Historic Side | Spanish Springs — Orange Blossom Gardens", description: "Historic Side | Spanish Springs" },
-      { id: "v017", name: "Historic Side | Spanish Springs — Palo Alto",           description: "Historic Side | Spanish Springs" },
-      { id: "v018", name: "Historic Side | Spanish Springs — Piedmont",            description: "Historic Side | Spanish Springs" },
-      { id: "v019", name: "Historic Side | Spanish Springs — Pine Hills",          description: "Historic Side | Spanish Springs" },
-      { id: "v020", name: "Historic Side | Spanish Springs — Pine Ridge",          description: "Historic Side | Spanish Springs" },
-      { id: "v021", name: "Historic Side | Spanish Springs — Polo Ridge",          description: "Historic Side | Spanish Springs" },
-      { id: "v022", name: "Historic Side | Spanish Springs — Rio Grande",          description: "Historic Side | Spanish Springs" },
-      { id: "v023", name: "Historic Side | Spanish Springs — Rio Ponderosa",       description: "Historic Side | Spanish Springs" },
-      { id: "v024", name: "Historic Side | Spanish Springs — Rio Ranchero",        description: "Historic Side | Spanish Springs" },
-      { id: "v025", name: "Historic Side | Spanish Springs — Santiago",            description: "Historic Side | Spanish Springs" },
-      { id: "v026", name: "Historic Side | Spanish Springs — Santo Domingo",       description: "Historic Side | Spanish Springs" },
-      { id: "v027", name: "Historic Side | Spanish Springs — Silver Lake",         description: "Historic Side | Spanish Springs" },
-      { id: "v028", name: "Historic Side | Spanish Springs — Springdale",          description: "Historic Side | Spanish Springs" },
-      { id: "v029", name: "Historic Side | Spanish Springs — Summerhill",          description: "Historic Side | Spanish Springs" },
-      { id: "v030", name: "Historic Side | Spanish Springs — Tierra Del Sol",      description: "Historic Side | Spanish Springs" },
-      { id: "v031", name: "Historic Side | Spanish Springs — Valle Verde",         description: "Historic Side | Spanish Springs" },
-      { id: "v032", name: "Historic Side | Spanish Springs — Woodbury",            description: "Historic Side | Spanish Springs" },
-      // ── Established Villages | Lake Sumter ──
-      { id: "v033", name: "Established Villages | Lake Sumter — Amelia",                        description: "Established Villages | Lake Sumter" },
-      { id: "v034", name: "Established Villages | Lake Sumter — Ashland",                       description: "Established Villages | Lake Sumter" },
-      { id: "v035", name: "Established Villages | Lake Sumter — Belvedere",                     description: "Established Villages | Lake Sumter" },
-      { id: "v036", name: "Established Villages | Lake Sumter — Bonita",                        description: "Established Villages | Lake Sumter" },
-      { id: "v037", name: "Established Villages | Lake Sumter — Bonnybrook",                    description: "Established Villages | Lake Sumter" },
-      { id: "v038", name: "Established Villages | Lake Sumter — Bridgeport at Creekside Landing", description: "Established Villages | Lake Sumter" },
-      { id: "v039", name: "Established Villages | Lake Sumter — Bridgeport at Lake Miona",      description: "Established Villages | Lake Sumter" },
-      { id: "v040", name: "Established Villages | Lake Sumter — Bridgeport at Lake Sumter",     description: "Established Villages | Lake Sumter" },
-      { id: "v041", name: "Established Villages | Lake Sumter — Bridgeport at Laurel Valley",   description: "Established Villages | Lake Sumter" },
-      { id: "v042", name: "Established Villages | Lake Sumter — Bridgeport at Miona Shores",    description: "Established Villages | Lake Sumter" },
-      { id: "v043", name: "Established Villages | Lake Sumter — Bridgeport at Mission Hills",   description: "Established Villages | Lake Sumter" },
-      { id: "v044", name: "Established Villages | Lake Sumter — Buttonwood",                    description: "Established Villages | Lake Sumter" },
-      { id: "v045", name: "Established Villages | Lake Sumter — Caroline",                      description: "Established Villages | Lake Sumter" },
-      { id: "v046", name: "Established Villages | Lake Sumter — Duval",                         description: "Established Villages | Lake Sumter" },
-      { id: "v047", name: "Established Villages | Lake Sumter — Haciendas of Mission Hills",    description: "Established Villages | Lake Sumter" },
-      { id: "v048", name: "Established Villages | Lake Sumter — Hadley",                        description: "Established Villages | Lake Sumter" },
-      { id: "v049", name: "Established Villages | Lake Sumter — Hemingway",                     description: "Established Villages | Lake Sumter" },
-      { id: "v050", name: "Established Villages | Lake Sumter — Lakeshore Cottages",            description: "Established Villages | Lake Sumter" },
-      { id: "v051", name: "Established Villages | Lake Sumter — Largo",                         description: "Established Villages | Lake Sumter" },
-      { id: "v052", name: "Established Villages | Lake Sumter — Liberty Park",                  description: "Established Villages | Lake Sumter" },
-      { id: "v053", name: "Established Villages | Lake Sumter — Lynnhaven",                     description: "Established Villages | Lake Sumter" },
-      { id: "v054", name: "Established Villages | Lake Sumter — Mallory Square",                description: "Established Villages | Lake Sumter" },
-      { id: "v055", name: "Established Villages | Lake Sumter — Pennecamp",                     description: "Established Villages | Lake Sumter" },
-      { id: "v056", name: "Established Villages | Lake Sumter — Poinciana",                     description: "Established Villages | Lake Sumter" },
-      { id: "v057", name: "Established Villages | Lake Sumter — Sabal Chase",                   description: "Established Villages | Lake Sumter" },
-      { id: "v058", name: "Established Villages | Lake Sumter — St. Charles",                   description: "Established Villages | Lake Sumter" },
-      { id: "v059", name: "Established Villages | Lake Sumter — St. James",                     description: "Established Villages | Lake Sumter" },
-      { id: "v060", name: "Established Villages | Lake Sumter — Sunset Pointe",                 description: "Established Villages | Lake Sumter" },
-      { id: "v061", name: "Established Villages | Lake Sumter — Tall Trees",                    description: "Established Villages | Lake Sumter" },
-      { id: "v062", name: "Established Villages | Lake Sumter — Tamarind Grove",                description: "Established Villages | Lake Sumter" },
-      { id: "v063", name: "Established Villages | Lake Sumter — Virginia Trace",                description: "Established Villages | Lake Sumter" },
-      { id: "v064", name: "Established Villages | Lake Sumter — Winifred",                      description: "Established Villages | Lake Sumter" },
-      // ── Newer Villages | Brownwood / South of 466A ──
-      { id: "v065", name: "Newer Villages | Brownwood — Charlotte",                             description: "Newer Villages | Brownwood" },
-      { id: "v066", name: "Newer Villages | Brownwood — Collier",                               description: "Newer Villages | Brownwood" },
-      { id: "v067", name: "Newer Villages | Brownwood — Collier at Alden Bungalows",            description: "Newer Villages | Brownwood" },
-      { id: "v068", name: "Newer Villages | Brownwood — Collier at Antrim Dells",               description: "Newer Villages | Brownwood" },
-      { id: "v069", name: "Newer Villages | Brownwood — Dunedin",                               description: "Newer Villages | Brownwood" },
-      { id: "v070", name: "Newer Villages | Brownwood — Fernandina",                            description: "Newer Villages | Brownwood" },
-      { id: "v071", name: "Newer Villages | Brownwood — Gilchrist",                             description: "Newer Villages | Brownwood" },
-      { id: "v072", name: "Newer Villages | Brownwood — Hillsborough",                          description: "Newer Villages | Brownwood" },
-      { id: "v073", name: "Newer Villages | Brownwood — LaBelle",                               description: "Newer Villages | Brownwood" },
-      { id: "v074", name: "Newer Villages | Brownwood — Lake Deaton",                           description: "Newer Villages | Brownwood" },
-      { id: "v075", name: "Newer Villages | Brownwood — Osceola Hills",                         description: "Newer Villages | Brownwood" },
-      { id: "v076", name: "Newer Villages | Brownwood — Osceola Hills at Soaring Eagle Preserve", description: "Newer Villages | Brownwood" },
-      { id: "v077", name: "Newer Villages | Brownwood — Pinellas",                              description: "Newer Villages | Brownwood" },
-      { id: "v078", name: "Newer Villages | Brownwood — Sanibel",                               description: "Newer Villages | Brownwood" },
-      // ── Eastport | South of SR-44 ──
-      { id: "v079", name: "Eastport | South of SR-44 — Bradford",                               description: "Eastport | South of SR-44" },
-      { id: "v080", name: "Eastport | South of SR-44 — Cason Hammock",                          description: "Eastport | South of SR-44" },
-      { id: "v081", name: "Eastport | South of SR-44 — Chitty Chatty",                          description: "Eastport | South of SR-44" },
-      { id: "v082", name: "Eastport | South of SR-44 — Citrus Grove",                           description: "Eastport | South of SR-44" },
-      { id: "v083", name: "Eastport | South of SR-44 — Dabney",                                 description: "Eastport | South of SR-44" },
-      { id: "v084", name: "Eastport | South of SR-44 — DeLuna",                                 description: "Eastport | South of SR-44" },
-      { id: "v085", name: "Eastport | South of SR-44 — DeSoto",                                 description: "Eastport | South of SR-44" },
-      { id: "v086", name: "Eastport | South of SR-44 — Fenney",                                 description: "Eastport | South of SR-44" },
-      { id: "v087", name: "Eastport | South of SR-44 — Hammock at Fenney",                      description: "Eastport | South of SR-44" },
-      { id: "v088", name: "Eastport | South of SR-44 — Hawkins",                                description: "Eastport | South of SR-44" },
-      { id: "v089", name: "Eastport | South of SR-44 — Lake Denham",                            description: "Eastport | South of SR-44" },
-      { id: "v090", name: "Eastport | South of SR-44 — Linden",                                 description: "Eastport | South of SR-44" },
-      { id: "v091", name: "Eastport | South of SR-44 — Marsh Bend",                             description: "Eastport | South of SR-44" },
-      { id: "v092", name: "Eastport | South of SR-44 — McClure",                                description: "Eastport | South of SR-44" },
-      { id: "v093", name: "Eastport | South of SR-44 — Monarch Grove",                          description: "Eastport | South of SR-44" },
-      { id: "v094", name: "Eastport | South of SR-44 — Newell",                                 description: "Eastport | South of SR-44" },
-      { id: "v095", name: "Eastport | South of SR-44 — Richmond",                               description: "Eastport | South of SR-44" },
-      { id: "v096", name: "Eastport | South of SR-44 — St. Catherine",                          description: "Eastport | South of SR-44" },
-      { id: "v097", name: "Eastport | South of SR-44 — St. Johns",                              description: "Eastport | South of SR-44" },
+            const VILLAGE_DATA = [
+      { id: "v001", name: "Alhambra" },
+      { id: "v002", name: "Amelia" },
+      { id: "v003", name: "Ashland" },
+      { id: "v004", name: "Belle Aire" },
+      { id: "v005", name: "Belvedere" },
+      { id: "v006", name: "Bonita" },
+      { id: "v007", name: "Bonnybrook" },
+      { id: "v008", name: "Bradford" },
+      { id: "v009", name: "Briar Meadow" },
+      { id: "v010", name: "Bridgeport at Creekside Landing" },
+      { id: "v011", name: "Bridgeport at Lake Miona" },
+      { id: "v012", name: "Bridgeport at Lake Sumter" },
+      { id: "v013", name: "Bridgeport at Laurel Valley" },
+      { id: "v014", name: "Bridgeport at Miona Shores" },
+      { id: "v015", name: "Bridgeport at Mission Hills" },
+      { id: "v016", name: "Buttonwood" },
+      { id: "v017", name: "Calumet Grove" },
+      { id: "v018", name: "Caroline" },
+      { id: "v019", name: "Cason Hammock" },
+      { id: "v020", name: "Charlotte" },
+      { id: "v021", name: "Chatham" },
+      { id: "v022", name: "Chitty Chatty" },
+      { id: "v023", name: "Citrus Grove" },
+      { id: "v024", name: "Collier" },
+      { id: "v025", name: "Collier at Alden Bungalows" },
+      { id: "v026", name: "Collier at Antrim Dells" },
+      { id: "v027", name: "Country Club Hills" },
+      { id: "v028", name: "Dabney" },
+      { id: "v029", name: "De Allende" },
+      { id: "v030", name: "De La Vista" },
+      { id: "v031", name: "Del Mar" },
+      { id: "v032", name: "DeLuna" },
+      { id: "v033", name: "DeSoto" },
+      { id: "v034", name: "Dunedin" },
+      { id: "v035", name: "Duval" },
+      { id: "v036", name: "El Cortez" },
+      { id: "v037", name: "Fenney" },
+      { id: "v038", name: "Fernandina" },
+      { id: "v039", name: "Gilchrist" },
+      { id: "v040", name: "Glenbrook" },
+      { id: "v041", name: "Hacienda" },
+      { id: "v042", name: "Haciendas of Mission Hills" },
+      { id: "v043", name: "Hadley" },
+      { id: "v044", name: "Hammock at Fenney" },
+      { id: "v045", name: "Hawkins" },
+      { id: "v046", name: "Hemingway" },
+      { id: "v047", name: "Hillsborough" },
+      { id: "v048", name: "La Reynalda" },
+      { id: "v049", name: "La Zamora" },
+      { id: "v050", name: "LaBelle" },
+      { id: "v051", name: "Lake Deaton" },
+      { id: "v052", name: "Lake Denham" },
+      { id: "v053", name: "Lakeshore Cottages" },
+      { id: "v054", name: "Largo" },
+      { id: "v055", name: "Liberty Park" },
+      { id: "v056", name: "Linden" },
+      { id: "v057", name: "Lynnhaven" },
+      { id: "v058", name: "Mallory Square" },
+      { id: "v059", name: "Marsh Bend" },
+      { id: "v060", name: "McClure" },
+      { id: "v061", name: "Mira Mesa" },
+      { id: "v062", name: "Monarch Grove" },
+      { id: "v063", name: "Newell" },
+      { id: "v064", name: "Orange Blossom Gardens" },
+      { id: "v065", name: "Osceola Hills" },
+      { id: "v066", name: "Osceola Hills at Soaring Eagle Preserve" },
+      { id: "v067", name: "Palo Alto" },
+      { id: "v068", name: "Pennecamp" },
+      { id: "v069", name: "Piedmont" },
+      { id: "v070", name: "Pine Hills" },
+      { id: "v071", name: "Pine Ridge" },
+      { id: "v072", name: "Pinellas" },
+      { id: "v073", name: "Poinciana" },
+      { id: "v074", name: "Polo Ridge" },
+      { id: "v075", name: "Richmond" },
+      { id: "v076", name: "Rio Grande" },
+      { id: "v077", name: "Rio Ponderosa" },
+      { id: "v078", name: "Rio Ranchero" },
+      { id: "v079", name: "Sabal Chase" },
+      { id: "v080", name: "Sanibel" },
+      { id: "v081", name: "Santiago" },
+      { id: "v082", name: "Santo Domingo" },
+      { id: "v083", name: "Silver Lake" },
+      { id: "v084", name: "Springdale" },
+      { id: "v085", name: "St. Catherine" },
+      { id: "v086", name: "St. Charles" },
+      { id: "v087", name: "St. James" },
+      { id: "v088", name: "St. Johns" },
+      { id: "v089", name: "Summerhill" },
+      { id: "v090", name: "Sunset Pointe" },
+      { id: "v091", name: "Tall Trees" },
+      { id: "v092", name: "Tamarind Grove" },
+      { id: "v093", name: "Tierra Del Sol" },
+      { id: "v094", name: "Valle Verde" },
+      { id: "v095", name: "Virginia Trace" },
+      { id: "v096", name: "Winifred" },
+      { id: "v097", name: "Woodbury" },
     ];
     setAreas(VILLAGE_DATA);
   }, []);
 
-  const grouped = groupAreas(areas);
 
   const doSearch = async (selSvc, selArea) => {
     setSelAreaR(selArea);
@@ -988,118 +963,15 @@ export default function Home() {
       all = data.providers || [];
     } catch(e) { all = []; }
 
-    // Real ServiceArea entity IDs per macro group (stable DB IDs)
-    // Individual village IDs → their macro group ID
-    const VILLAGE_TO_MACRO_ID = {
-      // Historic Side villages → macro ID 69d06c4a4f1e1017a77a7018
-      "69d06c54c9c22e67aed3c0ff": "69d06c4a4f1e1017a77a7018",
-      "69d06c54c9c22e67aed3c100": "69d06c4a4f1e1017a77a7018",
-      "69d06c54c9c22e67aed3c101": "69d06c4a4f1e1017a77a7018",
-      "69d06c54c9c22e67aed3c102": "69d06c4a4f1e1017a77a7018",
-      "69d06c54c9c22e67aed3c103": "69d06c4a4f1e1017a77a7018",
-      "69d06c54c9c22e67aed3c104": "69d06c4a4f1e1017a77a7018",
-      "69d06c54c9c22e67aed3c105": "69d06c4a4f1e1017a77a7018",
-      "69d06c54c9c22e67aed3c106": "69d06c4a4f1e1017a77a7018",
-      "69d06c54c9c22e67aed3c107": "69d06c4a4f1e1017a77a7018",
-      "69d06c54c9c22e67aed3c108": "69d06c4a4f1e1017a77a7018",
-      "69d06c54c9c22e67aed3c109": "69d06c4a4f1e1017a77a7018",
-      "69d06c54c9c22e67aed3c10a": "69d06c4a4f1e1017a77a7018",
-      // Established Villages → macro ID 69d06c4a4f1e1017a77a7019
-      "69d06c54c9c22e67aed3c10b": "69d06c4a4f1e1017a77a7019",
-      "69d06c54c9c22e67aed3c10c": "69d06c4a4f1e1017a77a7019",
-      "69d06c54c9c22e67aed3c10d": "69d06c4a4f1e1017a77a7019",
-      "69d06c54c9c22e67aed3c10e": "69d06c4a4f1e1017a77a7019",
-      "69d06c54c9c22e67aed3c10f": "69d06c4a4f1e1017a77a7019",
-      "69d06c54c9c22e67aed3c110": "69d06c4a4f1e1017a77a7019",
-      "69d06c54c9c22e67aed3c111": "69d06c4a4f1e1017a77a7019",
-      "69d06c54c9c22e67aed3c112": "69d06c4a4f1e1017a77a7019",
-      "69d06c54c9c22e67aed3c113": "69d06c4a4f1e1017a77a7019",
-      "69d06c54c9c22e67aed3c114": "69d06c4a4f1e1017a77a7019",
-      "69d06c54c9c22e67aed3c115": "69d06c4a4f1e1017a77a7019",
-      "69d06c54c9c22e67aed3c116": "69d06c4a4f1e1017a77a7019",
-      "69d06c54c9c22e67aed3c117": "69d06c4a4f1e1017a77a7019",
-      "69d06c54c9c22e67aed3c118": "69d06c4a4f1e1017a77a7019",
-      "69d06c54c9c22e67aed3c119": "69d06c4a4f1e1017a77a7019",
-      "69d06c54c9c22e67aed3c11a": "69d06c4a4f1e1017a77a7019",
-      "69d06c54c9c22e67aed3c11b": "69d06c4a4f1e1017a77a7019",
-      "69d06c54c9c22e67aed3c11c": "69d06c4a4f1e1017a77a7019",
-      "69d06c54c9c22e67aed3c11d": "69d06c4a4f1e1017a77a7019",
-      "69d06c54c9c22e67aed3c11e": "69d06c4a4f1e1017a77a7019",
-      "69d06c54c9c22e67aed3c11f": "69d06c4a4f1e1017a77a7019",
-      "69d06c54c9c22e67aed3c120": "69d06c4a4f1e1017a77a7019",
-      "69d06c54c9c22e67aed3c121": "69d06c4a4f1e1017a77a7019",
-      // Newer Villages → macro ID 69d06c4a4f1e1017a77a701a
-      "69d06c54c9c22e67aed3c122": "69d06c4a4f1e1017a77a701a",
-      "69d06c54c9c22e67aed3c123": "69d06c4a4f1e1017a77a701a",
-      "69d06c54c9c22e67aed3c124": "69d06c4a4f1e1017a77a701a",
-      "69d06c54c9c22e67aed3c125": "69d06c4a4f1e1017a77a701a",
-      "69d06c54c9c22e67aed3c126": "69d06c4a4f1e1017a77a701a",
-      "69d06c54c9c22e67aed3c127": "69d06c4a4f1e1017a77a701a",
-      "69d06c54c9c22e67aed3c128": "69d06c4a4f1e1017a77a701a",
-      "69d06c54c9c22e67aed3c129": "69d06c4a4f1e1017a77a701a",
-      "69d06c54c9c22e67aed3c12a": "69d06c4a4f1e1017a77a701a",
-      "69d06c54c9c22e67aed3c12b": "69d06c4a4f1e1017a77a701a",
-      "69d06c54c9c22e67aed3c12c": "69d06c4a4f1e1017a77a701a",
-      "69d06c54c9c22e67aed3c12d": "69d06c4a4f1e1017a77a701a",
-      "69d06c54c9c22e67aed3c12e": "69d06c4a4f1e1017a77a701a",
-      "69d06c54c9c22e67aed3c12f": "69d06c4a4f1e1017a77a701a",
-      "69d06c54c9c22e67aed3c130": "69d06c4a4f1e1017a77a701a",
-      // Eastport → macro ID 69d06c4a4f1e1017a77a701b
-      "69d06c54c9c22e67aed3c131": "69d06c4a4f1e1017a77a701b",
-      "69d06c54c9c22e67aed3c132": "69d06c4a4f1e1017a77a701b",
-      "69d06c54c9c22e67aed3c133": "69d06c4a4f1e1017a77a701b",
-      "69d06c54c9c22e67aed3c134": "69d06c4a4f1e1017a77a701b",
-      "69d06c54c9c22e67aed3c135": "69d06c4a4f1e1017a77a701b",
-      // Family → macro ID 69d06c4a4f1e1017a77a701c
-      "69d06c54c9c22e67aed3c136": "69d06c4a4f1e1017a77a701c",
-      "69d06c54c9c22e67aed3c137": "69d06c4a4f1e1017a77a701c",
-      "69d06c54c9c22e67aed3c138": "69d06c4a4f1e1017a77a701c",
-      "69d06c54c9c22e67aed3c139": "69d06c4a4f1e1017a77a701c",
-    };
-
-    // Macro group IDs per description key
-    const DESC_TO_MACRO_ID = {
-      "Historic Side | Spanish Springs":    "69d06c4a4f1e1017a77a7018",
-      "Established Villages | Lake Sumter": "69d06c4a4f1e1017a77a7019",
-      "Newer Villages | Brownwood":         "69d06c4a4f1e1017a77a701a",
-      "Eastport | South of SR-44":          "69d06c4a4f1e1017a77a701b",
-    };
-
-    // The macro ID the user is searching in
-    const searchMacroId = selArea ? DESC_TO_MACRO_ID[selArea.description] || null : null;
-
-    const out = all.filter(p => {
-      if (p.is_visible === false) return false;
-      const provAreas = (p.service_areas || []);
-
-      // Macro aliases for legacy providers that store text keys
-      const LEGACY_ALIASES = {
-        "69d06c4a4f1e1017a77a7018": ["historic", "historic side"],
-        "69d06c4a4f1e1017a77a7019": ["established", "established villages"],
-        "69d06c4a4f1e1017a77a701a": ["newer", "newer villages", "south"],
-        "69d06c4a4f1e1017a77a701b": ["eastport"],
-        "69d06c4a4f1e1017a77a701c": ["family", "family villages", "family & non-age-restricted villages"],
-      };
-
-      // Area match: check if any of the provider's area IDs belong to the selected macro group
-      let areaMatch = true;
-      if (selArea && searchMacroId) {
-        const legacyKeys = LEGACY_ALIASES[searchMacroId] || [];
-        areaMatch = provAreas.some(areaId => {
-          // Direct match to macro ID (provider covers whole group)
-          if (areaId === searchMacroId) return true;
-          // Individual village that maps to this macro
-          if (VILLAGE_TO_MACRO_ID[areaId] === searchMacroId) return true;
-          // Legacy text match (older providers store strings like "historic", "established")
-          if (legacyKeys.includes(areaId.toLowerCase())) return true;
-          return false;
+    // Match providers by village name (case-insensitive) or "all villages"
+      const areaMatch = !selArea || (() => {
+        const village = selArea.name.toLowerCase();
+        const provAreas = (p.service_areas || []);
+        return provAreas.some(a => {
+          const aLow = String(a).toLowerCase();
+          return aLow === "all" || aLow === "all villages" || aLow.includes(village) || village.includes(aLow);
         });
-      }
-
-      // Service match: provider's category_id matches the selected service/category
-      const provCatId = selSvc?.category_id || selSvc?.id;
-      const svcMatch = !selSvc || p.category_id === provCatId;
-
+      })();
       return areaMatch && svcMatch;
     });
     // Fetch approved V-Hub reviews for matched providers and sort by rating
