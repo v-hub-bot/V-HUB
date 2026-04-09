@@ -77,6 +77,8 @@ const STORIES = {
     body: [
       "The Villages remains one of Florida's fastest-growing communities, drawing hundreds of new residents every month. With that growth comes opportunity — for local entrepreneurs, tradespeople, and service professionals eager to build their client base.",
       "Community leaders gathered recently to discuss expanded support for small business owners. New listing tiers on V-Hub allow providers to reach exactly the neighborhoods they serve.",
+      "From plumbers and electricians to dog groomers and personal shoppers, the demand for skilled local help has surged across all 97 villages — from Alhambra to Woodbury.",
+      "V-Hub was built specifically for this community. No national spam, no out-of-area listings — just real neighbors helping real neighbors, one village at a time.",
     ]
   },
   classifieds: {
@@ -95,6 +97,10 @@ const STORIES = {
     body: [
       "Whether you need a leaky faucet fixed, windows replaced, or your lawn trimmed before the weekend, V-Hub connects you with licensed, vetted professionals across every neighborhood.",
       "Categories include Home Repair, Landscaping, Cleaning, Pet Care, Tech Help, Transportation, and Personal Assistance. Find the right provider for your village today.",
+      "Every provider listed on V-Hub is geo-specific to The Villages — so results are always relevant to your street, your neighborhood, your community.",
+      "Look up a handyman in Fenney, a pet groomer near Marsh Bend, or a tech helper in Brownwood Square — V-Hub surfaces exactly who serves your area, nothing more.",
+      "Providers are vetted by the V-Hub team before listing. Residents can leave reviews, rate their experience, and help neighbors make confident, informed choices.",
+      "Whether you are new to The Villages or have lived here for years, V-Hub is the go-to directory for finding trusted help — fast, local, and always free to search.",
     ]
   },
 };
