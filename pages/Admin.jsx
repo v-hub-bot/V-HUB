@@ -166,18 +166,18 @@ export default function Admin() {
 
   const loadAll = async () => {
     try {
-      const res = await fetch("/functions/adminData", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ pin: adminPin }),
-      });
-      if (!res.ok) { console.error("Admin data load failed"); return; }
-      const data = await res.json();
-      setProviders(data.providers || []);
-      setCategories(data.categories || []);
-      setServices(data.services || []);
-      setAreas(data.areas || []);
-      setReviews(data.reviews || []);
+      const [provList, catList, svcList, areaList, revList] = await Promise.all([
+        Provider.list(),
+        Category.list(),
+        Service.list(),
+        ServiceArea.list(),
+        ProviderReview.list(),
+      ]);
+      setProviders(provList || []);
+      setCategories(catList || []);
+      setServices(svcList || []);
+      setAreas(areaList || []);
+      setReviews(revList || []);
     } catch (e) {
       console.error("loadAll error", e);
     }
