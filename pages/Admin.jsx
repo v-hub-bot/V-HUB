@@ -447,6 +447,37 @@ function ProvidersTab({ providers, categories, services, areas, onAdd, onEdit, o
     setTimeout(() => setActionMsg(""), 6000);
   };
 
+  const handleApproveProvider = async (p) => {
+    if (!window.confirm(`Approve "${p.business_name}" and make them live on V-Hub?`)) return;
+    setActionMsg("⏳ Approving provider...");
+    try {
+      const res = await fetch("/functions/approveProvider", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          provider_record_id: p.id,
+          provider_id: p.provider_id,
+          business_name: p.business_name,
+          owner_name: p.owner_name,
+          email: p.email,
+          phone: p.phone,
+          services: p.services || [],
+          service_areas: p.service_areas || [],
+        }),
+      });
+      const data = await res.json();
+      if (data.ok) {
+        setActionMsg(`✅ ${p.business_name} is now live on V-Hub! Confirmation email sent.`);
+        onSaved();
+      } else {
+        setActionMsg("❌ " + (data.error || "Approval failed."));
+      }
+    } catch (e) {
+      setActionMsg("❌ Error: " + e.message);
+    }
+    setTimeout(() => setActionMsg(""), 7000);
+  };
+
   return (
     <div>
       {actionMsg && (
@@ -473,7 +504,7 @@ function ProvidersTab({ providers, categories, services, areas, onAdd, onEdit, o
       <div>
         {providers.map((p) => {
           const cat = categories.find(c => c.id === p.category_id);
-          const statusColor = p.subscription_status === "active" ? BRAND.teal : p.subscription_status === "trial" ? BRAND.orange : "#999";
+          const statusColor = p.subscription_status === "active" ? BRAND.teal : p.subscription_status === "trial" ? BRAND.orange : p.subscription_status === "pending" ? "#c0392b" : "#999";
           return (
             <div key={p.id} style={{ background: "#fff", borderRadius: 16, padding: "18px 20px", marginBottom: 12, boxShadow: "0 3px 14px rgba(0,0,0,0.08)", display: "flex", alignItems: "center", gap: 14 }}>
               <div style={{ flex: 1 }}>
@@ -489,7 +520,12 @@ function ProvidersTab({ providers, categories, services, areas, onAdd, onEdit, o
                 <div style={{ fontSize: 14, color: BRAND.subtext }}>{p.phone}{p.email ? ` · ${p.email}` : ""}</div>
               </div>
               <div style={{ display: "flex", gap: 6, flexWrap: "wrap", justifyContent: "flex-end" }}>
-                {p.subscription_status !== "active" && (
+                {p.subscription_status === "pending" && (
+                  <button onClick={() => handleApproveProvider(p)} style={{ background: "#2e7d32", color: "#fff", border: "none", borderRadius: 8, padding: "8px 14px", fontSize: 12, fontWeight: 700, cursor: "pointer" }}>
+                    ✅ Approve &amp; Go Live
+                  </button>
+                )}
+                {p.subscription_status !== "active" && p.subscription_status !== "pending" && (
                   <button onClick={() => handleSendPaymentLink(p)} style={{ background: BRAND.teal, color: "#fff", border: "none", borderRadius: 8, padding: "8px 12px", fontSize: 12, fontWeight: 700, cursor: "pointer" }}>
                     💳 Send Payment Link
                   </button>

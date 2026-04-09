@@ -1,8 +1,45 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.23';
 
+// Helper: send email via Gmail API using service-role connector token
+async function sendEmail(base44: any, to: string, subject: string, htmlBody: string) {
+  const { accessToken } = await base44.asServiceRole.connectors.getConnection('gmail');
+
+  const boundary = "vhub_boundary_" + Date.now();
+  const mime = [
+    `From: V-Hub Admin <admin@v-hub.us>`,
+    `To: ${to}`,
+    `Subject: ${subject}`,
+    `MIME-Version: 1.0`,
+    `Content-Type: multipart/alternative; boundary="${boundary}"`,
+    ``,
+    `--${boundary}`,
+    `Content-Type: text/html; charset=UTF-8`,
+    `Content-Transfer-Encoding: quoted-printable`,
+    ``,
+    htmlBody,
+    `--${boundary}--`,
+  ].join("\r\n");
+
+  const encoded = btoa(unescape(encodeURIComponent(mime)))
+    .replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+
+  const res = await fetch('https://gmail.googleapis.com/gmail/v1/users/me/messages/send', {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ raw: encoded }),
+  });
+
+  if (!res.ok) {
+    const err = await res.text();
+    console.error('Gmail send error:', err);
+  }
+}
+
 Deno.serve(async (req) => {
   try {
-    // Use service role to allow unauthenticated provider submissions
     const base44 = createClientFromRequest(req);
 
     const body = await req.json().catch(() => ({}));
@@ -44,6 +81,64 @@ Deno.serve(async (req) => {
       subscription_status: "pending",
       is_visible: false,
     });
+
+    // ── Notify William (admin) ────────────────────────────────────────────
+    try {
+      const servicesList = (services || []).join(', ') || 'N/A';
+      const areasList = (service_areas || []).join(', ') || 'N/A';
+      const adminHtml = `
+        <div style="font-family: Georgia, serif; max-width: 600px; margin: 0 auto; background: #F5E8CC; border: 2px solid #8B4513; border-radius: 12px; overflow: hidden;">
+          <div style="background: #1A0A00; padding: 20px 24px; text-align: center;">
+            <img src="https://media.base44.com/images/public/69d062aca815ce8e697894b1/a9af95bc3_V-Hublogo.png" style="height: 60px; border-radius: 8px;" />
+            <div style="color: #F5E8CC; font-size: 20px; font-weight: 900; letter-spacing: 2px; margin-top: 10px;">NEW LISTING SUBMISSION</div>
+          </div>
+          <div style="padding: 24px;">
+            <p style="color: #5A3010; font-size: 15px; margin: 0 0 20px;">A new provider has submitted a listing on V-Hub and is awaiting your approval.</p>
+            <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
+              <tr style="border-bottom: 1px solid #C4A270;">
+                <td style="padding: 10px 8px; font-weight: 700; color: #5A3010; width: 38%;">Business Name</td>
+                <td style="padding: 10px 8px; color: #1A0A00;">${business_name}</td>
+              </tr>
+              <tr style="border-bottom: 1px solid #C4A270; background: rgba(139,69,19,0.05);">
+                <td style="padding: 10px 8px; font-weight: 700; color: #5A3010;">Owner / Contact</td>
+                <td style="padding: 10px 8px; color: #1A0A00;">${owner_name}</td>
+              </tr>
+              <tr style="border-bottom: 1px solid #C4A270;">
+                <td style="padding: 10px 8px; font-weight: 700; color: #5A3010;">Phone</td>
+                <td style="padding: 10px 8px; color: #1A0A00;">${phone}</td>
+              </tr>
+              <tr style="border-bottom: 1px solid #C4A270; background: rgba(139,69,19,0.05);">
+                <td style="padding: 10px 8px; font-weight: 700; color: #5A3010;">Email</td>
+                <td style="padding: 10px 8px; color: #1A0A00;">${email}</td>
+              </tr>
+              ${website ? `<tr style="border-bottom: 1px solid #C4A270;"><td style="padding: 10px 8px; font-weight: 700; color: #5A3010;">Website</td><td style="padding: 10px 8px; color: #1A0A00;">${website}</td></tr>` : ''}
+              ${address ? `<tr style="border-bottom: 1px solid #C4A270; background: rgba(139,69,19,0.05);"><td style="padding: 10px 8px; font-weight: 700; color: #5A3010;">Address</td><td style="padding: 10px 8px; color: #1A0A00;">${address}</td></tr>` : ''}
+              <tr style="border-bottom: 1px solid #C4A270;">
+                <td style="padding: 10px 8px; font-weight: 700; color: #5A3010;">Services Offered</td>
+                <td style="padding: 10px 8px; color: #1A0A00;">${servicesList}</td>
+              </tr>
+              <tr style="background: rgba(139,69,19,0.05);">
+                <td style="padding: 10px 8px; font-weight: 700; color: #5A3010;">Areas Served</td>
+                <td style="padding: 10px 8px; color: #1A0A00;">${areasList}</td>
+              </tr>
+            </table>
+            ${description ? `<div style="margin-top: 16px; padding: 12px; background: #fff; border-left: 3px solid #8B4513; border-radius: 4px; font-size: 13px; color: #333;"><strong>About the Business:</strong><br/>${description}</div>` : ''}
+            <div style="text-align: center; margin-top: 24px;">
+              <a href="https://v-hub.us/Admin" style="display: inline-block; background: #2e7d32; color: #fff; text-decoration: none; padding: 14px 28px; border-radius: 8px; font-weight: 700; font-size: 15px; letter-spacing: 1px;">
+                ✅ Go to Admin Dashboard to Approve
+              </a>
+            </div>
+          </div>
+          <div style="background: #1A0A00; padding: 12px; text-align: center; color: rgba(245,232,204,0.5); font-size: 11px;">
+            V-Hub · The Villages, Florida · admin@v-hub.us
+          </div>
+        </div>
+      `;
+      await sendEmail(base44, 'admin@v-hub.us', `📋 New Listing: ${business_name}`, adminHtml);
+    } catch (emailErr) {
+      console.error("Admin notification email failed:", emailErr);
+      // Don't fail the submission if email fails
+    }
 
     return Response.json({ ok: true, id: record.id, provider_id });
   } catch (error) {
