@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react"; // v2
+import React, { useState, useEffect, useRef } from "react"; // v3 - expanded content
 import { createPortal } from "react-dom";
 import { ServiceArea, Category, Service, Provider, ProviderReview } from "@/api/entities";
 
