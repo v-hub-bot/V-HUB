@@ -1,40 +1,27 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.23';
 
-// Helper: send email via Gmail API using service-role connector token
-async function sendEmail(base44: any, to: string, subject: string, htmlBody: string) {
-  const { accessToken } = await base44.asServiceRole.connectors.getConnection('gmail');
+const SENDGRID_API_KEY = Deno.env.get('SENDGRID_API_KEY') || '';
 
-  const boundary = "vhub_boundary_" + Date.now();
-  const mime = [
-    `From: V-Hub Admin <admin@v-hub.us>`,
-    `To: ${to}`,
-    `Subject: ${subject}`,
-    `MIME-Version: 1.0`,
-    `Content-Type: multipart/alternative; boundary="${boundary}"`,
-    ``,
-    `--${boundary}`,
-    `Content-Type: text/html; charset=UTF-8`,
-    `Content-Transfer-Encoding: quoted-printable`,
-    ``,
-    htmlBody,
-    `--${boundary}--`,
-  ].join("\r\n");
-
-  const encoded = btoa(unescape(encodeURIComponent(mime)))
-    .replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
-
-  const res = await fetch('https://gmail.googleapis.com/gmail/v1/users/me/messages/send', {
+async function sendEmail(to: string, subject: string, htmlBody: string) {
+  const res = await fetch('https://api.sendgrid.com/v3/mail/send', {
     method: 'POST',
     headers: {
-      Authorization: `Bearer ${accessToken}`,
+      Authorization: `Bearer ${SENDGRID_API_KEY}`,
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ raw: encoded }),
+    body: JSON.stringify({
+      personalizations: [{ to: [{ email: to }] }],
+      from: { email: 'admin@v-hub.us', name: 'V-Hub' },
+      subject,
+      content: [{ type: 'text/html', value: htmlBody }],
+    }),
   });
 
   if (!res.ok) {
     const err = await res.text();
-    console.error('Gmail send error:', err);
+    console.error('SendGrid send error:', err);
+  } else {
+    console.log('SendGrid email sent successfully to:', to);
   }
 }
 
@@ -134,10 +121,9 @@ Deno.serve(async (req) => {
           </div>
         </div>
       `;
-      await sendEmail(base44, 'admin@v-hub.us', `📋 New Listing: ${business_name}`, adminHtml);
+      await sendEmail('admin@v-hub.us', `📋 New Listing: ${business_name}`, adminHtml);
     } catch (emailErr) {
       console.error("Admin notification email failed:", emailErr);
-      // Don't fail the submission if email fails
     }
 
     return Response.json({ ok: true, id: record.id, provider_id });
