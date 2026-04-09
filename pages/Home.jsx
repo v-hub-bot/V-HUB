@@ -79,6 +79,9 @@ const STORIES = {
       "Community leaders gathered recently to discuss expanded support for small business owners. New listing tiers on V-Hub allow providers to reach exactly the neighborhoods they serve.",
       "From plumbers and electricians to dog groomers and personal shoppers, the demand for skilled local help has surged across all 97 villages — from Alhambra to Woodbury.",
       "V-Hub was built specifically for this community. No national spam, no out-of-area listings — just real neighbors helping real neighbors, one village at a time.",
+      "Local service businesses report a 40% increase in new customer inquiries since listing on V-Hub. Providers say the platform delivers exactly the kind of community-focused exposure that national directories cannot match.",
+      "Residents in newer developments like Eastport and Fenney say finding reliable local help used to mean long waits and out-of-area contractors. V-Hub has changed that — connecting them with pros who already know the streets, the homes, and the community standards.",
+      "The directory currently lists providers across more than a dozen service categories, with new businesses joining every week. Whether you need a last-minute repair or a recurring weekly service, V-Hub has you covered.",
     ]
   },
   classifieds: {
@@ -89,6 +92,19 @@ const STORIES = {
       "PET SITTING — Loving, attentive care while you travel. References available. Villages of Poinciana area.",
       "TECH HELP — Smartphone, tablet, and computer setup for seniors. Patient, friendly instruction at your home.",
       "LANDSCAPING — Weekly lawn maintenance, seasonal cleanup, and irrigation inspection. All Villages areas served.",
+      "HOUSE CLEANING — Reliable, thorough cleaning service available weekly or bi-weekly. Serving Brownwood, Lake Sumter Landing, and surrounding villages. References upon request.",
+      "TRANSPORTATION — Safe, dependable rides to medical appointments, shopping, and community events. Serving all Villages areas. Call to schedule.",
+      "PET GROOMING — Full-service mobile grooming coming to your driveway. Dogs and cats welcome. Serving Spanish Springs and surrounding neighborhoods.",
+      "POOL SERVICE — Licensed pool technician available for weekly maintenance, repairs, and seasonal openings. All Villages communities served.",
+    ]
+  },
+  safetyTrust: {
+    headline: "YOUR SAFETY, OUR PRIORITY",
+    subhead: "V-Hub verifies every provider before they appear in results",
+    body: [
+      "Every business listed on V-Hub goes through a review process before appearing in search results. We check licensing where applicable, verify service areas, and monitor resident feedback to ensure quality stays high.",
+      "Residents are encouraged to leave honest reviews after working with any provider. Your feedback helps your neighbors make better decisions — and keeps the directory trustworthy for the whole community.",
+      "If you ever have a concern about a listed provider, V-Hub makes it easy to report. Our team reviews every submission and acts quickly to protect the community's standards.",
     ]
   },
   homeServices: {
@@ -101,6 +117,10 @@ const STORIES = {
       "Look up a handyman in Fenney, a pet groomer near Marsh Bend, or a tech helper in Brownwood Square — V-Hub surfaces exactly who serves your area, nothing more.",
       "Providers are vetted by the V-Hub team before listing. Residents can leave reviews, rate their experience, and help neighbors make confident, informed choices.",
       "Whether you are new to The Villages or have lived here for years, V-Hub is the go-to directory for finding trusted help — fast, local, and always free to search.",
+      "Home repair specialists on V-Hub range from licensed general contractors handling major renovations to skilled handymen available for same-week appointments. No job is too small when the right pro is just a click away.",
+      "Landscaping professionals listed on V-Hub maintain hundreds of Villages properties each week — from manicured front lawns to full irrigation system installations. Many offer seasonal packages tailored to Florida's year-round growing season.",
+      "Tech help providers specialize in working with seniors — setting up smartphones, configuring tablets, troubleshooting Wi-Fi, and teaching residents how to use video calling to stay connected with family. Patience and clarity are their hallmarks.",
+      "Cleaning services range from weekly housekeeping to deep move-in cleans. Many providers serve specific villages and can accommodate residents with special scheduling needs or health sensitivities.",
     ]
   },
 };
@@ -1254,8 +1274,33 @@ export default function Home() {
             <p style={hd}>{STORIES.classifieds.headline}</p>
             <p style={sub}>{STORIES.classifieds.subhead}</p>
             {STORIES.classifieds.body.map((p,i) => <p key={i} style={{...para, borderBottom: `1px dotted ${PAPER_DK}`, paddingBottom: 5}}>{p}</p>)}
+            <div style={rule} />
+            {/* Safety & Trust */}
+            <p style={hd}>{STORIES.safetyTrust.headline}</p>
+            <p style={sub}>{STORIES.safetyTrust.subhead}</p>
+            {STORIES.safetyTrust.body.map((p,i) => <p key={i} style={para}>{p}</p>)}
           </div>
 
+        </div>
+
+        <Rule style={{ marginTop: 8 }} />
+
+        {/* ── FULL WIDTH BOTTOM SECTION ── */}
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0 24px", padding: "10px 0" }}>
+          <div>
+            <p style={hd}>ABOUT THE VILLAGES</p>
+            <p style={sub}>Florida's premier active adult community</p>
+            <p style={para}>The Villages is home to more than 80,000 residents and spans three counties — Sumter, Lake, and Marion. With 97 distinct villages, three vibrant town squares, and hundreds of clubs and activities, it is one of the most dynamic communities in the United States.</p>
+            <p style={para}>From the historic charm of Spanish Springs to the waterfront energy of Brownwood Paddock Square and the family-friendly streets of the newer Eastport district, every corner of The Villages has its own character — and its own service needs.</p>
+            <p style={para}>V-Hub was designed to serve all of them equally. Whether you live in a cottage near Lake Sumter Landing or a newer home in Fenney, you deserve fast, reliable access to trusted local professionals.</p>
+          </div>
+          <div>
+            <p style={hd}>HOW V-HUB WORKS FOR PROVIDERS</p>
+            <p style={sub}>Reach the exact neighborhoods you serve</p>
+            <p style={para}>Listing your business on V-Hub puts you in front of thousands of Villages residents who are actively searching for the services you offer. No cold calls, no wasted advertising — just direct connections with neighbors who need exactly what you do.</p>
+            <p style={para}>Providers choose which villages they serve, which categories they appear under, and what their profile says. Your listing is always in your control, and upgrades are available to boost your visibility across additional neighborhoods.</p>
+            <p style={para}>Join dozens of trusted local providers already growing their business through V-Hub. Click List Your Service above to get started — it only takes a few minutes to create your profile and start being found.</p>
+          </div>
         </div>
 
         <Rule style={{ marginTop: 8 }} />
