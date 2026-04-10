@@ -346,7 +346,7 @@ export default function ProviderDashboard() {
             </button>
             <div style={{ marginTop: 18, fontSize: 11, color: INK_FADE, fontStyle: "italic" }}>
               Don't have a Provider ID?{" "}
-              <a href="/ListService" style={{ color: BROWN_BTN, fontWeight: 700 }}>List your business</a> and William will assign you one.
+              <a href="/ListService" style={{ color: BROWN_BTN, fontWeight: 700 }}>List your business</a> and an admin will assign you one.
             </div>
           </div>
         </div>

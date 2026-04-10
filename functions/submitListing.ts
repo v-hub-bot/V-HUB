@@ -69,7 +69,7 @@ Deno.serve(async (req) => {
       is_visible: false,
     });
 
-    // ── Notify William (admin) ────────────────────────────────────────────
+    // ── Notify admin ─────────────────────────────────────────────────────
     try {
       const servicesList = (services || []).join(', ') || 'N/A';
       const areasList = (service_areas || []).join(', ') || 'N/A';
