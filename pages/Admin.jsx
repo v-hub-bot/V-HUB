@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { ServiceArea, Category, Service, Provider, ProviderReview } from "@/api/entities";
 
-// ─── Constants ────────────────────────────────────────────────────────────────
+// Constants
 const VALID_PINS = ["6185"];
 const BRAND = {
   orange: "#E8431A",
@@ -19,7 +19,7 @@ const addBtnStyle = { background: `linear-gradient(135deg, ${BRAND.orange}, ${BR
 const editBtnStyle = { background: "#e8f4fd", color: BRAND.blue, border: "none", borderRadius: 7, padding: "7px 14px", fontSize: 13, fontWeight: 600, cursor: "pointer" };
 const deleteBtnStyle = { background: "#fdecea", color: BRAND.orange, border: "none", borderRadius: 7, padding: "7px 14px", fontSize: 13, fontWeight: 600, cursor: "pointer" };
 
-// ─── PIN Gate ─────────────────────────────────────────────────────────────────
+// PIN Gate
 function PinGate({ onUnlock }) {
   const [pin, setPin] = useState("");
   const [err, setErr] = useState(false);
@@ -63,19 +63,19 @@ function PinGate({ onUnlock }) {
             </button>
           ))}
           <button onClick={() => setPin(p => p.slice(0,-1))}
-            style={{ padding: "11px 0", fontSize: 13, color: PAPER, background: "#3A1A00", border: `1px solid ${BROWN}`, borderRadius: 6, cursor: "pointer" }}>⌫</button>
+            style={{ padding: "11px 0", fontSize: 13, color: PAPER, background: "#3A1A00", border: `1px solid ${BROWN}`, borderRadius: 6, cursor: "pointer" }}>DEL</button>
           <button onClick={() => press("0")}
             style={{ padding: "11px 0", fontSize: 17, fontWeight: 700, color: PAPER, background: "#3A1A00", border: `1px solid ${BROWN}`, borderRadius: 6, cursor: "pointer" }}>0</button>
           <div />
         </div>
         {err && <div style={{ textAlign: "center", color: "#f66", fontSize: 11, marginTop: 8, fontStyle: "italic" }}>Incorrect PIN</div>}
       </div>
-      <a href="/" style={{ color: "rgba(245,232,204,0.3)", fontSize: 11, marginTop: 24, textDecoration: "none" }}>← Back to V-Hub</a>
+      <a href="/" style={{ color: "rgba(245,232,204,0.3)", fontSize: 11, marginTop: 24, textDecoration: "none" }}>Back to V-Hub</a>
     </div>
   );
 }
 
-// ─── Reviews Tab ──────────────────────────────────────────────────────────────
+// Reviews Tab
 function ReviewsTab({ reviews, providers, onRefresh }) {
   const [filter, setFilter] = useState("pending");
   const shown = reviews.filter(r => filter === "all" ? true : filter === "pending" ? !r.is_approved : r.is_approved);
@@ -87,7 +87,7 @@ function ReviewsTab({ reviews, providers, onRefresh }) {
     <div>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
         <div style={{ fontSize: 18, fontWeight: 700, color: BRAND.text }}>
-          Reviews ({reviews.length} · {reviews.filter(r => !r.is_approved).length} pending)
+          Reviews ({reviews.length} | {reviews.filter(r => !r.is_approved).length} pending)
         </div>
         <div style={{ display: "flex", gap: 6 }}>
           {["pending","approved","all"].map(f => (
@@ -112,7 +112,7 @@ function ReviewsTab({ reviews, providers, onRefresh }) {
                 <div style={{ fontSize: 12, color: "#B8860B" }}>{"★".repeat(r.rating || 0)} {r.rating}/5</div>
               </div>
               <span style={{ background: r.is_approved ? BRAND.teal + "22" : BRAND.orange + "22", color: r.is_approved ? BRAND.teal : BRAND.orange, borderRadius: 20, padding: "3px 10px", fontSize: 11, fontWeight: 700, alignSelf: "flex-start" }}>
-                {r.is_approved ? "✅ Approved" : "⏳ Pending"}
+                {r.is_approved ? "✅ Approved" : "... Pending"}
               </span>
             </div>
             <div style={{ fontSize: 13, color: BRAND.subtext, fontStyle: "italic", margin: "8px 0", borderLeft: "3px solid #eee", paddingLeft: 8 }}>"{r.review_text}"</div>
@@ -127,7 +127,7 @@ function ReviewsTab({ reviews, providers, onRefresh }) {
   );
 }
 
-// ─── Provider Form ────────────────────────────────────────────────────────────
+// Provider Form
 function ProviderForm({ provider, categories, services, areas, onClose, onSaved }) {
   const blank = { business_name:"", owner_name:"", email:"", phone:"", website:"", description:"", category_id:"", service_areas:[], services:[], subscription_status:"trial", subscription_tier:"basic", is_visible:true, years_in_business:"", license_number:"" };
   const [form, setForm] = useState(provider || blank);
@@ -180,7 +180,7 @@ function ProviderForm({ provider, categories, services, areas, onClose, onSaved 
         <div style={{ marginBottom: 12 }}>
           <label style={labelStyle}>Category</label>
           <select value={form.category_id || ""} onChange={e => setForm({...form, category_id: e.target.value})} style={inputStyle}>
-            <option value="">— Select Category —</option>
+            <option value="">- Select Category -</option>
             {categories.map(c => <option key={c.id} value={c.id}>{c.icon} {c.name}</option>)}
           </select>
         </div>
@@ -224,7 +224,7 @@ function ProviderForm({ provider, categories, services, areas, onClose, onSaved 
       <div style={{ display: "flex", gap: 10 }}>
         <button onClick={handleSave} disabled={saving || !form.business_name}
           style={{ ...addBtnStyle, opacity: saving || !form.business_name ? 0.6 : 1 }}>
-          {saving ? "Saving…" : provider ? "Save Changes" : "Add Provider"}
+          {saving ? "Saving..." : provider ? "Save Changes" : "Add Provider"}
         </button>
         <button onClick={onClose} style={{ background: "#f0f0f0", color: BRAND.text, border: "none", borderRadius: 10, padding: "10px 18px", fontSize: 14, fontWeight: 600, cursor: "pointer" }}>Cancel</button>
       </div>
@@ -232,7 +232,7 @@ function ProviderForm({ provider, categories, services, areas, onClose, onSaved 
   );
 }
 
-// ─── Providers Tab ────────────────────────────────────────────────────────────
+// Providers Tab
 function ProvidersTab({ providers, categories, services, areas, onRefresh }) {
   const [msg, setMsg] = useState("");
   const [showForm, setShowForm] = useState(false);
@@ -244,7 +244,7 @@ function ProvidersTab({ providers, categories, services, areas, onRefresh }) {
 
   const sendPayLink = async (p) => {
     if (!p.email) { flash("❌ Provider has no email on file."); return; }
-    flash("⏳ Generating payment link…");
+    flash("... Generating payment link...");
     try {
       const res = await fetch("/functions/createCheckoutSession", { method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify({ provider_id: p.provider_id, provider_email: p.email, provider_name: p.owner_name, business_name: p.business_name }) });
       const d = await res.json();
@@ -255,7 +255,7 @@ function ProvidersTab({ providers, categories, services, areas, onRefresh }) {
 
   const approveProv = async (p) => {
     if (!window.confirm(`Approve "${p.business_name}" and make them live?`)) return;
-    flash("⏳ Approving…");
+    flash("... Approving...");
     try {
       const res = await fetch("/functions/approveProvider", { method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify({ provider_record_id: p.id, provider_id: p.provider_id, business_name: p.business_name, owner_name: p.owner_name, email: p.email, phone: p.phone, services: p.services||[], service_areas: p.service_areas||[] }) });
       const d = await res.json();
@@ -267,7 +267,7 @@ function ProvidersTab({ providers, categories, services, areas, onRefresh }) {
   const cancelSub = async (p) => {
     if (!p.stripe_subscription_id) { flash("❌ No Stripe subscription found."); return; }
     if (!window.confirm(`Cancel ${p.business_name}'s subscription?`)) return;
-    flash("⏳ Cancelling…");
+    flash("... Cancelling...");
     try {
       const res = await fetch("/functions/cancelSubscription", { method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify({ stripe_subscription_id: p.stripe_subscription_id }) });
       const d = await res.json();
@@ -278,7 +278,7 @@ function ProvidersTab({ providers, categories, services, areas, onRefresh }) {
 
   return (
     <div>
-      {msg && <div style={{ background: msg.startsWith("✅") ? "#e8f5e9" : msg.startsWith("⏳") ? "#fff8e1" : "#ffebee", border:"1px solid #ccc", borderRadius:8, padding:"10px 14px", marginBottom:10, fontSize:13, fontWeight:600 }}>{msg}</div>}
+      {msg && <div style={{ background: msg.startsWith("✅") ? "#e8f5e9" : msg.startsWith("pending_icon") ? "#fff8e1" : "#ffebee", border:"1px solid #ccc", borderRadius:8, padding:"10px 14px", marginBottom:10, fontSize:13, fontWeight:600 }}>{msg}</div>}
       <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:14 }}>
         <div style={{ fontSize:18, fontWeight:700, color:BRAND.text }}>All Providers ({providers.length})</div>
         <button onClick={() => { setEditItem(null); setShowForm(true); }} style={addBtnStyle}>+ Add Provider</button>
@@ -300,7 +300,7 @@ function ProvidersTab({ providers, categories, services, areas, onRefresh }) {
                 {p.is_visible === false && <span style={{ background:"#ff000015", color:"red", borderRadius:20, padding:"2px 8px", fontSize:11, fontWeight:700 }}>Hidden</span>}
               </div>
               {cat && <div style={{ fontSize:12, color:BRAND.teal, fontWeight:600 }}>{cat.icon} {cat.name}</div>}
-              <div style={{ fontSize:13, color:BRAND.subtext }}>{p.phone}{p.email ? ` · ${p.email}` : ""}</div>
+              <div style={{ fontSize:13, color:BRAND.subtext }}>{p.phone}{p.email ? ` | ${p.email}` : ""}</div>
             </div>
             <div style={{ display:"flex", gap:5, flexWrap:"wrap", justifyContent:"flex-end" }}>
               {p.subscription_status === "pending" && <button onClick={() => approveProv(p)} style={{ background:"#2e7d32", color:"#fff", border:"none", borderRadius:7, padding:"7px 12px", fontSize:12, fontWeight:700, cursor:"pointer" }}>✅ Approve</button>}
@@ -317,7 +317,7 @@ function ProvidersTab({ providers, categories, services, areas, onRefresh }) {
   );
 }
 
-// ─── Simple CRUD Tab ──────────────────────────────────────────────────────────
+// Simple CRUD Tab
 function SimpleTab({ items, entity, fields, onRefresh }) {
   const [showForm, setShowForm] = useState(false);
   const [editItem, setEditItem] = useState(null);
@@ -355,7 +355,7 @@ function SimpleTab({ items, entity, fields, onRefresh }) {
                 ? <input type="checkbox" checked={form[f.key] !== false} onChange={e => setForm({...form, [f.key]: e.target.checked})} style={{ width:18, height:18 }} />
                 : f.type === "select"
                   ? <select value={form[f.key] || ""} onChange={e => setForm({...form, [f.key]: e.target.value})} style={inputStyle}>
-                      <option value="">— Select —</option>
+                      <option value="">- Select -</option>
                       {f.options.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
                     </select>
                   : <input type={f.type || "text"} value={form[f.key] || ""} onChange={e => setForm({...form, [f.key]: e.target.value})} style={inputStyle} />
@@ -363,7 +363,7 @@ function SimpleTab({ items, entity, fields, onRefresh }) {
             </div>
           ))}
           <div style={{ display:"flex", gap:8, marginTop:8 }}>
-            <button onClick={save} disabled={saving} style={{ ...addBtnStyle, opacity: saving ? 0.7 : 1 }}>{saving ? "Saving…" : "Save"}</button>
+            <button onClick={save} disabled={saving} style={{ ...addBtnStyle, opacity: saving ? 0.7 : 1 }}>{saving ? "Saving..." : "Save"}</button>
             <button onClick={close} style={{ background:"#f0f0f0", border:"none", borderRadius:9, padding:"10px 18px", fontSize:14, cursor:"pointer" }}>Cancel</button>
           </div>
         </div>
@@ -385,7 +385,7 @@ function SimpleTab({ items, entity, fields, onRefresh }) {
   );
 }
 
-// ─── Main Admin ───────────────────────────────────────────────────────────────
+// Main Admin
 export default function Admin() {
   const [pin, setPin] = useState(() => { try { return sessionStorage.getItem("vhub_admin_pin") || ""; } catch(e) { return ""; } });
   const unlocked = VALID_PINS.includes(pin);
@@ -398,16 +398,22 @@ export default function Admin() {
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(false);
 
+  const [loadErr, setLoadErr] = useState("");
   const loadAll = async () => {
     setLoading(true);
-    const [p, c, s, a, r] = await Promise.allSettled([
-      Provider.list(), Category.list(), Service.list(), ServiceArea.list(), ProviderReview.list()
-    ]);
-    setProviders(p.status === "fulfilled" ? (p.value || []) : []);
-    setCategories(c.status === "fulfilled" ? (c.value || []) : []);
-    setServices(s.status === "fulfilled" ? (s.value || []) : []);
-    setAreas(a.status === "fulfilled" ? (a.value || []) : []);
-    setReviews(r.status === "fulfilled" ? (r.value || []) : []);
+    setLoadErr("");
+    try {
+      const [p, c, s, a, r] = await Promise.allSettled([
+        Provider.list(), Category.list(), Service.list(), ServiceArea.list(), ProviderReview.list()
+      ]);
+      setProviders(p.status === "fulfilled" ? (p.value || []) : []);
+      setCategories(c.status === "fulfilled" ? (c.value || []) : []);
+      setServices(s.status === "fulfilled" ? (s.value || []) : []);
+      setAreas(a.status === "fulfilled" ? (a.value || []) : []);
+      setReviews(r.status === "fulfilled" ? (r.value || []) : []);
+    } catch(e) {
+      setLoadErr(e.message || "Unknown error loading data");
+    }
     setLoading(false);
   };
 
@@ -418,7 +424,17 @@ export default function Admin() {
   if (loading) return (
     <div style={{ minHeight:"100vh", background:"#1A0A00", display:"flex", alignItems:"center", justifyContent:"center", flexDirection:"column", gap:14 }}>
       <img src="https://media.base44.com/images/public/69d062aca815ce8e697894b1/a9af95bc3_V-Hublogo.png" style={{ width:60, borderRadius:10 }} alt="" />
-      <div style={{ color:"#F5E8CC", fontSize:15, fontFamily:"Georgia" }}>Loading…</div>
+      <div style={{ color:"#F5E8CC", fontSize:15, fontFamily:"Georgia" }}>Loading...</div>
+    </div>
+  );
+
+  if (loadErr) return (
+    <div style={{ minHeight:"100vh", background:"#fff8f8", display:"flex", alignItems:"center", justifyContent:"center", flexDirection:"column", gap:14, padding:30 }}>
+      <div style={{ fontSize:36 }}>⚠️</div>
+      <div style={{ fontSize:18, fontWeight:700, color:"#c00" }}>Could not load admin data</div>
+      <div style={{ fontSize:14, color:"#555", fontFamily:"monospace", background:"#f0f0f0", padding:"10px 16px", borderRadius:8, maxWidth:500 }}>{loadErr}</div>
+      <button onClick={loadAll} style={{ background:BRAND.orange, color:"#fff", border:"none", borderRadius:10, padding:"12px 24px", fontSize:15, fontWeight:700, cursor:"pointer" }}>Retry</button>
+      <a href="/" style={{ color:BRAND.blue, fontSize:13 }}>Back to V-Hub</a>
     </div>
   );
 
@@ -433,7 +449,7 @@ export default function Admin() {
             <div style={{ color:"rgba(255,255,255,0.8)", fontSize:12 }}>Manage Providers & Listings</div>
           </div>
         </div>
-        <a href="/" style={{ color:"#fff", textDecoration:"none", background:"rgba(255,255,255,0.2)", borderRadius:8, padding:"7px 14px", fontSize:13, fontWeight:600 }}>View Site →</a>
+        <a href="/" style={{ color:"#fff", textDecoration:"none", background:"rgba(255,255,255,0.2)", borderRadius:8, padding:"7px 14px", fontSize:13, fontWeight:600 }}>View Site</a>
       </div>
 
       {/* Stats */}
@@ -441,7 +457,7 @@ export default function Admin() {
         {[
           { label:"Providers", count:providers.length, icon:"🏢", color:BRAND.orange },
           { label:"Active", count:providers.filter(p => p.subscription_status === "active").length, icon:"✅", color:BRAND.teal },
-          { label:"Pending", count:providers.filter(p => p.subscription_status === "pending").length, icon:"⏳", color:BRAND.blue },
+          { label:"Pending", count:providers.filter(p => p.subscription_status === "pending").length, icon:"pending_icon", color:BRAND.blue },
           { label:"Reviews", count:reviews.filter(r => !r.is_approved).length, icon:"⭐", color:"#7C3AED" },
         ].map(s => (
           <div key={s.label} style={{ background:"#fff", borderRadius:12, padding:"14px 18px", boxShadow:"0 2px 10px rgba(0,0,0,0.07)", minWidth:100, flex:1 }}>
