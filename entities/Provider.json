@@ -38,15 +38,20 @@
       "type": "string",
       "enum": [
         "pending",
+        "trial",
         "active",
         "cancelled",
-        "past_due"
+        "past_due",
+        "trial_expired"
       ]
     },
     "subscription_tier": {
       "type": "string"
     },
     "is_visible": {
+      "type": "boolean"
+    },
+    "is_active": {
       "type": "boolean"
     },
     "years_in_business": {
@@ -74,6 +79,28 @@
       "type": "string"
     },
     "stripe_customer_id": {
+      "type": "string"
+    },
+    "trial_start_date": {
+      "type": "string"
+    },
+    "trial_end_date": {
+      "type": "string"
+    },
+    "onboarding_type": {
+      "type": "string",
+      "enum": [
+        "self",
+        "admin"
+      ]
+    },
+    "vh_number": {
+      "type": "string"
+    },
+    "reminder_sent": {
+      "type": "boolean"
+    },
+    "notes": {
       "type": "string"
     }
   },
