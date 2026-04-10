@@ -1,383 +1,239 @@
 import React, { useState, useEffect } from "react";
-import { ServiceArea, Category, Service, Provider, ProviderReview } from "@/api/entities";
+import { ServiceArea, Category, Service, Provider, ProviderReview, User } from "@/api/entities";
 
-// Constants
-const VALID_PINS = ["6185"];
+// Brand
 const BRAND = {
   orange: "#E8431A",
   teal: "#00BFA5",
-  blue: "#0077B6",
-  lightBg: "#F0FAF9",
-  text: "#1A1A2E",
-  subtext: "#555",
+  blue: "#1A3F70",
+  lightBg: "#F5F7FA",
+  dark: "#1A0A00",
 };
-const TABS = ["Providers", "Reviews", "Categories", "Services", "Service Areas"];
 
-const labelStyle = { display: "block", fontSize: 14, fontWeight: 600, color: "#333", marginBottom: 5 };
-const inputStyle = { width: "100%", padding: "10px 12px", fontSize: 14, borderRadius: 8, border: "1.5px solid #ddd", background: "#fff", color: "#333", outline: "none", boxSizing: "border-box" };
-const addBtnStyle = { background: `linear-gradient(135deg, ${BRAND.orange}, ${BRAND.teal})`, color: "#fff", border: "none", borderRadius: 10, padding: "10px 20px", fontSize: 14, fontWeight: 700, cursor: "pointer" };
-const editBtnStyle = { background: "#e8f4fd", color: BRAND.blue, border: "none", borderRadius: 7, padding: "7px 14px", fontSize: 13, fontWeight: 600, cursor: "pointer" };
-const deleteBtnStyle = { background: "#fdecea", color: BRAND.orange, border: "none", borderRadius: 7, padding: "7px 14px", fontSize: 13, fontWeight: 600, cursor: "pointer" };
+const ADMIN_EMAILS = ["admin@v-hub.us", "founder@poc-it.co"];
 
-// PIN Gate
-function PinGate({ onUnlock }) {
-  const [pin, setPin] = useState("");
-  const [err, setErr] = useState(false);
+// ────────────────────────────────────────────────────────
+//  Access Denied screen
+// ────────────────────────────────────────────────────────
+function AccessDenied() {
+  return (
+    <div style={{ minHeight: "100vh", background: BRAND.lightBg, display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", gap: 16, padding: 30 }}>
+      <img src="https://media.base44.com/images/public/69d062aca815ce8e697894b1/a9af95bc3_V-Hublogo.png" style={{ width: 72, borderRadius: 12 }} alt="V-Hub" />
+      <div style={{ fontSize: 22, fontWeight: 800, color: "#c00" }}>Access Restricted</div>
+      <div style={{ fontSize: 15, color: "#555", textAlign: "center", maxWidth: 320 }}>
+        This page is only available to V-Hub administrators.
+        Please sign in with your admin account.
+      </div>
+      <a href="/" style={{ background: BRAND.orange, color: "#fff", textDecoration: "none", borderRadius: 10, padding: "12px 24px", fontWeight: 700, fontSize: 15 }}>Back to V-Hub</a>
+    </div>
+  );
+}
 
-  const press = (d) => {
-    const next = pin + d;
-    setPin(next);
-    setErr(false);
-    if (next.length === 4) {
-      if (VALID_PINS.includes(next)) {
-        try { sessionStorage.setItem("vhub_admin_pin", next); } catch(e) {}
-        onUnlock(next);
-      } else {
-        setErr(true);
-        setTimeout(() => { setPin(""); setErr(false); }, 900);
-      }
-    }
+// ────────────────────────────────────────────────────────
+//  Provider card
+// ────────────────────────────────────────────────────────
+function ProviderCard({ provider, categories, onEdit, onRefresh }) {
+  const [busy, setBusy] = useState(false);
+  const [msg, setMsg] = useState("");
+
+  const flash = (m) => { setMsg(m); setTimeout(() => setMsg(""), 3000); };
+
+  const approve = async () => {
+    setBusy(true);
+    await Provider.update(provider.id, { is_visible: true, subscription_status: "active" });
+    flash("Provider approved and now visible.");
+    onRefresh();
+    setBusy(false);
   };
 
-  const PAPER = "#F5E8CC";
-  const BROWN = "#8B4513";
+  const toggleVisible = async () => {
+    setBusy(true);
+    await Provider.update(provider.id, { is_visible: !provider.is_visible });
+    flash(provider.is_visible ? "Provider hidden." : "Provider made visible.");
+    onRefresh();
+    setBusy(false);
+  };
+
+  const remove = async () => {
+    if (!window.confirm("Delete this provider permanently?")) return;
+    setBusy(true);
+    await Provider.delete(provider.id);
+    onRefresh();
+    setBusy(false);
+  };
+
+  const catName = categories.find(c => c.id === provider.category_id)?.name || "—";
+  const statusColor = provider.is_visible ? "#00897b" : "#e65100";
 
   return (
-    <div style={{ minHeight: "100vh", background: "#1A0A00", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", fontFamily: "Georgia, serif" }}>
-      <img src="https://media.base44.com/images/public/69d062aca815ce8e697894b1/a9af95bc3_V-Hublogo.png"
-        style={{ width: 72, height: 72, borderRadius: 12, marginBottom: 18 }} alt="V-Hub" />
-      <div style={{ color: PAPER, fontSize: 20, fontWeight: 900, letterSpacing: 3, marginBottom: 4 }}>V-HUB ADMIN</div>
-      <div style={{ color: "rgba(245,232,204,0.45)", fontSize: 11, marginBottom: 28, letterSpacing: 1 }}>RESTRICTED ACCESS</div>
-      <div style={{ background: "#2A1500", border: `1px solid ${BROWN}`, borderRadius: 12, padding: "24px 28px", width: 210 }}>
-        <div style={{ fontSize: 10, fontWeight: 700, color: PAPER, textAlign: "center", marginBottom: 12, letterSpacing: 2 }}>ENTER PIN</div>
-        <div style={{ display: "flex", justifyContent: "center", gap: 8, marginBottom: 18 }}>
-          {[0,1,2,3].map(i => (
-            <div key={i} style={{ width: 14, height: 14, borderRadius: "50%", border: `2px solid ${BROWN}`, background: pin.length > i ? (err ? "#c00" : BROWN) : "transparent" }} />
-          ))}
+    <div style={{ background: "#fff", borderRadius: 12, padding: "16px 18px", marginBottom: 12, boxShadow: "0 2px 8px rgba(0,0,0,0.07)", borderLeft: `4px solid ${statusColor}` }}>
+      <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 10, flexWrap: "wrap" }}>
+        <div style={{ flex: 1 }}>
+          <div style={{ fontWeight: 800, fontSize: 16, color: BRAND.dark }}>{provider.business_name}</div>
+          <div style={{ fontSize: 13, color: "#666", marginTop: 2 }}>{provider.owner_name} | {catName}</div>
+          <div style={{ fontSize: 12, color: "#888", marginTop: 2 }}>{provider.email}</div>
+          {provider.phone && <div style={{ fontSize: 12, color: "#888" }}>{provider.phone}</div>}
         </div>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 6 }}>
-          {["1","2","3","4","5","6","7","8","9"].map(d => (
-            <button key={d} onClick={() => press(d)}
-              style={{ padding: "11px 0", fontSize: 17, fontWeight: 700, color: PAPER, background: "#3A1A00", border: `1px solid ${BROWN}`, borderRadius: 6, cursor: "pointer" }}>
-              {d}
-            </button>
-          ))}
-          <button onClick={() => setPin(p => p.slice(0,-1))}
-            style={{ padding: "11px 0", fontSize: 13, color: PAPER, background: "#3A1A00", border: `1px solid ${BROWN}`, borderRadius: 6, cursor: "pointer" }}>DEL</button>
-          <button onClick={() => press("0")}
-            style={{ padding: "11px 0", fontSize: 17, fontWeight: 700, color: PAPER, background: "#3A1A00", border: `1px solid ${BROWN}`, borderRadius: 6, cursor: "pointer" }}>0</button>
-          <div />
-        </div>
-        {err && <div style={{ textAlign: "center", color: "#f66", fontSize: 11, marginTop: 8, fontStyle: "italic" }}>Incorrect PIN</div>}
-      </div>
-      <a href="/" style={{ color: "rgba(245,232,204,0.3)", fontSize: 11, marginTop: 24, textDecoration: "none" }}>Back to V-Hub</a>
-    </div>
-  );
-}
-
-// Reviews Tab
-function ReviewsTab({ reviews, providers, onRefresh }) {
-  const [filter, setFilter] = useState("pending");
-  const shown = reviews.filter(r => filter === "all" ? true : filter === "pending" ? !r.is_approved : r.is_approved);
-
-  const approve = async (r) => { await ProviderReview.update(r.id, { is_approved: true }); onRefresh(); };
-  const del = async (r) => { if (!window.confirm("Delete review?")) return; await ProviderReview.delete(r.id); onRefresh(); };
-
-  return (
-    <div>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
-        <div style={{ fontSize: 18, fontWeight: 700, color: BRAND.text }}>
-          Reviews ({reviews.length} | {reviews.filter(r => !r.is_approved).length} pending)
-        </div>
-        <div style={{ display: "flex", gap: 6 }}>
-          {["pending","approved","all"].map(f => (
-            <button key={f} onClick={() => setFilter(f)}
-              style={{ background: filter === f ? BRAND.orange : "#fff", color: filter === f ? "#fff" : BRAND.text, border: "none", borderRadius: 8, padding: "7px 14px", fontSize: 12, fontWeight: 600, cursor: "pointer", textTransform: "capitalize" }}>
-              {f}
-            </button>
-          ))}
-        </div>
-      </div>
-      {shown.length === 0 && <div style={{ textAlign: "center", padding: 40, color: BRAND.subtext, fontStyle: "italic" }}>No {filter} reviews.</div>}
-      {shown.map(r => {
-        const prov = providers.find(p => p.id === r.provider_id);
-        return (
-          <div key={r.id} style={{ background: "#fff", borderRadius: 12, padding: "14px 18px", marginBottom: 8, boxShadow: "0 2px 8px rgba(0,0,0,0.07)", borderLeft: `4px solid ${r.is_approved ? BRAND.teal : BRAND.orange}` }}>
-            <div style={{ display: "flex", justifyContent: "space-between", flexWrap: "wrap", gap: 6 }}>
-              <div>
-                <div style={{ fontSize: 14, fontWeight: 700 }}>{r.customer_name}
-                  {r.customer_village && <span style={{ fontSize: 11, color: BRAND.subtext, marginLeft: 8 }}>📍 {r.customer_village}</span>}
-                </div>
-                <div style={{ fontSize: 12, color: BRAND.teal }}>For: <strong>{prov ? prov.business_name : r.provider_id}</strong></div>
-                <div style={{ fontSize: 12, color: "#B8860B" }}>{"★".repeat(r.rating || 0)} {r.rating}/5</div>
-              </div>
-              <span style={{ background: r.is_approved ? BRAND.teal + "22" : BRAND.orange + "22", color: r.is_approved ? BRAND.teal : BRAND.orange, borderRadius: 20, padding: "3px 10px", fontSize: 11, fontWeight: 700, alignSelf: "flex-start" }}>
-                {r.is_approved ? "✅ Approved" : "... Pending"}
-              </span>
-            </div>
-            <div style={{ fontSize: 13, color: BRAND.subtext, fontStyle: "italic", margin: "8px 0", borderLeft: "3px solid #eee", paddingLeft: 8 }}>"{r.review_text}"</div>
-            <div style={{ display: "flex", gap: 6 }}>
-              {!r.is_approved && <button onClick={() => approve(r)} style={{ background: BRAND.teal, color: "#fff", border: "none", borderRadius: 7, padding: "7px 14px", fontSize: 12, fontWeight: 600, cursor: "pointer" }}>✓ Approve</button>}
-              <button onClick={() => del(r)} style={{ background: "#fdecea", color: "#c00", border: "none", borderRadius: 7, padding: "7px 12px", fontSize: 12, fontWeight: 600, cursor: "pointer" }}>Delete</button>
-            </div>
+        <div style={{ display: "flex", flexDirection: "column", gap: 6, alignItems: "flex-end" }}>
+          <div style={{ fontSize: 11, fontWeight: 700, color: statusColor, background: statusColor + "18", borderRadius: 6, padding: "3px 8px" }}>
+            {provider.is_visible ? "VISIBLE" : "HIDDEN"}
           </div>
-        );
-      })}
+          <div style={{ fontSize: 11, color: "#999" }}>{provider.subscription_tier || "free"}</div>
+        </div>
+      </div>
+
+      {msg && <div style={{ marginTop: 8, fontSize: 12, color: "#00897b", fontStyle: "italic" }}>{msg}</div>}
+
+      <div style={{ display: "flex", gap: 8, marginTop: 12, flexWrap: "wrap" }}>
+        {!provider.is_visible && (
+          <button onClick={approve} disabled={busy} style={{ background: BRAND.teal, color: "#fff", border: "none", borderRadius: 8, padding: "7px 14px", fontSize: 12, fontWeight: 700, cursor: "pointer" }}>
+            Approve
+          </button>
+        )}
+        <button onClick={toggleVisible} disabled={busy} style={{ background: provider.is_visible ? "#e65100" : BRAND.orange, color: "#fff", border: "none", borderRadius: 8, padding: "7px 14px", fontSize: 12, fontWeight: 700, cursor: "pointer" }}>
+          {provider.is_visible ? "Hide" : "Show"}
+        </button>
+        <button onClick={() => onEdit(provider)} style={{ background: "#f0f0f0", color: "#333", border: "none", borderRadius: 8, padding: "7px 14px", fontSize: 12, fontWeight: 700, cursor: "pointer" }}>
+          Edit
+        </button>
+        <button onClick={remove} disabled={busy} style={{ background: "#fff", color: "#c00", border: "1px solid #c00", borderRadius: 8, padding: "7px 14px", fontSize: 12, fontWeight: 700, cursor: "pointer" }}>
+          Delete
+        </button>
+      </div>
     </div>
   );
 }
 
-// Provider Form
-function ProviderForm({ provider, categories, services, areas, onClose, onSaved }) {
-  const blank = { business_name:"", owner_name:"", email:"", phone:"", website:"", description:"", category_id:"", service_areas:[], services:[], subscription_status:"trial", subscription_tier:"basic", is_visible:true, years_in_business:"", license_number:"" };
+// ────────────────────────────────────────────────────────
+//  Provider edit form (modal)
+// ────────────────────────────────────────────────────────
+function ProviderForm({ provider, categories, onClose, onSaved }) {
+  const blank = { business_name: "", owner_name: "", email: "", phone: "", category_id: "", description: "", subscription_tier: "free", subscription_status: "pending", is_visible: false };
   const [form, setForm] = useState(provider || blank);
   const [saving, setSaving] = useState(false);
 
-  const filteredServices = form.category_id ? services.filter(s => s.category_id === form.category_id) : services;
-
-  const toggleArr = (key, val) => setForm(prev => ({
-    ...prev, [key]: (prev[key] || []).includes(val) ? (prev[key] || []).filter(x => x !== val) : [...(prev[key] || []), val]
-  }));
-
-  const handleSave = async () => {
-    setSaving(true);
-    try {
-      if (provider && provider.id) { await Provider.update(provider.id, form); }
-      else { await Provider.create(form); }
-      onSaved(); onClose();
-    } catch(e) { alert("Save failed: " + e.message); }
-    setSaving(false);
-  };
-
-  const F = ({ label, k, type="text" }) => (
-    <div style={{ marginBottom: 12 }}>
-      <label style={labelStyle}>{label}</label>
-      {type === "checkbox"
-        ? <input type="checkbox" checked={form[k] !== false} onChange={e => setForm({...form, [k]: e.target.checked})} style={{ width:18, height:18 }} />
-        : <input type={type} value={form[k] || ""} onChange={e => setForm({...form, [k]: e.target.value})} style={inputStyle} />
-      }
-    </div>
-  );
-
-  return (
-    <div style={{ background: "#fff", borderRadius: 16, padding: "22px", boxShadow: "0 4px 20px rgba(0,0,0,0.10)", marginBottom: 20, border: `2px solid ${BRAND.teal}30` }}>
-      <div style={{ fontSize: 17, fontWeight: 700, marginBottom: 16, color: BRAND.text }}>{provider ? "✏️ Edit Provider" : "➕ Add Provider"}</div>
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))", gap: "0 16px" }}>
-        <F label="Business Name *" k="business_name" />
-        <F label="Owner Name" k="owner_name" />
-        <F label="Email" k="email" type="email" />
-        <F label="Phone" k="phone" />
-        <F label="Website" k="website" />
-        <F label="Years in Business" k="years_in_business" />
-        <F label="License #" k="license_number" />
-      </div>
-      <div style={{ marginBottom: 12 }}>
-        <label style={labelStyle}>Description</label>
-        <textarea value={form.description || ""} onChange={e => setForm({...form, description: e.target.value})}
-          style={{ ...inputStyle, minHeight: 70, resize: "vertical" }} />
-      </div>
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: "0 16px" }}>
-        <div style={{ marginBottom: 12 }}>
-          <label style={labelStyle}>Category</label>
-          <select value={form.category_id || ""} onChange={e => setForm({...form, category_id: e.target.value})} style={inputStyle}>
-            <option value="">- Select Category -</option>
-            {categories.map(c => <option key={c.id} value={c.id}>{c.icon} {c.name}</option>)}
-          </select>
-        </div>
-        <div style={{ marginBottom: 12 }}>
-          <label style={labelStyle}>Subscription Status</label>
-          <select value={form.subscription_status || "trial"} onChange={e => setForm({...form, subscription_status: e.target.value})} style={inputStyle}>
-            {["trial","pending","active","cancelled","expired"].map(s => <option key={s} value={s}>{s}</option>)}
-          </select>
-        </div>
-      </div>
-      {/* Service areas */}
-      <div style={{ marginBottom: 12 }}>
-        <label style={labelStyle}>🗺️ Service Areas</label>
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-          {areas.map(a => (
-            <div key={a.id} onClick={() => toggleArr("service_areas", a.id)}
-              style={{ background: (form.service_areas || []).includes(a.id) ? BRAND.teal : "#f0f0f0", color: (form.service_areas || []).includes(a.id) ? "#fff" : BRAND.text, borderRadius: 16, padding: "5px 12px", cursor: "pointer", fontSize: 12, fontWeight: 600 }}>
-              {a.name}
-            </div>
-          ))}
-        </div>
-      </div>
-      {/* Services */}
-      {filteredServices.length > 0 && (
-        <div style={{ marginBottom: 16 }}>
-          <label style={labelStyle}>🛠️ Services Offered</label>
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-            {filteredServices.map(s => (
-              <div key={s.id} onClick={() => toggleArr("services", s.name)}
-                style={{ background: (form.services || []).includes(s.name) ? BRAND.orange : "#f0f0f0", color: (form.services || []).includes(s.name) ? "#fff" : BRAND.text, borderRadius: 16, padding: "5px 12px", cursor: "pointer", fontSize: 12, fontWeight: 600 }}>
-                {s.name}
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 16 }}>
-        <input type="checkbox" id="vis" checked={form.is_visible !== false} onChange={e => setForm({...form, is_visible: e.target.checked})} style={{ width:18, height:18 }} />
-        <label htmlFor="vis" style={{ fontSize: 14, fontWeight: 600, cursor: "pointer" }}>Visible to customers</label>
-      </div>
-      <div style={{ display: "flex", gap: 10 }}>
-        <button onClick={handleSave} disabled={saving || !form.business_name}
-          style={{ ...addBtnStyle, opacity: saving || !form.business_name ? 0.6 : 1 }}>
-          {saving ? "Saving..." : provider ? "Save Changes" : "Add Provider"}
-        </button>
-        <button onClick={onClose} style={{ background: "#f0f0f0", color: BRAND.text, border: "none", borderRadius: 10, padding: "10px 18px", fontSize: 14, fontWeight: 600, cursor: "pointer" }}>Cancel</button>
-      </div>
-    </div>
-  );
-}
-
-// Providers Tab
-function ProvidersTab({ providers, categories, services, areas, onRefresh }) {
-  const [msg, setMsg] = useState("");
-  const [showForm, setShowForm] = useState(false);
-  const [editItem, setEditItem] = useState(null);
-
-  const flash = (m, ms = 6000) => { setMsg(m); setTimeout(() => setMsg(""), ms); };
-
-  const del = async (id) => { if (!window.confirm("Delete provider?")) return; await Provider.delete(id); onRefresh(); };
-
-  const sendPayLink = async (p) => {
-    if (!p.email) { flash("❌ Provider has no email on file."); return; }
-    flash("... Generating payment link...");
-    try {
-      const res = await fetch("/functions/createCheckoutSession", { method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify({ provider_id: p.provider_id, provider_email: p.email, provider_name: p.owner_name, business_name: p.business_name }) });
-      const d = await res.json();
-      if (d.url) { try { await navigator.clipboard.writeText(d.url); } catch(e) {} flash("✅ Payment link copied! Send to " + (p.email || p.business_name)); window.open(d.url, "_blank"); }
-      else flash("❌ " + (d.error || "Failed to generate link."));
-    } catch(e) { flash("❌ " + e.message); }
-  };
-
-  const approveProv = async (p) => {
-    if (!window.confirm(`Approve "${p.business_name}" and make them live?`)) return;
-    flash("... Approving...");
-    try {
-      const res = await fetch("/functions/approveProvider", { method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify({ provider_record_id: p.id, provider_id: p.provider_id, business_name: p.business_name, owner_name: p.owner_name, email: p.email, phone: p.phone, services: p.services||[], service_areas: p.service_areas||[] }) });
-      const d = await res.json();
-      if (d.ok) { flash("✅ " + p.business_name + " is now live!"); onRefresh(); }
-      else flash("❌ " + (d.error || "Failed."));
-    } catch(e) { flash("❌ " + e.message); }
-  };
-
-  const cancelSub = async (p) => {
-    if (!p.stripe_subscription_id) { flash("❌ No Stripe subscription found."); return; }
-    if (!window.confirm(`Cancel ${p.business_name}'s subscription?`)) return;
-    flash("... Cancelling...");
-    try {
-      const res = await fetch("/functions/cancelSubscription", { method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify({ stripe_subscription_id: p.stripe_subscription_id }) });
-      const d = await res.json();
-      if (d.success) { await Provider.update(p.id, { subscription_status:"cancelled" }); flash("✅ Subscription cancelled."); onRefresh(); }
-      else flash("❌ " + (d.error || "Failed."));
-    } catch(e) { flash("❌ " + e.message); }
-  };
-
-  return (
-    <div>
-      {msg && <div style={{ background: msg.startsWith("✅") ? "#e8f5e9" : msg.startsWith("pending_icon") ? "#fff8e1" : "#ffebee", border:"1px solid #ccc", borderRadius:8, padding:"10px 14px", marginBottom:10, fontSize:13, fontWeight:600 }}>{msg}</div>}
-      <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:14 }}>
-        <div style={{ fontSize:18, fontWeight:700, color:BRAND.text }}>All Providers ({providers.length})</div>
-        <button onClick={() => { setEditItem(null); setShowForm(true); }} style={addBtnStyle}>+ Add Provider</button>
-      </div>
-      {showForm && (
-        <ProviderForm provider={editItem} categories={categories} services={services} areas={areas}
-          onClose={() => { setShowForm(false); setEditItem(null); }} onSaved={() => { setShowForm(false); setEditItem(null); onRefresh(); }} />
-      )}
-      {providers.map(p => {
-        const cat = categories.find(c => c.id === p.category_id);
-        const sc = p.subscription_status === "active" ? BRAND.teal : p.subscription_status === "trial" ? BRAND.orange : p.subscription_status === "pending" ? "#c0392b" : "#999";
-        return (
-          <div key={p.id} style={{ background:"#fff", borderRadius:14, padding:"14px 18px", marginBottom:10, boxShadow:"0 2px 10px rgba(0,0,0,0.07)", display:"flex", alignItems:"center", gap:12, flexWrap:"wrap" }}>
-            <div style={{ flex:1, minWidth:200 }}>
-              <div style={{ display:"flex", alignItems:"center", gap:8, flexWrap:"wrap" }}>
-                <div style={{ fontSize:16, fontWeight:700, color:BRAND.text }}>{p.business_name}</div>
-                {p.provider_id && <span style={{ background:"#f0f0f0", color:"#555", borderRadius:10, padding:"1px 7px", fontSize:11 }}>ID: {p.provider_id}</span>}
-                <span style={{ background:`${sc}20`, color:sc, borderRadius:20, padding:"2px 8px", fontSize:11, fontWeight:700, textTransform:"uppercase" }}>{p.subscription_status || "pending"}</span>
-                {p.is_visible === false && <span style={{ background:"#ff000015", color:"red", borderRadius:20, padding:"2px 8px", fontSize:11, fontWeight:700 }}>Hidden</span>}
-              </div>
-              {cat && <div style={{ fontSize:12, color:BRAND.teal, fontWeight:600 }}>{cat.icon} {cat.name}</div>}
-              <div style={{ fontSize:13, color:BRAND.subtext }}>{p.phone}{p.email ? ` | ${p.email}` : ""}</div>
-            </div>
-            <div style={{ display:"flex", gap:5, flexWrap:"wrap", justifyContent:"flex-end" }}>
-              {p.subscription_status === "pending" && <button onClick={() => approveProv(p)} style={{ background:"#2e7d32", color:"#fff", border:"none", borderRadius:7, padding:"7px 12px", fontSize:12, fontWeight:700, cursor:"pointer" }}>✅ Approve</button>}
-              {!["active","pending"].includes(p.subscription_status) && <button onClick={() => sendPayLink(p)} style={{ background:BRAND.teal, color:"#fff", border:"none", borderRadius:7, padding:"7px 12px", fontSize:12, fontWeight:700, cursor:"pointer" }}>💳 Pay Link</button>}
-              {p.subscription_status === "active" && <button onClick={() => cancelSub(p)} style={{ background:"#fff3e0", color:"#e65100", border:"1px solid #e65100", borderRadius:7, padding:"7px 12px", fontSize:12, fontWeight:700, cursor:"pointer" }}>✕ Cancel</button>}
-              <button onClick={() => { setEditItem(p); setShowForm(true); }} style={editBtnStyle}>Edit</button>
-              <button onClick={() => del(p.id)} style={deleteBtnStyle}>Delete</button>
-            </div>
-          </div>
-        );
-      })}
-      {providers.length === 0 && <div style={{ textAlign:"center", padding:50, color:BRAND.subtext }}>No providers yet. Click "+ Add Provider" to get started.</div>}
-    </div>
-  );
-}
-
-// Simple CRUD Tab
-function SimpleTab({ items, entity, fields, onRefresh }) {
-  const [showForm, setShowForm] = useState(false);
-  const [editItem, setEditItem] = useState(null);
-  const [form, setForm] = useState({});
-  const [saving, setSaving] = useState(false);
-
-  const open = (item) => { setForm(item ? {...item} : {}); setEditItem(item || null); setShowForm(true); };
-  const close = () => { setShowForm(false); setEditItem(null); };
+  const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
 
   const save = async () => {
     setSaving(true);
-    try {
-      if (editItem && editItem.id) { await entity.update(editItem.id, form); }
-      else { await entity.create(form); }
-      onRefresh(); close();
-    } catch(e) { alert("Save error: " + e.message); }
+    if (provider) await Provider.update(provider.id, form);
+    else await Provider.create(form);
     setSaving(false);
+    onSaved();
   };
 
-  const del = async (id) => { if (!window.confirm("Delete?")) return; await entity.delete(id); onRefresh(); };
+  const labelStyle = { fontSize: 12, fontWeight: 700, color: "#444", marginBottom: 3 };
+  const inputStyle = { width: "100%", padding: "9px 10px", borderRadius: 8, border: "1px solid #ddd", fontSize: 14, boxSizing: "border-box" };
+
+  return (
+    <div style={{ position: "fixed", inset: 0, zIndex: 999, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }}>
+      <div style={{ background: "#fff", borderRadius: 16, padding: 24, width: "100%", maxWidth: 480, maxHeight: "90vh", overflowY: "auto", boxShadow: "0 8px 40px rgba(0,0,0,0.2)" }}>
+        <div style={{ fontWeight: 800, fontSize: 18, marginBottom: 16, color: BRAND.dark }}>{provider ? "Edit Provider" : "Add Provider"}</div>
+
+        {[
+          ["business_name", "Business Name"],
+          ["owner_name", "Owner Name"],
+          ["email", "Email"],
+          ["phone", "Phone"],
+          ["website", "Website"],
+          ["license_number", "License Number"],
+        ].map(([k, label]) => (
+          <div key={k} style={{ marginBottom: 12 }}>
+            <div style={labelStyle}>{label}</div>
+            <input value={form[k] || ""} onChange={e => set(k, e.target.value)} style={inputStyle} />
+          </div>
+        ))}
+
+        <div style={{ marginBottom: 12 }}>
+          <div style={labelStyle}>Category</div>
+          <select value={form.category_id || ""} onChange={e => set("category_id", e.target.value)} style={inputStyle}>
+            <option value="">- Select Category -</option>
+            {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+          </select>
+        </div>
+
+        <div style={{ marginBottom: 12 }}>
+          <div style={labelStyle}>Subscription Tier</div>
+          <select value={form.subscription_tier || "free"} onChange={e => set("subscription_tier", e.target.value)} style={inputStyle}>
+            <option value="free">Free</option>
+            <option value="basic">Basic</option>
+            <option value="pro">Pro</option>
+            <option value="featured">Featured</option>
+          </select>
+        </div>
+
+        <div style={{ marginBottom: 12 }}>
+          <div style={labelStyle}>Status</div>
+          <select value={form.subscription_status || "pending"} onChange={e => set("subscription_status", e.target.value)} style={inputStyle}>
+            <option value="pending">Pending</option>
+            <option value="active">Active</option>
+            <option value="cancelled">Cancelled</option>
+          </select>
+        </div>
+
+        <div style={{ marginBottom: 16 }}>
+          <label style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer" }}>
+            <input type="checkbox" checked={!!form.is_visible} onChange={e => set("is_visible", e.target.checked)} />
+            <span style={{ fontSize: 14, fontWeight: 600 }}>Visible in search results</span>
+          </label>
+        </div>
+
+        <div style={{ marginBottom: 16 }}>
+          <div style={labelStyle}>Description</div>
+          <textarea value={form.description || ""} onChange={e => set("description", e.target.value)} rows={3} style={{ ...inputStyle, resize: "vertical" }} />
+        </div>
+
+        <div style={{ display: "flex", gap: 10, justifyContent: "flex-end" }}>
+          <button onClick={onClose} style={{ background: "#f0f0f0", color: "#333", border: "none", borderRadius: 8, padding: "10px 20px", fontWeight: 700, cursor: "pointer" }}>Cancel</button>
+          <button onClick={save} disabled={saving} style={{ background: BRAND.orange, color: "#fff", border: "none", borderRadius: 8, padding: "10px 20px", fontWeight: 700, cursor: "pointer" }}>
+            {saving ? "Saving..." : "Save"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ────────────────────────────────────────────────────────
+//  Reviews tab
+// ────────────────────────────────────────────────────────
+function ReviewsTab({ reviews, onRefresh }) {
+  const [filter, setFilter] = useState("pending");
+  const filtered = reviews.filter(r => filter === "all" ? true : filter === "pending" ? !r.is_approved : r.is_approved);
+
+  const approve = async (r) => {
+    await ProviderReview.update(r.id, { is_approved: true });
+    onRefresh();
+  };
+  const remove = async (r) => {
+    if (!window.confirm("Delete this review?")) return;
+    await ProviderReview.delete(r.id);
+    onRefresh();
+  };
 
   return (
     <div>
-      <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:14 }}>
-        <div style={{ fontSize:18, fontWeight:700, color:BRAND.text }}>{items.length} items</div>
-        <button onClick={() => open(null)} style={addBtnStyle}>+ Add New</button>
+      <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
+        {["pending", "approved", "all"].map(f => (
+          <button key={f} onClick={() => setFilter(f)} style={{ background: filter === f ? BRAND.orange : "#eee", color: filter === f ? "#fff" : "#333", border: "none", borderRadius: 8, padding: "7px 14px", fontSize: 13, fontWeight: 700, cursor: "pointer", textTransform: "capitalize" }}>{f}</button>
+        ))}
       </div>
-      {showForm && (
-        <div style={{ background:"#fff", borderRadius:14, padding:"20px", marginBottom:16, boxShadow:"0 4px 14px rgba(0,0,0,0.09)", border:`2px solid ${BRAND.teal}30` }}>
-          <div style={{ fontSize:16, fontWeight:700, marginBottom:14 }}>{editItem ? "Edit" : "Add New"}</div>
-          {fields.map(f => (
-            <div key={f.key} style={{ marginBottom:11 }}>
-              <label style={labelStyle}>{f.label}</label>
-              {f.type === "checkbox"
-                ? <input type="checkbox" checked={form[f.key] !== false} onChange={e => setForm({...form, [f.key]: e.target.checked})} style={{ width:18, height:18 }} />
-                : f.type === "select"
-                  ? <select value={form[f.key] || ""} onChange={e => setForm({...form, [f.key]: e.target.value})} style={inputStyle}>
-                      <option value="">- Select -</option>
-                      {f.options.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
-                    </select>
-                  : <input type={f.type || "text"} value={form[f.key] || ""} onChange={e => setForm({...form, [f.key]: e.target.value})} style={inputStyle} />
-              }
+      {filtered.length === 0 && <div style={{ color: "#999", fontSize: 14, padding: 20 }}>No reviews in this category.</div>}
+      {filtered.map(r => (
+        <div key={r.id} style={{ background: "#fff", borderRadius: 12, padding: "14px 16px", marginBottom: 10, boxShadow: "0 2px 6px rgba(0,0,0,0.07)", borderLeft: `4px solid ${r.is_approved ? BRAND.teal : "#e65100"}` }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+            <div>
+              <div style={{ fontWeight: 700, fontSize: 14 }}>{r.customer_name}</div>
+              <div style={{ fontSize: 12, color: "#888" }}>{r.customer_village} | {r.service_used}</div>
+              <div style={{ fontSize: 13, marginTop: 6, color: "#333" }}>{r.review_text}</div>
             </div>
-          ))}
-          <div style={{ display:"flex", gap:8, marginTop:8 }}>
-            <button onClick={save} disabled={saving} style={{ ...addBtnStyle, opacity: saving ? 0.7 : 1 }}>{saving ? "Saving..." : "Save"}</button>
-            <button onClick={close} style={{ background:"#f0f0f0", border:"none", borderRadius:9, padding:"10px 18px", fontSize:14, cursor:"pointer" }}>Cancel</button>
+            <div style={{ fontSize: 18, color: "#f59e0b" }}>{"*".repeat(r.rating || 0)}</div>
           </div>
-        </div>
-      )}
-      {items.map(item => (
-        <div key={item.id} style={{ background:"#fff", borderRadius:12, padding:"13px 16px", marginBottom:8, boxShadow:"0 2px 8px rgba(0,0,0,0.06)", display:"flex", alignItems:"center", justifyContent:"space-between" }}>
-          <div>
-            <div style={{ fontSize:15, fontWeight:600, color:BRAND.text }}>{item.icon ? item.icon + " " : ""}{item.name}</div>
-            {item.description && <div style={{ fontSize:12, color:BRAND.subtext }}>{item.description}</div>}
-            {item.is_active === false && <span style={{ color:"#999", fontSize:11 }}>Inactive</span>}
-          </div>
-          <div style={{ display:"flex", gap:6 }}>
-            <button onClick={() => open(item)} style={editBtnStyle}>Edit</button>
-            <button onClick={() => del(item.id)} style={deleteBtnStyle}>Delete</button>
+          <div style={{ display: "flex", gap: 8, marginTop: 10 }}>
+            {!r.is_approved && (
+              <button onClick={() => approve(r)} style={{ background: BRAND.teal, color: "#fff", border: "none", borderRadius: 8, padding: "6px 12px", fontSize: 12, fontWeight: 700, cursor: "pointer" }}>Approve</button>
+            )}
+            <button onClick={() => remove(r)} style={{ background: "#fff", color: "#c00", border: "1px solid #c00", borderRadius: 8, padding: "6px 12px", fontSize: 12, fontWeight: 700, cursor: "pointer" }}>Delete</button>
           </div>
         </div>
       ))}
@@ -385,10 +241,192 @@ function SimpleTab({ items, entity, fields, onRefresh }) {
   );
 }
 
-// Main Admin
+// ────────────────────────────────────────────────────────
+//  Categories tab
+// ────────────────────────────────────────────────────────
+function CategoriesTab({ categories, onRefresh }) {
+  const [showForm, setShowForm] = useState(false);
+  const [editItem, setEditItem] = useState(null);
+  const [form, setForm] = useState({ name: "", icon: "", description: "", is_active: true });
+  const [saving, setSaving] = useState(false);
+
+  const openAdd = () => { setForm({ name: "", icon: "", description: "", is_active: true }); setEditItem(null); setShowForm(true); };
+  const openEdit = (c) => { setForm(c); setEditItem(c); setShowForm(true); };
+
+  const save = async () => {
+    setSaving(true);
+    if (editItem) await Category.update(editItem.id, form);
+    else await Category.create(form);
+    setSaving(false);
+    setShowForm(false);
+    onRefresh();
+  };
+
+  const remove = async (c) => {
+    if (!window.confirm("Delete category?")) return;
+    await Category.delete(c.id);
+    onRefresh();
+  };
+
+  const inputStyle = { width: "100%", padding: "8px 10px", borderRadius: 8, border: "1px solid #ddd", fontSize: 14, boxSizing: "border-box", marginBottom: 10 };
+
+  return (
+    <div>
+      <button onClick={openAdd} style={{ background: BRAND.orange, color: "#fff", border: "none", borderRadius: 10, padding: "10px 18px", fontWeight: 700, fontSize: 14, cursor: "pointer", marginBottom: 16 }}>+ Add Category</button>
+      {showForm && (
+        <div style={{ background: "#fff", borderRadius: 12, padding: 20, marginBottom: 16, boxShadow: "0 2px 8px rgba(0,0,0,0.1)" }}>
+          <input placeholder="Category name" value={form.name || ""} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} style={inputStyle} />
+          <input placeholder="Icon emoji" value={form.icon || ""} onChange={e => setForm(f => ({ ...f, icon: e.target.value }))} style={inputStyle} />
+          <input placeholder="Description" value={form.description || ""} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} style={inputStyle} />
+          <div style={{ display: "flex", gap: 8 }}>
+            <button onClick={save} disabled={saving} style={{ background: BRAND.orange, color: "#fff", border: "none", borderRadius: 8, padding: "8px 16px", fontWeight: 700, cursor: "pointer" }}>{saving ? "Saving..." : "Save"}</button>
+            <button onClick={() => setShowForm(false)} style={{ background: "#eee", color: "#333", border: "none", borderRadius: 8, padding: "8px 16px", fontWeight: 700, cursor: "pointer" }}>Cancel</button>
+          </div>
+        </div>
+      )}
+      {categories.map(c => (
+        <div key={c.id} style={{ background: "#fff", borderRadius: 10, padding: "12px 16px", marginBottom: 8, display: "flex", alignItems: "center", justifyContent: "space-between", boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}>
+          <div><span style={{ fontSize: 20, marginRight: 8 }}>{c.icon}</span><strong>{c.name}</strong></div>
+          <div style={{ display: "flex", gap: 6 }}>
+            <button onClick={() => openEdit(c)} style={{ background: "#f0f0f0", border: "none", borderRadius: 7, padding: "5px 10px", cursor: "pointer", fontSize: 12 }}>Edit</button>
+            <button onClick={() => remove(c)} style={{ background: "#fff", color: "#c00", border: "1px solid #c00", borderRadius: 7, padding: "5px 10px", cursor: "pointer", fontSize: 12 }}>Del</button>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// ────────────────────────────────────────────────────────
+//  Services tab
+// ────────────────────────────────────────────────────────
+function ServicesTab({ services, categories, onRefresh }) {
+  const [showForm, setShowForm] = useState(false);
+  const [editItem, setEditItem] = useState(null);
+  const [form, setForm] = useState({});
+  const [saving, setSaving] = useState(false);
+  const [filterCat, setFilterCat] = useState("all");
+
+  const openAdd = () => { setForm({ name: "", category_id: "", is_active: true }); setEditItem(null); setShowForm(true); };
+  const openEdit = (s) => { setForm(s); setEditItem(s); setShowForm(true); };
+
+  const save = async () => {
+    setSaving(true);
+    if (editItem) await Service.update(editItem.id, form);
+    else await Service.create(form);
+    setSaving(false);
+    setShowForm(false);
+    onRefresh();
+  };
+
+  const remove = async (s) => {
+    if (!window.confirm("Delete service?")) return;
+    await Service.delete(s.id);
+    onRefresh();
+  };
+
+  const filtered = filterCat === "all" ? services : services.filter(s => s.category_id === filterCat);
+  const inputStyle = { width: "100%", padding: "8px 10px", borderRadius: 8, border: "1px solid #ddd", fontSize: 14, boxSizing: "border-box", marginBottom: 10 };
+
+  return (
+    <div>
+      <div style={{ display: "flex", gap: 8, marginBottom: 14, flexWrap: "wrap" }}>
+        <button onClick={openAdd} style={{ background: BRAND.orange, color: "#fff", border: "none", borderRadius: 10, padding: "9px 16px", fontWeight: 700, fontSize: 13, cursor: "pointer" }}>+ Add Service</button>
+        <select value={filterCat} onChange={e => setFilterCat(e.target.value)} style={{ padding: "9px 12px", borderRadius: 10, border: "1px solid #ddd", fontSize: 13, cursor: "pointer" }}>
+          <option value="all">All Categories</option>
+          {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+        </select>
+      </div>
+      {showForm && (
+        <div style={{ background: "#fff", borderRadius: 12, padding: 20, marginBottom: 16, boxShadow: "0 2px 8px rgba(0,0,0,0.1)" }}>
+          <input placeholder="Service name" value={form.name || ""} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} style={inputStyle} />
+          <select value={form.category_id || ""} onChange={e => setForm(f => ({ ...f, category_id: e.target.value }))} style={inputStyle}>
+            <option value="">- Select Category -</option>
+            {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+          </select>
+          <div style={{ display: "flex", gap: 8 }}>
+            <button onClick={save} disabled={saving} style={{ background: BRAND.orange, color: "#fff", border: "none", borderRadius: 8, padding: "8px 16px", fontWeight: 700, cursor: "pointer" }}>{saving ? "Saving..." : "Save"}</button>
+            <button onClick={() => setShowForm(false)} style={{ background: "#eee", color: "#333", border: "none", borderRadius: 8, padding: "8px 16px", fontWeight: 700, cursor: "pointer" }}>Cancel</button>
+          </div>
+        </div>
+      )}
+      <div style={{ fontSize: 12, color: "#888", marginBottom: 8 }}>{filtered.length} services</div>
+      {filtered.map(s => (
+        <div key={s.id} style={{ background: "#fff", borderRadius: 10, padding: "11px 16px", marginBottom: 7, display: "flex", alignItems: "center", justifyContent: "space-between", boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}>
+          <div>
+            <div style={{ fontWeight: 600, fontSize: 14 }}>{s.name}</div>
+            <div style={{ fontSize: 12, color: "#888" }}>{categories.find(c => c.id === s.category_id)?.name || "—"}</div>
+          </div>
+          <div style={{ display: "flex", gap: 6 }}>
+            <button onClick={() => openEdit(s)} style={{ background: "#f0f0f0", border: "none", borderRadius: 7, padding: "5px 10px", cursor: "pointer", fontSize: 12 }}>Edit</button>
+            <button onClick={() => remove(s)} style={{ background: "#fff", color: "#c00", border: "1px solid #c00", borderRadius: 7, padding: "5px 10px", cursor: "pointer", fontSize: 12 }}>Del</button>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// ────────────────────────────────────────────────────────
+//  Service Areas tab
+// ────────────────────────────────────────────────────────
+function AreasTab({ areas, onRefresh }) {
+  const [showForm, setShowForm] = useState(false);
+  const [editItem, setEditItem] = useState(null);
+  const [form, setForm] = useState({ name: "", is_active: true });
+  const [saving, setSaving] = useState(false);
+
+  const openAdd = () => { setForm({ name: "", is_active: true }); setEditItem(null); setShowForm(true); };
+  const openEdit = (a) => { setForm(a); setEditItem(a); setShowForm(true); };
+
+  const save = async () => {
+    setSaving(true);
+    if (editItem) await ServiceArea.update(editItem.id, form);
+    else await ServiceArea.create(form);
+    setSaving(false);
+    setShowForm(false);
+    onRefresh();
+  };
+
+  const remove = async (a) => {
+    if (!window.confirm("Delete area?")) return;
+    await ServiceArea.delete(a.id);
+    onRefresh();
+  };
+
+  const inputStyle = { width: "100%", padding: "8px 10px", borderRadius: 8, border: "1px solid #ddd", fontSize: 14, boxSizing: "border-box", marginBottom: 10 };
+
+  return (
+    <div>
+      <button onClick={openAdd} style={{ background: BRAND.orange, color: "#fff", border: "none", borderRadius: 10, padding: "10px 18px", fontWeight: 700, fontSize: 14, cursor: "pointer", marginBottom: 16 }}>+ Add Area</button>
+      {showForm && (
+        <div style={{ background: "#fff", borderRadius: 12, padding: 20, marginBottom: 16, boxShadow: "0 2px 8px rgba(0,0,0,0.1)" }}>
+          <input placeholder="Village/Area name" value={form.name || ""} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} style={inputStyle} />
+          <div style={{ display: "flex", gap: 8 }}>
+            <button onClick={save} disabled={saving} style={{ background: BRAND.orange, color: "#fff", border: "none", borderRadius: 8, padding: "8px 16px", fontWeight: 700, cursor: "pointer" }}>{saving ? "Saving..." : "Save"}</button>
+            <button onClick={() => setShowForm(false)} style={{ background: "#eee", color: "#333", border: "none", borderRadius: 8, padding: "8px 16px", fontWeight: 700, cursor: "pointer" }}>Cancel</button>
+          </div>
+        </div>
+      )}
+      {areas.map(a => (
+        <div key={a.id} style={{ background: "#fff", borderRadius: 10, padding: "11px 16px", marginBottom: 7, display: "flex", alignItems: "center", justifyContent: "space-between", boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}>
+          <div style={{ fontWeight: 600 }}>{a.name}</div>
+          <div style={{ display: "flex", gap: 6 }}>
+            <button onClick={() => openEdit(a)} style={{ background: "#f0f0f0", border: "none", borderRadius: 7, padding: "5px 10px", cursor: "pointer", fontSize: 12 }}>Edit</button>
+            <button onClick={() => remove(a)} style={{ background: "#fff", color: "#c00", border: "1px solid #c00", borderRadius: 7, padding: "5px 10px", cursor: "pointer", fontSize: 12 }}>Del</button>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// ────────────────────────────────────────────────────────
+//  Main Admin page
+// ────────────────────────────────────────────────────────
 export default function Admin() {
-  const [pin, setPin] = useState(() => { try { return sessionStorage.getItem("vhub_admin_pin") || ""; } catch(e) { return ""; } });
-  const unlocked = VALID_PINS.includes(pin);
+  const [currentUser, setCurrentUser] = useState(null);
+  const [checking, setChecking] = useState(true);
 
   const [activeTab, setActiveTab] = useState("Providers");
   const [providers, setProviders] = useState([]);
@@ -397,11 +435,23 @@ export default function Admin() {
   const [areas, setAreas] = useState([]);
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [editProvider, setEditProvider] = useState(null);
+  const [showProviderForm, setShowProviderForm] = useState(false);
+  const [providerFilter, setProviderFilter] = useState("all");
 
-  const [loadErr, setLoadErr] = useState("");
+  useEffect(() => {
+    User.me()
+      .then(u => { setCurrentUser(u); setChecking(false); })
+      .catch(() => { setCurrentUser(null); setChecking(false); });
+  }, []);
+
+  const isAdmin = currentUser && (
+    currentUser.role === "admin" ||
+    ADMIN_EMAILS.includes(currentUser.email)
+  );
+
   const loadAll = async () => {
     setLoading(true);
-    setLoadErr("");
     try {
       const [p, c, s, a, r] = await Promise.allSettled([
         Provider.list(), Category.list(), Service.list(), ServiceArea.list(), ProviderReview.list()
@@ -411,108 +461,134 @@ export default function Admin() {
       setServices(s.status === "fulfilled" ? (s.value || []) : []);
       setAreas(a.status === "fulfilled" ? (a.value || []) : []);
       setReviews(r.status === "fulfilled" ? (r.value || []) : []);
-    } catch(e) {
-      setLoadErr(e.message || "Unknown error loading data");
+    } catch (e) {
+      console.error("Admin load error:", e);
     }
     setLoading(false);
   };
 
-  useEffect(() => { if (unlocked) loadAll(); }, [unlocked]);
+  useEffect(() => {
+    if (isAdmin) loadAll();
+  }, [isAdmin]);
 
-  if (!unlocked) return <PinGate onUnlock={setPin} />;
+  // Still checking auth
+  if (checking) return (
+    <div style={{ minHeight: "100vh", background: BRAND.lightBg, display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <div style={{ fontSize: 16, color: "#888" }}>Checking access...</div>
+    </div>
+  );
 
+  // Not admin
+  if (!isAdmin) return <AccessDenied />;
+
+  // Loading data
   if (loading) return (
-    <div style={{ minHeight:"100vh", background:"#1A0A00", display:"flex", alignItems:"center", justifyContent:"center", flexDirection:"column", gap:14 }}>
-      <img src="https://media.base44.com/images/public/69d062aca815ce8e697894b1/a9af95bc3_V-Hublogo.png" style={{ width:60, borderRadius:10 }} alt="" />
-      <div style={{ color:"#F5E8CC", fontSize:15, fontFamily:"Georgia" }}>Loading...</div>
+    <div style={{ minHeight: "100vh", background: BRAND.lightBg, display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", gap: 14 }}>
+      <img src="https://media.base44.com/images/public/69d062aca815ce8e697894b1/a9af95bc3_V-Hublogo.png" style={{ width: 60, borderRadius: 10 }} alt="" />
+      <div style={{ color: "#555", fontSize: 15 }}>Loading admin data...</div>
     </div>
   );
 
-  if (loadErr) return (
-    <div style={{ minHeight:"100vh", background:"#fff8f8", display:"flex", alignItems:"center", justifyContent:"center", flexDirection:"column", gap:14, padding:30 }}>
-      <div style={{ fontSize:36 }}>⚠️</div>
-      <div style={{ fontSize:18, fontWeight:700, color:"#c00" }}>Could not load admin data</div>
-      <div style={{ fontSize:14, color:"#555", fontFamily:"monospace", background:"#f0f0f0", padding:"10px 16px", borderRadius:8, maxWidth:500 }}>{loadErr}</div>
-      <button onClick={loadAll} style={{ background:BRAND.orange, color:"#fff", border:"none", borderRadius:10, padding:"12px 24px", fontSize:15, fontWeight:700, cursor:"pointer" }}>Retry</button>
-      <a href="/" style={{ color:BRAND.blue, fontSize:13 }}>Back to V-Hub</a>
-    </div>
-  );
+  const filteredProviders = providerFilter === "all" ? providers
+    : providerFilter === "visible" ? providers.filter(p => p.is_visible)
+    : providers.filter(p => !p.is_visible);
+
+  const pendingReviews = reviews.filter(r => !r.is_approved).length;
+
+  const TABS = [
+    { name: "Providers", label: `Providers (${providers.length})` },
+    { name: "Reviews", label: `Reviews${pendingReviews > 0 ? ` (${pendingReviews} pending)` : ""}` },
+    { name: "Categories", label: `Categories (${categories.length})` },
+    { name: "Services", label: `Services (${services.length})` },
+    { name: "Service Areas", label: `Areas (${areas.length})` },
+  ];
 
   return (
-    <div style={{ minHeight:"100vh", background:BRAND.lightBg, fontFamily:"'Segoe UI', sans-serif" }}>
+    <div style={{ minHeight: "100vh", background: BRAND.lightBg, fontFamily: "'Segoe UI', sans-serif" }}>
+
       {/* Header */}
-      <div style={{ background:`linear-gradient(135deg, ${BRAND.orange}, ${BRAND.teal})`, padding:"18px 22px", display:"flex", alignItems:"center", justifyContent:"space-between", boxShadow:"0 3px 10px rgba(0,0,0,0.12)" }}>
-        <div style={{ display:"flex", alignItems:"center", gap:10 }}>
-          <img src="https://media.base44.com/images/public/69d062aca815ce8e697894b1/a9af95bc3_V-Hublogo.png" style={{ height:44, borderRadius:8 }} alt="V-Hub" />
+      <div style={{ background: `linear-gradient(135deg, ${BRAND.orange}, ${BRAND.teal})`, padding: "16px 20px", display: "flex", alignItems: "center", justifyContent: "space-between", boxShadow: "0 3px 10px rgba(0,0,0,0.12)" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <img src="https://media.base44.com/images/public/69d062aca815ce8e697894b1/a9af95bc3_V-Hublogo.png" style={{ height: 42, borderRadius: 8 }} alt="V-Hub" />
           <div>
-            <div style={{ color:"#fff", fontSize:20, fontWeight:800 }}>V-HUB Admin</div>
-            <div style={{ color:"rgba(255,255,255,0.8)", fontSize:12 }}>Manage Providers & Listings</div>
+            <div style={{ color: "#fff", fontSize: 18, fontWeight: 800 }}>V-HUB Admin</div>
+            <div style={{ color: "rgba(255,255,255,0.85)", fontSize: 12 }}>{currentUser?.email}</div>
           </div>
         </div>
-        <a href="/" style={{ color:"#fff", textDecoration:"none", background:"rgba(255,255,255,0.2)", borderRadius:8, padding:"7px 14px", fontSize:13, fontWeight:600 }}>View Site</a>
+        <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
+          <button onClick={loadAll} style={{ background: "rgba(255,255,255,0.2)", color: "#fff", border: "none", borderRadius: 8, padding: "8px 14px", fontSize: 13, fontWeight: 600, cursor: "pointer" }}>Refresh</button>
+          <a href="/" style={{ color: "#fff", fontSize: 13, textDecoration: "none", opacity: 0.9 }}>View Site</a>
+        </div>
       </div>
 
-      {/* Stats */}
-      <div style={{ display:"flex", gap:12, padding:"16px 20px", flexWrap:"wrap" }}>
+      {/* Stats bar */}
+      <div style={{ display: "flex", gap: 12, padding: "14px 20px", flexWrap: "wrap", background: "#fff", borderBottom: "1px solid #eee" }}>
         {[
-          { label:"Providers", count:providers.length, icon:"🏢", color:BRAND.orange },
-          { label:"Active", count:providers.filter(p => p.subscription_status === "active").length, icon:"✅", color:BRAND.teal },
-          { label:"Pending", count:providers.filter(p => p.subscription_status === "pending").length, icon:"pending_icon", color:BRAND.blue },
-          { label:"Reviews", count:reviews.filter(r => !r.is_approved).length, icon:"⭐", color:"#7C3AED" },
+          { label: "Total Providers", value: providers.length, color: BRAND.orange },
+          { label: "Visible", value: providers.filter(p => p.is_visible).length, color: BRAND.teal },
+          { label: "Pending Approval", value: providers.filter(p => !p.is_visible).length, color: "#e65100" },
+          { label: "Reviews Pending", value: pendingReviews, color: "#f59e0b" },
         ].map(s => (
-          <div key={s.label} style={{ background:"#fff", borderRadius:12, padding:"14px 18px", boxShadow:"0 2px 10px rgba(0,0,0,0.07)", minWidth:100, flex:1 }}>
-            <div style={{ fontSize:22 }}>{s.icon}</div>
-            <div style={{ fontSize:26, fontWeight:800, color:s.color }}>{s.count}</div>
-            <div style={{ fontSize:13, color:BRAND.subtext }}>{s.label}</div>
+          <div key={s.label} style={{ background: s.color + "12", border: `1px solid ${s.color}33`, borderRadius: 10, padding: "10px 16px", minWidth: 110 }}>
+            <div style={{ fontSize: 22, fontWeight: 800, color: s.color }}>{s.value}</div>
+            <div style={{ fontSize: 11, color: "#666", marginTop: 1 }}>{s.label}</div>
           </div>
         ))}
       </div>
 
-      {/* Tabs */}
-      <div style={{ display:"flex", gap:6, padding:"0 20px 14px", overflowX:"auto" }}>
-        {TABS.map(tab => (
-          <button key={tab} onClick={() => setActiveTab(tab)}
-            style={{ background: activeTab === tab ? `linear-gradient(135deg, ${BRAND.orange}, ${BRAND.teal})` : "#fff", color: activeTab === tab ? "#fff" : BRAND.text, border:"none", borderRadius:10, padding:"10px 18px", fontSize:14, fontWeight:600, cursor:"pointer", whiteSpace:"nowrap", boxShadow:"0 2px 6px rgba(0,0,0,0.07)" }}>
-            {tab}
+      {/* Tab bar */}
+      <div style={{ display: "flex", gap: 4, padding: "12px 20px 0", background: "#fff", borderBottom: "2px solid #eee", flexWrap: "wrap" }}>
+        {TABS.map(t => (
+          <button key={t.name} onClick={() => setActiveTab(t.name)}
+            style={{ background: activeTab === t.name ? BRAND.orange : "transparent", color: activeTab === t.name ? "#fff" : "#555", border: "none", borderRadius: "8px 8px 0 0", padding: "9px 14px", fontWeight: 700, fontSize: 13, cursor: "pointer", borderBottom: activeTab === t.name ? `2px solid ${BRAND.orange}` : "none", marginBottom: -2 }}>
+            {t.label}
           </button>
         ))}
-        <button onClick={loadAll} style={{ background:"#fff", color:BRAND.subtext, border:"none", borderRadius:10, padding:"10px 14px", fontSize:14, cursor:"pointer", boxShadow:"0 2px 6px rgba(0,0,0,0.07)" }}>🔄</button>
       </div>
 
-      {/* Content */}
-      <div style={{ padding:"0 20px 40px" }}>
+      {/* Tab content */}
+      <div style={{ padding: "20px", maxWidth: 900, margin: "0 auto" }}>
+
         {activeTab === "Providers" && (
-          <ProvidersTab providers={providers} categories={categories} services={services} areas={areas} onRefresh={loadAll} />
+          <div>
+            <div style={{ display: "flex", gap: 8, marginBottom: 16, flexWrap: "wrap", alignItems: "center" }}>
+              <button onClick={() => { setEditProvider(null); setShowProviderForm(true); }}
+                style={{ background: BRAND.orange, color: "#fff", border: "none", borderRadius: 10, padding: "10px 18px", fontWeight: 700, fontSize: 14, cursor: "pointer" }}>
+                + Add Provider
+              </button>
+              {["all", "visible", "hidden"].map(f => (
+                <button key={f} onClick={() => setProviderFilter(f)}
+                  style={{ background: providerFilter === f ? BRAND.blue : "#eee", color: providerFilter === f ? "#fff" : "#333", border: "none", borderRadius: 8, padding: "9px 14px", fontSize: 13, fontWeight: 600, cursor: "pointer", textTransform: "capitalize" }}>
+                  {f === "all" ? `All (${providers.length})` : f === "visible" ? `Visible (${providers.filter(p => p.is_visible).length})` : `Hidden (${providers.filter(p => !p.is_visible).length})`}
+                </button>
+              ))}
+            </div>
+            {filteredProviders.map(p => (
+              <ProviderCard key={p.id} provider={p} categories={categories}
+                onEdit={(prov) => { setEditProvider(prov); setShowProviderForm(true); }}
+                onRefresh={loadAll} />
+            ))}
+            {filteredProviders.length === 0 && (
+              <div style={{ textAlign: "center", color: "#aaa", padding: 40, fontSize: 15 }}>No providers found.</div>
+            )}
+          </div>
         )}
-        {activeTab === "Reviews" && (
-          <ReviewsTab reviews={reviews} providers={providers} onRefresh={loadAll} />
-        )}
-        {activeTab === "Categories" && (
-          <SimpleTab items={categories} entity={Category} onRefresh={loadAll}
-            fields={[
-              { key:"name", label:"Category Name", type:"text" },
-              { key:"icon", label:"Icon (emoji)", type:"text" },
-              { key:"description", label:"Description", type:"text" },
-              { key:"is_active", label:"Active", type:"checkbox" },
-            ]} />
-        )}
-        {activeTab === "Services" && (
-          <SimpleTab items={services} entity={Service} onRefresh={loadAll}
-            fields={[
-              { key:"name", label:"Service Name", type:"text" },
-              { key:"category_id", label:"Category", type:"select", options: categories.map(c => ({ value:c.id, label:`${c.icon||""} ${c.name}` })) },
-              { key:"is_active", label:"Active", type:"checkbox" },
-            ]} />
-        )}
-        {activeTab === "Service Areas" && (
-          <SimpleTab items={areas} entity={ServiceArea} onRefresh={loadAll}
-            fields={[
-              { key:"name", label:"Village Name", type:"text" },
-              { key:"description", label:"Section", type:"text" },
-              { key:"is_active", label:"Active", type:"checkbox" },
-            ]} />
-        )}
+
+        {activeTab === "Reviews" && <ReviewsTab reviews={reviews} onRefresh={loadAll} />}
+        {activeTab === "Categories" && <CategoriesTab categories={categories} onRefresh={loadAll} />}
+        {activeTab === "Services" && <ServicesTab services={services} categories={categories} onRefresh={loadAll} />}
+        {activeTab === "Service Areas" && <AreasTab areas={areas} onRefresh={loadAll} />}
       </div>
+
+      {/* Provider form modal */}
+      {showProviderForm && (
+        <ProviderForm
+          provider={editProvider}
+          categories={categories}
+          onClose={() => { setShowProviderForm(false); setEditProvider(null); }}
+          onSaved={() => { setShowProviderForm(false); setEditProvider(null); loadAll(); }}
+        />
+      )}
     </div>
   );
 }

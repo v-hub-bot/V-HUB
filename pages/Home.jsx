@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react"; // v3 - expanded content
 import { createPortal } from "react-dom";
-import { ServiceArea, Category, Service, Provider, ProviderReview } from "@/api/entities";
+import { ServiceArea, Category, Service, Provider, ProviderReview, User } from "@/api/entities";
 
 // ── SEO Meta Tags ──────────────────────────────────────────────────────────
 function useMeta({ title, description, keywords, ogTitle, ogDescription, ogImage, canonical }) {
@@ -145,29 +145,9 @@ const newsStyle = {
   margin: 0,
 };
 
-function Burger() {
+function Burger({ currentUser }) {
   const [open, setOpen] = useState(false);
-  const [pinMode, setPinMode] = useState(false);
-  const [pin, setPin] = useState("");
-  const [adminUnlocked, setAdminUnlocked] = useState(false);
-  const [pinError, setPinError] = useState(false);
-
-  const handlePinKey = (digit) => {
-    const next = pin + digit;
-    setPin(next);
-    setPinError(false);
-    if (next.length === 4) {
-      if (next === "6185" || next === "1357") {
-        sessionStorage.setItem("vhub_admin_pin", next);
-        setAdminUnlocked(true);
-        setPinMode(false);
-        setPin("");
-      } else {
-        setPinError(true);
-        setTimeout(() => { setPin(""); setPinError(false); }, 800);
-      }
-    }
-  };
+  const isAdmin = currentUser && (currentUser.role === "admin" || currentUser.email === "admin@v-hub.us" || currentUser.email === "founder@poc-it.co");
 
   return (
     <>
@@ -176,17 +156,17 @@ function Burger() {
       </button>
       {open && (
         <>
-          <div onClick={() => { setOpen(false); setPinMode(false); setPin(""); }} style={{ position: "fixed", inset: 0, zIndex: 299, background: "rgba(0,0,0,0.55)" }} />
+          <div onClick={() => setOpen(false)} style={{ position: "fixed", inset: 0, zIndex: 299, background: "rgba(0,0,0,0.55)" }} />
           <div style={{ position: "fixed", top: 0, right: 0, bottom: 0, width: 235, background: PAPER, zIndex: 300, boxShadow: "-3px 0 20px rgba(0,0,0,0.3)", fontFamily: "'Times New Roman', serif", display: "flex", flexDirection: "column" }}>
             <div style={{ background: INK, padding: "13px 12px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-              <span style={{ color: PAPER, fontWeight: 900, fontSize: 14, letterSpacing: 2 }}>🌴 V-HUB</span>
-              <button onClick={() => { setOpen(false); setPinMode(false); setPin(""); }} style={{ background: "rgba(255,255,255,0.1)", border: "none", color: "#fff", borderRadius: 3, width: 22, height: 22, fontSize: 12, cursor: "pointer" }}>✕</button>
+              <span style={{ color: PAPER, fontWeight: 900, fontSize: 14, letterSpacing: 2 }}>V-HUB</span>
+              <button onClick={() => setOpen(false)} style={{ background: "rgba(255,255,255,0.1)", border: "none", color: "#fff", borderRadius: 3, width: 22, height: 22, fontSize: 12, cursor: "pointer" }}>x</button>
             </div>
             <div style={{ padding: "8px 7px", flex: 1, overflowY: "auto" }}>
               {[
-                { label: "🏠 Home", href: "/" },
-                { label: "📋 List Your Business", href: "/ListService" },
-                { label: "🗂 Provider Hub", href: "/ProviderDashboard", highlight: true },
+                { label: "Home", href: "/" },
+                { label: "List Your Business", href: "/ListService" },
+                { label: "Provider Hub", href: "/ProviderDashboard", highlight: true },
               ].map((l, i) => (
                 <a key={i} href={l.href} style={{ textDecoration: "none" }}>
                   <div style={{ padding: "10px 12px", borderRadius: 3, fontSize: 13, fontWeight: 700, color: l.highlight ? PAPER : INK, marginBottom: 4, background: l.highlight ? BROWN_BTN : PAPER_MID, borderLeft: `4px solid ${BROWN_BTN}` }}>{l.label}</div>
@@ -197,52 +177,19 @@ function Burger() {
                 Already listed? Visit the <strong>Provider Hub</strong> to manage your profile, view your stats, and read your reviews.
               </div>
 
-              {/* Admin unlock — PIN keypad */}
-              {pinMode && !adminUnlocked && (
-                <div style={{ margin: "16px 7px 0", padding: "12px", background: PAPER_MID, borderRadius: 6, border: `1px solid ${PAPER_DK}` }}>
-                  <div style={{ fontSize: 11, fontWeight: 700, color: INK, textAlign: "center", marginBottom: 8, letterSpacing: 1 }}>ENTER PIN</div>
-                  <div style={{ display: "flex", justifyContent: "center", gap: 8, marginBottom: 10 }}>
-                    {[0,1,2,3].map(i => (
-                      <div key={i} style={{ width: 14, height: 14, borderRadius: "50%", border: `2px solid ${BROWN_BTN}`, background: pin.length > i ? (pinError ? "#cc0000" : BROWN_BTN) : "transparent" }} />
-                    ))}
-                  </div>
-                  <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 6 }}>
-                    {["1","2","3","4","5","6","7","8","9"].map(d => (
-                      <button key={d} onClick={() => handlePinKey(d)}
-                        style={{ padding: "9px 0", fontSize: 15, fontWeight: 700, fontFamily: "'Times New Roman', serif", color: INK, background: PAPER, border: `1px solid ${PAPER_DK}`, borderRadius: 4, cursor: "pointer" }}>
-                        {d}
-                      </button>
-                    ))}
-                    <button onClick={() => { setPin(p => p.slice(0,-1)); setPinError(false); }}
-                      style={{ padding: "9px 0", fontSize: 14, fontWeight: 700, fontFamily: "'Times New Roman', serif", color: INK, background: PAPER, border: `1px solid ${PAPER_DK}`, borderRadius: 4, cursor: "pointer" }}>
-                      ⌫
-                    </button>
-                    <button onClick={() => handlePinKey("0")}
-                      style={{ padding: "9px 0", fontSize: 15, fontWeight: 700, fontFamily: "'Times New Roman', serif", color: INK, background: PAPER, border: `1px solid ${PAPER_DK}`, borderRadius: 4, cursor: "pointer" }}>
-                      0
-                    </button>
-                    <div />
-                  </div>
-                  {pinError && <div style={{ textAlign: "center", color: "#cc0000", fontSize: 10, marginTop: 6, fontStyle: "italic" }}>Incorrect PIN</div>}
-                </div>
-              )}
-
-              {/* Admin link — only visible after unlock */}
-              {adminUnlocked && (
+              {/* Admin link — only visible to admin users */}
+              {isAdmin && (
                 <a href="/Admin" style={{ textDecoration: "none" }}>
-                  <div style={{ margin: "12px 0 0", padding: "10px 12px", borderRadius: 3, fontSize: 13, fontWeight: 700, color: PAPER, background: "#1A3F70", borderLeft: "4px solid #0D2545" }}>⚙️ Admin Dashboard</div>
+                  <div style={{ margin: "12px 0 0", padding: "10px 12px", borderRadius: 3, fontSize: 13, fontWeight: 700, color: PAPER, background: "#1A3F70", borderLeft: "4px solid #0D2545" }}>Admin Dashboard</div>
                 </a>
               )}
             </div>
 
-            {/* Hidden lock icon at very bottom */}
-            <div style={{ padding: "8px 12px", borderTop: `1px solid ${PAPER_DK}`, display: "flex", justifyContent: "flex-end" }}>
-              <button onClick={() => { setPinMode(m => !m); setPin(""); setPinError(false); }}
-                style={{ background: "none", border: "none", cursor: "pointer", opacity: 0.25, fontSize: 16, color: INK, padding: 4 }}
-                title="">
-                🔒
-              </button>
-            </div>
+            {currentUser && (
+              <div style={{ padding: "8px 12px", borderTop: `1px solid ${PAPER_DK}` }}>
+                <div style={{ fontSize: 11, color: INK_FADE, fontStyle: "italic" }}>{currentUser.full_name || currentUser.email}</div>
+              </div>
+            )}
           </div>
         </>
       )}
@@ -924,6 +871,8 @@ export default function Home() {
   ];
 
   useEffect(() => {
+    // Load current user for admin check
+    User.me().then(u => setCurrentUser(u)).catch(() => setCurrentUser(null));
     setCats(CATS_STATIC);
     setSvcs(SVCS_STATIC);
     // Hardcoded villages — no auth needed
@@ -1201,7 +1150,7 @@ export default function Home() {
               <span>-Hub</span>
             </span>
             {/* Right: burger — same size as palm */}
-            <div style={{ flexShrink: 0 }}><Burger /></div>
+            <div style={{ flexShrink: 0 }}><Burger currentUser={currentUser} /></div>
           </div>
           {/* Tagline */}
           <div style={{ fontSize: 13, fontStyle: "italic", color: INK_FADE, textAlign: "center", margin: "6px 0 10px" }}>
