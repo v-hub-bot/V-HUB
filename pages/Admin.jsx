@@ -424,6 +424,14 @@ function AreasTab({ areas, onRefresh }) {
 // ────────────────────────────────────────────────────────
 //  Main Admin page
 // ────────────────────────────────────────────────────────
+function getWelcomeName(user) {
+  if (!user) return "Admin";
+  const email = user.email || "";
+  if (email === "kimberlycook1980@gmail.com" || email === "5bebegurlz@gmail.com") return "Kimberly";
+  if (email === "evansrus@comcast.net") return "Bill";
+  return user.full_name || email;
+}
+
 export default function Admin() {
   const [currentUser, setCurrentUser] = useState(null);
   const [checking, setChecking] = useState(true);
@@ -511,8 +519,8 @@ export default function Admin() {
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           <img src="https://media.base44.com/images/public/69d062aca815ce8e697894b1/a9af95bc3_V-Hublogo.png" style={{ height: 42, borderRadius: 8 }} alt="V-Hub" />
           <div>
-            <div style={{ color: "#fff", fontSize: 18, fontWeight: 800 }}>V-HUB Admin</div>
-            <div style={{ color: "rgba(255,255,255,0.85)", fontSize: 12 }}>{currentUser?.email}</div>
+            <div style={{ color: "#fff", fontSize: 18, fontWeight: 800 }}>Welcome, {getWelcomeName(currentUser)}!</div>
+            <div style={{ color: "rgba(255,255,255,0.85)", fontSize: 12 }}>V-HUB Admin Dashboard</div>
           </div>
         </div>
         <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
