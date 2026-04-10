@@ -10,7 +10,7 @@ const BRAND = {
   dark: "#1A0A00",
 };
 
-const ADMIN_EMAILS = ["admin@v-hub.us", "founder@poc-it.co"];
+const ADMIN_EMAILS = ["kimberlycook1980@gmail.com", "5bebegurlz@gmail.com", "evansrus@comcast.net"];
 
 // ────────────────────────────────────────────────────────
 //  Access Denied screen

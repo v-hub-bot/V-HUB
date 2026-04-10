@@ -147,7 +147,8 @@ const newsStyle = {
 
 function Burger({ currentUser }) {
   const [open, setOpen] = useState(false);
-  const isAdmin = currentUser && (currentUser.role === "admin" || currentUser.email === "admin@v-hub.us" || currentUser.email === "founder@poc-it.co");
+  const ADMIN_EMAILS = ["kimberlycook1980@gmail.com", "5bebegurlz@gmail.com", "evansrus@comcast.net"];
+  const isAdmin = currentUser && (currentUser.role === "admin" || ADMIN_EMAILS.includes(currentUser.email));
 
   return (
     <>
