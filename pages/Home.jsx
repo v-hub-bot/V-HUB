@@ -599,6 +599,7 @@ function Results({ results, areas, cats, svcs, onReset, onSel, selArea, selCatId
 
 // ── Dropdown Button ───────────────────────────────────────────────────────────
 function DropBtn({ label, isOpen, onClick }) {
+  const isPlaceholder = label === "Select a Service..." || label === "Select a Village...";
   return (
     <button onClick={onClick} style={{
       width: "100%", background: PAPER,
@@ -606,10 +607,11 @@ function DropBtn({ label, isOpen, onClick }) {
       boxShadow: `0 0 0 1.5px ${YELLOW}, 0 0 10px 2px rgba(255,220,0,0.35)`,
       borderRadius: 5, padding: "10px 12px", fontSize: 13,
       fontFamily: "'Times New Roman', serif",
-      color: (label.startsWith("Select") || label === "Select a Service...") ? INK_FADE : INK,
-      fontWeight: label.startsWith("Select") ? 400 : 700,
+      color: isPlaceholder ? INK_FADE : INK,
+      fontWeight: isPlaceholder ? 400 : 700,
       cursor: "pointer", display: "flex", justifyContent: "space-between",
       alignItems: "center", textAlign: "left", boxSizing: "border-box",
+      WebkitTapHighlightColor: "transparent",
     }}>
       <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "85%" }}>{label}</span>
       <span style={{ fontSize: 10, flexShrink: 0, marginLeft: 4 }}>{isOpen ? "▲" : "▼"}</span>
@@ -617,22 +619,16 @@ function DropBtn({ label, isOpen, onClick }) {
   );
 }
 
-// ── Service Dropdown ──────────────────────────────────────────────────────────
-function SvcDropdown({ open, cats, svcs, openCat, selSvc, setOpenCat, setSelSvc, setSOpen, anchorRef }) {
-  const [pos, setPos] = React.useState({ top: 0, left: 0, width: 0, openUp: false });
-  React.useEffect(() => {
-    if (open && anchorRef?.current) {
-      const rect = anchorRef.current.getBoundingClientRect();
-      const spaceBelow = window.innerHeight - rect.bottom;
-      const spaceAbove = rect.top;
-      const openUp = spaceBelow < 340 && spaceAbove > spaceBelow;
-      setPos({ top: openUp ? rect.top : rect.bottom, left: rect.left, width: rect.width, openUp });
-    }
-  }, [open]);
+// ── Service Dropdown (inline, no portal) ─────────────────────────────────────
+function SvcDropdown({ open, cats, svcs, openCat, selSvc, setOpenCat, setSelSvc, setSOpen }) {
   if (!open) return null;
-  const maxH = pos.openUp ? Math.min(pos.top - 8, 450) : Math.min(window.innerHeight - pos.top - 8, 450);
-  return createPortal(
-    <div onClick={e => e.stopPropagation()} style={{ position: "fixed", top: pos.openUp ? "auto" : pos.top + 2, bottom: pos.openUp ? (window.innerHeight - pos.top + 2) : "auto", left: pos.left, width: pos.width, background: PAPER, border: `2px solid ${INK}`, borderRadius: 4, zIndex: 999999, boxShadow: "0 8px 28px rgba(0,0,0,0.4)", maxHeight: maxH, overflowY: "auto" }}>
+  return (
+    <div onClick={e => e.stopPropagation()} style={{
+      position: "absolute", top: "calc(100% + 2px)", left: 0, right: 0,
+      background: PAPER, border: `2px solid ${INK}`, borderRadius: 4,
+      zIndex: 9999, boxShadow: "0 8px 28px rgba(0,0,0,0.4)",
+      maxHeight: 400, overflowY: "auto",
+    }}>
       {cats.length === 0 && <div style={{ padding: 12, fontSize: 12, color: INK_FADE }}>Loading...</div>}
       {cats.map(c => {
         const catSvcs = svcs.filter(s => s.category_id === c.id);
@@ -641,12 +637,14 @@ function SvcDropdown({ open, cats, svcs, openCat, selSvc, setOpenCat, setSelSvc,
         return (
           <div key={c.id}>
             <div style={{ display: "flex", borderBottom: `1px solid ${PAPER_DK}`, background: parentSelected ? BROWN_HL : PAPER }}>
-              <div onClick={e => { e.stopPropagation(); setSelSvc({ id: c.id, name: c.name, category_id: c.id, icon: c.icon, _isCat: true }); setSOpen(false); setOpenCat(null); }}
+              <div
+                onClick={e => { e.stopPropagation(); setSelSvc({ id: c.id, name: c.name, category_id: c.id, icon: c.icon, _isCat: true }); setSOpen(false); setOpenCat(null); }}
                 style={{ flex: 1, padding: "12px 16px", fontSize: 16, fontWeight: 700, color: parentSelected ? "#fff" : INK, cursor: "pointer" }}>
                 {c.icon} {c.name}
               </div>
-              <div onClick={e => { e.stopPropagation(); setOpenCat(isExpanded ? null : c.id); }}
-                style={{ padding: "10px 14px", fontSize: 10, color: parentSelected ? "#fff" : INK, cursor: "pointer", borderLeft: `1px solid ${PAPER_DK}` }}>
+              <div
+                onClick={e => { e.stopPropagation(); setOpenCat(isExpanded ? null : c.id); }}
+                style={{ padding: "10px 14px", fontSize: 10, color: parentSelected ? "#fff" : INK, cursor: "pointer", borderLeft: `1px solid ${PAPER_DK}`, display: "flex", alignItems: "center" }}>
                 {isExpanded ? "▲" : "▼"}
               </div>
             </div>
@@ -663,50 +661,26 @@ function SvcDropdown({ open, cats, svcs, openCat, selSvc, setOpenCat, setSelSvc,
           </div>
         );
       })}
-    </div>,
-    document.body
+    </div>
   );
 }
 
-// ── Village Dropdown ──────────────────────────────────────────────────────────
-function VilDropdown({ open, areas, selArea, setSelArea, setVOpen, anchorRef }) {
-  const [pos, setPos] = React.useState({ top: 0, left: 0, width: 0, openUp: false });
-
-  React.useEffect(() => {
-    if (open && anchorRef?.current) {
-      const rect = anchorRef.current.getBoundingClientRect();
-      const spaceBelow = window.innerHeight - rect.bottom;
-      const spaceAbove = rect.top;
-      const openUp = spaceBelow < 340 && spaceAbove > spaceBelow;
-      setPos({ top: openUp ? rect.top : rect.bottom, left: rect.left, width: rect.width, openUp });
-    }
-  }, [open]);
-
+// ── Village Dropdown (inline, no portal) ─────────────────────────────────────
+function VilDropdown({ open, areas, selArea, setSelArea, setVOpen }) {
   if (!open) return null;
   const sorted = [...areas].sort((a, b) => a.name.localeCompare(b.name));
-  const maxH = pos.openUp ? Math.min(pos.top - 8, 400) : Math.min(window.innerHeight - pos.top - 8, 400);
-
-  return createPortal(
+  return (
     <div onClick={e => e.stopPropagation()} style={{
-      position: "fixed",
-      top: pos.openUp ? "auto" : pos.top + 2,
-      bottom: pos.openUp ? (window.innerHeight - pos.top + 2) : "auto",
-      left: pos.left,
-      width: pos.width,
-      background: PAPER,
-      border: `2px solid ${INK}`,
-      borderRadius: 4,
-      zIndex: 999999,
-      boxShadow: "0 8px 28px rgba(0,0,0,0.4)",
-      maxHeight: maxH,
-      overflowY: "auto",
+      position: "absolute", top: "calc(100% + 2px)", left: 0, right: 0,
+      background: PAPER, border: `2px solid ${INK}`, borderRadius: 4,
+      zIndex: 9999, boxShadow: "0 8px 28px rgba(0,0,0,0.4)",
+      maxHeight: 400, overflowY: "auto",
     }}>
       {sorted.map(v => (
-        <div key={v.id} onClick={e => { e.stopPropagation(); setSelArea(v); setVOpen(false); }}
+        <div key={v.id}
+          onClick={e => { e.stopPropagation(); setSelArea(v); setVOpen(false); }}
           style={{
-            padding: "12px 16px",
-            fontSize: 16,
-            lineHeight: 1.4,
+            padding: "12px 16px", fontSize: 16, lineHeight: 1.4,
             color: selArea?.id === v.id ? "#fff" : INK,
             background: selArea?.id === v.id ? BROWN_HL : PAPER,
             borderBottom: `1px solid ${PAPER_DK}`,
@@ -717,8 +691,7 @@ function VilDropdown({ open, areas, selArea, setSelArea, setVOpen, anchorRef }) 
           {v.name}
         </div>
       ))}
-    </div>,
-    document.body
+    </div>
   );
 }
 
@@ -727,17 +700,14 @@ function SearchBox({ cats, svcs, areas, onSearch, selSvc, setSelSvc, selArea, se
   const [sOpen,   setSOpen]   = useState(false);
   const [vOpen,   setVOpen]   = useState(false);
   const [openCat, setOpenCat] = useState(null);
-  const sBtnRef = useRef(null);
-  const vBtnRef = useRef(null);
 
   const closeAll = () => { setSOpen(false); setVOpen(false); setOpenCat(null); };
 
-  // Build display label: show selected service name
   const svcLabel = selSvc ? (selSvc._isCat ? `${selSvc.icon || ""} ${selSvc.name}` : selSvc.name) : "Select a Service...";
 
   return (
-    <div onClick={closeAll} style={{ background: PAPER_MID, border: `2px solid ${PAPER_DK}`, borderRadius: 6, padding: "14px 12px", width: "100%", boxSizing: "border-box" }}>
-      <a href="/ListService" style={{ textDecoration: "none", display: "block", marginBottom: 8 }} onClick={e => e.stopPropagation()}>
+    <div style={{ background: PAPER_MID, border: `2px solid ${PAPER_DK}`, borderRadius: 6, padding: "14px 12px", width: "100%", boxSizing: "border-box" }}>
+      <a href="/ListService" style={{ textDecoration: "none", display: "block", marginBottom: 8 }}>
         <button style={{
           width: "100%", background: `linear-gradient(180deg,#9A6030,${BROWN_BTN} 60%,#5A3010)`,
           border: `3px solid ${BROWN_BTN}`,
@@ -761,13 +731,13 @@ function SearchBox({ cats, svcs, areas, onSearch, selSvc, setSelSvc, selArea, se
         <div style={{ flex: 1, fontSize: 11, fontWeight: 700, color: INK, fontFamily: "'Times New Roman', serif" }}>Where do you need it?</div>
       </div>
       <div style={{ display: "flex", gap: 8 }}>
-        <div style={{ flex: 1, minWidth: 0, position: "relative" }} ref={sBtnRef}>
+        <div style={{ flex: 1, minWidth: 0, position: "relative" }}>
           <DropBtn label={svcLabel} isOpen={sOpen} onClick={e => { e.stopPropagation(); if (sOpen) { setSOpen(false); setOpenCat(null); } else { setSOpen(true); setVOpen(false); } }} />
-          <SvcDropdown open={sOpen} cats={cats} svcs={svcs} openCat={openCat} selSvc={selSvc} setOpenCat={setOpenCat} setSelSvc={s => { setSelSvc(s); }} setSOpen={setSOpen} anchorRef={sBtnRef} />
+          <SvcDropdown open={sOpen} cats={cats} svcs={svcs} openCat={openCat} selSvc={selSvc} setOpenCat={setOpenCat} setSelSvc={s => { setSelSvc(s); setSOpen(false); }} setSOpen={setSOpen} />
         </div>
-        <div style={{ flex: 1, minWidth: 0, position: "relative" }} ref={vBtnRef}>
-          <DropBtn label={selArea ? vName(selArea) : "Select a Village..."} isOpen={vOpen} onClick={e => { e.stopPropagation(); if (vOpen) { setVOpen(false); } else { setVOpen(true); setSOpen(false); setOpenCat(null); } }} />
-          <VilDropdown open={vOpen} areas={areas} selArea={selArea} setSelArea={a => { setSelArea(a); }} setVOpen={setVOpen} anchorRef={vBtnRef} />
+        <div style={{ flex: 1, minWidth: 0, position: "relative" }}>
+          <DropBtn label={selArea ? selArea.name : "Select a Village..."} isOpen={vOpen} onClick={e => { e.stopPropagation(); if (vOpen) { setVOpen(false); } else { setVOpen(true); setSOpen(false); setOpenCat(null); } }} />
+          <VilDropdown open={vOpen} areas={areas} selArea={selArea} setSelArea={a => { setSelArea(a); setVOpen(false); }} setVOpen={setVOpen} />
         </div>
       </div>
     </div>
