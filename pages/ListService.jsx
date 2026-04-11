@@ -82,22 +82,35 @@ const CATS = [
 
 // ── Macro service areas ────────────────────────────────────────────────────
 const MACRO_AREAS = [
-  { key: "historic",    label: "🌴 Historic Side", villages: [
-    "Spanish Springs","Buttonwood","Calumet Grove","Duval","El Cortez","Largo","Lady Lake","Pennecamp","Piedmont","Pine Ridge","Tamarind Grove",
+  { key: "historic", label: "🌴 Historic Side", villages: [
+    "Alhambra","Ashland","Belle Aire","Belvedere","Bonita","Buttonwood","Calumet Grove",
+    "Country Club Hills","De Allende","De La Vista","Del Mar","DeLuna","El Cortez","Hacienda",
+    "Haciendas of Mission Hills","La Reynalda","La Zamora","LaBelle","Largo","Orange Blossom Gardens",
+    "Pennecamp","Piedmont","Pine Ridge","Poinciana","Rio Ranchero","Santo Domingo","Spanish Springs",
+    "Tamarind Grove","Valle Verde","Virginia Trace",
   ]},
   { key: "established", label: "🏡 Established Villages", villages: [
-    "Amelia","Bonnybrook","Buttonwood","DeSoto","Dunedin (age-restricted)","Fernandina","Glenbrook","Hadley","Lake Deaton (age-restricted)",
-    "Lakeside Landings","Mallory Hill","Mira Mesa","Orange Blossom Gardens","Palo Alto","Pennecamp","Pine Hills (age-restricted)",
-    "Rio Grande","Rio Ponderosa","Sabal Chase","Silver Lake","Summerhill","Sunset Pointe","Tierra Del Sol","Woodbury",
+    "Amelia","Bonnybrook","Caroline","Charlotte","Chatham","DeSoto","Dunedin","Fernandina",
+    "Gilchrist","Glenbrook","Hadley","Hawkins","Hemingway","Hillsborough","Lake Deaton",
+    "Lynnhaven","Mira Mesa","Palo Alto","Pinellas","Polo Ridge","Rio Grande","Rio Ponderosa",
+    "Sabal Chase","Silver Lake","Springdale","Summerhill","Sunset Pointe","Tierra Del Sol","Woodbury",
   ]},
-  { key: "newer",       label: "🌿 Newer Villages", villages: [
-    "Duval","Fenney","福Tall Trees","Linden","Liberty Park","McClure","Middleton","Monarch Grove","Newell","Richmond","Santiago",
+  { key: "newer", label: "🌿 Newer Villages", villages: [
+    "Chitty Chatty","Citrus Grove","Dabney","Duval","Fenney","Hammock at Fenney","Lakeshore Cottages",
+    "Liberty Park","Linden","Mallory Square","Marsh Bend","McClure","Monarch Grove",
+    "Newell","Pine Hills","Richmond","Sanibel","Santiago","Tall Trees",
   ]},
-  { key: "eastport",    label: "🌊 Eastport", villages: [
-    "Bradford","Collier","Eastmoor","Eastport Town Center","Magnolia","Tysen","Wasatch","Winifred",
+  { key: "eastport", label: "🌊 Eastport", villages: [
+    "Bradford","Bridgeport at Creekside Landing","Bridgeport at Lake Miona","Bridgeport at Lake Sumter",
+    "Bridgeport at Laurel Valley","Bridgeport at Miona Shores","Bridgeport at Mission Hills",
+    "Cason Hammock","Collier","Collier at Alden Bungalows","Collier at Antrim Dells",
+    "Lake Denham","Osceola Hills","Osceola Hills at Soaring Eagle Preserve","Winifred",
   ]},
-  { key: "family",      label: "🏠 Family & Non-Age-Restricted Villages", villages: [
-    "Briar Meadow","Captiva","Dunedin","Hacienda East","Hacienda Hills","Lake Deaton","Mallory Square","Mercer","Pine Hills","Pinecrest","Sumter Landing",
+  { key: "st_john", label: "⛪ St. John's Area", villages: [
+    "St. Catherine","St. Charles","St. James","St. Johns",
+  ]},
+  { key: "fenney", label: "🌿 Fenney & South", villages: [
+    "Briar Meadow","Haciendas of Mission Hills","La Zamora","LaBelle",
   ]},
 ];
 
@@ -812,33 +825,31 @@ export default function ListService() {
                 <span style={{ fontSize: 14 }}>{areaOpen ? "▲" : "▼"}</span>
               </div>
               {areaOpen && (() => {
-                // Group villages A-Z alphabetically
-                const sorted = [...dbAreas].sort((a, b) => a.name.localeCompare(b.name));
-                const groups = {};
-                sorted.forEach(a => {
-                  const letter = a.name[0].toUpperCase();
-                  if (!groups[letter]) groups[letter] = [];
-                  groups[letter].push(a);
-                });
-                return Object.entries(groups).map(([letter, areas]) => {
-                  const isExpanded = openMacro === letter;
-                  const areaIds = areas.map(a => a.id);
-                  const checkedCount = areaIds.filter(id => selAreas.includes(id)).length;
-                  const allChecked = checkedCount === areas.length;
+                // Group by macro region using MACRO_AREAS
+                return MACRO_AREAS.map(macro => {
+                  // Find db villages whose name matches this macro's village list
+                  const macroVillages = dbAreas.filter(a =>
+                    macro.villages.some(v => v.toLowerCase() === a.name.toLowerCase())
+                  );
+                  if (macroVillages.length === 0) return null;
+                  const isExpanded = openMacro === macro.key;
+                  const macroIds = macroVillages.map(a => a.id);
+                  const checkedCount = macroIds.filter(id => selAreas.includes(id)).length;
+                  const allChecked = checkedCount === macroIds.length;
                   const someChecked = checkedCount > 0 && !allChecked;
                   return (
-                    <div key={letter}>
+                    <div key={macro.key}>
                       <div style={{ display: "flex", alignItems: "center", borderBottom: `1px solid ${PAPER_DK}`, background: someChecked || allChecked ? "rgba(122,72,32,0.08)" : "transparent" }}>
-                        <div onClick={() => toggleMacro(areaIds)} style={{ width: 20, height: 20, border: `2px solid ${allChecked ? BROWN_BTN : someChecked ? BROWN_BTN : PAPER_DK}`, borderRadius: 3, background: allChecked ? BROWN_BTN : PAPER, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, margin: "12px 10px 12px 14px", cursor: "pointer" }}>
+                        <div onClick={() => toggleMacro(macroIds)} style={{ width: 20, height: 20, border: `2px solid ${allChecked ? BROWN_BTN : someChecked ? BROWN_BTN : PAPER_DK}`, borderRadius: 3, background: allChecked ? BROWN_BTN : PAPER, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, margin: "12px 10px 12px 14px", cursor: "pointer" }}>
                           {allChecked && <span style={{ color: PAPER, fontSize: 11 }}>✓</span>}
                           {someChecked && <span style={{ color: BROWN_BTN, fontSize: 11 }}>–</span>}
                         </div>
-                        <div onClick={() => setOpenMacro(isExpanded ? null : letter)} style={{ flex: 1, padding: "12px 0", cursor: "pointer", fontWeight: 700, fontSize: 14, color: INK, fontFamily: "'Times New Roman', serif" }}>
-                          {letter} — {areas.length} villages {checkedCount > 0 ? <span style={{ fontSize: 11, color: BROWN_BTN }}>({checkedCount} selected)</span> : ""}
+                        <div onClick={() => setOpenMacro(isExpanded ? null : macro.key)} style={{ flex: 1, padding: "12px 0", cursor: "pointer", fontWeight: 700, fontSize: 13, color: INK, fontFamily: "'Times New Roman', serif" }}>
+                          {macro.label} {checkedCount > 0 ? <span style={{ fontSize: 11, color: BROWN_BTN }}>({checkedCount} selected)</span> : ""}
                         </div>
-                        <div onClick={() => setOpenMacro(isExpanded ? null : letter)} style={{ padding: "12px 14px", cursor: "pointer", fontSize: 11, color: INK }}>{isExpanded ? "▲" : "▼"}</div>
+                        <div onClick={() => setOpenMacro(isExpanded ? null : macro.key)} style={{ padding: "12px 14px", cursor: "pointer", fontSize: 11, color: INK }}>{isExpanded ? "▲" : "▼"}</div>
                       </div>
-                      {isExpanded && areas.map(area => {
+                      {isExpanded && macroVillages.sort((a,b) => a.name.localeCompare(b.name)).map(area => {
                         const checked = selAreas.includes(area.id);
                         return (
                           <div key={area.id} onClick={() => toggleVillage(area.id)}
@@ -1039,33 +1050,31 @@ export default function ListService() {
                 <span style={{ fontSize: 11 }}>{areaOpen ? "▲" : "▼"}</span>
               </div>
               {areaOpen && (() => {
-                // Group villages A-Z alphabetically
-                const sorted = [...dbAreas].sort((a, b) => a.name.localeCompare(b.name));
-                const groups = {};
-                sorted.forEach(a => {
-                  const letter = a.name[0].toUpperCase();
-                  if (!groups[letter]) groups[letter] = [];
-                  groups[letter].push(a);
-                });
-                return Object.entries(groups).map(([letter, areas]) => {
-                  const isExpanded = openMacro === letter;
-                  const areaIds = areas.map(a => a.id);
-                  const checkedCount = areaIds.filter(id => selAreas.includes(id)).length;
-                  const allChecked = checkedCount === areas.length;
+                // Group by macro region using MACRO_AREAS
+                return MACRO_AREAS.map(macro => {
+                  // Find db villages whose name matches this macro's village list
+                  const macroVillages = dbAreas.filter(a =>
+                    macro.villages.some(v => v.toLowerCase() === a.name.toLowerCase())
+                  );
+                  if (macroVillages.length === 0) return null;
+                  const isExpanded = openMacro === macro.key;
+                  const macroIds = macroVillages.map(a => a.id);
+                  const checkedCount = macroIds.filter(id => selAreas.includes(id)).length;
+                  const allChecked = checkedCount === macroIds.length;
                   const someChecked = checkedCount > 0 && !allChecked;
                   return (
-                    <div key={letter}>
+                    <div key={macro.key}>
                       <div style={{ display: "flex", alignItems: "center", borderBottom: `1px solid ${PAPER_DK}`, background: someChecked || allChecked ? "rgba(122,72,32,0.08)" : "transparent" }}>
-                        <div onClick={() => toggleMacro(areaIds)} style={{ width: 20, height: 20, border: `2px solid ${allChecked ? BROWN_BTN : someChecked ? BROWN_BTN : PAPER_DK}`, borderRadius: 3, background: allChecked ? BROWN_BTN : PAPER, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, margin: "12px 10px 12px 14px", cursor: "pointer" }}>
+                        <div onClick={() => toggleMacro(macroIds)} style={{ width: 20, height: 20, border: `2px solid ${allChecked ? BROWN_BTN : someChecked ? BROWN_BTN : PAPER_DK}`, borderRadius: 3, background: allChecked ? BROWN_BTN : PAPER, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, margin: "12px 10px 12px 14px", cursor: "pointer" }}>
                           {allChecked && <span style={{ color: PAPER, fontSize: 11 }}>✓</span>}
                           {someChecked && <span style={{ color: BROWN_BTN, fontSize: 11 }}>–</span>}
                         </div>
-                        <div onClick={() => setOpenMacro(isExpanded ? null : letter)} style={{ flex: 1, padding: "12px 0", cursor: "pointer", fontWeight: 700, fontSize: 14, color: INK, fontFamily: "'Times New Roman', serif" }}>
-                          {letter} — {areas.length} villages {checkedCount > 0 ? <span style={{ fontSize: 11, color: BROWN_BTN }}>({checkedCount} selected)</span> : ""}
+                        <div onClick={() => setOpenMacro(isExpanded ? null : macro.key)} style={{ flex: 1, padding: "12px 0", cursor: "pointer", fontWeight: 700, fontSize: 13, color: INK, fontFamily: "'Times New Roman', serif" }}>
+                          {macro.label} {checkedCount > 0 ? <span style={{ fontSize: 11, color: BROWN_BTN }}>({checkedCount} selected)</span> : ""}
                         </div>
-                        <div onClick={() => setOpenMacro(isExpanded ? null : letter)} style={{ padding: "12px 14px", cursor: "pointer", fontSize: 11, color: INK }}>{isExpanded ? "▲" : "▼"}</div>
+                        <div onClick={() => setOpenMacro(isExpanded ? null : macro.key)} style={{ padding: "12px 14px", cursor: "pointer", fontSize: 11, color: INK }}>{isExpanded ? "▲" : "▼"}</div>
                       </div>
-                      {isExpanded && areas.map(area => {
+                      {isExpanded && macroVillages.sort((a,b) => a.name.localeCompare(b.name)).map(area => {
                         const checked = selAreas.includes(area.id);
                         return (
                           <div key={area.id} onClick={() => toggleVillage(area.id)}
