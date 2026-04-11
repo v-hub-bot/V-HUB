@@ -315,11 +315,184 @@ export default function ListService() {
   const [selCatId,     setSelCatId]      = useState("");
 
   useEffect(() => {
-    Promise.all([Category.list(), Service.list(), ServiceArea.list()]).then(([cats, svcs, areas]) => {
-      setDbCategories(Array.isArray(cats) ? cats.filter(c => c.is_active) : []);
-      setDbServices(Array.isArray(svcs) ? svcs.filter(s => s.is_active) : []);
-      setDbAreas(Array.isArray(areas) ? areas.filter(a => a.is_active) : []);
-    }).catch(console.error);
+    // Hardcoded static data — no auth required for public listing form
+    const CATS_STATIC = [
+      { id: "69d09c14d5ee9e7be9aa301b", name: "Home Services", icon: "🏠", is_active: true },
+      { id: "69d181fe57b60e0aecf4067d", name: "Home Systems & Utilities", icon: "💡", is_active: true },
+      { id: "69d09c14d5ee9e7be9aa301c", name: "Yard & Outdoor", icon: "🌿", is_active: true },
+      { id: "69d09c14d5ee9e7be9aa301d", name: "Golf Cart Services", icon: "⛳", is_active: true },
+      { id: "69d09c14d5ee9e7be9aa301e", name: "Automobile Services", icon: "🚗", is_active: true },
+      { id: "69d09c14d5ee9e7be9aa301f", name: "Personal Care", icon: "💆", is_active: true },
+      { id: "69d09c14d5ee9e7be9aa3020", name: "Pet Services", icon: "🐾", is_active: true },
+      { id: "69d09c14d5ee9e7be9aa3021", name: "Transportation", icon: "🚐", is_active: true },
+      { id: "69d181fe57b60e0aecf4067e", name: "Professional Services", icon: "💼", is_active: true },
+    ];
+    const SVCS_STATIC = [
+      { id: "s01", category_id: "69d09c14d5ee9e7be9aa301b", name: "Home Improvements", is_active: true },
+      { id: "s02", category_id: "69d09c14d5ee9e7be9aa301b", name: "General Repairs", is_active: true },
+      { id: "s03", category_id: "69d09c14d5ee9e7be9aa301b", name: "Cleaning Services (Home & Pool)", is_active: true },
+      { id: "s04", category_id: "69d09c14d5ee9e7be9aa301b", name: "Painting (Interior/Exterior)", is_active: true },
+      { id: "s05", category_id: "69d09c14d5ee9e7be9aa301b", name: "Garage Door Services", is_active: true },
+      { id: "s06", category_id: "69d09c14d5ee9e7be9aa301b", name: "Window Installation/Repair", is_active: true },
+      { id: "s07", category_id: "69d09c14d5ee9e7be9aa301b", name: "HVAC", is_active: true },
+      { id: "s08", category_id: "69d09c14d5ee9e7be9aa301b", name: "Plumbing", is_active: true },
+      { id: "s09", category_id: "69d09c14d5ee9e7be9aa301b", name: "Roofing", is_active: true },
+      { id: "s10", category_id: "69d181fe57b60e0aecf4067d", name: "Handyman Services", is_active: true },
+      { id: "s11", category_id: "69d181fe57b60e0aecf4067d", name: "Security & Home Watch", is_active: true },
+      { id: "s12", category_id: "69d181fe57b60e0aecf4067d", name: "Pest Control", is_active: true },
+      { id: "s13", category_id: "69d181fe57b60e0aecf4067d", name: "Appliance Repair", is_active: true },
+      { id: "s14", category_id: "69d181fe57b60e0aecf4067d", name: "Electrical & Lighting", is_active: true },
+      { id: "s15", category_id: "69d181fe57b60e0aecf4067d", name: "Flooring (Tile, Wood, Carpet)", is_active: true },
+      { id: "s16", category_id: "69d181fe57b60e0aecf4067d", name: "Home Organization", is_active: true },
+      { id: "s17", category_id: "69d181fe57b60e0aecf4067d", name: "Smart Home Installation", is_active: true },
+      { id: "s18", category_id: "69d181fe57b60e0aecf4067d", name: "Pool & Spa Services", is_active: true },
+      { id: "s19", category_id: "69d09c14d5ee9e7be9aa301c", name: "Lawn Mowing", is_active: true },
+      { id: "s20", category_id: "69d09c14d5ee9e7be9aa301c", name: "Sod Installation", is_active: true },
+      { id: "s21", category_id: "69d09c14d5ee9e7be9aa301c", name: "Tree Trimming & Pruning/Removal", is_active: true },
+      { id: "s22", category_id: "69d09c14d5ee9e7be9aa301c", name: "Lawn Fertilization", is_active: true },
+      { id: "s23", category_id: "69d09c14d5ee9e7be9aa301c", name: "Irrigation/Sprinkler Services", is_active: true },
+      { id: "s24", category_id: "69d09c14d5ee9e7be9aa301c", name: "Landscaping", is_active: true },
+      { id: "s25", category_id: "69d09c14d5ee9e7be9aa301c", name: "Hardscaping", is_active: true },
+      { id: "s26", category_id: "69d09c14d5ee9e7be9aa301c", name: "Pressure Washing", is_active: true },
+      { id: "s27", category_id: "69d09c14d5ee9e7be9aa301c", name: "Driveway Repair/Cleaning/Painting", is_active: true },
+      { id: "s28", category_id: "69d09c14d5ee9e7be9aa301d", name: "Rentals", is_active: true },
+      { id: "s29", category_id: "69d09c14d5ee9e7be9aa301d", name: "Repairs", is_active: true },
+      { id: "s30", category_id: "69d09c14d5ee9e7be9aa301d", name: "Detailing", is_active: true },
+      { id: "s31", category_id: "69d09c14d5ee9e7be9aa301d", name: "Lighting Upgrades", is_active: true },
+      { id: "s32", category_id: "69d09c14d5ee9e7be9aa301d", name: "Improvements/Customizations", is_active: true },
+      { id: "s33", category_id: "69d09c14d5ee9e7be9aa301d", name: "Battery Replacement", is_active: true },
+      { id: "s34", category_id: "69d09c14d5ee9e7be9aa301d", name: "Tire Services", is_active: true },
+      { id: "s35", category_id: "69d09c14d5ee9e7be9aa301e", name: "Auto Repairs", is_active: true },
+      { id: "s36", category_id: "69d09c14d5ee9e7be9aa301e", name: "Auto Detailing", is_active: true },
+      { id: "s37", category_id: "69d09c14d5ee9e7be9aa301e", name: "Oil Changes", is_active: true },
+      { id: "s38", category_id: "69d09c14d5ee9e7be9aa301e", name: "Tire Services", is_active: true },
+      { id: "s39", category_id: "69d09c14d5ee9e7be9aa301e", name: "Mobile Mechanic", is_active: true },
+      { id: "s40", category_id: "69d09c14d5ee9e7be9aa301f", name: "Hair Stylists", is_active: true },
+      { id: "s41", category_id: "69d09c14d5ee9e7be9aa301f", name: "Nail Technicians", is_active: true },
+      { id: "s42", category_id: "69d09c14d5ee9e7be9aa301f", name: "Spa Services", is_active: true },
+      { id: "s43", category_id: "69d09c14d5ee9e7be9aa301f", name: "Home Health Aides", is_active: true },
+      { id: "s44", category_id: "69d09c14d5ee9e7be9aa301f", name: "Massage Therapists", is_active: true },
+      { id: "s45", category_id: "69d09c14d5ee9e7be9aa301f", name: "Personal Trainers", is_active: true },
+      { id: "s46", category_id: "69d09c14d5ee9e7be9aa301f", name: "Makeup Artists", is_active: true },
+      { id: "s47", category_id: "69d09c14d5ee9e7be9aa3020", name: "Veterinary Services", is_active: true },
+      { id: "s48", category_id: "69d09c14d5ee9e7be9aa3020", name: "Grooming", is_active: true },
+      { id: "s49", category_id: "69d09c14d5ee9e7be9aa3020", name: "Pet Sitting/Walking", is_active: true },
+      { id: "s50", category_id: "69d09c14d5ee9e7be9aa3020", name: "Pet Training", is_active: true },
+      { id: "s51", category_id: "69d09c14d5ee9e7be9aa3020", name: "Mobile Grooming", is_active: true },
+      { id: "s52", category_id: "69d09c14d5ee9e7be9aa3021", name: "Medical Transport", is_active: true },
+      { id: "s53", category_id: "69d09c14d5ee9e7be9aa3021", name: "Airport Transport", is_active: true },
+      { id: "s54", category_id: "69d09c14d5ee9e7be9aa3021", name: "Local Rides", is_active: true },
+      { id: "s55", category_id: "69d09c14d5ee9e7be9aa3021", name: "Errand Services", is_active: true },
+      { id: "s56", category_id: "69d09c14d5ee9e7be9aa3021", name: "Courier/Delivery Services", is_active: true },
+      { id: "s57", category_id: "69d181fe57b60e0aecf4067e", name: "Accounting & Bookkeeping", is_active: true },
+      { id: "s58", category_id: "69d181fe57b60e0aecf4067e", name: "Notary Services", is_active: true },
+      { id: "s59", category_id: "69d181fe57b60e0aecf4067e", name: "IT Support", is_active: true },
+      { id: "s60", category_id: "69d181fe57b60e0aecf4067e", name: "Legal Services", is_active: true },
+      { id: "s61", category_id: "69d181fe57b60e0aecf4067e", name: "Business Consulting", is_active: true },
+      { id: "s62", category_id: "69d181fe57b60e0aecf4067e", name: "Tax Preparation", is_active: true },
+    ];
+    const AREAS_STATIC = [
+      { id: "va001", name: "Alhambra", is_active: true },
+      { id: "va002", name: "Amelia", is_active: true },
+      { id: "va003", name: "Ashland", is_active: true },
+      { id: "va004", name: "Belle Aire", is_active: true },
+      { id: "va005", name: "Belvedere", is_active: true },
+      { id: "va006", name: "Bonita", is_active: true },
+      { id: "va007", name: "Bonnybrook", is_active: true },
+      { id: "va008", name: "Bradford", is_active: true },
+      { id: "va009", name: "Briar Meadow", is_active: true },
+      { id: "va010", name: "Bridgeport at Creekside Landing", is_active: true },
+      { id: "va011", name: "Bridgeport at Lake Miona", is_active: true },
+      { id: "va012", name: "Bridgeport at Lake Sumter", is_active: true },
+      { id: "va013", name: "Bridgeport at Laurel Valley", is_active: true },
+      { id: "va014", name: "Bridgeport at Miona Shores", is_active: true },
+      { id: "va015", name: "Bridgeport at Mission Hills", is_active: true },
+      { id: "va016", name: "Buttonwood", is_active: true },
+      { id: "va017", name: "Calumet Grove", is_active: true },
+      { id: "va018", name: "Caroline", is_active: true },
+      { id: "va019", name: "Cason Hammock", is_active: true },
+      { id: "va020", name: "Charlotte", is_active: true },
+      { id: "va021", name: "Chatham", is_active: true },
+      { id: "va022", name: "Chitty Chatty", is_active: true },
+      { id: "va023", name: "Citrus Grove", is_active: true },
+      { id: "va024", name: "Collier", is_active: true },
+      { id: "va025", name: "Collier at Alden Bungalows", is_active: true },
+      { id: "va026", name: "Collier at Antrim Dells", is_active: true },
+      { id: "va027", name: "Country Club Hills", is_active: true },
+      { id: "va028", name: "Dabney", is_active: true },
+      { id: "va029", name: "De Allende", is_active: true },
+      { id: "va030", name: "De La Vista", is_active: true },
+      { id: "va031", name: "Del Mar", is_active: true },
+      { id: "va032", name: "DeLuna", is_active: true },
+      { id: "va033", name: "DeSoto", is_active: true },
+      { id: "va034", name: "Dunedin", is_active: true },
+      { id: "va035", name: "Duval", is_active: true },
+      { id: "va036", name: "El Cortez", is_active: true },
+      { id: "va037", name: "Fenney", is_active: true },
+      { id: "va038", name: "Fernandina", is_active: true },
+      { id: "va039", name: "Gilchrist", is_active: true },
+      { id: "va040", name: "Glenbrook", is_active: true },
+      { id: "va041", name: "Hacienda", is_active: true },
+      { id: "va042", name: "Haciendas of Mission Hills", is_active: true },
+      { id: "va043", name: "Hadley", is_active: true },
+      { id: "va044", name: "Hammock at Fenney", is_active: true },
+      { id: "va045", name: "Hawkins", is_active: true },
+      { id: "va046", name: "Hemingway", is_active: true },
+      { id: "va047", name: "Hillsborough", is_active: true },
+      { id: "va048", name: "La Reynalda", is_active: true },
+      { id: "va049", name: "La Zamora", is_active: true },
+      { id: "va050", name: "LaBelle", is_active: true },
+      { id: "va051", name: "Lake Deaton", is_active: true },
+      { id: "va052", name: "Lake Denham", is_active: true },
+      { id: "va053", name: "Lakeshore Cottages", is_active: true },
+      { id: "va054", name: "Largo", is_active: true },
+      { id: "va055", name: "Liberty Park", is_active: true },
+      { id: "va056", name: "Linden", is_active: true },
+      { id: "va057", name: "Lynnhaven", is_active: true },
+      { id: "va058", name: "Mallory Square", is_active: true },
+      { id: "va059", name: "Marsh Bend", is_active: true },
+      { id: "va060", name: "McClure", is_active: true },
+      { id: "va061", name: "Mira Mesa", is_active: true },
+      { id: "va062", name: "Monarch Grove", is_active: true },
+      { id: "va063", name: "Newell", is_active: true },
+      { id: "va064", name: "Orange Blossom Gardens", is_active: true },
+      { id: "va065", name: "Osceola Hills", is_active: true },
+      { id: "va066", name: "Osceola Hills at Soaring Eagle Preserve", is_active: true },
+      { id: "va067", name: "Palo Alto", is_active: true },
+      { id: "va068", name: "Pennecamp", is_active: true },
+      { id: "va069", name: "Piedmont", is_active: true },
+      { id: "va070", name: "Pine Hills", is_active: true },
+      { id: "va071", name: "Pine Ridge", is_active: true },
+      { id: "va072", name: "Pinellas", is_active: true },
+      { id: "va073", name: "Poinciana", is_active: true },
+      { id: "va074", name: "Polo Ridge", is_active: true },
+      { id: "va075", name: "Richmond", is_active: true },
+      { id: "va076", name: "Rio Grande", is_active: true },
+      { id: "va077", name: "Rio Ponderosa", is_active: true },
+      { id: "va078", name: "Rio Ranchero", is_active: true },
+      { id: "va079", name: "Sabal Chase", is_active: true },
+      { id: "va080", name: "Sanibel", is_active: true },
+      { id: "va081", name: "Santiago", is_active: true },
+      { id: "va082", name: "Santo Domingo", is_active: true },
+      { id: "va083", name: "Silver Lake", is_active: true },
+      { id: "va084", name: "Springdale", is_active: true },
+      { id: "va085", name: "St. Catherine", is_active: true },
+      { id: "va086", name: "St. Charles", is_active: true },
+      { id: "va087", name: "St. James", is_active: true },
+      { id: "va088", name: "St. Johns", is_active: true },
+      { id: "va089", name: "Summerhill", is_active: true },
+      { id: "va090", name: "Sunset Pointe", is_active: true },
+      { id: "va091", name: "Tall Trees", is_active: true },
+      { id: "va092", name: "Tamarind Grove", is_active: true },
+      { id: "va093", name: "Tierra Del Sol", is_active: true },
+      { id: "va094", name: "Valle Verde", is_active: true },
+      { id: "va095", name: "Virginia Trace", is_active: true },
+      { id: "va096", name: "Winifred", is_active: true },
+      { id: "va097", name: "Woodbury", is_active: true },
+    ];
+    setDbCategories(CATS_STATIC);
+    setDbServices(SVCS_STATIC);
+    setDbAreas(AREAS_STATIC);
   }, []);
 
   const toggleSvc = (id) => {
@@ -697,9 +870,9 @@ export default function ListService() {
             </div>
             <div style={{ marginTop: 16, borderTop: `1px solid ${PAPER_DK}`, paddingTop: 14, textAlign: "center" }}>
               <div style={{ fontSize: 13, fontWeight: 900, color: INK, marginBottom: 6, textTransform: "uppercase", letterSpacing: 1 }}>Questions?</div>
-              <a href="mailto:william@v-hub.com" style={{ textDecoration: "none" }}>
+              <a href="mailto:admin@v-hub.us" style={{ textDecoration: "none" }}>
                 <div style={{ background: BROWN_BTN, color: PAPER, borderRadius: 6, padding: "11px 16px", fontSize: 14, fontWeight: 700, fontFamily: "'Times New Roman', serif", letterSpacing: 1 }}>
-                  william@v-hub.com
+                  admin@v-hub.us
                 </div>
               </a>
             </div>
@@ -948,8 +1121,8 @@ export default function ListService() {
           <div style={{ border: `2px solid ${BROWN_BTN}`, borderRadius: 4, padding: "14px 12px", textAlign: "center", background: PAPER_MID, marginBottom: 16 }}>
             <div style={{ fontSize: 13, fontWeight: 900, color: INK, marginBottom: 6, textTransform: "uppercase", letterSpacing: 1 }}>Questions?</div>
             <div style={{ fontSize: 12, color: INK_FADE, fontStyle: "italic", lineHeight: 1.6, marginBottom: 8 }}>Contact Admin directly.</div>
-            <a href="mailto:william@v-hub.com" style={{ textDecoration: "none" }}>
-              <div style={{ background: BROWN_BTN, color: PAPER, borderRadius: 4, padding: "8px 12px", fontSize: 12, fontWeight: 700, fontFamily: "'Times New Roman', serif", letterSpacing: 1 }}>william@v-hub.com</div>
+            <a href="mailto:admin@v-hub.us" style={{ textDecoration: "none" }}>
+              <div style={{ background: BROWN_BTN, color: PAPER, borderRadius: 4, padding: "8px 12px", fontSize: 12, fontWeight: 700, fontFamily: "'Times New Roman', serif", letterSpacing: 1 }}>admin@v-hub.us</div>
             </a>
           </div>
           <div style={{ margin: "16px 0", textAlign: "center", color: PAPER_DK, fontSize: 16 }}>✦ ✦ ✦</div>
