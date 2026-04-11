@@ -159,6 +159,44 @@ function ProvidersTab({ providers, setProviders, catMap, svcMap, areaMap }) {
     return true;
   });
 
+  const [approving, setApproving] = useState(null);
+
+  const approveAndNotify = async (p) => {
+    if (!window.confirm(`Approve ${p.business_name} and send them a confirmation email?`)) return;
+    setApproving(p.id);
+    try {
+      const res = await fetch("https://api.base44.com/api/apps/69d062aca815ce8e697894b1/functions/approveProvider", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          provider_record_id: p.id,
+          business_name: p.business_name,
+          owner_name: p.owner_name,
+          email: p.email,
+          phone: p.phone,
+          services: p.services || [],
+          service_areas: p.service_areas || [],
+          vh_number: p.vh_number,
+        }),
+      });
+      const data = await res.json();
+      if (data.ok) {
+        setProviders(prev => prev.map(x => x.id === p.id ? {
+          ...x, is_active: true, is_visible: true,
+          subscription_status: "trial",
+          trial_start_date: data.trial_start,
+          trial_end_date: data.trial_end,
+        } : x));
+        alert(`✅ ${p.business_name} has been approved and notified by email!`);
+      } else {
+        alert("❌ Error: " + (data.error || "Unknown error"));
+      }
+    } catch (e) {
+      alert("❌ Network error: " + e.message);
+    }
+    setApproving(null);
+  };
+
   const toggleActive = async (p) => { await Provider.update(p.id, { is_active: !p.is_active }); setProviders(prev => prev.map(x => x.id === p.id ? { ...x, is_active: !p.is_active } : x)); };
   const toggleVisible = async (p) => { await Provider.update(p.id, { is_visible: !p.is_visible }); setProviders(prev => prev.map(x => x.id === p.id ? { ...x, is_visible: !p.is_visible } : x)); };
   const del = async (p) => { if (!window.confirm(`Delete ${p.business_name}?`)) return; await Provider.delete(p.id); setProviders(prev => prev.filter(x => x.id !== p.id)); };
@@ -309,11 +347,20 @@ function ProvidersTab({ providers, setProviders, catMap, svcMap, areaMap }) {
 
                 {/* Action buttons */}
                 <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                  <button onClick={() => toggleActive(p)} style={S.btn(p.is_active ? "#8B4513" : T.green)}>{p.is_active ? "Deactivate" : "Activate"}</button>
+                  {(!p.is_active || p.subscription_status === "pending") && (
+                    <button
+                      onClick={() => approveAndNotify(p)}
+                      disabled={approving === p.id}
+                      style={S.btn("#2e7d32")}
+                    >
+                      {approving === p.id ? "Approving..." : "✅ Approve & Notify"}
+                    </button>
+                  )}
+                  <button onClick={() => toggleActive(p)} style={S.btn(p.is_active ? "#8B4513" : "#555")}>{p.is_active ? "Deactivate" : "Activate Only"}</button>
                   <button onClick={() => toggleVisible(p)} style={S.btn(T.teal)}>{p.is_visible === false ? "Make Visible" : "Hide Listing"}</button>
                   <button onClick={() => del(p)} style={S.btn(T.red)}>Delete</button>
                   {p.email && <a href={`mailto:${p.email}`} style={{ ...S.btn(T.brownLight), textDecoration: "none" }}>✉️ Email</a>}
-                  {p.phone && <a href={`tel:${p.phone}`} style={{ ...S.btn("#555"), textDecoration: "none" }}>📞 Call</a>}
+                  {p.phone && <a href={`tel:${p.phone}`} style={{ ...S.btn("#777"), textDecoration: "none" }}>📞 Call</a>}
                 </div>
               </div>
             )}
