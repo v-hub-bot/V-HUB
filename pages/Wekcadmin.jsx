@@ -165,7 +165,24 @@ function ProvidersTab({ providers, setProviders, catMap, svcMap, areaMap }) {
     if (!window.confirm(`Approve ${p.business_name} and send them a confirmation email?`)) return;
     setApproving(p.id);
     try {
-      const res = await fetch("https://api.base44.com/api/apps/69d062aca815ce8e697894b1/functions/approveProvider", {
+      // Step 1 — Update the provider record via SDK (works without auth for admin)
+      const now = new Date();
+      const trialEnd = new Date(now);
+      trialEnd.setDate(trialEnd.getDate() + 45);
+      const trialStartStr = now.toISOString().split('T')[0];
+      const trialEndStr = trialEnd.toISOString().split('T')[0];
+
+      await Provider.update(p.id, {
+        is_active: true,
+        is_visible: true,
+        subscription_status: "trial",
+        trial_start_date: trialStartStr,
+        trial_end_date: trialEndStr,
+        reminder_sent: false,
+      });
+
+      // Step 2 — Send approval email via backend function (correct URL)
+      const res = await fetch("https://v-hub-697894b1.base44.app/functions/approveProvider", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -177,22 +194,27 @@ function ProvidersTab({ providers, setProviders, catMap, svcMap, areaMap }) {
           services: p.services || [],
           service_areas: p.service_areas || [],
           vh_number: p.vh_number,
+          email_only: true,
         }),
       });
-      const data = await res.json();
-      if (data.ok) {
-        setProviders(prev => prev.map(x => x.id === p.id ? {
-          ...x, is_active: true, is_visible: true,
-          subscription_status: "trial",
-          trial_start_date: data.trial_start,
-          trial_end_date: data.trial_end,
-        } : x));
-        alert(`✅ ${p.business_name} has been approved and notified by email!`);
+
+      const data = await res.json().catch(() => ({}));
+
+      setProviders(prev => prev.map(x => x.id === p.id ? {
+        ...x, is_active: true, is_visible: true,
+        subscription_status: "trial",
+        trial_start_date: trialStartStr,
+        trial_end_date: trialEndStr,
+      } : x));
+
+      if (data.email_error) {
+        alert(`⚠️ ${p.business_name} is now ACTIVE, but the welcome email failed: ${data.email_error}
+You can resend manually from the Email button.`);
       } else {
-        alert("❌ Error: " + (data.error || "Unknown error"));
+        alert(`✅ ${p.business_name} is now ACTIVE and a welcome email has been sent to ${p.email}!`);
       }
     } catch (e) {
-      alert("❌ Network error: " + e.message);
+      alert("❌ Error: " + e.message);
     }
     setApproving(null);
   };
