@@ -531,7 +531,7 @@ function AreasTab({ areas, onRefresh }) {
 }
 
 // ── MAIN ADMIN PAGE ───────────────────────────────────────────────────────
-export default function Admin() {
+export default function Wekcadmin() {
   const [currentUser, setCurrentUser] = useState(null);
   const [checking, setChecking] = useState(true);
   const [activeTab, setActiveTab] = useState("Providers");
