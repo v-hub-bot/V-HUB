@@ -80,11 +80,14 @@ function AccessDenied() {
   return (
     <div style={{ minHeight: "100vh", background: BRAND.lightBg, display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", gap: 16, padding: 30 }}>
       <img src="https://media.base44.com/images/public/69d062aca815ce8e697894b1/a9af95bc3_V-Hublogo.png" style={{ width: 72, borderRadius: 12 }} alt="V-Hub" />
-      <div style={{ fontSize: 22, fontWeight: 800, color: "#c00" }}>Access Restricted</div>
+      <div style={{ fontSize: 22, fontWeight: 800, color: "#333" }}>Admin Sign In</div>
       <div style={{ fontSize: 15, color: "#555", textAlign: "center", maxWidth: 320 }}>
-        This page is only available to V-Hub administrators. Please sign in with your admin account.
+        This area is restricted to V-Hub administrators. Sign in with your admin account to continue.
       </div>
-      <a href="/" style={{ background: BRAND.orange, color: "#fff", textDecoration: "none", borderRadius: 10, padding: "12px 24px", fontWeight: 700, fontSize: 15 }}>Back to V-Hub</a>
+      <a href={"/login?redirect=/Wekcadmin"} style={{ background: BRAND.orange, color: "#fff", textDecoration: "none", borderRadius: 10, padding: "14px 32px", fontWeight: 700, fontSize: 15, letterSpacing: 0.5 }}>
+        Sign In →
+      </a>
+      <a href="/" style={{ fontSize: 13, color: "#999", textDecoration: "none", marginTop: 4 }}>← Back to V-Hub</a>
     </div>
   );
 }
