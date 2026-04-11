@@ -532,8 +532,11 @@ function AreasTab({ areas, onRefresh }) {
 
 // ── MAIN ADMIN PAGE ───────────────────────────────────────────────────────
 export default function Wekcadmin() {
+  const CORRECT_PIN = "6185";
+  const [pin, setPin] = useState("");
+  const [pinError, setPinError] = useState(false);
+  const [unlocked, setUnlocked] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
-  const [checking, setChecking] = useState(true);
   const [activeTab, setActiveTab] = useState("Providers");
   const [providers, setProviders] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -546,12 +549,19 @@ export default function Wekcadmin() {
   const [trialFilter, setTrialFilter] = useState("all");
 
   useEffect(() => {
-    User.me()
-      .then(u => { setCurrentUser(u); setChecking(false); })
-      .catch(() => { setCurrentUser(null); setChecking(false); });
+    User.me().then(u => setCurrentUser(u)).catch(() => setCurrentUser(null));
   }, []);
 
-  const isAdmin = currentUser && (currentUser.role === "admin" || ADMIN_EMAILS.includes(currentUser.email));
+  const handlePin = () => {
+    if (pin === CORRECT_PIN) {
+      setUnlocked(true);
+      loadAll();
+    } else {
+      setPinError(true);
+      setPin("");
+      setTimeout(() => setPinError(false), 2000);
+    }
+  };
 
   const loadAll = async () => {
     setLoading(true);
@@ -568,15 +578,40 @@ export default function Wekcadmin() {
     setLoading(false);
   };
 
-  useEffect(() => { if (isAdmin) loadAll(); }, [isAdmin]);
-
-  if (checking) return (
-    <div style={{ minHeight: "100vh", background: BRAND.lightBg, display: "flex", alignItems: "center", justifyContent: "center" }}>
-      <div style={{ fontSize: 16, color: "#888" }}>Checking access...</div>
+  if (!unlocked) return (
+    <div style={{ minHeight: "100vh", background: BRAND.lightBg, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Segoe UI', sans-serif" }}>
+      <div style={{ background: "#fff", borderRadius: 16, padding: "40px 36px", boxShadow: "0 8px 32px rgba(0,0,0,0.12)", textAlign: "center", maxWidth: 340, width: "100%" }}>
+        <img src="https://media.base44.com/images/public/69d062aca815ce8e697894b1/a9af95bc3_V-Hublogo.png" style={{ width: 64, borderRadius: 12, marginBottom: 16 }} alt="V-Hub" />
+        <div style={{ fontSize: 22, fontWeight: 800, color: "#1A0A00", marginBottom: 6 }}>Admin Access</div>
+        <div style={{ fontSize: 14, color: "#888", marginBottom: 24 }}>Enter your 4-digit PIN to continue</div>
+        <input
+          type="password"
+          inputMode="numeric"
+          maxLength={4}
+          value={pin}
+          onChange={e => setPin(e.target.value.replace(/\D/g, "").slice(0, 4))}
+          onKeyDown={e => e.key === "Enter" && handlePin()}
+          placeholder="••••"
+          style={{
+            width: "100%", boxSizing: "border-box", fontSize: 28, textAlign: "center",
+            letterSpacing: 12, padding: "12px 16px", borderRadius: 10,
+            border: pinError ? "2px solid #e00" : "2px solid #ddd",
+            outline: "none", marginBottom: 12, background: pinError ? "#fff5f5" : "#f9f9f9",
+            transition: "border 0.2s",
+          }}
+          autoFocus
+        />
+        {pinError && <div style={{ color: "#c00", fontSize: 13, marginBottom: 10 }}>Incorrect PIN — try again</div>}
+        <button
+          onClick={handlePin}
+          style={{ width: "100%", background: BRAND.orange, color: "#fff", border: "none", borderRadius: 10, padding: "13px", fontSize: 16, fontWeight: 700, cursor: "pointer", letterSpacing: 0.5 }}
+        >
+          Unlock →
+        </button>
+        <a href="/" style={{ display: "block", marginTop: 16, fontSize: 13, color: "#aaa", textDecoration: "none" }}>← Back to V-Hub</a>
+      </div>
     </div>
   );
-
-  if (!isAdmin) return <AccessDenied />;
 
   if (loading) return (
     <div style={{ minHeight: "100vh", background: BRAND.lightBg, display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", gap: 14 }}>
