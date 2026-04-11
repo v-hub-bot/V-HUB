@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react"; // v3-static-fix
 import { Provider, Category, Service, ServiceArea } from "@/api/entities";
 
 // ── SEO Meta Tags ──────────────────────────────────────────────────────────
@@ -46,7 +46,7 @@ const BROWN_BTN = "#7A4820";
 const YELLOW    = "#FFDB00";
 const RED_RULE  = "#8B1A1A";
 
-// ── Service categories ─────────────────────────────────────────────────────
+// ── Service categories (STATIC - v3) ────────────────────────────────────────
 const CATS = [
   { id: "c1", name: "Home Services", icon: "🏠", services: [
     "Home Improvements","General Repairs","Cleaning Services (Home & Pool)","Painting (Interior/Exterior)",
