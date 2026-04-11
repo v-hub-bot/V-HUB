@@ -147,8 +147,6 @@ const newsStyle = {
 
 function Burger({ currentUser }) {
   const [open, setOpen] = useState(false);
-  const ADMIN_EMAILS = ["kimberlycook1980@gmail.com", "5bebegurlz@gmail.com", "evansrus@comcast.net"];
-  const isAdmin = currentUser && (currentUser.role === "admin" || ADMIN_EMAILS.includes(currentUser.email));
 
   return (
     <>
@@ -178,12 +176,7 @@ function Burger({ currentUser }) {
                 Already listed? Visit the <strong>Provider Hub</strong> to manage your profile, view your stats, and read your reviews.
               </div>
 
-              {/* Admin link — only visible to admin users */}
-              {isAdmin && (
-                <a href="/Admin" style={{ textDecoration: "none" }}>
-                  <div style={{ margin: "12px 0 0", padding: "10px 12px", borderRadius: 3, fontSize: 13, fontWeight: 700, color: PAPER, background: "#1A3F70", borderLeft: "4px solid #0D2545" }}>Admin Dashboard</div>
-                </a>
-              )}
+
             </div>
 
             {currentUser && (

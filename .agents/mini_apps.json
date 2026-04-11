@@ -2,9 +2,6 @@
   "app_id": "69d06ada8019d7e9edf7f8e8",
   "slug": "v-hub-app-edf7f8e8",
   "pages": {
-    "Admin": {
-      "title": "Admin"
-    },
     "Home": {
       "title": "Home"
     },
@@ -13,6 +10,9 @@
     },
     "ProviderDashboard": {
       "title": "ProviderDashboard"
+    },
+    "Wekcadmin": {
+      "title": "Wekcadmin"
     }
   }
 }
