@@ -353,7 +353,7 @@ export default function ListService() {
     try {
       const acct = genAccountNum();
       // Use backend function to bypass RLS for unauthenticated submissions
-      const res = await fetch("https://v-hub-697894b1.base44.app/functions/submitListing", {
+      const res = await fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/submitListing", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -412,12 +412,12 @@ export default function ListService() {
           <div style={{ fontSize: isMobile ? 14 : 13, color: INK_FADE, lineHeight: 1.8, marginBottom: 10, textAlign: "left", background: PAPER_MID, border: `1px solid ${PAPER_DK}`, borderRadius: 6, padding: "14px 18px" }}>
             <div style={{ fontWeight: 700, color: INK, marginBottom: 8, fontSize: 13 }}>What happens next:</div>
             <div>📋 <strong>Step 1</strong> — Your listing is now pending review by our Admin.</div>
-            <div style={{ marginTop: 6 }}>✅ <strong>Step 2</strong> — Once approved, you'll receive an email at <strong>{email || "the address you provided"}</strong> with your sign-in information and instructions to access your <strong>Provider Hub</strong>.</div>
-            <div style={{ marginTop: 6 }}>🗂 <strong>Step 3</strong> — Log into your Provider Hub to manage your profile, view inquiries, and update your listing at any time.</div>
+            <div style={{ marginTop: 6 }}>✅ <strong>Step 2</strong> — Once approved, you'll get a confirmation email at <strong>{email || "the address you provided"}</strong>.</div>
+            <div style={{ marginTop: 6 }}>🗂 <strong>Step 3</strong> — Sign into your <strong>Provider Hub</strong> at any time using this email address to manage your listing, view stats, and update your profile.</div>
           </div>
 
           <div style={{ fontSize: 12, color: INK_FADE, fontStyle: "italic", marginBottom: 24 }}>
-            Questions? Contact Admin at <span style={{ color: BROWN_BTN }}>william@v-hub.com</span>
+            Questions? Contact us at <a href="mailto:admin@v-hub.us" style={{ color: BROWN_BTN }}>admin@v-hub.us</a>
           </div>
 
           <a href="/" style={{ textDecoration: "none" }}>
