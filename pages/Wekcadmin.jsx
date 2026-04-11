@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 
-const PINS = ["6185"];
+const PINS = ["6185", "1357"];
 const API = "https://api.base44.app/api/apps/69d062aca815ce8e697894b1";
 const BRAND = { orange: "#E8431A", teal: "#00BFA5", blue: "#1A3F70", bg: "#F5F7FA" };
 const LOGO = "https://media.base44.com/images/public/69d062aca815ce8e697894b1/a9af95bc3_V-Hublogo.png";
