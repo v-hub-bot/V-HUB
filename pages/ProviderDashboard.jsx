@@ -892,7 +892,7 @@ export default function ProviderDashboard() {
       } />
 
       <div style={{ maxWidth: 700, margin: "0 auto", padding: "24px 16px 60px" }}>
-        <button onClick={() => setView("dashboard")} style={{ background: "transparent", border: `1.5px solid ${PAPER_DK}`, color: INK_FADE, borderRadius: 6, padding: "7px 16px", fontSize: 12, cursor: "pointer", marginBottom: 20, fontFamily: SANS }}>← Back to Dashboard</button>
+        <button onClick={() => setView("dashboard")} style={{ background: "transparent", border: `1.5px solid ${PAPER_DK}`, color: INK_FADE, borderRadius: 6, padding: "7px 16px", fontSize: 12, cursor: "pointer", marginBottom: 20, fontFamily: SANS }}>← Back to Hub</button>
 
         {saveMsg && <div style={{ textAlign: "center", fontSize: 13, color: saveMsg.startsWith("✓") ? GREEN : RED_RULE, fontStyle: "italic", marginBottom: 16 }}>{saveMsg}</div>}
 
@@ -944,7 +944,7 @@ export default function ProviderDashboard() {
       } />
 
       <div style={{ maxWidth: 560, margin: "0 auto", padding: "24px 16px 60px" }}>
-        <button onClick={() => setView("dashboard")} style={{ background: "transparent", border: `1.5px solid ${PAPER_DK}`, color: INK_FADE, borderRadius: 6, padding: "7px 16px", fontSize: 12, cursor: "pointer", marginBottom: 20, fontFamily: SANS }}>← Back to Dashboard</button>
+        <button onClick={() => setView("dashboard")} style={{ background: "transparent", border: `1.5px solid ${PAPER_DK}`, color: INK_FADE, borderRadius: 6, padding: "7px 16px", fontSize: 12, cursor: "pointer", marginBottom: 20, fontFamily: SANS }}>← Back to Hub</button>
 
         <div style={shS}>Account Settings</div>
 
