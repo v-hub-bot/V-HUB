@@ -1169,24 +1169,21 @@ export default function Home() {
         boxShadow: "0 2px 40px rgba(0,0,0,0.28)",
       }}>
 
-        {/* ── NEWSPAPER TOP EDGE ── */}
-        <div style={{
-          background: "linear-gradient(180deg, #2a1800 0%, #3d2200 40%, #5a3510 70%, #7a5028 100%)",
-          height: 18,
-          boxShadow: "0 4px 12px rgba(0,0,0,0.55), 0 2px 4px rgba(0,0,0,0.4), inset 0 -2px 6px rgba(0,0,0,0.3)",
-          borderBottom: "2px solid #1a0a00",
-          position: "relative",
-          zIndex: 2,
-        }}>
-          {/* Subtle paper texture lines */}
-          <div style={{ position: "absolute", inset: 0, background: "repeating-linear-gradient(90deg, transparent, transparent 40px, rgba(255,255,255,0.03) 40px, rgba(255,255,255,0.03) 41px)" }} />
+        {/* ── NEWSPAPER STACKED PAGES EDGE ── */}
+        <div style={{ position: "relative", height: 28, marginBottom: 0 }}>
+          {/* Page 5 — deepest/darkest */}
+          <div style={{ position: "absolute", top: 0, left: 6, right: 6, height: 28, background: "#b8a070", borderRadius: "0 0 3px 3px", boxShadow: "0 3px 6px rgba(0,0,0,0.35)" }} />
+          {/* Page 4 */}
+          <div style={{ position: "absolute", top: 0, left: 4, right: 4, height: 24, background: "#c9b484", borderRadius: "0 0 3px 3px", boxShadow: "0 3px 5px rgba(0,0,0,0.3)" }} />
+          {/* Page 3 */}
+          <div style={{ position: "absolute", top: 0, left: 3, right: 3, height: 20, background: "#d8c496", borderRadius: "0 0 2px 2px", boxShadow: "0 2px 5px rgba(0,0,0,0.25)" }} />
+          {/* Page 2 */}
+          <div style={{ position: "absolute", top: 0, left: 2, right: 2, height: 16, background: "#e6d4a8", borderRadius: "0 0 2px 2px", boxShadow: "0 2px 4px rgba(0,0,0,0.2)" }} />
+          {/* Page 1 — top/front page, matches PAPER */}
+          <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 12, background: "#F0E6C8", borderRadius: "0 0 2px 2px", boxShadow: "0 4px 10px rgba(0,0,0,0.25), inset 0 -1px 0 rgba(0,0,0,0.1)" }} />
+          {/* Dark top binding line */}
+          <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 4, background: "linear-gradient(180deg, #1a0a00 0%, #3d2200 100%)" }} />
         </div>
-        {/* Drop shadow strip below edge */}
-        <div style={{
-          height: 8,
-          background: "linear-gradient(180deg, rgba(0,0,0,0.18) 0%, transparent 100%)",
-          marginBottom: 0,
-        }} />
 
         {/* ── MASTHEAD ── */}
         <div style={{ background: PAPER, padding: "10px 14px 8px" }}>
@@ -1205,7 +1202,7 @@ export default function Home() {
             </div>
             {/* Center: Stacked V / — / Hub */}
             <div style={{ flex: 1, textAlign: "center", lineHeight: 1, fontFamily: "'Times New Roman', serif" }}>
-              <div style={{ fontStyle: "italic", fontWeight: 700, fontFamily: "'Great Vibes', cursive", fontSize: 62, color: BROWN_BTN, WebkitTextStroke: "0.6px " + BROWN_BTN, textShadow: `0.5px 0.5px 0 ${BROWN_BTN}`, lineHeight: 1 }}>V</div>
+              <div style={{ fontStyle: "italic", fontWeight: 700, fontFamily: "'Great Vibes', cursive", fontSize: 62, color: "#003366", WebkitTextStroke: "0.6px #003366", textShadow: `0.5px 0.5px 0 #001a40`, lineHeight: 1 }}>V</div>
               <div style={{ fontSize: 22, fontWeight: 900, color: INK, letterSpacing: 4, lineHeight: 1, margin: "1px 0" }}>—</div>
               <div style={{ fontSize: 52, fontWeight: 900, color: INK, letterSpacing: -1, lineHeight: 1 }}>Hub</div>
             </div>
