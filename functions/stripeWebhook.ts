@@ -34,6 +34,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
           if (provider) {
             await base44.asServiceRole.entities.Provider.update(provider.id, {
               subscription_status: "active",
+              subscription_tier: provider.subscription_tier || "basic",
               is_visible: true,
               is_active: true,
               stripe_subscription_id: subscriptionId,

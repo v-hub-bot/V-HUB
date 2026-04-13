@@ -79,7 +79,7 @@ const NEWSPAPER_CONTENT = {
       "Community leaders gathered recently to discuss expanded support for small business owners. New listing tiers on V-Hub allow providers to reach exactly the neighborhoods they serve.",
       "From plumbers and electricians to dog groomers and personal shoppers, the demand for skilled local help has surged across all 97 villages — from Alhambra to Woodbury.",
       "V-Hub was built specifically for this community. No national spam, no out-of-area listings — just real neighbors helping real neighbors, one village at a time.",
-      "Local service businesses report a 40% increase in new customer inquiries since listing on V-Hub. Providers say the platform delivers exactly the kind of community-focused exposure that national directories cannot match.",
+      "Local service businesses report meaningful new customer inquiries since listing on V-Hub. Providers say the platform delivers exactly the kind of community-focused exposure that national directories cannot match.",
       "Residents in newer developments like Eastport and Fenney say finding reliable local help used to mean long waits and out-of-area contractors. V-Hub has changed that — connecting them with pros who already know the streets, the homes, and the community standards.",
       "The directory currently lists providers across more than a dozen service categories, with new businesses joining every week. Whether you need a last-minute repair or a recurring weekly service, V-Hub has you covered.",
     ]
@@ -104,7 +104,7 @@ const NEWSPAPER_CONTENT = {
     body: [
       "Every business listed on V-Hub goes through a review process before appearing in search results. We check licensing where applicable, verify service areas, and monitor resident feedback to ensure quality stays high.",
       "Residents are encouraged to leave honest reviews after working with any provider. Your feedback helps your neighbors make better decisions — and keeps the directory trustworthy for the whole community.",
-      "If you ever have a concern about a listed provider, V-Hub makes it easy to report. Our team reviews every submission and acts quickly to protect the community's standards.",
+      "If you ever have a concern about a listed provider, contact us directly at admin@v-hub.us — our team reviews every submission and acts quickly to protect the community's standards.",
     ]
   },
   homeServices: {

@@ -370,6 +370,11 @@ You can resend manually from the Email button.`);
                 {p.notes && <div style={{ fontSize: 12, color: T.brownLight, background: "#fff8e1", borderRadius: 6, padding: "8px 10px", marginBottom: 10 }}>📝 {p.notes}</div>}
 
                 {/* Login credentials */}
+                {(!p.login_password) && (
+                  <div style={{ fontSize: 11, color: "#c0392b", fontWeight: 700, background: "#ffeaea", border: "1px solid #c0392b", borderRadius: 4, padding: "3px 8px", marginBottom: 6, fontFamily: T.sans }}>
+                    ⚠️ No login password set — provider cannot log into Provider Hub. Edit their record to add one.
+                  </div>
+                )}
                 {(p.login_email || p.login_password) && (
                   <div style={{ background: "#E8F5E9", border: "1px solid #A5D6A7", borderRadius: 8, padding: "10px 14px", marginBottom: 10 }}>
                     <div style={{ fontSize: 11, color: "#2E7D32", fontFamily: T.sans, fontWeight: 700, marginBottom: 6, textTransform: "uppercase", letterSpacing: 1 }}>🔐 Provider Hub Login</div>

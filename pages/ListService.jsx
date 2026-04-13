@@ -122,8 +122,8 @@ const LEFT_STORIES = [
 ];
 
 const RIGHT_STORIES = [
-  { head: "Your Listing Pays for Itself", sub: "Providers see new calls within days", body: "Businesses listed on V-Hub report an average of 3–5 new customer inquiries per week. With zero commission and direct contact from residents, your listing cost is recovered the moment your first job is booked." },
-  { head: "Be Seen Where Your Customers Are Looking", sub: "Residents search V-Hub first", body: "Over 65% of Villages residents say they would prefer a local directory over a national search engine when looking for home services. Your V-Hub profile puts you exactly where that search is happening." },
+  { head: "Your Listing Pays for Itself", sub: "Providers see new calls within days", body: "Businesses listed on V-Hub connect directly with residents at no commission. With direct contact and zero middlemen, your listing cost is recovered the moment your first job is booked." },
+  { head: "Be Seen Where Your Customers Are Looking", sub: "Residents search V-Hub first", body: "Villages residents prefer a local, community-focused directory over national search engines when looking for home services. Your V-Hub profile puts you exactly where that search is happening." },
   { head: "Building Community Through Commerce", sub: "Strong businesses make stronger neighborhoods", body: "V-Hub is not just a directory — it's an investment in The Villages community. When residents hire local, money stays local. Businesses grow. Neighborhoods thrive. Your listing is a step toward that stronger community." },
 ];
 

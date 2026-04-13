@@ -123,6 +123,7 @@ Deno.serve(async (req) => {
         is_active: true,
         is_visible: true,
         subscription_status: "trial",
+        subscription_tier: "basic",
         trial_start_date: trialStartStr,
         trial_end_date: trialEndStr,
         reminder_sent: false,
