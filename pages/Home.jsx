@@ -1172,9 +1172,9 @@ export default function Home() {
         {/* ── MASTHEAD ── */}
         <div style={{ background: PAPER, padding: "14px 14px 8px" }}>
           {/* Top row: palm | title (centered) | burger */}
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-            {/* Left: V-Hub logo icon */}
-            <div style={{ flexShrink: 0, width: 100, height: 72, display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <div style={{ display: "flex", alignItems: "center" }}>
+            {/* Left: V-Hub logo icon — fixed width to balance burger */}
+            <div style={{ flexShrink: 0, width: 100, height: 80, display: "flex", alignItems: "center", justifyContent: "center" }}>
               <img
                 src="https://base44.app/api/apps/69d062aca815ce8e697894b1/files/mp/public/69d062aca815ce8e697894b1/d5e005e56_logo_icon_tight.png"
                 alt="V-Hub logo icon"
@@ -1182,19 +1182,19 @@ export default function Home() {
                 fetchPriority="high"
                 decoding="sync"
                 style={{
-                  width: 100, height: 72,
+                  width: 100, height: 80,
                   objectFit: "contain",
                   display: "block",
                 }}
               />
             </div>
-            {/* Center: V-Hub title */}
-            <span style={{ flex: 1, textAlign: "center", fontSize: 52, fontWeight: 900, color: INK, fontFamily: "'Times New Roman', serif", letterSpacing: -1, lineHeight: 1 }}>
+            {/* Center: V-Hub title — truly centered by using absolute positioning trick */}
+            <div style={{ flex: 1, textAlign: "center", fontSize: 52, fontWeight: 900, color: INK, fontFamily: "'Times New Roman', serif", letterSpacing: -1, lineHeight: 1 }}>
               <span style={{ fontStyle: "italic", fontWeight: 700, fontFamily: "'Great Vibes', cursive", fontSize: "1.35em", color: BROWN_BTN, WebkitTextStroke: "0.6px " + BROWN_BTN, textShadow: `0.5px 0.5px 0 ${BROWN_BTN}` }}>V</span>
               <span>-Hub</span>
-            </span>
-            {/* Right: burger — same size as palm */}
-            <div style={{ flexShrink: 0 }}><Burger currentUser={currentUser} /></div>
+            </div>
+            {/* Right: burger — padded to 100px to match left side */}
+            <div style={{ flexShrink: 0, width: 100, display: "flex", justifyContent: "flex-end" }}><Burger currentUser={currentUser} /></div>
           </div>
           {/* Tagline */}
           <div style={{ fontSize: 13, fontStyle: "italic", color: INK_FADE, textAlign: "center", margin: "6px 0 10px" }}>
