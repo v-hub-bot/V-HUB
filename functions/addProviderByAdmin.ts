@@ -62,7 +62,12 @@ Deno.serve(async (req) => {
     const {
       business_name, owner_name, email, phone,
       website, address, description, years_in_business,
-      license_number, services, service_areas, category_id, notes
+      license_number, services, service_areas, category_id, notes,
+      google_review_url,
+      subscription_status: inputStatus,
+      subscription_tier: inputTier,
+      is_active: inputActive,
+      is_visible: inputVisible,
     } = body;
 
     if (!business_name || !owner_name || !email) {
@@ -95,19 +100,22 @@ Deno.serve(async (req) => {
       description: description || '',
       years_in_business: years_in_business ? Number(years_in_business) : 0,
       license_number: license_number || '',
+      google_review_url: google_review_url || '',
       services: services || [],
       service_areas: service_areas || [],
       category_id: category_id || '',
       notes: notes || '',
       vh_number,
       onboarding_type: 'admin',
-      subscription_status: 'trial',
-      subscription_tier: 'basic',
-      is_visible: true,
-      is_active: true,
+      subscription_status: inputStatus || 'trial',
+      subscription_tier: inputTier || 'basic',
+      is_visible: inputVisible !== false,
+      is_active: inputActive !== false,
       trial_start_date: now.toISOString(),
       trial_end_date: trialEnd.toISOString(),
       reminder_sent: false,
+      profile_views: 0,
+      search_appearances: 0,
     });
 
     // Send welcome email to provider

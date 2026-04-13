@@ -970,10 +970,27 @@ export default function Home() {
     setSelAreaR(selArea);
     setSelCatR(selSvc);
     let all = [];
+    let ENTITY_AREA_MAP = {}; // real ServiceArea entity ID -> village name
+    let ENTITY_SVC_MAP = {};   // real Service entity ID -> service name
     try {
-      const resp = await fetch('https://v-hub-app-edf7f8e8.base44.app/functions/getProviders', { method: 'POST', headers: { 'Content-Type': 'application/json' } });
-      const data = await resp.json();
+      const [provResp, areaEntities, svcEntities] = await Promise.all([
+        fetch('https://v-hub-app-edf7f8e8.base44.app/functions/getProviders', { method: 'POST', headers: { 'Content-Type': 'application/json' } }),
+        ServiceArea.list().catch(() => []),
+        Service.list().catch(() => []),
+      ]);
+      const data = await provResp.json();
       all = data.providers || [];
+      // Build map of real ServiceArea entity ID -> plain village name (strip emoji prefix)
+      (areaEntities || []).forEach(a => {
+        if (a.id && a.name) {
+          const plainName = a.name.split('—').pop()?.trim() || a.name;
+          ENTITY_AREA_MAP[a.id] = plainName.toLowerCase();
+        }
+      });
+      // Build map of real Service entity ID -> service name
+      (svcEntities || []).forEach(s => {
+        if (s.id && s.name) ENTITY_SVC_MAP[s.id] = s.name;
+      });
     } catch(e) { all = []; }
 
     // ── Legacy ID lookup maps ──────────────────────────────────────────────
@@ -987,6 +1004,7 @@ export default function Home() {
       const s = String(a).toLowerCase().trim();
       if (LEGACY_VA[s]) return LEGACY_VA[s].toLowerCase();
       if (MACRO_AREA[a]) return MACRO_AREA[a]; // "historic", "established", etc.
+      if (ENTITY_AREA_MAP[a]) return ENTITY_AREA_MAP[a]; // real ServiceArea entity ID
       // Entity ID from new 64-village list — we check by name inclusion later
       return s; // raw value (may be entity ID or plain text)
     };
@@ -1017,9 +1035,17 @@ export default function Home() {
           // Also match if any of provider's services belong to that category
           const catSvcIds = SVCS_STATIC.filter(s => s.category_id === selSvc.id).map(s => s.id);
           if (provSvcs.some(sid => catSvcIds.includes(sid))) return true;
+          // Also match real entity Service IDs that belong to this category
+          const realCatSvcIds = Object.keys(ENTITY_SVC_MAP).filter(id => {
+            // We need to check category_id for real service entities — use svcEntities lookup
+            return false; // handled by category_id match above
+          });
           // Text-based services (old providers): check if service name matches category
           const catSvcNames = SVCS_STATIC.filter(s => s.category_id === selSvc.id).map(s => s.name.toLowerCase());
-          if (provSvcs.some(sv => catSvcNames.some(cn => String(sv).toLowerCase().includes(cn) || cn.includes(String(sv).toLowerCase())))) return true;
+          if (provSvcs.some(sv => {
+            const resolved = ENTITY_SVC_MAP[sv] || LEGACY_SVC_MAP[sv] || String(sv);
+            return catSvcNames.some(cn => resolved.toLowerCase().includes(cn) || cn.includes(resolved.toLowerCase()));
+          })) return true;
           return false;
         } else {
           // Specific service selected
@@ -1027,7 +1053,7 @@ export default function Home() {
           // Try resolving provider service IDs to names and compare
           const selName = selSvc.name.toLowerCase();
           if (provSvcs.some(sv => {
-            const resolved = LEGACY_SVC_MAP[sv] || String(sv);
+            const resolved = ENTITY_SVC_MAP[sv] || LEGACY_SVC_MAP[sv] || String(sv);
             return resolved.toLowerCase().includes(selName) || selName.includes(resolved.toLowerCase());
           })) return true;
           return false;

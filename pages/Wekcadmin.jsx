@@ -58,7 +58,7 @@ function PinGate({ onUnlock }) {
 }
 
 // ── OVERVIEW ──────────────────────────────────────────────────────────────────
-function Overview({ providers, reviews, leads }) {
+function Overview({ providers, reviews, leads, fullAreaMap }) {
   const active = providers.filter(p => p.is_active).length;
   const trial = providers.filter(p => p.subscription_status === "trial").length;
   const paid = providers.filter(p => ["active", "paid"].includes(p.subscription_status)).length;
@@ -69,7 +69,15 @@ function Overview({ providers, reviews, leads }) {
   const pending = reviews.filter(r => !r.is_approved).length;
 
   const areaCount = {};
-  providers.forEach(p => (Array.isArray(p.service_areas) ? p.service_areas : []).forEach(a => { if (!a.includes("69d")) areaCount[a] = (areaCount[a] || 0) + 1; }));
+  providers.forEach(p => (Array.isArray(p.service_areas) ? p.service_areas : []).forEach(a => {
+    // Resolve to a human-readable name
+    let name = fullAreaMap?.[a] || a;
+    // If it's a long entity name like "🏡 Established Villages — Alhambra", extract village name
+    if (name.includes('—')) name = name.split('—').pop()?.trim() || name;
+    // Strip emoji prefix if present
+    name = name.replace(/^[^\w\s]+\s*/, '').trim();
+    if (name && name.length > 2) areaCount[name] = (areaCount[name] || 0) + 1;
+  }));
   const topAreas = Object.entries(areaCount).sort((a, b) => b[1] - a[1]).slice(0, 5);
 
   const cards = [
@@ -163,7 +171,7 @@ function ProvidersTab({ providers, setProviders, catMap, svcMap, areaMap, fullSv
     if (filter === "hidden") return !p.is_active;
     if (filter === "trial") return p.subscription_status === "trial";
     if (filter === "paid") return ["active", "paid"].includes(p.subscription_status);
-    if (filter === "pending") return p.subscription_status === "pending" || (!p.is_active && p.onboarding_type === "self_signup");
+    if (filter === "pending") return p.subscription_status === "pending";
     if (filter === "expiring") { const d = daysLeft(p.trial_end_date); return d !== null && d >= 0 && d <= 7; }
     return true;
   });
@@ -656,24 +664,41 @@ function AddProviderTab({ onAdded, categories, services: allServices, serviceAre
     if (form.services.length === 0) return alert("Please select at least one service.");
     if (form.service_areas.length === 0) return alert("Please select at least one village.");
     setSaving(true);
-    const vh = "VH-" + String(Math.floor(1000 + Math.random() * 9000));
-    const now = new Date().toISOString();
-    const trialEnd = new Date(Date.now() + 45 * 86400000).toISOString();
     try {
-      const body = { ...form, vh_number: vh, trial_start_date: now, trial_end_date: trialEnd, profile_views: 0, search_appearances: 0, years_in_business: form.years_in_business ? Number(form.years_in_business) : 0 };
-      const createRes = await fetch(`https://v-hub-app-edf7f8e8.base44.app/functions/adminUpdateProvider`, {
+      // Use addProviderByAdmin — handles VH# dedup, temp password, and welcome email
+      const res = await fetch(`https://v-hub-app-edf7f8e8.base44.app/functions/addProviderByAdmin`, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ pin: adminPin, create: true, fields: body }),
+        body: JSON.stringify({
+          business_name: form.business_name,
+          owner_name: form.owner_name,
+          email: form.email,
+          phone: form.phone || '',
+          website: form.website || '',
+          address: form.address || '',
+          description: form.description || '',
+          years_in_business: form.years_in_business ? Number(form.years_in_business) : 0,
+          license_number: form.license_number || '',
+          google_review_url: form.google_review_url || '',
+          services: form.services,
+          service_areas: form.service_areas,
+          category_id: form.category_id,
+          notes: form.notes || '',
+          subscription_status: form.subscription_status || 'trial',
+          subscription_tier: form.subscription_tier || 'basic',
+          is_active: form.is_active !== false,
+          is_visible: form.is_visible !== false,
+        }),
       });
-      const createData = await createRes.json();
-      if (createData.error) throw new Error(createData.error);
-      const newP = createData.record;
-      setDone({ name: newP.business_name, vh: newP.vh_number });
-      onAdded(newP);
+      const data = await res.json();
+      if (data.error) throw new Error(data.error);
+      // Fetch the created record to get full details
+      const newP = { business_name: form.business_name, vh_number: data.vh_number, id: data.id, ...form };
+      setDone({ name: form.business_name, vh: data.vh_number, email: form.email });
+      onAdded({ ...newP, id: data.id, vh_number: data.vh_number });
       setForm(empty);
       setSvcSearch("");
-      setTimeout(() => setDone(null), 6000);
-    } catch (e) { alert("Error: " + e.message); }
+      setTimeout(() => setDone(null), 8000);
+    } catch (e) { alert("Error adding provider: " + e.message); }
     setSaving(false);
   };
 
@@ -681,9 +706,10 @@ function AddProviderTab({ onAdded, categories, services: allServices, serviceAre
     <div style={S.card}>
       <div style={S.secTitle}>➕ Add New Provider</div>
       {done && (
-        <div style={{ background: "#e8f5e9", border: `1px solid ${T.green}`, borderRadius: 8, padding: "12px 16px", color: T.green, fontFamily: T.sans, fontSize: 13, marginBottom: 16 }}>
-          ✅ <strong>{done.name}</strong> added! Account #{done.vh}<br />
-          <span style={{ fontSize: 12 }}>They are now live on the homepage under their selected services and villages.</span>
+        <div style={{ background: "#e8f5e9", border: `1px solid ${T.green}`, borderRadius: 8, padding: "14px 16px", color: T.green, fontFamily: T.sans, fontSize: 13, marginBottom: 16, lineHeight: 1.7 }}>
+          ✅ <strong>{done.name}</strong> added — Account #{done.vh}<br />
+          <span style={{ color: T.teal }}>📧 Welcome email + login credentials sent to: <strong>{done.email}</strong></span><br />
+          <span style={{ fontSize: 12, color: T.brownLight }}>Provider is now live. They can log into Provider Hub using their email and the temp password in their welcome email.</span>
         </div>
       )}
       <div style={{ display: "flex", flexDirection: "column", gap: 11 }}>
@@ -877,7 +903,7 @@ function Dashboard({ adminPin }) {
       </div>
 
       <div style={{ padding: 14, maxWidth: 800, margin: "0 auto" }}>
-        {tab === "Overview" && <Overview providers={providers} reviews={reviews} leads={leads} />}
+        {tab === "Overview" && <Overview providers={providers} reviews={reviews} leads={leads} fullAreaMap={fullAreaMap} />}
         {tab === "Providers" && <ProvidersTab providers={providers} setProviders={setProviders} catMap={catMap} svcMap={svcMap} areaMap={areaMap} fullSvcMap={fullSvcMap} fullAreaMap={fullAreaMap} adminPin={adminPin} />}
         {tab === "Reviews" && <ReviewsTab reviews={reviews} setReviews={setReviews} providers={providers} adminPin={adminPin} />}
         {tab === "Leads" && <LeadsTab leads={leads} providers={providers} />}
