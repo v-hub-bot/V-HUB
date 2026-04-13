@@ -46,6 +46,7 @@ const BROWN_BTN = "#7A4820";
 const BROWN_HL  = "#6B3010";
 const YELLOW    = "#FFDB00";
 const TEAL      = "#00BFA5";
+const NAVY      = "#1B3D6F";
 
 // Newspaper stories — each has headline, subhead, paragraphs
 const NEWSPAPER_CONTENT = {
@@ -606,8 +607,8 @@ function DropBtn({ label, isOpen, onClick }) {
   return (
     <button onClick={onClick} style={{
       width: "100%", background: PAPER,
-      border: `3px solid ${TEAL}`,
-      boxShadow: `0 0 0 1.5px ${TEAL}, 0 0 10px 2px rgba(0,191,165,0.35)`,
+      border: `3px solid ${YELLOW}`,
+      boxShadow: `0 0 0 1.5px ${YELLOW}, 0 0 10px 2px rgba(255,220,0,0.35)`,
       borderRadius: 5, padding: "10px 12px", fontSize: 13,
       fontFamily: "'Times New Roman', serif",
       color: isPlaceholder ? INK_FADE : INK,
@@ -715,8 +716,8 @@ function SearchBox({ cats, svcs, areas, onSearch, selSvc, setSelSvc, selArea, se
         <a href="/ListService" style={{ textDecoration: "none", flex: 1 }}>
           <button style={{
             width: "100%", background: `linear-gradient(180deg,#9A6030,${BROWN_BTN} 60%,#5A3010)`,
-            border: `3px solid ${TEAL}`,
-            boxShadow: `0 0 0 1.5px ${TEAL}, 0 0 10px 2px rgba(0,191,165,0.3)`,
+            border: `3px solid ${NAVY}`,
+            boxShadow: `0 0 0 1.5px ${NAVY}, 0 0 10px 2px rgba(27,61,111,0.3)`,
             borderRadius: 5, color: "#F5E8CC", fontFamily: "'Times New Roman', serif",
             fontWeight: 700, fontSize: 11, letterSpacing: 1.5, padding: "12px 6px", cursor: "pointer", boxSizing: "border-box",
             textTransform: "uppercase", lineHeight: 1.3,
@@ -727,8 +728,8 @@ function SearchBox({ cats, svcs, areas, onSearch, selSvc, setSelSvc, selArea, se
         <a href="/ProviderDashboard" style={{ textDecoration: "none", flex: 1 }}>
           <button style={{
             width: "100%", background: `linear-gradient(180deg,#9A6030,${BROWN_BTN} 60%,#5A3010)`,
-            border: `3px solid ${TEAL}`,
-            boxShadow: `0 0 0 1.5px ${TEAL}, 0 0 10px 2px rgba(0,191,165,0.3)`,
+            border: `3px solid ${NAVY}`,
+            boxShadow: `0 0 0 1.5px ${NAVY}, 0 0 10px 2px rgba(27,61,111,0.3)`,
             borderRadius: 5, color: "#F5E8CC", fontFamily: "'Times New Roman', serif",
             fontWeight: 700, fontSize: 11, letterSpacing: 1.5, padding: "12px 6px", cursor: "pointer", boxSizing: "border-box",
             textTransform: "uppercase", lineHeight: 1.3,
@@ -753,7 +754,7 @@ function SearchBox({ cats, svcs, areas, onSearch, selSvc, setSelSvc, selArea, se
       </div>
       <button onClick={e => { e.stopPropagation(); onSearch(selSvc, selArea); }} style={{
         width: "100%", background: `linear-gradient(180deg,#9A6030,${BROWN_BTN} 60%,#5A3010)`,
-        border: `3px solid ${TEAL}`, boxShadow: `0 0 0 1.5px ${TEAL}, 0 0 10px 2px rgba(0,191,165,0.35)`,
+        border: `3px solid ${YELLOW}`, boxShadow: `0 0 0 1.5px ${YELLOW}, 0 0 10px 2px rgba(255,220,0,0.35)`,
         borderRadius: 5, color: "#F5E8CC", fontFamily: "'Times New Roman', serif",
         fontWeight: 700, fontSize: 14, letterSpacing: 3, padding: "13px", cursor: "pointer", boxSizing: "border-box",
         marginTop: 10,
