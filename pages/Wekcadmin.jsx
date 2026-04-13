@@ -831,193 +831,329 @@ function AnalyticsTab({ providers, reviews, leads, stats, catMap, svcMap, fullSv
 
 // ── ADD PROVIDER TAB ──────────────────────────────────────────────────────────
 function AddProviderTab({ onAdded, categories, services: allServices, serviceAreas: allAreas, adminPin }) {
-  const services = allServices.filter(s => s.is_active !== false);
-  const serviceAreas = allAreas.filter(a => a.is_active !== false);
-  const empty = { business_name: "", owner_name: "", email: "", phone: "", website: "", description: "", address: "", license_number: "", years_in_business: "", google_review_url: "", notes: "", subscription_status: "trial", subscription_tier: "basic", onboarding_type: "admin_added", is_active: true, is_visible: true, category_id: "", services: [], service_areas: [] };
+  const activeServices = allServices.filter(s => s.is_active !== false);
+  const activeAreas = allAreas.filter(a => a.is_active !== false);
+
+  // Macro village groups (mirrors ListService)
+  const MACRO_AREAS = [
+    { key: "historic", label: "🌴 Historic Side", villages: ["Alhambra","Ashland","Belle Aire","Belvedere","Bonita","Buttonwood","Calumet Grove","Country Club Hills","De Allende","De La Vista","Del Mar","DeLuna","El Cortez","Hacienda","Haciendas of Mission Hills","La Reynalda","La Zamora","LaBelle","Largo","Orange Blossom Gardens","Pennecamp","Piedmont","Pine Ridge","Poinciana","Rio Ranchero","Santo Domingo","Spanish Springs","Tamarind Grove","Valle Verde","Virginia Trace"] },
+    { key: "established", label: "🏡 Established Villages", villages: ["Amelia","Bonnybrook","Caroline","Charlotte","Chatham","DeSoto","Dunedin","Fernandina","Gilchrist","Glenbrook","Hadley","Hawkins","Hemingway","Hillsborough","Lake Deaton","Lynnhaven","Mira Mesa","Palo Alto","Pinellas","Polo Ridge","Rio Grande","Rio Ponderosa","Sabal Chase","Silver Lake","Springdale","Summerhill","Sunset Pointe","Tierra Del Sol","Woodbury"] },
+    { key: "newer", label: "🌿 Newer Villages", villages: ["Chitty Chatty","Citrus Grove","Dabney","Duval","Fenney","Hammock at Fenney","Lakeshore Cottages","Liberty Park","Linden","Mallory Square","Marsh Bend","McClure","Monarch Grove","Newell","Pine Hills","Richmond","Sanibel","Santiago","Tall Trees"] },
+    { key: "eastport", label: "🌊 Eastport", villages: ["Bradford","Bridgeport at Creekside Landing","Bridgeport at Lake Miona","Bridgeport at Lake Sumter","Bridgeport at Laurel Valley","Bridgeport at Miona Shores","Bridgeport at Mission Hills","Cason Hammock","Collier","Collier at Alden Bungalows","Collier at Antrim Dells","Lake Denham","Osceola Hills","Osceola Hills at Soaring Eagle Preserve","Winifred"] },
+    { key: "st_john", label: "⛪ St. John's Area", villages: ["St. Catherine","St. Charles","St. James","St. Johns"] },
+  ];
+
+  // Build a name→id map for service areas
+  const areaNameToId = {};
+  activeAreas.forEach(a => {
+    const shortName = a.name.includes(' — ') ? a.name.split(' — ').pop().trim() : a.name;
+    areaNameToId[shortName] = a.id;
+    areaNameToId[a.name] = a.id;
+  });
+
+  const empty = {
+    business_name: "", owner_name: "", email: "", phone: "", website: "",
+    description: "", address: "", license_number: "", years_in_business: "",
+    google_review_url: "", notes: "", category_id: "", services: [], service_areas: [],
+    trial_days: "45",
+  };
   const [form, setForm] = useState(empty);
   const [saving, setSaving] = useState(false);
   const [done, setDone] = useState(null);
   const [svcSearch, setSvcSearch] = useState("");
+  const [openMacros, setOpenMacros] = useState({});
 
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
-  const toggle = (k, val) => setForm(f => ({ ...f, [k]: f[k].includes(val) ? f[k].filter(x => x !== val) : [...f[k], val] }));
+  const toggleSvc = (id) => setForm(f => ({ ...f, services: f.services.includes(id) ? f.services.filter(x => x !== id) : [...f.services, id] }));
+  const toggleArea = (id) => setForm(f => ({ ...f, service_areas: f.service_areas.includes(id) ? f.service_areas.filter(x => x !== id) : [...f.service_areas, id] }));
+  const toggleMacro = (key) => setOpenMacros(m => ({ ...m, [key]: !m[key] }));
 
-  // Group services by category
+  // Services grouped by selected category
   const catServices = {};
-  services.forEach(s => { if (!catServices[s.category_id]) catServices[s.category_id] = []; catServices[s.category_id].push(s); });
+  activeServices.forEach(s => { if (!catServices[s.category_id]) catServices[s.category_id] = []; catServices[s.category_id].push(s); });
+  const filteredSvcs = svcSearch.trim()
+    ? activeServices.filter(s => s.name.toLowerCase().includes(svcSearch.toLowerCase()))
+    : (catServices[form.category_id] || []);
 
-  // Filter services when searching
-  const filteredSvcs = svcSearch ? services.filter(s => s.name.toLowerCase().includes(svcSearch.toLowerCase())) : null;
-
-  // Get selected category's services if category is chosen
-  const relevantCatId = form.category_id;
-
-  // When category changes, clear services
   const setCategory = (catId) => setForm(f => ({ ...f, category_id: catId, services: [] }));
 
+  // Count how many villages are selected per macro group
+  const macroSelectedCount = (macro) => {
+    return macro.villages.filter(vName => {
+      const id = areaNameToId[vName];
+      return id && form.service_areas.includes(id);
+    }).length;
+  };
+
+  const selectAllMacro = (macro) => {
+    const ids = macro.villages.map(v => areaNameToId[v]).filter(Boolean);
+    setForm(f => {
+      const current = new Set(f.service_areas);
+      ids.forEach(id => current.add(id));
+      return { ...f, service_areas: Array.from(current) };
+    });
+  };
+
+  const deselectAllMacro = (macro) => {
+    const ids = new Set(macro.villages.map(v => areaNameToId[v]).filter(Boolean));
+    setForm(f => ({ ...f, service_areas: f.service_areas.filter(id => !ids.has(id)) }));
+  };
+
   const save = async () => {
-    if (!form.business_name || !form.email) return alert("Business name and email are required.");
-    if (!form.owner_name) return alert("Owner name is required to send the welcome email.");
-    if (!form.category_id) return alert("Please select a category.");
-    if (form.services.length === 0) return alert("Please select at least one service.");
-    if (form.service_areas.length === 0) return alert("Please select at least one village.");
+    if (!form.business_name.trim()) return alert("Business name is required.");
+    if (!form.owner_name.trim()) return alert("Owner name is required (needed for the welcome email).");
+    if (!form.email.trim()) return alert("Email is required.");
+    if (!form.category_id) return alert("Please select a service category.");
+    if (form.services.length === 0) return alert("Please select at least one specific service.");
+    if (form.service_areas.length === 0) return alert("Please select at least one service area (village).");
     setSaving(true);
     try {
-      // Use addProviderByAdmin — handles VH# dedup, temp password, and welcome email
       const res = await fetch(`https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/addProviderByAdmin`, {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           pin: adminPin,
-          business_name: form.business_name,
-          owner_name: form.owner_name,
-          email: form.email,
-          phone: form.phone || '',
-          website: form.website || '',
-          address: form.address || '',
-          description: form.description || '',
-          years_in_business: form.years_in_business ? Number(form.years_in_business) : 0,
-          license_number: form.license_number || '',
-          google_review_url: form.google_review_url || '',
+          business_name: form.business_name.trim(),
+          owner_name: form.owner_name.trim(),
+          email: form.email.trim(),
+          phone: form.phone.trim(),
+          website: form.website.trim(),
+          address: form.address.trim(),
+          description: form.description.trim(),
+          years_in_business: form.years_in_business ? Number(form.years_in_business) : null,
+          license_number: form.license_number.trim(),
+          google_review_url: form.google_review_url.trim(),
           services: form.services,
           service_areas: form.service_areas,
           category_id: form.category_id,
-          notes: form.notes || '',
-          subscription_status: form.subscription_status || 'trial',
-          subscription_tier: form.subscription_tier || 'basic',
-          is_active: form.is_active !== false,
-          is_visible: form.is_visible !== false,
+          notes: form.notes.trim(),
+          trial_days: parseInt(form.trial_days) || 45,
         }),
       });
       const data = await res.json();
       if (data.error) throw new Error(data.error);
-      // Fetch the created record to get full details
-      const newP = { business_name: form.business_name, vh_number: data.vh_number, id: data.id, ...form };
-      setDone({ name: form.business_name, vh: data.vh_number, email: form.email });
-      onAdded({ ...newP, id: data.id, vh_number: data.vh_number });
+      setDone({ name: form.business_name, vh: data.vh_number, email: form.email, tempPass: data.temp_password });
+      onAdded({ ...form, id: data.id, vh_number: data.vh_number });
       setForm(empty);
       setSvcSearch("");
-      setTimeout(() => setDone(null), 8000);
-    } catch (e) { alert("Error adding provider: " + e.message); }
+      setOpenMacros({});
+    } catch (e) { alert("Error: " + e.message); }
     setSaving(false);
   };
 
   return (
     <div style={S.card}>
-      <div style={S.secTitle}>➕ Add New Provider</div>
+      <div style={S.secTitle}>➕ Add Provider on Their Behalf</div>
+      <div style={{ fontSize: 13, color: T.brownLight, fontFamily: T.sans, marginBottom: 16, lineHeight: 1.6, background: T.parchmentDark, borderRadius: 6, padding: "10px 14px", borderLeft: `4px solid ${T.gold}` }}>
+        Use this form to build a listing for a provider you've spoken with. They'll receive a welcome email explaining that you created their profile, along with their VH account number, temporary password, and trial info. They can log in at any time to view stats and update their listing.
+      </div>
+
       {done && (
-        <div style={{ background: "#e8f5e9", border: `1px solid ${T.green}`, borderRadius: 8, padding: "14px 16px", color: T.green, fontFamily: T.sans, fontSize: 13, marginBottom: 16, lineHeight: 1.7 }}>
-          ✅ <strong>{done.name}</strong> added — Account #{done.vh}<br />
-          <span style={{ color: T.teal }}>📧 Welcome email + login credentials sent to: <strong>{done.email}</strong></span><br />
-          <span style={{ fontSize: 12, color: T.brownLight }}>Provider is now live. They can log into Provider Hub using their email and the temp password in their welcome email.</span>
+        <div style={{ background: "#e8f5e9", border: `2px solid ${T.green}`, borderRadius: 10, padding: "18px 16px", marginBottom: 18, fontFamily: T.sans }}>
+          <div style={{ fontSize: 15, fontWeight: 900, color: T.green, marginBottom: 8 }}>✅ {done.name} — Added Successfully!</div>
+          <div style={{ fontSize: 13, color: T.brownDark, lineHeight: 1.8 }}>
+            <strong>Account #:</strong> {done.vh}<br />
+            <strong>Email sent to:</strong> {done.email}<br />
+            <strong>Temp password:</strong> <span style={{ fontFamily: "monospace", background: "#f0f0f0", padding: "2px 8px", borderRadius: 4, fontWeight: 700 }}>{done.tempPass}</span><br />
+            <span style={{ fontSize: 12, color: T.brownLight }}>Provider is live. They received their "we built your profile" email with login credentials and trial info.</span>
+          </div>
+          <button onClick={() => setDone(null)} style={{ marginTop: 10, ...S.btn(T.brown), fontSize: 12 }}>Dismiss</button>
         </div>
       )}
-      <div style={{ display: "flex", flexDirection: "column", gap: 11 }}>
 
-        {/* Business info */}
-        <div style={{ fontWeight: 700, fontSize: 12, color: T.brownLight, fontFamily: T.sans, textTransform: "uppercase", letterSpacing: 1 }}>— Business Info —</div>
-        {[["Business Name *", "business_name", "text"], ["Owner Name", "owner_name", "text"], ["Email *", "email", "email"], ["Phone", "phone", "tel"], ["Website", "website", "url"], ["Address", "address", "text"], ["License #", "license_number", "text"], ["Years in Business", "years_in_business", "number"], ["Google Review URL", "google_review_url", "url"]].map(([lbl, k, t]) => (
-          <div key={k}>
-            <div style={{ fontSize: 12, color: T.brownLight, fontFamily: T.sans, marginBottom: 2 }}>{lbl}</div>
-            <input type={t} value={form[k]} onChange={e => set(k, e.target.value)} style={S.inp} />
-          </div>
-        ))}
-        <div>
-          <div style={{ fontSize: 12, color: T.brownLight, fontFamily: T.sans, marginBottom: 2 }}>Description</div>
-          <textarea value={form.description} onChange={e => set("description", e.target.value)} rows={3} style={{ ...S.inp, resize: "vertical" }} />
-        </div>
-        <div>
-          <div style={{ fontSize: 12, color: T.brownLight, fontFamily: T.sans, marginBottom: 2 }}>Admin Notes (internal)</div>
-          <textarea value={form.notes} onChange={e => set("notes", e.target.value)} rows={2} style={{ ...S.inp, resize: "vertical" }} />
-        </div>
+      <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
 
-        {/* Subscription */}
-        <div style={{ fontWeight: 700, fontSize: 12, color: T.brownLight, fontFamily: T.sans, textTransform: "uppercase", letterSpacing: 1 }}>— Account Settings —</div>
+        {/* ── SECTION: Business Info ── */}
+        <div style={{ fontWeight: 900, fontSize: 11, color: T.brownLight, fontFamily: T.sans, textTransform: "uppercase", letterSpacing: 2, borderBottom: `1px solid ${T.border}`, paddingBottom: 6, marginTop: 4 }}>Business Info</div>
+
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
-          {[["Status", "subscription_status", [["trial", "Trial (45 days)"], ["active", "Active/Paid"], ["pending", "Pending"], ["cancelled", "Cancelled"]]], ["Tier", "subscription_tier", [["basic", "Basic"], ["featured", "Featured"], ["premium", "Premium"]]], ["Active?", "is_active", [["true", "Yes — Active"], ["false", "No — Inactive"]]], ["Visible?", "is_visible", [["true", "Yes — Visible"], ["false", "No — Hidden"]]]].map(([lbl, k, opts]) => (
+          {[["Business Name *", "business_name", "text"], ["Owner Name *", "owner_name", "text"]].map(([lbl, k, t]) => (
             <div key={k}>
-              <div style={{ fontSize: 12, color: T.brownLight, fontFamily: T.sans, marginBottom: 2 }}>{lbl}</div>
-              <select value={String(form[k])} onChange={e => set(k, k === "is_active" || k === "is_visible" ? e.target.value === "true" : e.target.value)} style={S.inp}>
-                {opts.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
-              </select>
+              <div style={{ fontSize: 11, color: T.brownLight, fontFamily: T.sans, marginBottom: 3 }}>{lbl}</div>
+              <input type={t} value={form[k]} onChange={e => set(k, e.target.value)} style={S.inp} />
             </div>
           ))}
         </div>
 
-        {/* CATEGORY (Macro) */}
-        <div style={{ borderTop: `1px solid ${T.border}`, paddingTop: 12 }}>
-          <div style={{ fontWeight: 700, fontSize: 12, color: T.brownLight, fontFamily: T.sans, textTransform: "uppercase", letterSpacing: 1, marginBottom: 8 }}>— Macro Category * —</div>
-          <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-            {categories.map(cat => (
-              <div key={cat.id} onClick={() => setCategory(cat.id)}
-                style={{ padding: "10px 12px", borderRadius: 8, border: `2px solid ${form.category_id === cat.id ? T.brown : T.border}`, cursor: "pointer", background: form.category_id === cat.id ? T.parchmentDark : T.cream, display: "flex", alignItems: "center", gap: 10 }}>
-                <span style={{ fontSize: 20 }}>{cat.icon}</span>
-                <div>
-                  <div style={{ fontWeight: 700, color: T.brownDark, fontSize: 14 }}>{cat.name}</div>
-                  <div style={{ fontSize: 11, color: T.brownLight, fontFamily: T.sans }}>{cat.description}</div>
-                </div>
-                {form.category_id === cat.id && <span style={{ marginLeft: "auto", color: T.brown, fontSize: 18 }}>✓</span>}
-              </div>
-            ))}
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+          {[["Email Address *", "email", "email"], ["Phone Number", "phone", "tel"]].map(([lbl, k, t]) => (
+            <div key={k}>
+              <div style={{ fontSize: 11, color: T.brownLight, fontFamily: T.sans, marginBottom: 3 }}>{lbl}</div>
+              <input type={t} value={form[k]} onChange={e => set(k, e.target.value)} style={S.inp} />
+            </div>
+          ))}
+        </div>
+
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+          {[["Website", "website", "url"], ["Address / City", "address", "text"]].map(([lbl, k, t]) => (
+            <div key={k}>
+              <div style={{ fontSize: 11, color: T.brownLight, fontFamily: T.sans, marginBottom: 3 }}>{lbl}</div>
+              <input type={t} value={form[k]} onChange={e => set(k, e.target.value)} style={S.inp} placeholder={k === "website" ? "https://..." : ""} />
+            </div>
+          ))}
+        </div>
+
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+          {[["Years in Business", "years_in_business", "number"], ["License #", "license_number", "text"]].map(([lbl, k, t]) => (
+            <div key={k}>
+              <div style={{ fontSize: 11, color: T.brownLight, fontFamily: T.sans, marginBottom: 3 }}>{lbl}</div>
+              <input type={t} value={form[k]} onChange={e => set(k, e.target.value)} style={S.inp} min={t === "number" ? 0 : undefined} />
+            </div>
+          ))}
+        </div>
+
+        <div>
+          <div style={{ fontSize: 11, color: T.brownLight, fontFamily: T.sans, marginBottom: 3 }}>Google Review URL</div>
+          <input type="url" value={form.google_review_url} onChange={e => set("google_review_url", e.target.value)} style={S.inp} placeholder="https://g.page/..." />
+        </div>
+
+        <div>
+          <div style={{ fontSize: 11, color: T.brownLight, fontFamily: T.sans, marginBottom: 3 }}>Business Description</div>
+          <textarea value={form.description} onChange={e => set("description", e.target.value)} rows={3} style={{ ...S.inp, resize: "vertical" }} placeholder="Briefly describe what makes them stand out, their experience, specialties..." />
+        </div>
+
+        {/* ── SECTION: Trial Settings ── */}
+        <div style={{ fontWeight: 900, fontSize: 11, color: T.brownLight, fontFamily: T.sans, textTransform: "uppercase", letterSpacing: 2, borderBottom: `1px solid ${T.border}`, paddingBottom: 6, marginTop: 4 }}>Trial Settings</div>
+
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, alignItems: "end" }}>
+          <div>
+            <div style={{ fontSize: 11, color: T.brownLight, fontFamily: T.sans, marginBottom: 3 }}>Free Trial Length (days)</div>
+            <input type="number" value={form.trial_days} onChange={e => set("trial_days", e.target.value)} style={S.inp} min={1} max={365} />
+          </div>
+          <div style={{ fontSize: 12, color: T.brownLight, fontFamily: T.sans, lineHeight: 1.5, paddingBottom: 4 }}>
+            Default: 45 days. Ends: <strong>{(() => { const d = new Date(); d.setDate(d.getDate() + (parseInt(form.trial_days) || 45)); return d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }); })()}</strong><br />
+            After trial: provider can subscribe for $12/mo via their dashboard.
           </div>
         </div>
 
-        {/* SERVICES (Micro) — filtered by selected category */}
-        {form.category_id && (
-          <div style={{ borderTop: `1px solid ${T.border}`, paddingTop: 12 }}>
-            <div style={{ fontWeight: 700, fontSize: 12, color: T.brownLight, fontFamily: T.sans, textTransform: "uppercase", letterSpacing: 1, marginBottom: 6 }}>
-              — Services Offered * — <span style={{ fontWeight: 400, textTransform: "none" }}>({form.services.length} selected)</span>
+        <div>
+          <div style={{ fontSize: 11, color: T.brownLight, fontFamily: T.sans, marginBottom: 3 }}>Internal Admin Notes (not sent to provider)</div>
+          <textarea value={form.notes} onChange={e => set("notes", e.target.value)} rows={2} style={{ ...S.inp, resize: "vertical" }} placeholder="How you reached out, their response, any special notes..." />
+        </div>
+
+        {/* ── SECTION: Macro Category ── */}
+        <div style={{ fontWeight: 900, fontSize: 11, color: T.brownLight, fontFamily: T.sans, textTransform: "uppercase", letterSpacing: 2, borderBottom: `1px solid ${T.border}`, paddingBottom: 6, marginTop: 4 }}>Service Category * (Macro)</div>
+        <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+          {categories.map(cat => (
+            <div key={cat.id} onClick={() => setCategory(cat.id)}
+              style={{ padding: "10px 14px", borderRadius: 8, border: `2px solid ${form.category_id === cat.id ? T.brown : T.border}`, cursor: "pointer", background: form.category_id === cat.id ? T.parchmentDark : T.cream, display: "flex", alignItems: "center", gap: 12, transition: "all 0.15s" }}>
+              <span style={{ fontSize: 22 }}>{cat.icon}</span>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontWeight: 700, color: T.brownDark, fontSize: 13 }}>{cat.name}</div>
+                {cat.description && <div style={{ fontSize: 11, color: T.brownLight, fontFamily: T.sans }}>{cat.description}</div>}
+              </div>
+              {form.category_id === cat.id && <span style={{ color: T.brown, fontSize: 18, fontWeight: 900 }}>✓</span>}
             </div>
-            <input placeholder="Search services..." value={svcSearch} onChange={e => setSvcSearch(e.target.value)} style={{ ...S.inp, marginBottom: 8 }} />
+          ))}
+        </div>
+
+        {/* ── SECTION: Services (Micro) ── */}
+        {form.category_id && (
+          <>
+            <div style={{ fontWeight: 900, fontSize: 11, color: T.brownLight, fontFamily: T.sans, textTransform: "uppercase", letterSpacing: 2, borderBottom: `1px solid ${T.border}`, paddingBottom: 6, marginTop: 4 }}>
+              Specific Services * (Micro) — {form.services.length} selected
+            </div>
+
             {form.services.length > 0 && (
-              <div style={{ display: "flex", flexWrap: "wrap", gap: 4, marginBottom: 8 }}>
-                {form.services.map(id => { const s = services.find(x => x.id === id); return s ? <span key={id} onClick={() => toggle("services", id)} style={{ fontSize: 12, background: T.brown, color: "#fff", borderRadius: 4, padding: "3px 10px", cursor: "pointer" }}>{s.name} ✕</span> : null; })}
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 5, marginBottom: 4 }}>
+                {form.services.map(id => {
+                  const s = activeServices.find(x => x.id === id);
+                  return s ? (
+                    <span key={id} onClick={() => toggleSvc(id)} style={{ fontSize: 12, background: T.brown, color: "#fff", borderRadius: 20, padding: "4px 12px", cursor: "pointer", fontFamily: T.sans }}>
+                      {s.name} ✕
+                    </span>
+                  ) : null;
+                })}
               </div>
             )}
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 5 }}>
-              {(filteredSvcs || (catServices[form.category_id] || [])).map(svc => (
-                <button key={svc.id} onClick={() => toggle("services", svc.id)} style={{ fontSize: 12, padding: "5px 11px", borderRadius: 5, border: `1px solid ${T.border}`, cursor: "pointer", fontFamily: T.sans, background: form.services.includes(svc.id) ? T.brown : T.parchment, color: form.services.includes(svc.id) ? "#fff" : T.brownDark }}>
-                  {svc.name}
-                </button>
-              ))}
+
+            <input placeholder="Search services..." value={svcSearch} onChange={e => setSvcSearch(e.target.value)} style={{ ...S.inp, marginBottom: 2 }} />
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+              {filteredSvcs.map(svc => {
+                const sel = form.services.includes(svc.id);
+                return (
+                  <button key={svc.id} onClick={() => toggleSvc(svc.id)} style={{ fontSize: 12, padding: "6px 13px", borderRadius: 20, border: `2px solid ${sel ? T.brown : T.border}`, background: sel ? T.brown : T.cream, color: sel ? "#fff" : T.brownDark, cursor: "pointer", fontWeight: sel ? 700 : 400, fontFamily: T.sans, transition: "all 0.1s" }}>
+                    {sel ? "✓ " : ""}{svc.name}
+                  </button>
+                );
+              })}
+              {filteredSvcs.length === 0 && <div style={{ fontSize: 13, color: T.brownLight, fontFamily: T.sans, fontStyle: "italic" }}>No services found. Try a different search.</div>}
             </div>
-            {!svcSearch && catServices[form.category_id]?.length === 0 && (
-              <div style={{ fontSize: 12, color: "#aaa", fontStyle: "italic" }}>No services in this category yet.</div>
-            )}
+          </>
+        )}
+
+        {/* ── SECTION: Service Areas (Villages) ── */}
+        <div style={{ fontWeight: 900, fontSize: 11, color: T.brownLight, fontFamily: T.sans, textTransform: "uppercase", letterSpacing: 2, borderBottom: `1px solid ${T.border}`, paddingBottom: 6, marginTop: 4 }}>
+          Service Areas * (Villages) — {form.service_areas.length} selected
+        </div>
+
+        {form.service_areas.length > 0 && (
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 5, marginBottom: 4 }}>
+            {form.service_areas.map(id => {
+              const a = activeAreas.find(x => x.id === id);
+              const name = a ? (a.name.includes(' — ') ? a.name.split(' — ').pop().trim() : a.name) : id;
+              return (
+                <span key={id} onClick={() => toggleArea(id)} style={{ fontSize: 12, background: T.teal, color: "#fff", borderRadius: 20, padding: "4px 12px", cursor: "pointer", fontFamily: T.sans }}>
+                  {name} ✕
+                </span>
+              );
+            })}
           </div>
         )}
 
-        {/* VILLAGES */}
-        <div style={{ borderTop: `1px solid ${T.border}`, paddingTop: 12 }}>
-          <div style={{ fontWeight: 700, fontSize: 12, color: T.brownLight, fontFamily: T.sans, textTransform: "uppercase", letterSpacing: 1, marginBottom: 6 }}>
-            — Service Villages * — <span style={{ fontWeight: 400, textTransform: "none" }}>({form.service_areas.length} selected)</span>
-          </div>
-          <div style={{ display: "flex", gap: 8, marginBottom: 8 }}>
-            <button onClick={() => set("service_areas", serviceAreas.map(a => a.id))} style={{ ...S.btn(T.teal), fontSize: 11 }}>Select All</button>
-            <button onClick={() => set("service_areas", [])} style={{ ...S.btn("#888"), fontSize: 11 }}>Clear</button>
-          </div>
-          {form.service_areas.length > 0 && (
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 4, marginBottom: 8 }}>
-              {form.service_areas.map(id => { const a = serviceAreas.find(x => x.id === id); return a ? <span key={id} onClick={() => toggle("service_areas", id)} style={{ fontSize: 12, background: T.teal, color: "#fff", borderRadius: 4, padding: "3px 10px", cursor: "pointer" }}>{a.name} ✕</span> : null; })}
+        {MACRO_AREAS.map(macro => {
+          const isOpen = openMacros[macro.key];
+          const count = macroSelectedCount(macro);
+          const totalWithIds = macro.villages.filter(v => areaNameToId[v]).length;
+          return (
+            <div key={macro.key} style={{ border: `2px solid ${count > 0 ? T.teal : T.border}`, borderRadius: 8, overflow: "hidden" }}>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 14px", background: count > 0 ? "#e0f7f4" : T.cream, cursor: "pointer" }} onClick={() => toggleMacro(macro.key)}>
+                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                  <span style={{ fontSize: 16 }}>{isOpen ? "▾" : "▸"}</span>
+                  <span style={{ fontWeight: 700, fontSize: 13, color: T.brownDark }}>{macro.label}</span>
+                  {count > 0 && <span style={{ fontSize: 11, background: T.teal, color: "#fff", borderRadius: 10, padding: "2px 8px", fontFamily: T.sans }}>{count} selected</span>}
+                </div>
+                <div style={{ display: "flex", gap: 8 }}>
+                  {totalWithIds > 0 && (
+                    <>
+                      <button onClick={e => { e.stopPropagation(); selectAllMacro(macro); }} style={{ fontSize: 11, padding: "3px 10px", borderRadius: 4, border: `1px solid ${T.teal}`, background: T.teal, color: "#fff", cursor: "pointer", fontFamily: T.sans }}>All</button>
+                      {count > 0 && <button onClick={e => { e.stopPropagation(); deselectAllMacro(macro); }} style={{ fontSize: 11, padding: "3px 10px", borderRadius: 4, border: `1px solid ${T.border}`, background: T.cream, color: T.brownDark, cursor: "pointer", fontFamily: T.sans }}>None</button>}
+                    </>
+                  )}
+                </div>
+              </div>
+              {isOpen && (
+                <div style={{ padding: "10px 14px", background: "#fafaf6", display: "flex", flexWrap: "wrap", gap: 6 }}>
+                  {macro.villages.map(vName => {
+                    const id = areaNameToId[vName];
+                    if (!id) return null;
+                    const sel = form.service_areas.includes(id);
+                    return (
+                      <button key={vName} onClick={() => toggleArea(id)} style={{ fontSize: 12, padding: "5px 12px", borderRadius: 20, border: `2px solid ${sel ? T.teal : T.border}`, background: sel ? T.teal : T.cream, color: sel ? "#fff" : T.brownDark, cursor: "pointer", fontWeight: sel ? 700 : 400, fontFamily: T.sans, transition: "all 0.1s" }}>
+                        {sel ? "✓ " : ""}{vName}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
             </div>
-          )}
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
-            {serviceAreas.map(a => (
-              <button key={a.id} onClick={() => toggle("service_areas", a.id)} style={{ fontSize: 12, padding: "4px 10px", borderRadius: 4, border: `1px solid ${T.border}`, cursor: "pointer", fontFamily: T.sans, background: form.service_areas.includes(a.id) ? T.teal : T.parchment, color: form.service_areas.includes(a.id) ? "#fff" : T.brownDark }}>
-                {a.name}
-              </button>
-            ))}
+          );
+        })}
+
+        {/* ── SUBMIT ── */}
+        <div style={{ marginTop: 10, borderTop: `1px solid ${T.border}`, paddingTop: 14 }}>
+          <div style={{ fontSize: 12, color: T.brownLight, fontFamily: T.sans, marginBottom: 12, lineHeight: 1.6, background: "#fff8e1", borderRadius: 6, padding: "10px 12px" }}>
+            📧 <strong>What happens when you click Add:</strong> A listing is created instantly, set to active with a {form.trial_days || 45}-day trial. The provider receives a professional email explaining that V-Hub built their profile, along with their VH account number, temporary password, and instructions to log into their Provider Hub.
           </div>
+          <button onClick={save} disabled={saving} style={{ ...S.btn(saving ? T.brownLight : T.brown), padding: "12px 24px", fontSize: 14, width: "100%", opacity: saving ? 0.7 : 1, letterSpacing: 0.5 }}>
+            {saving ? "⏳ Creating listing & sending email..." : "✅ Create Listing & Send Welcome Email"}
+          </button>
         </div>
 
-        <button onClick={save} disabled={saving} style={{ ...S.btn(T.brown), padding: 13, fontSize: 15, marginTop: 8, opacity: saving ? 0.6 : 1 }}>
-          {saving ? "Saving..." : "✅ Add Provider to V-HUB"}
-        </button>
       </div>
     </div>
   );
 }
-
-// ── MAIN DASHBOARD ────────────────────────────────────────────────────────────
 function Dashboard({ adminPin }) {
   const [providers, setProviders] = useState([]);
   const [reviews, setReviews] = useState([]);
