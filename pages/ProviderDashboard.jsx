@@ -489,7 +489,7 @@ function LoginScreen({ onLogin, onForgot }) {
         <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 4, color: INK_FADE, textTransform: "uppercase", fontFamily: SERIF, marginBottom: 6 }}>The Villages, Florida</div>
         <div style={{ fontSize: 28, fontWeight: 900, color: INK, letterSpacing: 3, textTransform: "uppercase", fontFamily: SERIF }}>Provider Hub</div>
         <div style={{ height: 2, background: RED_RULE, margin: "10px auto", width: 180 }} />
-        <div style={{ fontSize: 13, color: INK_FADE, fontStyle: "italic", fontFamily: SERIF }}>Manage your listing · View stats · Update services &amp; villages</div>
+        <div style={{ fontSize: 13, color: INK_FADE, fontStyle: "italic", fontFamily: SERIF }}>Manage your listing · View stats · Update services & villages</div>
       </div>
 
       {/* Login card */}
@@ -499,7 +499,7 @@ function LoginScreen({ onLogin, onForgot }) {
             <div style={{ fontSize: 36, marginBottom: 8 }}>🔐</div>
             <div style={{ fontSize: 16, fontWeight: 900, color: INK, textTransform: "uppercase", letterSpacing: 2, fontFamily: SERIF }}>Sign In to Your Hub</div>
             <div style={{ fontSize: 13, color: INK_FADE, fontStyle: "italic", marginTop: 6, lineHeight: 1.6, fontFamily: SERIF }}>
-              Use the email &amp; password you chose when you listed your business.
+              Use the email & password you chose when you listed your business.
             </div>
           </div>
 
