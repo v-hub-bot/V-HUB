@@ -1,16 +1,23 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.23';
 
-const CORS_HEADERS = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type, Authorization",
-};
+const ALLOWED_ORIGIN = "https://v-hub-app-edf7f8e8.base44.app";
+
+function getCorsHeaders(req: Request) {
+  const origin = req.headers.get("origin") || "";
+  const allowed = origin === ALLOWED_ORIGIN || origin === "";
+  return {
+    "Access-Control-Allow-Origin": allowed ? origin || ALLOWED_ORIGIN : "null",
+    "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type, Authorization",
+    "Vary": "Origin",
+  };
+}
 
 const ADMIN_EMAILS = ["kimberlycook1980@gmail.com", "5bebegurlz@gmail.com", "evansrus@comcast.net"];
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
-    return new Response(null, { headers: CORS_HEADERS });
+    return new Response(null, { headers: getCorsHeaders(req) });
   }
 
   try {
@@ -31,7 +38,7 @@ Deno.serve(async (req) => {
     } catch (_) {}
 
     if (!pinProvided && !userIsAdmin) {
-      return Response.json({ error: "Unauthorized" }, { status: 401, headers: CORS_HEADERS });
+      return Response.json({ error: "Unauthorized" }, { status: 401, headers: getCorsHeaders(req) });
     }
 
     const sr = base44.asServiceRole;
@@ -54,9 +61,9 @@ Deno.serve(async (req) => {
       categories: categories || [],
       services: services || [],
       serviceAreas: serviceAreas || [],
-    }, { headers: CORS_HEADERS });
+    }, { headers: getCorsHeaders(req) });
   } catch (error) {
     console.error('getAdminData error:', error);
-    return Response.json({ error: error.message }, { status: 500, headers: CORS_HEADERS });
+    return Response.json({ error: error.message }, { status: 500, headers: getCorsHeaders(req) });
   }
 });
