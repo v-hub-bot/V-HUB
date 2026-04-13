@@ -233,6 +233,11 @@ function ProvDetail({ prov, areas, cats, onBack }) {
     }).catch(() => {
       Provider.update(prov.id, { profile_views: (prov.profile_views || 0) + 1 }).catch(() => {});
     });
+    // Log to detailed analytics
+    fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/trackEvent", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ provider_id: prov.id, event_type: "profile_view", source: "homepage" }),
+    }).catch(() => {});
   }, [prov.id]);
 
   const avgRating = reviews.length > 0
@@ -1123,10 +1128,24 @@ export default function Home() {
     });
     setResults(out);
     setSearched(true);
-    // Silently increment search_appearances for each matched provider
-    out.forEach(p => {
-      Provider.update(p.id, { search_appearances: (p.search_appearances || 0) + 1 }).catch(() => {});
-    });
+    // Track search appearances — fire & forget to backend analytics
+    if (out.length > 0) {
+      const areaLabel = selArea ? (areas.find(a => a.id === selArea || a.name === selArea)?.name || selArea) : "";
+      const svcObj = selSvc ? svcs.find(s => s.id === selSvc) : null;
+      const catObj = svcObj ? cats.find(c => c.id === svcObj.category_id) : null;
+      const events = out.map(p => ({
+        provider_id: p.id,
+        event_type: "search_appearance",
+        service_name: svcObj?.name || "",
+        category_name: catObj?.name || "",
+        area_name: areaLabel,
+        source: "homepage",
+      }));
+      fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/trackEvent", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(events),
+      }).catch(() => {});
+    }
   };
 
   const reset = () => {

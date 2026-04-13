@@ -58,22 +58,38 @@ function ExpiryBadge({ date }) {
 
 function AdCard({ ad }) {
   const expired = ad.deal_expires_at && daysUntil(ad.deal_expires_at) < 0;
+
+  const trackClick = () => {
+    fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/trackEvent", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        provider_id: ad.provider_id,
+        event_type: "classified_click",
+        area_name: ad.village || "",
+        source: "classifieds_page",
+      }),
+    }).catch(() => {});
+  };
+
   return (
-    <div style={{
-      background: expired ? "#F0EAD6" : PAPER,
-      border: `2px solid ${expired ? PAPER_DK : INK}`,
-      borderRadius: 2,
-      padding: "14px 14px 12px",
-      fontFamily: "'Times New Roman', serif",
-      display: "flex",
-      flexDirection: "column",
-      gap: 5,
-      boxSizing: "border-box",
-      width: "100%",
-      minHeight: 240,
-      position: "relative",
-      opacity: expired ? 0.7 : 1,
-    }}>
+    <div
+      onClick={trackClick}
+      style={{
+        background: expired ? "#F0EAD6" : PAPER,
+        border: `2px solid ${expired ? PAPER_DK : INK}`,
+        borderRadius: 2,
+        padding: "14px 14px 12px",
+        fontFamily: "'Times New Roman', serif",
+        display: "flex",
+        flexDirection: "column",
+        gap: 5,
+        boxSizing: "border-box",
+        width: "100%",
+        minHeight: 240,
+        position: "relative",
+        opacity: expired ? 0.7 : 1,
+        cursor: "pointer",
+      }}>
       {/* Decorative inner border */}
       <div style={{ position: "absolute", top: 4, left: 4, right: 4, borderTop: `1px solid ${INK}` }} />
       <div style={{ position: "absolute", bottom: 4, left: 4, right: 4, borderBottom: `1px solid ${INK}` }} />

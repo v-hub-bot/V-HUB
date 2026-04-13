@@ -1,0 +1,34 @@
+{
+  "type": "object",
+  "properties": {
+    "provider_id": {
+      "type": "string"
+    },
+    "event_type": {
+      "type": "string",
+      "enum": [
+        "search_appearance",
+        "profile_view",
+        "classified_click",
+        "lead_inquiry"
+      ]
+    },
+    "service_name": {
+      "type": "string"
+    },
+    "category_name": {
+      "type": "string"
+    },
+    "area_name": {
+      "type": "string"
+    },
+    "date_key": {
+      "type": "string"
+    },
+    "source": {
+      "type": "string"
+    }
+  },
+  "required": [],
+  "name": "ProviderAnalytic"
+}

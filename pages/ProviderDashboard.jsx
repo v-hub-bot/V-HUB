@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Provider, ProviderReview, Service, ServiceArea, Category, ClassifiedAd } from "@/api/entities";
+import { Provider, ProviderReview, Service, ServiceArea, Category, ClassifiedAd, ProviderAnalytic } from "@/api/entities";
 
 // ── SEO ───────────────────────────────────────────────────────────────────
 function useMeta(title) {
@@ -632,6 +632,226 @@ function LoginScreen({ onLogin, onForgot }) {
 }
 
 // ── MAIN COMPONENT ────────────────────────────────────────────────────────
+// ── Analytics Dashboard Component ────────────────────────────────────────────
+function AnalyticsDashboard({ provider, reviews }) {
+  const [analytics, setAnalytics] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [range, setRange] = useState(30); // days
+
+  useEffect(() => {
+    if (!provider?.id) return;
+    loadAnalytics();
+  }, [provider?.id, range]);
+
+  const loadAnalytics = async () => {
+    setLoading(true);
+    try {
+      // Pull all analytic events for this provider
+      const events = await ProviderAnalytic.filter({ provider_id: provider.id });
+
+      const cutoff = new Date();
+      cutoff.setDate(cutoff.getDate() - range);
+      const cutoffKey = cutoff.toISOString().slice(0, 10);
+
+      const inRange = (events || []).filter(e => (e.date_key || "") >= cutoffKey);
+      const allTime = events || [];
+
+      // Tally by type
+      const searches   = inRange.filter(e => e.event_type === "search_appearance");
+      const views      = inRange.filter(e => e.event_type === "profile_view");
+      const adClicks   = inRange.filter(e => e.event_type === "classified_click");
+      const leads      = inRange.filter(e => e.event_type === "lead_inquiry");
+
+      // Searches by service
+      const byService = {};
+      searches.forEach(e => {
+        const k = e.service_name || "General Search";
+        byService[k] = (byService[k] || 0) + 1;
+      });
+
+      // Searches + views by area/village
+      const byArea = {};
+      [...searches, ...views].forEach(e => {
+        const k = e.area_name || "Unknown";
+        if (k && k !== "Unknown") byArea[k] = (byArea[k] || 0) + 1;
+      });
+
+      // Daily trend — last 14 days
+      const trend = {};
+      const today = new Date();
+      for (let i = 13; i >= 0; i--) {
+        const d = new Date(today);
+        d.setDate(d.getDate() - i);
+        trend[d.toISOString().slice(0, 10)] = 0;
+      }
+      inRange.forEach(e => {
+        if (e.date_key && trend[e.date_key] !== undefined) trend[e.date_key]++;
+      });
+
+      setAnalytics({
+        searches: searches.length,
+        views: views.length,
+        adClicks: adClicks.length,
+        leads: leads.length,
+        allTimeSearches: allTime.filter(e => e.event_type === "search_appearance").length,
+        allTimeViews: allTime.filter(e => e.event_type === "profile_view").length,
+        byService: Object.entries(byService).sort((a, b) => b[1] - a[1]).slice(0, 8),
+        byArea: Object.entries(byArea).sort((a, b) => b[1] - a[1]).slice(0, 8),
+        trend: Object.entries(trend),
+      });
+    } catch (e) {
+      console.error("Analytics load error:", e);
+      setAnalytics(null);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const maxTrend = analytics ? Math.max(1, ...analytics.trend.map(([, v]) => v)) : 1;
+
+  return (
+    <div style={{ marginBottom: 24 }}>
+      {/* Header row */}
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14, flexWrap: "wrap", gap: 8 }}>
+        <div style={{ ...shS, marginBottom: 0, borderBottom: "none", paddingBottom: 0 }}>📊 Your Activity Report</div>
+        <div style={{ display: "flex", gap: 4 }}>
+          {[7, 30, 90].map(d => (
+            <button key={d} onClick={() => setRange(d)}
+              style={{ background: range === d ? TEAL : PAPER_MID, color: range === d ? "#fff" : INK, border: `1.5px solid ${range === d ? TEAL : PAPER_DK}`, borderRadius: 20, padding: "4px 12px", fontSize: 11, cursor: "pointer", fontFamily: SANS, fontWeight: range === d ? 700 : 400 }}>
+              {d}d
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {loading ? (
+        <div style={{ padding: "20px 0", textAlign: "center", fontSize: 13, color: INK_FADE, fontFamily: SANS }}>Loading your stats…</div>
+      ) : !analytics ? (
+        <div style={{ padding: "16px 0", textAlign: "center", fontSize: 13, color: INK_FADE, fontFamily: SANS, fontStyle: "italic" }}>Stats not available.</div>
+      ) : (
+        <>
+          {/* ── Top 4 stat cards ── */}
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 8, marginBottom: 14 }}>
+            {[
+              { icon: "🔍", label: "Times You Appeared in Search", value: analytics.searches, sub: `${range}-day window`, color: TEAL },
+              { icon: "👁", label: "People Clicked Your Profile", value: analytics.views, sub: `${range}-day window`, color: BROWN_BTN },
+              { icon: "📰", label: "Classified Ad Clicks", value: analytics.adClicks, sub: provider.classifieds_addon ? `${range}-day window` : "Add-on not active", color: "#7B3FA0" },
+              { icon: "⭐", label: "Reviews", value: reviews.length, sub: "All time", color: "#B8860B" },
+            ].map(({ icon, label, value, sub, color }) => (
+              <div key={label} style={{ background: PAPER_MID, border: `1.5px solid ${PAPER_DK}`, borderRadius: 8, padding: "14px 12px", textAlign: "center" }}>
+                <div style={{ fontSize: 20, marginBottom: 4 }}>{icon}</div>
+                <div style={{ fontSize: 26, fontWeight: 900, color, fontFamily: SANS, lineHeight: 1 }}>{value}</div>
+                <div style={{ fontSize: 11, color: INK, fontFamily: SANS, marginTop: 4, fontWeight: 700, lineHeight: 1.4 }}>{label}</div>
+                <div style={{ fontSize: 10, color: INK_FADE, fontFamily: SANS, marginTop: 2 }}>{sub}</div>
+              </div>
+            ))}
+          </div>
+
+          {/* ── All-time totals ── */}
+          <div style={{ background: PAPER, border: `1px solid ${PAPER_DK}`, borderRadius: 8, padding: "10px 14px", marginBottom: 14, display: "flex", gap: 20, flexWrap: "wrap", justifyContent: "center" }}>
+            <div style={{ fontSize: 12, color: INK_FADE, fontFamily: SANS, textAlign: "center" }}>
+              <span style={{ fontWeight: 900, color: INK, fontSize: 16 }}>{analytics.allTimeSearches.toLocaleString()}</span>
+              <br />All-time search appearances
+            </div>
+            <div style={{ fontSize: 12, color: INK_FADE, fontFamily: SANS, textAlign: "center" }}>
+              <span style={{ fontWeight: 900, color: INK, fontSize: 16 }}>{analytics.allTimeViews.toLocaleString()}</span>
+              <br />All-time profile views
+            </div>
+            <div style={{ fontSize: 12, color: INK_FADE, fontFamily: SANS, textAlign: "center" }}>
+              <span style={{ fontWeight: 900, color: INK, fontSize: 16 }}>{analytics.leads}</span>
+              <br />Leads in {range} days
+            </div>
+          </div>
+
+          {/* ── 14-day trend bar chart ── */}
+          {analytics.trend.some(([, v]) => v > 0) && (
+            <div style={{ background: PAPER_MID, border: `1.5px solid ${PAPER_DK}`, borderRadius: 8, padding: "14px 14px 10px", marginBottom: 14 }}>
+              <div style={{ fontSize: 11, fontWeight: 700, color: INK_FADE, textTransform: "uppercase", letterSpacing: 1, fontFamily: SANS, marginBottom: 10 }}>14-Day Activity Trend</div>
+              <div style={{ display: "flex", alignItems: "flex-end", gap: 3, height: 52 }}>
+                {analytics.trend.map(([date, count]) => {
+                  const h = Math.max(4, Math.round((count / maxTrend) * 48));
+                  const isToday = date === new Date().toISOString().slice(0, 10);
+                  return (
+                    <div key={date} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 2, height: "100%", justifyContent: "flex-end" }} title={`${date}: ${count} events`}>
+                      <div style={{ width: "100%", height: h, background: isToday ? TEAL : BROWN_BTN, borderRadius: "2px 2px 0 0", opacity: count === 0 ? 0.2 : 1, transition: "height 0.3s" }} />
+                    </div>
+                  );
+                })}
+              </div>
+              <div style={{ display: "flex", justifyContent: "space-between", marginTop: 4, fontSize: 9, color: INK_FADE, fontFamily: SANS }}>
+                <span>{analytics.trend[0]?.[0]?.slice(5)}</span>
+                <span style={{ color: TEAL, fontWeight: 700 }}>Today</span>
+              </div>
+            </div>
+          )}
+
+          {/* ── What are people searching? ── */}
+          {analytics.byService.length > 0 && (
+            <div style={{ background: PAPER_MID, border: `1.5px solid ${PAPER_DK}`, borderRadius: 8, padding: "14px", marginBottom: 14 }}>
+              <div style={{ fontSize: 11, fontWeight: 700, color: INK_FADE, textTransform: "uppercase", letterSpacing: 1, fontFamily: SANS, marginBottom: 10 }}>
+                🔍 What Customers Searched For
+              </div>
+              {analytics.byService.map(([svc, cnt]) => {
+                const pct = Math.round((cnt / (analytics.searches || 1)) * 100);
+                return (
+                  <div key={svc} style={{ marginBottom: 7 }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, fontFamily: SANS, marginBottom: 2 }}>
+                      <span style={{ color: INK, fontWeight: svc !== "General Search" ? 700 : 400 }}>{svc}</span>
+                      <span style={{ color: INK_FADE }}>{cnt}x</span>
+                    </div>
+                    <div style={{ background: PAPER_DK, borderRadius: 3, height: 6 }}>
+                      <div style={{ background: TEAL, borderRadius: 3, height: 6, width: `${pct}%`, transition: "width 0.4s" }} />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          {/* ── Where are customers coming from? ── */}
+          {analytics.byArea.length > 0 && (
+            <div style={{ background: PAPER_MID, border: `1.5px solid ${PAPER_DK}`, borderRadius: 8, padding: "14px", marginBottom: 14 }}>
+              <div style={{ fontSize: 11, fontWeight: 700, color: INK_FADE, textTransform: "uppercase", letterSpacing: 1, fontFamily: SANS, marginBottom: 10 }}>
+                📍 Where Customers Are Coming From
+              </div>
+              {analytics.byArea.map(([area, cnt]) => {
+                const maxArea = analytics.byArea[0]?.[1] || 1;
+                const pct = Math.round((cnt / maxArea) * 100);
+                return (
+                  <div key={area} style={{ marginBottom: 7 }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, fontFamily: SANS, marginBottom: 2 }}>
+                      <span style={{ color: INK, fontWeight: 700 }}>📍 {area}</span>
+                      <span style={{ color: INK_FADE }}>{cnt} searches</span>
+                    </div>
+                    <div style={{ background: PAPER_DK, borderRadius: 3, height: 6 }}>
+                      <div style={{ background: BROWN_BTN, borderRadius: 3, height: 6, width: `${pct}%`, transition: "width 0.4s" }} />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          {/* Empty state — no data yet */}
+          {analytics.searches === 0 && analytics.views === 0 && analytics.adClicks === 0 && (
+            <div style={{ background: PAPER, border: `1px dashed ${PAPER_DK}`, borderRadius: 8, padding: "16px", textAlign: "center", marginBottom: 8 }}>
+              <div style={{ fontSize: 13, color: INK_FADE, fontFamily: SANS, fontStyle: "italic", lineHeight: 1.8 }}>
+                No activity recorded in the last {range} days yet.<br />
+                As customers search V-Hub, your real stats will appear here.
+              </div>
+            </div>
+          )}
+
+          <div style={{ fontSize: 10, color: INK_FADE, fontFamily: SANS, fontStyle: "italic", textAlign: "right", marginTop: 4 }}>
+            All data is from real customer interactions — never estimated.
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
+
 export default function ProviderDashboard() {
   useMeta("Provider Hub | V-Hub — The Villages, FL");
 
@@ -1157,19 +1377,8 @@ export default function ProviderDashboard() {
         )}
         <StatusBanner provider={provider} onUpgrade={handleUpgrade} onCancel={handleCancel} paymentLoading={paymentLoading} cancelLoading={cancelLoading} paymentError={paymentError} />
 
-        {/* Quick stats */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 10, marginBottom: 24 }}>
-          {[
-            ["👁 Profile Views", provider.profile_views ?? 0, TEAL],
-            ["🔍 Search Hits", provider.search_appearances ?? 0, BROWN_BTN],
-            ["⭐ Reviews", reviews.length, "#B8860B"],
-          ].map(([label, val, color]) => (
-            <div key={label} style={{ background: PAPER_MID, border: `1.5px solid ${PAPER_DK}`, borderRadius: 8, padding: "14px 10px", textAlign: "center" }}>
-              <div style={{ fontSize: 22, fontWeight: 900, color, fontFamily: SANS }}>{val}</div>
-              <div style={{ fontSize: 11, color: INK_FADE, fontFamily: SANS, marginTop: 2 }}>{label}</div>
-            </div>
-          ))}
-        </div>
+        {/* ── ANALYTICS DASHBOARD ─────────────────────────────── */}
+        <AnalyticsDashboard provider={provider} reviews={reviews} />
 
         {/* Trial timeline */}
         {provider.subscription_status === "trial" && days !== null && days >= 0 && (
