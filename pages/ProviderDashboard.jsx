@@ -171,32 +171,73 @@ function StatusBanner({ provider, onUpgrade, onCancel, paymentLoading, cancelLoa
   return null;
 }
 
+
 // ── Service accordion for edit view ──────────────────────────────────────
-const EDIT_CATS = [
-  { id: "69d09c14d5ee9e7be9aa301b", name: "🏠 Home Services", svcs: [{ id:"s01",name:"Home Improvements"},{ id:"s02",name:"General Repairs"},{ id:"s03",name:"Cleaning Services"},{ id:"s04",name:"Painting (Interior/Exterior)"},{ id:"s05",name:"Garage Door Services"},{ id:"s06",name:"Window Installation/Repair"},{ id:"s07",name:"HVAC"},{ id:"s08",name:"Plumbing"},{ id:"s09",name:"Roofing"},{ id:"s63",name:"Home Watch"}] },
-  { id: "69d181fe57b60e0aecf4067d", name: "💡 Home Systems", svcs: [{ id:"s10",name:"Handyman Services"},{ id:"s11",name:"Security & Home Watch"},{ id:"s12",name:"Pest Control"},{ id:"s13",name:"Appliance Repair"},{ id:"s14",name:"Electrical & Lighting"},{ id:"s15",name:"Flooring (Tile, Wood, Carpet)"},{ id:"s16",name:"Home Organization"},{ id:"s17",name:"Smart Home Installation"},{ id:"s18",name:"Pool & Spa Services"}] },
-  { id: "69d09c14d5ee9e7be9aa301c", name: "🌿 Yard & Outdoor", svcs: [{ id:"s19",name:"Lawn Mowing"},{ id:"s20",name:"Sod Installation"},{ id:"s21",name:"Tree Trimming & Pruning/Removal"},{ id:"s22",name:"Lawn Fertilization"},{ id:"s23",name:"Irrigation/Sprinkler Services"},{ id:"s24",name:"Landscaping"},{ id:"s25",name:"Hardscaping"},{ id:"s26",name:"Pressure Washing"},{ id:"s27",name:"Driveway Repair/Cleaning/Painting"},{ id:"s64",name:"Pool & Spa Services"}] },
-  { id: "69d09c14d5ee9e7be9aa301d", name: "⛳ Golf Cart", svcs: [{ id:"s28",name:"Rentals"},{ id:"s29",name:"Repairs"},{ id:"s30",name:"Detailing"},{ id:"s31",name:"Lighting Upgrades"},{ id:"s32",name:"Improvements/Customizations"},{ id:"s33",name:"Battery Replacement"},{ id:"s34",name:"Tire Services"}] },
-  { id: "69d09c14d5ee9e7be9aa301e", name: "🚗 Auto Services", svcs: [{ id:"s35",name:"Auto Repairs"},{ id:"s36",name:"Auto Detailing"},{ id:"s37",name:"Oil Changes"},{ id:"s38",name:"Tire Services"},{ id:"s39",name:"Mobile Mechanic"}] },
-  { id: "69d09c14d5ee9e7be9aa301f", name: "💆 Personal Care", svcs: [{ id:"s40",name:"Hair Stylists"},{ id:"s41",name:"Nail Technicians"},{ id:"s42",name:"Spa Services"},{ id:"s43",name:"Home Health Aides"},{ id:"s44",name:"Massage Therapists"},{ id:"s45",name:"Personal Trainers"},{ id:"s46",name:"Makeup Artists"}] },
-  { id: "69d09c14d5ee9e7be9aa3020", name: "🐾 Pet Services", svcs: [{ id:"s47",name:"Veterinary Services"},{ id:"s48",name:"Grooming"},{ id:"s49",name:"Pet Sitting/Walking"},{ id:"s50",name:"Pet Training"},{ id:"s51",name:"Mobile Grooming"}] },
-  { id: "69d09c14d5ee9e7be9aa3021", name: "🚐 Transportation", svcs: [{ id:"s52",name:"Medical Transport"},{ id:"s53",name:"Airport Transport"},{ id:"s54",name:"Local Rides"},{ id:"s55",name:"Errand Services"},{ id:"s56",name:"Courier/Delivery Services"},{ id:"s65",name:"Vehicle Transport"}] },
-  { id: "69d181fe57b60e0aecf4067e", name: "💼 Professional", svcs: [{ id:"s57",name:"Accounting & Bookkeeping"},{ id:"s58",name:"Notary Services"},{ id:"s59",name:"IT Support"},{ id:"s60",name:"Legal Services"},{ id:"s61",name:"Business Consulting"},{ id:"s62",name:"Tax Preparation"}] },
-];
+// Supports both real entity IDs and legacy short codes (s01, s19, etc.)
+// Categories and services are loaded from DB at runtime.
 
-const VILLAGE_LIST = ["Alhambra","Amelia","Ashland","Belle Aire","Belvedere","Bonita","Bonnybrook","Bradford","Briar Meadow","Bridgeport at Creekside Landing","Bridgeport at Lake Miona","Bridgeport at Lake Sumter","Bridgeport at Laurel Valley","Bridgeport at Miona Shores","Bridgeport at Mission Hills","Buttonwood","Calumet Grove","Caroline","Cason Hammock","Charlotte","Chatham","Chitty Chatty","Citrus Grove","Collier","Collier at Alden Bungalows","Collier at Antrim Dells","Country Club Hills","Dabney","De Allende","De La Vista","Del Mar","DeLuna","DeSoto","Dunedin","Duval","El Cortez","Fenney","Fernandina","Gilchrist","Glenbrook","Hacienda","Haciendas of Mission Hills","Hadley","Hammock at Fenney","Hawkins","Hemingway","Hillsborough","La Reynalda","La Zamora","LaBelle","Lake Deaton","Lake Denham","Lakeshore Cottages","Largo","Liberty Park","Linden","Lynnhaven","Mallory Square","Marsh Bend","McClure","Mira Mesa","Monarch Grove","Newell","Orange Blossom Gardens","Osceola Hills","Osceola Hills at Soaring Eagle Preserve","Palo Alto","Pennecamp","Piedmont","Pine Hills","Pine Ridge","Pinellas","Poinciana","Polo Ridge","Richmond","Rio Grande","Rio Ponderosa","Rio Ranchero","Sabal Chase","Sanibel","Santiago","Santo Domingo","Silver Lake","Springdale","St. Catherine","St. Charles","St. James","St. Johns","Summerhill","Sunset Pointe","Tall Trees","Tamarind Grove","Tierra Del Sol","Valle Verde","Virginia Trace","Winifred","Woodbury"];
+// Legacy short-code → real service name map (for providers created before entity migration)
+const LEGACY_SVC_NAMES = {
+  s01:"Home Improvements",s02:"General Repairs",s03:"Cleaning Services",s04:"Painting (Interior/Exterior)",
+  s05:"Garage Door Services",s06:"Window Installation/Repair",s07:"HVAC",s08:"Plumbing",s09:"Roofing",
+  s10:"Handyman Services",s11:"Security & Home Watch",s12:"Pest Control",s13:"Appliance Repair",
+  s14:"Electrical & Lighting",s15:"Flooring (Tile, Wood, Carpet)",s16:"Home Organization",
+  s17:"Smart Home Installation",s18:"Pool & Spa Services",s19:"Lawn Mowing",s20:"Sod Installation",
+  s21:"Tree Trimming & Pruning/Removal",s22:"Lawn Fertilization",s23:"Irrigation/Sprinkler Services",
+  s24:"Landscaping",s25:"Hardscaping",s26:"Pressure Washing",s27:"Driveway Repair/Cleaning/Painting",
+  s28:"Rentals",s29:"Repairs",s30:"Detailing",s31:"Lighting Upgrades",s32:"Improvements/Customizations",
+  s33:"Battery Replacement",s34:"Tire Services",s35:"Auto Repairs",s36:"Auto Detailing",
+  s37:"Oil Changes",s38:"Tire Services",s39:"Mobile Mechanic",s40:"Hair Stylists",
+  s41:"Nail Technicians",s42:"Spa Services",s43:"Home Health Aides",s44:"Massage Therapists",
+  s45:"Personal Trainers",s46:"Makeup Artists",s47:"Veterinary Services",s48:"Grooming",
+  s49:"Pet Sitting/Walking",s50:"Pet Training",s51:"Mobile Grooming",s52:"Medical Transport",
+  s53:"Airport Transport",s54:"Local Rides",s55:"Errand Services",s56:"Courier/Delivery Services",
+  s57:"Accounting & Bookkeeping",s58:"Notary Services",s59:"IT Support",s60:"Legal Services",
+  s61:"Business Consulting",s62:"Tax Preparation",s63:"Home Watch",s64:"Pool Cleaning",
+  s65:"Golf Cart Repair",s66:"Auto Detailing",
+};
 
-function SvcAccordion({ selSvcs, setSelSvcs }) {
+// Legacy cat ID → icon/name (so legacy providers still see grouped categories)
+const LEGACY_CAT_META = {
+  "69d09c14d5ee9e7be9aa301b": { icon: "🏠", name: "Home Services" },
+  "69d181fe57b60e0aecf4067d": { icon: "💡", name: "Home Systems & Utilities" },
+  "69d09c14d5ee9e7be9aa301c": { icon: "🌿", name: "Yard & Outdoor" },
+  "69d09c14d5ee9e7be9aa301d": { icon: "⛳", name: "Golf Cart Services" },
+  "69d09c14d5ee9e7be9aa301e": { icon: "🚗", name: "Automobile Services" },
+  "69d09c14d5ee9e7be9aa301f": { icon: "💆", name: "Personal Care" },
+  "69d09c14d5ee9e7be9aa3020": { icon: "🐾", name: "Pet Services" },
+  "69d09c14d5ee9e7be9aa3021": { icon: "🚌", name: "Transportation" },
+  "69d181fe57b60e0aecf4067e": { icon: "💼", name: "Professional Services" },
+};
+
+function SvcAccordion({ selSvcs, setSelSvcs, dbCategories, dbServices }) {
   const [openCat, setOpenCat] = useState(null);
+
+  // Build category list: use live DB data, fall back to legacy meta
+  const cats = (dbCategories || []).filter(c => c.is_active !== false).map(cat => {
+    const meta = LEGACY_CAT_META[cat.id] || {};
+    return {
+      id: cat.id,
+      name: (meta.icon ? meta.icon + " " : (cat.icon ? cat.icon + " " : "")) + cat.name,
+      svcs: (dbServices || []).filter(s => s.category_id === cat.id && s.is_active !== false),
+    };
+  }).filter(c => c.svcs.length > 0);
+
+  // Also collect any legacy-code services that are currently selected but not in DB
+  const dbSvcIds = new Set((dbServices || []).map(s => s.id));
+  const legacySelected = selSvcs.filter(id => !dbSvcIds.has(id) && LEGACY_SVC_NAMES[id]);
+
   const toggle = (id) => setSelSvcs(prev => prev.includes(id) ? prev.filter(s => s !== id) : [...prev, id]);
+
   return (
     <div>
-      {EDIT_CATS.map(cat => {
+      {cats.map(cat => {
         const count = cat.svcs.filter(s => selSvcs.includes(s.id)).length;
         const isOpen = openCat === cat.id;
         return (
           <div key={cat.id} style={{ marginBottom: 4, borderRadius: 5, overflow: "hidden", border: `1.5px solid ${PAPER_DK}` }}>
-            <div onClick={() => setOpenCat(isOpen ? null : cat.id)} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 13px", background: count > 0 ? `linear-gradient(180deg,#9A6030,${BROWN_BTN})` : `linear-gradient(180deg,${PAPER_MID},${PAPER_DK})`, color: count > 0 ? PAPER : INK, cursor: "pointer", fontWeight: 700, fontSize: 13, fontFamily: SERIF }}>
+            <div onClick={() => setOpenCat(isOpen ? null : cat.id)}
+              style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 13px", background: count > 0 ? `linear-gradient(180deg,#9A6030,${BROWN_BTN})` : `linear-gradient(180deg,${PAPER_MID},${PAPER_DK})`, color: count > 0 ? PAPER : INK, cursor: "pointer", fontWeight: 700, fontSize: 13, fontFamily: SERIF }}>
               <span>{cat.name}{count > 0 ? `  ✓ ${count}` : ""}</span>
               <span style={{ fontSize: 11 }}>{isOpen ? "▲" : "▼"}</span>
             </div>
@@ -205,7 +246,8 @@ function SvcAccordion({ selSvcs, setSelSvcs }) {
                 {cat.svcs.map(svc => {
                   const checked = selSvcs.includes(svc.id);
                   return (
-                    <div key={svc.id} onClick={() => toggle(svc.id)} style={{ display: "flex", alignItems: "center", gap: 10, padding: "9px 16px", cursor: "pointer", background: checked ? "rgba(122,72,32,0.08)" : "transparent", borderBottom: `1px solid ${PAPER_MID}` }}>
+                    <div key={svc.id} onClick={() => toggle(svc.id)}
+                      style={{ display: "flex", alignItems: "center", gap: 10, padding: "9px 16px", cursor: "pointer", background: checked ? "rgba(122,72,32,0.08)" : "transparent", borderBottom: `1px solid ${PAPER_MID}` }}>
                       <div style={{ width: 16, height: 16, border: `2px solid ${checked ? BROWN_BTN : PAPER_DK}`, borderRadius: 3, background: checked ? BROWN_BTN : PAPER, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
                         {checked && <span style={{ color: PAPER, fontSize: 10 }}>✓</span>}
                       </div>
@@ -218,115 +260,138 @@ function SvcAccordion({ selSvcs, setSelSvcs }) {
           </div>
         );
       })}
+      {/* Show legacy selected services that aren't in the DB (read-only display) */}
+      {legacySelected.length > 0 && (
+        <div style={{ marginTop: 8, padding: "8px 12px", background: "#fffbe6", border: `1px solid ${PAPER_DK}`, borderRadius: 5 }}>
+          <div style={{ fontSize: 11, color: INK_FADE, fontFamily: SANS, marginBottom: 4 }}>Previously selected services:</div>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 5 }}>
+            {legacySelected.map(id => (
+              <span key={id} onClick={() => toggle(id)}
+                style={{ fontSize: 12, background: BROWN_BTN, color: PAPER, borderRadius: 20, padding: "3px 10px", cursor: "pointer", fontFamily: SANS }}>
+                {LEGACY_SVC_NAMES[id]} ✕
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
 
-function VillageSelect({ selAreas, setSelAreas }) {
-  const [open, setOpen] = useState(false);
-  const toggle = (v) => setSelAreas(p => p.includes(v) ? p.filter(a => a !== v) : [...p, v]);
+// ── Village picker — grouped by region, works with entity IDs ─────────────
+function VillageSelect({ selAreas, setSelAreas, dbAreas }) {
+  const [openGroup, setOpenGroup] = useState(null);
+
+  const MACRO_GROUPS = [
+    { key: "historic",    label: "🌴 Historic Side",       villages: ["Alhambra","Ashland","Belle Aire","Belvedere","Bonita","Buttonwood","Calumet Grove","Country Club Hills","De Allende","De La Vista","Del Mar","DeLuna","El Cortez","Hacienda","Haciendas of Mission Hills","La Reynalda","La Zamora","LaBelle","Largo","Orange Blossom Gardens","Pennecamp","Piedmont","Pine Ridge","Poinciana","Rio Ranchero","Santo Domingo","Spanish Springs","Tamarind Grove","Valle Verde","Virginia Trace"] },
+    { key: "established", label: "🏡 Established Villages", villages: ["Amelia","Bonnybrook","Caroline","Charlotte","Chatham","DeSoto","Dunedin","Fernandina","Gilchrist","Glenbrook","Hadley","Hawkins","Hemingway","Hillsborough","Lake Deaton","Lynnhaven","Mira Mesa","Palo Alto","Pinellas","Polo Ridge","Rio Grande","Rio Ponderosa","Sabal Chase","Silver Lake","Springdale","Summerhill","Sunset Pointe","Tierra Del Sol","Woodbury"] },
+    { key: "newer",       label: "🌿 Newer Villages",       villages: ["Chitty Chatty","Citrus Grove","Dabney","Duval","Fenney","Hammock at Fenney","Lakeshore Cottages","Liberty Park","Linden","Mallory Square","Marsh Bend","McClure","Monarch Grove","Newell","Pine Hills","Richmond","Sanibel","Santiago","Tall Trees"] },
+    { key: "eastport",    label: "🌊 Eastport",             villages: ["Bradford","Bridgeport at Creekside Landing","Bridgeport at Lake Miona","Bridgeport at Lake Sumter","Bridgeport at Laurel Valley","Bridgeport at Miona Shores","Bridgeport at Mission Hills","Cason Hammock","Collier","Collier at Alden Bungalows","Collier at Antrim Dells","Lake Denham","Osceola Hills","Osceola Hills at Soaring Eagle Preserve","Winifred"] },
+    { key: "st_john",     label: "⛪ St. John's Area",      villages: ["St. Catherine","St. Charles","St. James","St. Johns"] },
+  ];
+
+  // Build name→id map from live DB areas
+  const nameToId = {};
+  (dbAreas || []).forEach(a => {
+    const short = a.name.includes(' — ') ? a.name.split(' — ').pop().trim() : a.name;
+    nameToId[short] = a.id;
+    nameToId[a.name] = a.id;
+  });
+
+  // Also handle legacy: if selAreas contains village names (strings, not IDs), keep them as-is
+  const isLegacyName = (v) => !v.match(/^[0-9a-f]{24}$/i);
+
+  const isSelected = (vName) => {
+    const id = nameToId[vName];
+    return id ? selAreas.includes(id) : selAreas.includes(vName);
+  };
+
+  const toggle = (vName) => {
+    const id = nameToId[vName];
+    const key = id || vName;
+    setSelAreas(prev => prev.includes(key) ? prev.filter(a => a !== key) : [...prev, key]);
+  };
+
+  const selectAll = (group) => {
+    const keys = group.villages.map(v => nameToId[v] || v).filter(Boolean);
+    setSelAreas(prev => {
+      const s = new Set(prev);
+      keys.forEach(k => s.add(k));
+      return Array.from(s);
+    });
+  };
+
+  const deselectAll = (group) => {
+    const keys = new Set(group.villages.map(v => nameToId[v] || v).filter(Boolean));
+    setSelAreas(prev => prev.filter(k => !keys.has(k)));
+  };
+
+  const groupCount = (group) => group.villages.filter(v => isSelected(v)).length;
+
+  // Any selected areas that don't appear in any macro group (edge cases)
+  const allGroupVillages = new Set(MACRO_GROUPS.flatMap(g => g.villages.map(v => nameToId[v] || v)));
+  const orphans = selAreas.filter(id => !allGroupVillages.has(id));
+
   return (
     <div>
-      <div onClick={() => setOpen(o => !o)} style={{ border: `1.5px solid ${PAPER_DK}`, borderRadius: 5, padding: "10px 13px", cursor: "pointer", background: selAreas.length > 0 ? `linear-gradient(180deg,#9A6030,${BROWN_BTN})` : `linear-gradient(180deg,${PAPER_MID},${PAPER_DK})`, color: selAreas.length > 0 ? PAPER : INK, display: "flex", justifyContent: "space-between", fontWeight: 700, fontSize: 13, fontFamily: SERIF }}>
-        <span>📍 {selAreas.length === 0 ? "Select villages..." : `${selAreas.length} village${selAreas.length > 1 ? "s" : ""} selected`}</span>
-        <span style={{ fontSize: 11 }}>{open ? "▲" : "▼"}</span>
-      </div>
-      {open && (
-        <div style={{ border: `1.5px solid ${PAPER_DK}`, borderTop: "none", borderRadius: "0 0 5px 5px", maxHeight: 260, overflowY: "auto", background: PAPER }}>
-          <div style={{ padding: "6px 10px", borderBottom: `1px solid ${PAPER_DK}`, display: "flex", gap: 8 }}>
-            <button onClick={() => setSelAreas(VILLAGE_LIST)} style={{ fontSize: 11, background: TEAL, color: "#fff", border: "none", borderRadius: 4, padding: "4px 10px", cursor: "pointer", fontFamily: SANS }}>Select All</button>
-            <button onClick={() => setSelAreas([])} style={{ fontSize: 11, background: "#888", color: "#fff", border: "none", borderRadius: 4, padding: "4px 10px", cursor: "pointer", fontFamily: SANS }}>Clear</button>
-          </div>
-          {VILLAGE_LIST.map(v => {
-            const checked = selAreas.includes(v);
+      {selAreas.length > 0 && (
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 5, marginBottom: 10 }}>
+          {selAreas.map(id => {
+            const area = (dbAreas || []).find(a => a.id === id);
+            const name = area ? (area.name.includes(' — ') ? area.name.split(' — ').pop().trim() : area.name) : (isLegacyName(id) ? id : id);
             return (
-              <div key={v} onClick={() => toggle(v)} style={{ display: "flex", alignItems: "center", gap: 10, padding: "8px 14px", cursor: "pointer", background: checked ? "rgba(122,72,32,0.08)" : "transparent", borderBottom: `1px solid ${PAPER_MID}` }}>
-                <div style={{ width: 16, height: 16, border: `2px solid ${checked ? BROWN_BTN : PAPER_DK}`, borderRadius: 3, background: checked ? BROWN_BTN : PAPER, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                  {checked && <span style={{ color: PAPER, fontSize: 10 }}>✓</span>}
-                </div>
-                <span style={{ fontSize: 13, color: INK, fontFamily: SANS }}>{v}</span>
-              </div>
+              <span key={id} onClick={() => setSelAreas(prev => prev.filter(a => a !== id))}
+                style={{ fontSize: 12, background: TEAL, color: "#fff", borderRadius: 20, padding: "4px 11px", cursor: "pointer", fontFamily: SANS }}>
+                {name} ✕
+              </span>
             );
           })}
         </div>
       )}
+
+      {MACRO_GROUPS.map(group => {
+        const count = groupCount(group);
+        const isOpen = openGroup === group.key;
+        return (
+          <div key={group.key} style={{ marginBottom: 4, borderRadius: 5, overflow: "hidden", border: `1.5px solid ${count > 0 ? TEAL : PAPER_DK}` }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 13px", background: count > 0 ? `linear-gradient(180deg,#006B5C,${TEAL})` : `linear-gradient(180deg,${PAPER_MID},${PAPER_DK})`, color: count > 0 ? "#fff" : INK, cursor: "pointer" }}
+              onClick={() => setOpenGroup(isOpen ? null : group.key)}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <span style={{ fontSize: 11 }}>{isOpen ? "▲" : "▼"}</span>
+                <span style={{ fontWeight: 700, fontSize: 13, fontFamily: SERIF }}>{group.label}</span>
+                {count > 0 && <span style={{ fontSize: 11, background: "rgba(255,255,255,0.25)", borderRadius: 10, padding: "1px 7px", fontFamily: SANS }}>{count} selected</span>}
+              </div>
+              <div style={{ display: "flex", gap: 6 }} onClick={e => e.stopPropagation()}>
+                <button onClick={() => selectAll(group)} style={{ fontSize: 11, background: "rgba(255,255,255,0.2)", color: count > 0 ? "#fff" : INK, border: "1px solid rgba(255,255,255,0.3)", borderRadius: 4, padding: "3px 9px", cursor: "pointer", fontFamily: SANS }}>All</button>
+                {count > 0 && <button onClick={() => deselectAll(group)} style={{ fontSize: 11, background: "rgba(0,0,0,0.15)", color: count > 0 ? "#fff" : INK, border: "1px solid rgba(255,255,255,0.2)", borderRadius: 4, padding: "3px 9px", cursor: "pointer", fontFamily: SANS }}>None</button>}
+              </div>
+            </div>
+            {isOpen && (
+              <div style={{ background: PAPER, padding: "8px 10px", display: "flex", flexWrap: "wrap", gap: 6 }}>
+                {group.villages.map(vName => {
+                  const sel = isSelected(vName);
+                  return (
+                    <button key={vName} onClick={() => toggle(vName)}
+                      style={{ fontSize: 12, padding: "5px 12px", borderRadius: 20, border: `2px solid ${sel ? TEAL : PAPER_DK}`, background: sel ? TEAL : PAPER, color: sel ? "#fff" : INK, cursor: "pointer", fontWeight: sel ? 700 : 400, fontFamily: SANS, transition: "all 0.1s" }}>
+                      {sel ? "✓ " : ""}{vName}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        );
+      })}
       {selAreas.length > 0 && (
-        <div style={{ marginTop: 6, fontSize: 12, color: INK_FADE, fontFamily: SANS, lineHeight: 1.6 }}>
-          <strong style={{ color: INK }}>Serving:</strong> {selAreas.join(", ")}
+        <div style={{ marginTop: 6, fontSize: 12, color: INK_FADE, fontFamily: SANS }}>
+          {selAreas.length} village{selAreas.length !== 1 ? "s" : ""} selected
         </div>
       )}
     </div>
   );
 }
 
-// ── FORGOT PASSWORD SCREEN ───────────────────────────────────────────────
-function ForgotPasswordScreen({ onBack }) {
-  const [email, setEmail] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [sent, setSent] = useState(false);
-  const [error, setError] = useState("");
 
-  const handleSubmit = async (e) => {
-    e && e.preventDefault();
-    if (!email.trim()) { setError("Please enter your email address."); return; }
-    setLoading(true); setError("");
-    try {
-      await fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/requestPasswordReset", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: email.trim().toLowerCase() }),
-      });
-      setSent(true);
-    } catch {
-      setError("Something went wrong. Please try again.");
-    }
-    setLoading(false);
-  };
-
-  return (
-    <div style={{ minHeight: "100vh", background: PAPER, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: 24, fontFamily: SERIF }}>
-      <div style={{ width: "100%", maxWidth: 400 }}>
-        <a href="/" style={{ textDecoration: "none" }}>
-          <img src="https://media.base44.com/images/public/69d062aca815ce8e697894b1/a9af95bc3_V-Hublogo.png" style={{ height: 60, display: "block", margin: "0 auto 24px", borderRadius: 10 }} alt="V-Hub" />
-        </a>
-        <div style={{ background: PAPER_MID, border: `2px solid ${BROWN_BTN}`, borderRadius: 12, padding: 28, boxShadow: "0 4px 24px rgba(0,0,0,0.18)" }}>
-          <div style={{ fontSize: 20, fontWeight: 900, color: INK, letterSpacing: 1, marginBottom: 6, textAlign: "center" }}>Reset Your Password</div>
-          <div style={{ fontSize: 13, color: INK_FADE, textAlign: "center", marginBottom: 22, fontFamily: SANS }}>Enter your email and we'll send you a reset link.</div>
-
-          {sent ? (
-            <div style={{ textAlign: "center" }}>
-              <div style={{ fontSize: 40, marginBottom: 12 }}>📬</div>
-              <div style={{ fontSize: 15, color: GREEN, fontWeight: 700, marginBottom: 10 }}>Check your inbox!</div>
-              <div style={{ fontSize: 13, color: INK_FADE, fontFamily: SANS, lineHeight: 1.6, marginBottom: 20 }}>
-                If an account exists for <strong>{email}</strong>, we've sent a password reset link. It expires in 1 hour.
-              </div>
-              <button onClick={onBack} style={{ background: BROWN_BTN, color: PAPER, border: "none", borderRadius: 8, padding: "11px 24px", fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: SANS }}>← Back to Sign In</button>
-            </div>
-          ) : (
-            <form onSubmit={handleSubmit}>
-              {error && <div style={{ background: "#ffeaea", border: "1px solid #c0392b", borderRadius: 6, padding: "8px 12px", fontSize: 13, color: "#c0392b", fontFamily: SANS, marginBottom: 14 }}>{error}</div>}
-              <div style={{ marginBottom: 16 }}>
-                <label style={{ fontSize: 12, fontWeight: 700, color: INK_FADE, fontFamily: SANS, textTransform: "uppercase", letterSpacing: 1, display: "block", marginBottom: 6 }}>Email Address</label>
-                <input
-                  type="email"
-                  value={email}
-                  onChange={e => setEmail(e.target.value)}
-                  placeholder="The email on your V-Hub account"
-                  style={{ ...inS, border: `1.5px solid ${BROWN_BTN}`, borderRadius: 8, padding: "12px 14px", fontSize: 15 }}
-                  autoFocus
-                />
-              </div>
-              <button
-                type="submit"
-                disabled={loading}
-                style={{ width: "100%", background: loading ? PAPER_DK : `linear-gradient(180deg,#9A6030,${BROWN_BTN} 60%,#5A3010)`, color: PAPER, border: `3px solid ${YELLOW}`, boxShadow: `0 0 0 1.5px ${YELLOW}`, borderRadius: 8, padding: "14px 20px", fontSize: 15, fontWeight: 900, cursor: loading ? "not-allowed" : "pointer", fontFamily: SERIF, letterSpacing: 2, textTransform: "uppercase" }}
-              >
-                {loading ? "Sending..." : "Send Reset Link →"}
-              </button>
-              <div style={{ textAlign: "center", marginTop: 16 }}>
-                <button type="button" onClick={onBack} style={{ background: "none", border: "none", color: BROWN_BTN, fontSize: 13, cursor: "pointer", fontFamily: SANS, textDecoration: "underline" }}>← Back to Sign In</button>
-              </div>
-            </form>
           )}
         </div>
       </div>
@@ -575,6 +640,9 @@ export default function ProviderDashboard() {
   const [reviews, setReviews]       = useState([]);
   const [svcMap, setSvcMap]         = useState({});
   const [areaMap, setAreaMap]       = useState({});
+  const [dbCategories, setDbCategories] = useState([]);
+  const [dbServices, setDbServices]     = useState([]);
+  const [dbAreas, setDbAreas]           = useState([]);
 
   // Edit form state
   const [form, setForm]             = useState({});
@@ -641,15 +709,20 @@ export default function ProviderDashboard() {
       window.history.replaceState({}, "", window.location.pathname);
     }
 
-    // Load entity maps for name resolution
-    Service.list().then(svcs => {
-      const m = {}; (svcs || []).forEach(s => { m[s.id] = s.name; });
-      setSvcMap(m);
-    }).catch(() => {});
-    ServiceArea.list().then(areas => {
-      const m = {}; (areas || []).forEach(a => { m[a.id] = a.name; });
-      setAreaMap(m);
-    }).catch(() => {});
+    // Load entity data for name resolution and edit pickers
+    Promise.all([
+      Category.list().catch(() => []),
+      Service.list().catch(() => []),
+      ServiceArea.list().catch(() => []),
+    ]).then(([cats, svcs, areas]) => {
+      setDbCategories(cats || []);
+      setDbServices(svcs || []);
+      setDbAreas(areas || []);
+      const sm = {}; (svcs || []).forEach(s => { sm[s.id] = s.name; });
+      setSvcMap(sm);
+      const am = {}; (areas || []).forEach(a => { am[a.id] = a.name; });
+      setAreaMap(am);
+    });
   }, []);
 
   const loadReviews = async (pid) => {
@@ -898,13 +971,13 @@ export default function ProviderDashboard() {
 
         <div style={shS}>Section 2 — Services You Offer</div>
         <div style={{ marginBottom: 24 }}>
-          <SvcAccordion selSvcs={selSvcs} setSelSvcs={setSelSvcs} />
+          <SvcAccordion selSvcs={selSvcs} setSelSvcs={setSelSvcs} dbCategories={dbCategories} dbServices={dbServices} />
           {selSvcs.length > 0 && <div style={{ marginTop: 8, fontSize: 12, color: TEAL, fontFamily: SANS }}>✓ {selSvcs.length} service{selSvcs.length > 1 ? "s" : ""} selected</div>}
         </div>
 
         <div style={shS}>Section 3 — Villages You Serve</div>
         <div style={{ marginBottom: 28 }}>
-          <VillageSelect selAreas={selAreas} setSelAreas={setSelAreas} />
+          <VillageSelect selAreas={selAreas} setSelAreas={setSelAreas} dbAreas={dbAreas} />
         </div>
 
         <div style={{ textAlign: "center", borderTop: `2px solid ${INK}`, paddingTop: 20 }}>
