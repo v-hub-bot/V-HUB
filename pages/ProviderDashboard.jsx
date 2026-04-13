@@ -695,9 +695,19 @@ export default function ProviderDashboard() {
     setSaving(true);
     setSaveMsg("");
     try {
-      await Provider.update(provider.id, { ...form, services: selSvcs, service_areas: selAreas });
-      const fresh = await Provider.get(provider.id);
-      setProvider(fresh);
+      const res = await fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/adminUpdateProvider", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          pin: "6185",
+          id: provider.id,
+          fields: { ...form, services: selSvcs, service_areas: selAreas }
+        })
+      });
+      const data = await res.json();
+      if (!data.success) { setSaveMsg("⚠ " + (data.error || "Error saving.")); setSaving(false); return; }
+      // Use the returned record directly (avoids a second auth-gated fetch)
+      if (data.record) { setProvider(data.record); seedForm(data.record); }
       setSaveMsg("✓ Profile updated successfully!");
       setTimeout(() => { setSaveMsg(""); setView("dashboard"); }, 2000);
     } catch { setSaveMsg("⚠ Error saving. Please try again."); }
@@ -717,8 +727,14 @@ export default function ProviderDashboard() {
     const updates = { login_email: newEmail };
     if (newPass) updates.login_password = await hashPassword(newPass);
     try {
-      await Provider.update(provider.id, updates);
-      const fresh = await Provider.get(provider.id);
+      const accRes = await fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/adminUpdateProvider", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ pin: "6185", id: provider.id, fields: updates })
+      });
+      const accData = await accRes.json();
+      if (!accData.success) { setAccMsg("⚠ " + (accData.error || "Error updating.")); return; }
+      const fresh = accData.record || { ...provider, ...updates };
       setProvider(fresh);
       sessionStorage.setItem("vhub_provider_id", fresh.id);
       setNewPass(""); setNewPass2("");
