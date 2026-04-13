@@ -393,13 +393,6 @@ function VillageSelect({ selAreas, setSelAreas, dbAreas }) {
 }
 
 
-          )}
-        </div>
-      </div>
-    </div>
-  );
-}
-
 // ── RESET PASSWORD SCREEN ─────────────────────────────────────────────────
 function ResetPasswordScreen({ token, providerId, onSuccess }) {
   const [pass, setPass] = useState("");
