@@ -237,6 +237,11 @@ Deno.serve(async (req) => {
               🔍 Step 4 — Residents across your selected villages can find you
             </div>
 
+
+            <div style="background:#FFF3CD;border:1px solid #FFC107;border-radius:8px;padding:12px 16px;margin:20px 0;font-size:13px;color:#856404;text-align:center;">
+              📬 <strong>Didn't see this email?</strong> Check your <strong>Spam or Junk</strong> folder.<br/>
+              To make sure you get future V-Hub emails, add <strong>admin@v-hub.us</strong> to your contacts.
+            </div>
             <p style="font-size: 12px; color: #8B5E3C; margin-top: 4px; text-align: center;">
               Questions? Reply to this email or contact us at <a href="mailto:admin@v-hub.us" style="color: #5C3317;">admin@v-hub.us</a>
             </p>

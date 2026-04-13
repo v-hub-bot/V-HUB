@@ -352,6 +352,11 @@ Deno.serve(async (req) => {
                 </a>
               </div>
 
+
+              <div style="background:#FFF3CD;border:1px solid #FFC107;border-radius:8px;padding:12px 16px;margin:20px 0;font-size:13px;color:#856404;text-align:center;">
+                📬 <strong>Didn't see this email?</strong> It may have landed in your <strong>Spam or Junk</strong> folder.<br/>
+                To ensure you receive all V-Hub emails, add <strong>admin@v-hub.us</strong> to your contacts.
+              </div>
               <p style="font-size:12px;color:#8B5E3C;text-align:center;margin-top:14px;">
                 Questions? Reply to this email or reach us at <a href="mailto:admin@v-hub.us" style="color:#E8431A;">admin@v-hub.us</a>
               </p>
