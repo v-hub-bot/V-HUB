@@ -261,6 +261,11 @@ function LoginScreen({ onLogin }) {
       const prov = results[0];
       // Check password
       const storedPass = prov.login_password || "";
+      if (!storedPass) {
+        setError("Your account was set up by admin and has no password yet. Please email admin@v-hub.us to set up your login credentials.");
+        setLoading(false);
+        return;
+      }
       if (storedPass !== loginPass) {
         setError("Incorrect password. Please try again or contact admin@v-hub.us for help.");
         setLoading(false);

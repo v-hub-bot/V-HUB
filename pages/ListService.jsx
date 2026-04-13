@@ -701,7 +701,7 @@ export default function ListService() {
           </div>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginTop: 14 }}>
             {[
-              ["59", "Villages"],
+              ["97", "Villages"],
               ["9",  "Categories"],
               ["62", "Services"],
               ["#1", "Directory"],
@@ -1248,7 +1248,7 @@ export default function ListService() {
           <div style={{ margin: "16px 0", textAlign: "center", color: PAPER_DK, fontSize: 16 }}>✦ ✦ ✦</div>
           <div style={{ border: `1.5px solid ${PAPER_DK}`, borderRadius: 4, padding: "12px 10px", background: PAPER }}>
             <div style={{ fontSize: 10, fontWeight: 900, letterSpacing: 3, textTransform: "uppercase", color: INK, borderBottom: `2px solid ${INK}`, paddingBottom: 4, marginBottom: 10, textAlign: "center" }}>V-Hub By the Numbers</div>
-            {[["59","Villages Covered"],["9","Service Categories"],["62","Searchable Services"],["#1","Local Directory"]].map(([num, label]) => (
+            {[["97","Villages Covered"],["9","Service Categories"],["62","Searchable Services"],["#1","Local Directory"]].map(([num, label]) => (
               <div key={label} style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", padding: "5px 0", borderBottom: `1px solid ${PAPER_MID}` }}>
                 <span style={{ fontSize: 20, fontWeight: 900, color: BROWN_BTN, fontFamily: "'Times New Roman', serif" }}>{num}</span>
                 <span style={{ fontSize: 11, color: INK_FADE, fontStyle: "italic" }}>{label}</span>

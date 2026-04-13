@@ -505,7 +505,7 @@ function AnalyticsTab({ providers, reviews, leads, stats, catMap, svcMap, fullSv
       <div style={S.card}>
         <div style={S.secTitle}>💰 Revenue Snapshot</div>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8 }}>
-          {[["Est. MRR", `$${paid * 29}`, T.green], ["Paid", paid, T.teal], ["Trial", trial, T.gold]].map(([l, v, c]) => (
+          {[["Est. MRR", `$${paid * 12}`, T.green], ["Paid", paid, T.teal], ["Trial", trial, T.gold]].map(([l, v, c]) => (
             <div key={l} style={{ textAlign: "center", background: T.parchment, borderRadius: 6, padding: "10px 6px" }}>
               <div style={{ fontSize: 22, fontWeight: 800, color: c, fontFamily: T.sans }}>{v}</div>
               <div style={{ fontSize: 10, color: T.brownLight, fontFamily: T.sans }}>{l}</div>

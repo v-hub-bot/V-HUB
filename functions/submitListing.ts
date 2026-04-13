@@ -82,6 +82,7 @@ Deno.serve(async (req) => {
       vh_number,
       subscription_status: "pending",
       onboarding_type:     "self_signup",
+      subscription_tier:   "basic",
       trial_start_date:    now,
       trial_end_date:      trialEnd,
       is_visible:          false,

@@ -225,8 +225,12 @@ function ProvDetail({ prov, areas, cats, onBack }) {
     ProviderReview.filter({ provider_id: prov.id })
       .then(all => setReviews((all || []).filter(r => r.is_approved)))
       .catch(() => setReviews([]));
-    // increment profile view count
-    Provider.update(prov.id, { profile_views: (prov.profile_views || 0) + 1 }).catch(() => {});
+    // increment profile view count (read fresh to avoid race condition)
+    Provider.get(prov.id).then(fresh => {
+      Provider.update(prov.id, { profile_views: (fresh.profile_views || 0) + 1 }).catch(() => {});
+    }).catch(() => {
+      Provider.update(prov.id, { profile_views: (prov.profile_views || 0) + 1 }).catch(() => {});
+    });
   }, [prov.id]);
 
   const avgRating = reviews.length > 0
@@ -1066,7 +1070,7 @@ export default function Home() {
       // Higher rating first; same rating → tier order
       const ratingDiff = getScore(b) - getScore(a);
       if (ratingDiff !== 0) return ratingDiff;
-      const tier = { premium: 0, featured: 1, basic: 2 };
+      const tier = { premium: 0, featured: 1, standard: 2, basic: 3 };
       return (tier[a.subscription_tier] ?? 3) - (tier[b.subscription_tier] ?? 3);
     });
     setResults(out);
