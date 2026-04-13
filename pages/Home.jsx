@@ -777,6 +777,7 @@ export default function Home() {
   const [selCatR,  setSelCatR]  = useState(null);
   const [selSvc,   setSelSvc]   = useState(null);
   const [selArea,  setSelArea]  = useState(null);
+  const [currentUser, setCurrentUser] = useState(null);
 
   // Hardcoded categories & services (no auth needed on homepage)
   const CATS_STATIC = [
