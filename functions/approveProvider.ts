@@ -133,15 +133,16 @@ async function resolveServiceNames(ids: string[]): Promise<string> {
   try {
     const allServices = await fetchEntity('Service');
     const map = new Map(allServices.map((s: any) => [s.id, s.name]));
-    const names = ids.map((id) => {
-      // Try DB lookup first, then legacy map, then raw
-      return map.get(id) || SERVICE_LEGACY_MAP[id] || id;
-    });
-    return names.join(', ');
+    const names = ids
+      .map((id) => map.get(id) || SERVICE_LEGACY_MAP[id] || null)
+      .filter(Boolean) as string[];
+    // Strip emoji/group prefix from names like "🌿 Group — Village Name"
+    const clean = names.map(n => n.includes(' — ') ? n.split(' — ').pop()!.trim() : n);
+    return clean.length > 0 ? clean.join(', ') : 'See listing details';
   } catch (e) {
     console.error('resolveServiceNames failed:', e);
-    // Fall back to legacy map only
-    return ids.map(id => SERVICE_LEGACY_MAP[id] || id).join(', ');
+    const names = ids.map(id => SERVICE_LEGACY_MAP[id] || null).filter(Boolean) as string[];
+    return names.length > 0 ? names.join(', ') : 'See listing details';
   }
 }
 
@@ -151,13 +152,16 @@ async function resolveAreaNames(ids: string[]): Promise<string> {
   try {
     const allAreas = await fetchEntity('ServiceArea');
     const map = new Map(allAreas.map((a: any) => [a.id, a.name]));
-    const names = ids.map((id) => {
-      return map.get(id) || AREA_LEGACY_MAP[id] || id;
-    });
-    return names.join(', ');
+    const names = ids
+      .map((id) => map.get(id) || AREA_LEGACY_MAP[id] || null)
+      .filter(Boolean) as string[];
+    // Strip emoji/group prefix from names like "🌿 Group — Village Name"
+    const clean = names.map(n => n.includes(' — ') ? n.split(' — ').pop()!.trim() : n);
+    return clean.length > 0 ? clean.join(', ') : 'See listing details';
   } catch (e) {
     console.error('resolveAreaNames failed:', e);
-    return ids.map(id => AREA_LEGACY_MAP[id] || id).join(', ');
+    const names = ids.map(id => AREA_LEGACY_MAP[id] || null).filter(Boolean) as string[];
+    return names.length > 0 ? names.join(', ') : 'See listing details';
   }
 }
 

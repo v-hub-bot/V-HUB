@@ -103,14 +103,15 @@ Deno.serve(async (req) => {
       login_password:      hashed_password,
     });
 
-    // Use human-readable names (passed from frontend) for emails
+    // Use human-readable names (passed from frontend) — strip emoji/group prefix if present
+    const cleanName = (n: string) => n.includes(' — ') ? n.split(' — ').pop()!.trim() : n;
     const svcDisplay = (service_names && service_names.length > 0)
-      ? service_names.join(', ')
-      : (services || []).join(', ') || 'N/A';
+      ? service_names.map(cleanName).join(', ')
+      : 'See listing details';
 
     const areaDisplay = (area_names && area_names.length > 0)
-      ? area_names.join(', ')
-      : (service_areas || []).join(', ') || 'N/A';
+      ? area_names.map(cleanName).join(', ')
+      : 'See listing details';
 
     const catDisplay = category_name || 'N/A';
     const displayLoginEmail = login_email || email;
