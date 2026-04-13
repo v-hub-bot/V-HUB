@@ -439,14 +439,17 @@ function LoginScreen({ onLogin, onForgot }) {
       const isVH = /^vh-?\d{4}$/i.test(loginInput);
       let results = [];
       if (isVH) {
-        // Normalize to uppercase with dash e.g. VH-1234
+        // VH number is unique — find exact account
         const vhNorm = loginInput.toUpperCase().replace(/^VH(\d)/, 'VH-$1');
         results = await Provider.filter({ vh_number: vhNorm });
       } else {
-        // Try login_email first, then business email
-        results = await Provider.filter({ login_email: loginInput.toLowerCase() });
-        if (!results || results.length === 0) {
-          results = await Provider.filter({ email: loginInput.toLowerCase() });
+        // Email login — fetch ALL accounts with this email (could be multiple businesses)
+        let byLoginEmail = await Provider.filter({ login_email: loginInput.toLowerCase() });
+        let byEmail = await Provider.filter({ email: loginInput.toLowerCase() });
+        // Merge, deduplicate by id
+        const seen = new Set();
+        for (const p of [...(byLoginEmail||[]), ...(byEmail||[])]) {
+          if (!seen.has(p.id)) { seen.add(p.id); results.push(p); }
         }
       }
       if (!results || results.length === 0) {
@@ -454,22 +457,29 @@ function LoginScreen({ onLogin, onForgot }) {
         setLoading(false);
         return;
       }
-      const prov = results[0];
-      // Check password
-      const storedPass = prov.login_password || "";
-      if (!storedPass) {
-        setError("No password found for this account. Use \"Forgot your password?\" below to set one up — we\'ll email you a reset link.");
-        setLoading(false);
-        return;
-      }
-      // Support both legacy plaintext and new hashed passwords
+
+      // Hash the entered password once
       const hashedInput = await hashPassword(loginPass);
-      const isMatch = storedPass === loginPass || storedPass === hashedInput;
-      if (!isMatch) {
-        setError("Incorrect password. Please try again or contact admin@v-hub.us for help.");
+
+      // Find the account whose password matches — handles multiple businesses per email
+      const prov = results.find(p => {
+        const stored = p.login_password || "";
+        if (!stored) return false;
+        return stored === loginPass || stored === hashedInput;
+      });
+
+      if (!prov) {
+        // Check if any account was found but has no password
+        const hasNoPass = results.some(p => !p.login_password);
+        if (hasNoPass && results.length === 1) {
+          setError("No password found for this account. Use \"Forgot your password?\" below to set one up — we\'ll email you a reset link.");
+        } else {
+          setError("Incorrect password. Please try again, or use your VH number (e.g. VH-1234) to access a specific account.");
+        }
         setLoading(false);
         return;
       }
+
       // Success — store session in sessionStorage
       sessionStorage.setItem("vhub_provider_id", prov.id);
       onLogin(prov);
