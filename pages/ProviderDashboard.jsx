@@ -233,6 +233,157 @@ function VillageSelect({ selAreas, setSelAreas }) {
   );
 }
 
+// ── FORGOT PASSWORD SCREEN ───────────────────────────────────────────────
+function ForgotPasswordScreen({ onBack }) {
+  const [email, setEmail] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [sent, setSent] = useState(false);
+  const [error, setError] = useState("");
+
+  const handleSubmit = async (e) => {
+    e && e.preventDefault();
+    if (!email.trim()) { setError("Please enter your email address."); return; }
+    setLoading(true); setError("");
+    try {
+      await fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/requestPasswordReset", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: email.trim().toLowerCase() }),
+      });
+      setSent(true);
+    } catch {
+      setError("Something went wrong. Please try again.");
+    }
+    setLoading(false);
+  };
+
+  return (
+    <div style={{ minHeight: "100vh", background: PAPER, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: 24, fontFamily: SERIF }}>
+      <div style={{ width: "100%", maxWidth: 400 }}>
+        <a href="/" style={{ textDecoration: "none" }}>
+          <img src="https://media.base44.com/images/public/69d062aca815ce8e697894b1/a9af95bc3_V-Hublogo.png" style={{ height: 60, display: "block", margin: "0 auto 24px", borderRadius: 10 }} alt="V-Hub" />
+        </a>
+        <div style={{ background: PAPER_MID, border: `2px solid ${BROWN_BTN}`, borderRadius: 12, padding: 28, boxShadow: "0 4px 24px rgba(0,0,0,0.18)" }}>
+          <div style={{ fontSize: 20, fontWeight: 900, color: INK, letterSpacing: 1, marginBottom: 6, textAlign: "center" }}>Reset Your Password</div>
+          <div style={{ fontSize: 13, color: INK_FADE, textAlign: "center", marginBottom: 22, fontFamily: SANS }}>Enter your email and we'll send you a reset link.</div>
+
+          {sent ? (
+            <div style={{ textAlign: "center" }}>
+              <div style={{ fontSize: 40, marginBottom: 12 }}>📬</div>
+              <div style={{ fontSize: 15, color: GREEN, fontWeight: 700, marginBottom: 10 }}>Check your inbox!</div>
+              <div style={{ fontSize: 13, color: INK_FADE, fontFamily: SANS, lineHeight: 1.6, marginBottom: 20 }}>
+                If an account exists for <strong>{email}</strong>, we've sent a password reset link. It expires in 1 hour.
+              </div>
+              <button onClick={onBack} style={{ background: BROWN_BTN, color: PAPER, border: "none", borderRadius: 8, padding: "11px 24px", fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: SANS }}>← Back to Sign In</button>
+            </div>
+          ) : (
+            <form onSubmit={handleSubmit}>
+              {error && <div style={{ background: "#ffeaea", border: "1px solid #c0392b", borderRadius: 6, padding: "8px 12px", fontSize: 13, color: "#c0392b", fontFamily: SANS, marginBottom: 14 }}>{error}</div>}
+              <div style={{ marginBottom: 16 }}>
+                <label style={{ fontSize: 12, fontWeight: 700, color: INK_FADE, fontFamily: SANS, textTransform: "uppercase", letterSpacing: 1, display: "block", marginBottom: 6 }}>Email Address</label>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={e => setEmail(e.target.value)}
+                  placeholder="The email on your V-Hub account"
+                  style={{ ...inS, border: `1.5px solid ${BROWN_BTN}`, borderRadius: 8, padding: "12px 14px", fontSize: 15 }}
+                  autoFocus
+                />
+              </div>
+              <button
+                type="submit"
+                disabled={loading}
+                style={{ width: "100%", background: loading ? PAPER_DK : `linear-gradient(180deg,#9A6030,${BROWN_BTN} 60%,#5A3010)`, color: PAPER, border: `3px solid ${YELLOW}`, boxShadow: `0 0 0 1.5px ${YELLOW}`, borderRadius: 8, padding: "14px 20px", fontSize: 15, fontWeight: 900, cursor: loading ? "not-allowed" : "pointer", fontFamily: SERIF, letterSpacing: 2, textTransform: "uppercase" }}
+              >
+                {loading ? "Sending..." : "Send Reset Link →"}
+              </button>
+              <div style={{ textAlign: "center", marginTop: 16 }}>
+                <button type="button" onClick={onBack} style={{ background: "none", border: "none", color: BROWN_BTN, fontSize: 13, cursor: "pointer", fontFamily: SANS, textDecoration: "underline" }}>← Back to Sign In</button>
+              </div>
+            </form>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── RESET PASSWORD SCREEN ─────────────────────────────────────────────────
+function ResetPasswordScreen({ token, providerId, onSuccess }) {
+  const [pass, setPass] = useState("");
+  const [pass2, setPass2] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [done, setDone] = useState(false);
+  const [error, setError] = useState("");
+  const [showPass, setShowPass] = useState(false);
+
+  const handleSubmit = async (e) => {
+    e && e.preventDefault();
+    if (pass.length < 6) { setError("Password must be at least 6 characters."); return; }
+    if (pass !== pass2) { setError("Passwords don't match."); return; }
+    setLoading(true); setError("");
+    try {
+      const res = await fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/resetPassword", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ provider_id: providerId, token, new_password: pass }),
+      });
+      const data = await res.json();
+      if (data.error) { setError(data.error); setLoading(false); return; }
+      setDone(true);
+    } catch {
+      setError("Something went wrong. Please try again.");
+    }
+    setLoading(false);
+  };
+
+  return (
+    <div style={{ minHeight: "100vh", background: PAPER, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: 24, fontFamily: SERIF }}>
+      <div style={{ width: "100%", maxWidth: 400 }}>
+        <a href="/" style={{ textDecoration: "none" }}>
+          <img src="https://media.base44.com/images/public/69d062aca815ce8e697894b1/a9af95bc3_V-Hublogo.png" style={{ height: 60, display: "block", margin: "0 auto 24px", borderRadius: 10 }} alt="V-Hub" />
+        </a>
+        <div style={{ background: PAPER_MID, border: `2px solid ${BROWN_BTN}`, borderRadius: 12, padding: 28, boxShadow: "0 4px 24px rgba(0,0,0,0.18)" }}>
+          <div style={{ fontSize: 20, fontWeight: 900, color: INK, letterSpacing: 1, marginBottom: 6, textAlign: "center" }}>Set New Password</div>
+
+          {done ? (
+            <div style={{ textAlign: "center", padding: "20px 0" }}>
+              <div style={{ fontSize: 40, marginBottom: 12 }}>✅</div>
+              <div style={{ fontSize: 15, color: GREEN, fontWeight: 700, marginBottom: 10 }}>Password updated!</div>
+              <div style={{ fontSize: 13, color: INK_FADE, fontFamily: SANS, lineHeight: 1.6, marginBottom: 20 }}>
+                Your password has been changed. You can now sign in with your new password.
+              </div>
+              <button onClick={onSuccess} style={{ background: BROWN_BTN, color: PAPER, border: "none", borderRadius: 8, padding: "12px 28px", fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: SANS, letterSpacing: 1 }}>Sign In Now →</button>
+            </div>
+          ) : (
+            <form onSubmit={handleSubmit}>
+              {error && <div style={{ background: "#ffeaea", border: "1px solid #c0392b", borderRadius: 6, padding: "8px 12px", fontSize: 13, color: "#c0392b", fontFamily: SANS, marginBottom: 14 }}>{error}</div>}
+              <div style={{ marginBottom: 14 }}>
+                <label style={{ fontSize: 12, fontWeight: 700, color: INK_FADE, fontFamily: SANS, textTransform: "uppercase", letterSpacing: 1, display: "block", marginBottom: 6 }}>New Password</label>
+                <div style={{ position: "relative" }}>
+                  <input type={showPass ? "text" : "password"} value={pass} onChange={e => setPass(e.target.value)} placeholder="Min 6 characters" style={{ ...inS, border: `1.5px solid ${BROWN_BTN}`, borderRadius: 8, padding: "12px 44px 12px 14px", fontSize: 15 }} autoFocus />
+                  <button type="button" onClick={() => setShowPass(v => !v)} style={{ position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", fontSize: 16, color: INK_FADE }}>{showPass ? "🙈" : "👁"}</button>
+                </div>
+              </div>
+              <div style={{ marginBottom: 20 }}>
+                <label style={{ fontSize: 12, fontWeight: 700, color: INK_FADE, fontFamily: SANS, textTransform: "uppercase", letterSpacing: 1, display: "block", marginBottom: 6 }}>Confirm Password</label>
+                <input type={showPass ? "text" : "password"} value={pass2} onChange={e => setPass2(e.target.value)} placeholder="Re-enter new password" style={{ ...inS, border: `1.5px solid ${BROWN_BTN}`, borderRadius: 8, padding: "12px 14px", fontSize: 15 }} />
+              </div>
+              <button
+                type="submit"
+                disabled={loading}
+                style={{ width: "100%", background: loading ? PAPER_DK : `linear-gradient(180deg,#9A6030,${BROWN_BTN} 60%,#5A3010)`, color: PAPER, border: `3px solid ${YELLOW}`, boxShadow: `0 0 0 1.5px ${YELLOW}`, borderRadius: 8, padding: "14px 20px", fontSize: 15, fontWeight: 900, cursor: loading ? "not-allowed" : "pointer", fontFamily: SERIF, letterSpacing: 2, textTransform: "uppercase" }}
+              >
+                {loading ? "Saving..." : "Set New Password →"}
+              </button>
+            </form>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ── LOGIN SCREEN ──────────────────────────────────────────────────────────
 // ── SHA-256 password hashing (Web Crypto API) ─────────────────────────────
 async function hashPassword(plain) {
@@ -244,7 +395,7 @@ async function hashPassword(plain) {
   return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, "0")).join("");
 }
 
-function LoginScreen({ onLogin }) {
+function LoginScreen({ onLogin, onForgot }) {
   const [loginEmail, setLoginEmail] = useState("");
   const [loginPass, setLoginPass]   = useState("");
   const [showPass, setShowPass]     = useState(false);
@@ -376,12 +527,13 @@ function LoginScreen({ onLogin }) {
           </form>
 
           <div style={{ textAlign: "center", marginTop: 20, paddingTop: 16, borderTop: `1px solid ${PAPER_DK}` }}>
-            <div style={{ fontSize: 12, color: INK_FADE, fontFamily: SANS, marginBottom: 8 }}>
-              Forgot your password or need help?
-            </div>
-            <a href="mailto:admin@v-hub.us?subject=Provider Hub Login Help" style={{ fontSize: 13, color: BROWN_BTN, fontWeight: 700, fontFamily: SANS }}>
-              Contact admin@v-hub.us →
-            </a>
+            <button
+              type="button"
+              onClick={onForgot}
+              style={{ background: "none", border: "none", color: BROWN_BTN, fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: SANS, textDecoration: "underline" }}
+            >
+              Forgot your password?
+            </button>
           </div>
 
           <div style={{ textAlign: "center", marginTop: 16, fontSize: 12, color: INK_FADE, fontStyle: "italic", fontFamily: SANS }}>
@@ -399,7 +551,9 @@ export default function ProviderDashboard() {
   useMeta("Provider Hub | V-Hub — The Villages, FL");
 
   const [provider, setProvider]     = useState(null);
-  const [authState, setAuthState]   = useState("loading"); // loading | login | dashboard
+  const [authState, setAuthState]   = useState("loading"); // loading | login | forgot | reset | dashboard
+  const [resetToken, setResetToken] = useState("");
+  const [resetProviderId, setResetProviderId] = useState("");
   const [view, setView]             = useState("dashboard"); // dashboard | edit | account
   const [reviews, setReviews]       = useState([]);
   const [svcMap, setSvcMap]         = useState({});
@@ -450,8 +604,17 @@ export default function ProviderDashboard() {
       setAuthState("login");
     }
 
-    // Check for Stripe return params
+    // Check for Stripe return params or password reset token
     const urlParams = new URLSearchParams(window.location.search);
+    const resetTok = urlParams.get("reset_token");
+    const resetPid = urlParams.get("provider_id");
+    if (resetTok && resetPid) {
+      setResetToken(resetTok);
+      setResetProviderId(resetPid);
+      window.history.replaceState({}, "", window.location.pathname);
+      setAuthState("reset");
+      return;
+    }
     const paymentResult = urlParams.get("payment");
     if (paymentResult === "success") {
       setPaymentSuccess(true);
@@ -621,7 +784,9 @@ export default function ProviderDashboard() {
     </div>
   );
 
-  if (authState === "login") return <LoginScreen onLogin={handleLogin} />;
+  if (authState === "forgot") return <ForgotPasswordScreen onBack={() => setAuthState("login")} />;
+  if (authState === "reset") return <ResetPasswordScreen token={resetToken} providerId={resetProviderId} onSuccess={() => setAuthState("login")} />;
+  if (authState === "login") return <LoginScreen onLogin={handleLogin} onForgot={() => setAuthState("forgot")} />;
 
   // ── TOP NAV (shared across dashboard/edit/account) ────────────────────
   const TopNav = ({ rightContent }) => (
