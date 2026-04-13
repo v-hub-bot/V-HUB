@@ -1292,9 +1292,9 @@ export default function Home() {
           <a href="/Classifieds" style={{ textDecoration: "none" }}>
             <div style={{
               padding: "8px", textAlign: "center", fontSize: 11, fontWeight: 700,
-              letterSpacing: 2, color: "#2E7D32", textTransform: "uppercase",
-              border: "2px solid #2E7D32", borderRadius: 3, margin: "2px",
-              boxShadow: "0 0 6px rgba(46,125,50,0.3)",
+              letterSpacing: 2, color: "#1A6B3C", textTransform: "uppercase",
+              border: "3px solid #1A6B3C", borderRadius: 3, margin: "2px",
+              boxShadow: "0 0 8px rgba(26,107,60,0.35)",
               cursor: "pointer",
             }}>📰 Classifieds</div>
           </a>
