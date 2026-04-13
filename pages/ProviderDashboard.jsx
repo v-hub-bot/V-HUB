@@ -58,7 +58,7 @@ function Stars({ rating = 0, size = 14 }) {
 }
 
 // ── Trial / Subscription Banner ───────────────────────────────────────────
-function StatusBanner({ provider, onUpgrade, onCancel }) {
+function StatusBanner({ provider, onUpgrade, onCancel, paymentLoading, cancelLoading, paymentError }) {
   const status = provider.subscription_status;
   const days = daysLeft(provider.trial_end_date);
   const endFmt = fmt(provider.trial_end_date);
@@ -73,8 +73,8 @@ function StatusBanner({ provider, onUpgrade, onCancel }) {
               Your listing is live and visible to residents across The Villages.
             </div>
           </div>
-          <button onClick={onCancel} style={{ background: "transparent", border: "1.5px solid #888", color: "#666", borderRadius: 6, padding: "7px 16px", fontSize: 12, cursor: "pointer", fontFamily: SANS }}>
-            Cancel Subscription
+          <button onClick={onCancel} disabled={cancelLoading} style={{ background: "transparent", border: "1.5px solid #888", color: "#666", borderRadius: 6, padding: "7px 16px", fontSize: 12, cursor: cancelLoading ? "default" : "pointer", fontFamily: SANS, opacity: cancelLoading ? 0.6 : 1 }}>
+            {cancelLoading ? "Processing…" : "Cancel Subscription"}
           </button>
         </div>
       </div>
@@ -91,8 +91,9 @@ function StatusBanner({ provider, onUpgrade, onCancel }) {
           <div style={{ fontSize: 13, color: INK_FADE, fontFamily: SANS, marginBottom: 12, lineHeight: 1.6 }}>
             Your listing is currently <strong>hidden</strong> from search results. Subscribe for $12/month to go live again.
           </div>
-          <button onClick={onUpgrade} style={{ background: `linear-gradient(180deg,#9A6030,${BROWN_BTN})`, color: PAPER, border: `2px solid ${YELLOW}`, borderRadius: 6, padding: "10px 24px", fontWeight: 900, fontSize: 13, cursor: "pointer", fontFamily: SERIF, letterSpacing: 1 }}>
-            Subscribe — $12/mo →
+          {paymentError && <div style={{ fontSize: 12, color: RED_RULE, marginBottom: 8, fontFamily: SANS }}>{paymentError}</div>}
+          <button onClick={onUpgrade} disabled={paymentLoading} style={{ background: `linear-gradient(180deg,#9A6030,${BROWN_BTN})`, color: PAPER, border: `2px solid ${YELLOW}`, borderRadius: 6, padding: "10px 24px", fontWeight: 900, fontSize: 13, cursor: paymentLoading ? "default" : "pointer", fontFamily: SERIF, letterSpacing: 1, opacity: paymentLoading ? 0.7 : 1 }}>
+            {paymentLoading ? "Redirecting to Stripe…" : "Subscribe — $12/mo →"}
           </button>
         </div>
       );
@@ -115,8 +116,9 @@ function StatusBanner({ provider, onUpgrade, onCancel }) {
             : `After your trial ends on ${endFmt}, stay listed for just $12/month. Cancel anytime.`}
         </div>
         {urgent && (
-          <button onClick={onUpgrade} style={{ marginTop: 10, background: "#E65100", color: "#fff", border: "none", borderRadius: 6, padding: "9px 22px", fontWeight: 700, cursor: "pointer", fontSize: 13, fontFamily: SANS }}>
-            Set Up Billing — $12/mo →
+          {paymentError && <div style={{ fontSize: 12, color: "#BF360C", marginTop: 6, fontFamily: SANS }}>{paymentError}</div>}
+          <button onClick={onUpgrade} disabled={paymentLoading} style={{ marginTop: 10, background: "#E65100", color: "#fff", border: "none", borderRadius: 6, padding: "9px 22px", fontWeight: 700, cursor: paymentLoading ? "default" : "pointer", fontSize: 13, fontFamily: SANS, opacity: paymentLoading ? 0.7 : 1 }}>
+            {paymentLoading ? "Redirecting to Stripe…" : "Set Up Billing — $12/mo →"}
           </button>
         )}
       </div>
@@ -134,8 +136,8 @@ function StatusBanner({ provider, onUpgrade, onCancel }) {
     <div style={{ background: "#FAFAFA", border: "2px solid #CCC", borderRadius: 10, padding: "14px 18px", marginBottom: 20 }}>
       <div style={{ fontWeight: 900, color: "#555", fontSize: 14, fontFamily: SERIF }}>⏸ Subscription Cancelled</div>
       <div style={{ fontSize: 13, color: INK_FADE, fontFamily: SANS, marginTop: 4, lineHeight: 1.6 }}>Your listing is not currently visible. Contact us to reactivate.</div>
-      <button onClick={onUpgrade} style={{ marginTop: 10, background: BROWN_BTN, color: PAPER, border: `2px solid ${YELLOW}`, borderRadius: 6, padding: "9px 22px", fontWeight: 700, cursor: "pointer", fontSize: 13, fontFamily: SANS }}>
-        Reactivate — $12/mo →
+      <button onClick={onUpgrade} disabled={paymentLoading} style={{ marginTop: 10, background: BROWN_BTN, color: PAPER, border: `2px solid ${YELLOW}`, borderRadius: 6, padding: "9px 22px", fontWeight: 700, cursor: paymentLoading ? "default" : "pointer", fontSize: 13, fontFamily: SANS, opacity: paymentLoading ? 0.7 : 1 }}>
+        {paymentLoading ? "Redirecting to Stripe…" : "Reactivate — $12/mo →"}
       </button>
     </div>
   );
@@ -397,6 +399,10 @@ export default function ProviderDashboard() {
   const [newPass2, setNewPass2]     = useState("");
   const [newLoginEmail, setNewLoginEmail] = useState("");
   const [accMsg, setAccMsg]         = useState("");
+  const [paymentLoading, setPaymentLoading] = useState(false);
+  const [cancelLoading, setCancelLoading]   = useState(false);
+  const [paymentError, setPaymentError]     = useState("");
+  const [paymentSuccess, setPaymentSuccess] = useState(false);
   const [showNewPass, setShowNewPass] = useState(false);
 
   // Review form
@@ -424,6 +430,17 @@ export default function ProviderDashboard() {
         .catch(() => { sessionStorage.removeItem("vhub_provider_id"); setAuthState("login"); });
     } else {
       setAuthState("login");
+    }
+
+    // Check for Stripe return params
+    const urlParams = new URLSearchParams(window.location.search);
+    const paymentResult = urlParams.get("payment");
+    if (paymentResult === "success") {
+      setPaymentSuccess(true);
+      window.history.replaceState({}, "", window.location.pathname);
+    } else if (paymentResult === "cancelled") {
+      // just clear the URL param
+      window.history.replaceState({}, "", window.location.pathname);
     }
 
     // Load entity maps for name resolution
@@ -514,15 +531,61 @@ export default function ProviderDashboard() {
     setShowReviewForm(false);
   };
 
-  const handleUpgrade = () => {
-    window.location.href = `mailto:admin@v-hub.us?subject=Subscribe to V-Hub — ${provider?.business_name || ""}&body=Hi, I'd like to subscribe to V-Hub for $12/month. My VH# is ${provider?.vh_number || ""}.`;
-  };
-  const handleCancel = () => {
-    if (!window.confirm("Are you sure you want to cancel your V-Hub subscription? Your listing will be hidden.")) return;
-    window.location.href = `mailto:admin@v-hub.us?subject=Cancel Subscription — ${provider?.business_name || ""}&body=Hi, I'd like to cancel my V-Hub subscription. My VH# is ${provider?.vh_number || ""}.`;
+  const handleUpgrade = async () => {
+    setPaymentLoading(true);
+    setPaymentError("");
+    try {
+      const res = await fetch("https://v-hub-697894b1.base44.app/functions/createCheckoutSession", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          provider_id: provider.id,
+          provider_email: provider.email,
+          provider_name: provider.owner_name || provider.business_name,
+          business_name: provider.business_name,
+        }),
+      });
+      const data = await res.json();
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        setPaymentError("Could not start checkout. Please try again or contact admin@v-hub.us");
+      }
+    } catch (err) {
+      setPaymentError("Connection error. Please try again.");
+    }
+    setPaymentLoading(false);
   };
 
-  const avgRating = reviews.length > 0
+  const handleCancel = async () => {
+    if (!window.confirm("Are you sure you want to cancel your V-Hub subscription? Your listing will be hidden at end of billing period.")) return;
+    if (!provider.stripe_subscription_id) {
+      alert("No active Stripe subscription found. Please contact admin@v-hub.us to cancel.");
+      return;
+    }
+    setCancelLoading(true);
+    try {
+      const res = await fetch("https://v-hub-697894b1.base44.app/functions/cancelSubscription", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ stripe_subscription_id: provider.stripe_subscription_id }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        const cancelDate = data.cancel_at ? new Date(data.cancel_at * 1000).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" }) : "end of billing period";
+        alert(`Your subscription has been cancelled. You will remain listed until ${cancelDate}.`);
+        const fresh = await Provider.get(provider.id);
+        setProvider(fresh);
+      } else {
+        alert("Could not cancel. Please contact admin@v-hub.us");
+      }
+    } catch {
+      alert("Connection error. Please contact admin@v-hub.us");
+    }
+    setCancelLoading(false);
+  };
+
+    const avgRating = reviews.length > 0
     ? (reviews.reduce((s, r) => s + (r.rating || 0), 0) / reviews.length).toFixed(1)
     : null;
 
@@ -709,7 +772,17 @@ export default function ProviderDashboard() {
       <div style={{ maxWidth: 720, margin: "0 auto", padding: "22px 16px 60px" }}>
 
         {/* Status Banner */}
-        <StatusBanner provider={provider} onUpgrade={handleUpgrade} onCancel={handleCancel} />
+        {paymentSuccess && (
+          <div style={{ background: "#E8F5E9", border: "2px solid #4CAF50", borderRadius: 10, padding: "16px 18px", marginBottom: 20, display: "flex", alignItems: "center", gap: 12 }}>
+            <div style={{ fontSize: 28 }}>🎉</div>
+            <div>
+              <div style={{ fontWeight: 900, color: "#1B5E20", fontSize: 15, fontFamily: SERIF }}>Payment Successful — Welcome to V-Hub!</div>
+              <div style={{ fontSize: 13, color: "#2E7D32", fontFamily: SANS, marginTop: 3 }}>Your subscription is active. Your listing is now live and visible to residents across The Villages.</div>
+            </div>
+            <button onClick={() => setPaymentSuccess(false)} style={{ marginLeft: "auto", background: "transparent", border: "none", color: "#888", fontSize: 18, cursor: "pointer" }}>✕</button>
+          </div>
+        )}
+        <StatusBanner provider={provider} onUpgrade={handleUpgrade} onCancel={handleCancel} paymentLoading={paymentLoading} cancelLoading={cancelLoading} paymentError={paymentError} />
 
         {/* Quick stats */}
         <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 10, marginBottom: 24 }}>

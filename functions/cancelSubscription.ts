@@ -1,20 +1,37 @@
+// v3 - redeploy 2026-04-12
 import Stripe from "npm:stripe@14";
 
 export default async function handler(req: Request): Promise<Response> {
-  const { stripe_subscription_id } = await req.json();
+  const corsHeaders = {
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Methods": "POST, OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type",
+    "Content-Type": "application/json",
+  };
 
-  if (!stripe_subscription_id) {
-    return new Response(JSON.stringify({ error: "Missing stripe_subscription_id" }), { status: 400 });
+  if (req.method === "OPTIONS") {
+    return new Response(null, { status: 204, headers: corsHeaders });
   }
 
-  const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY")!, { apiVersion: "2023-10-16" });
+  try {
+    const { stripe_subscription_id } = await req.json();
 
-  // Cancel at period end (provider keeps access until billing cycle ends)
-  const subscription = await stripe.subscriptions.update(stripe_subscription_id, {
-    cancel_at_period_end: true,
-  });
+    if (!stripe_subscription_id) {
+      return new Response(JSON.stringify({ error: "Missing stripe_subscription_id" }), { status: 400, headers: corsHeaders });
+    }
 
-  return new Response(JSON.stringify({ success: true, cancel_at: subscription.cancel_at }), {
-    headers: { "Content-Type": "application/json" },
-  });
+    const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY")!, { apiVersion: "2023-10-16" });
+
+    // Cancel at period end (provider keeps access until billing cycle ends)
+    const subscription = await stripe.subscriptions.update(stripe_subscription_id, {
+      cancel_at_period_end: true,
+    });
+
+    return new Response(JSON.stringify({ success: true, cancel_at: subscription.cancel_at }), {
+      headers: corsHeaders,
+    });
+  } catch (err) {
+    console.error("cancelSubscription error:", err);
+    return new Response(JSON.stringify({ error: (err as any).message }), { status: 500, headers: corsHeaders });
+  }
 }
