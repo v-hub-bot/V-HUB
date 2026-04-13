@@ -117,8 +117,8 @@ const NEWSPAPER_CONTENT = {
       "Look up a handyman in Fenney, a pet groomer near Marsh Bend, or a tech helper in Brownwood Square — V-Hub surfaces exactly who serves your area, nothing more.",
       "Every provider is reviewed by the V-Hub team before their listing goes live. Residents can leave reviews, rate their experience, and help neighbors make confident, informed choices.",
       "Whether you are new to The Villages or have lived here for years, V-Hub is the go-to directory for finding trusted help — fast, local, and always free to search.",
-      "Home repair specialists on V-Hub range from licensed general contractors handling major renovations to skilled handymen available for same-week appointments. No job is too small when the right pro is just a click away.",
-      "Landscaping professionals listed on V-Hub maintain hundreds of Villages properties each week — from manicured front lawns to full irrigation system installations. Many offer seasonal packages tailored to Florida's year-round growing season.",
+      "Home repair specialists on V-Hub include general contractors, handymen, and tradespeople covering everything from minor fixes to major renovations. No job is too small when the right pro is just a click away.",
+      "Landscaping professionals listed on V-Hub cover lawn maintenance, full irrigation system installations, and everything in between. Many offer seasonal packages tailored to Florida's year-round growing season.",
       "Tech help providers specialize in working with seniors — setting up smartphones, configuring tablets, troubleshooting Wi-Fi, and teaching residents how to use video calling to stay connected with family. Patience and clarity are their hallmarks.",
       "Cleaning services range from weekly housekeeping to deep move-in cleans. Many providers serve specific villages and can accommodate residents with special scheduling needs or health sensitivities.",
     ]
@@ -1093,10 +1093,10 @@ export default function Home() {
 
   useMeta({
     title: "V-Hub | Find Local Services in The Villages, Florida",
-    description: "V-Hub is The Villages, Florida's trusted local service directory. Search landscaping, home repair, cleaning, pet care, golf cart services, transportation and more across all 59 villages.",
+    description: "V-Hub is The Villages, Florida's local service directory. Search landscaping, home repair, cleaning, pet care, transportation and more across all 97 villages.",
     keywords: "The Villages FL services, local service directory, home repair, landscaping, cleaning, pet care, golf cart services, The Villages Florida",
     ogTitle: "V-Hub — The Villages Local Services Directory",
-    ogDescription: "Find trusted, vetted local service providers across all 59 villages in The Villages, FL. No fees. No middlemen. Just neighbors serving neighbors.",
+    ogDescription: "Find local service providers across all 97 villages in The Villages, FL. No fees. No middlemen. Just neighbors serving neighbors.",
     ogImage: "https://media.base44.com/images/public/69d062aca815ce8e697894b1/f19aa517d_generated_image.png",
     canonical: "https://v-hub-app-edf7f8e8.base44.app/",
   });

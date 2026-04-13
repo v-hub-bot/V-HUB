@@ -117,7 +117,7 @@ const MACRO_AREAS = [
 // ── Sidebar stories ────────────────────────────────────────────────────────
 const LEFT_STORIES = [
   { head: "Built Exclusively for The Villages", sub: "Local providers, local residents — no middleman", body: "V-Hub is the only directory built specifically for The Villages, FL. Unlike national platforms, every listing is geo-specific — no out-of-area results, no confusion. Residents search V-Hub to find real local professionals in their own neighborhood." },
-  { head: "Why Local Discovery Matters", sub: "Neighbors trust neighbors", body: "Residents here value personal recommendations above all else. V-Hub replicates that word-of-mouth trust digitally — every provider is vetted, every listing is geo-specific, and every search leads directly to a real person in the community." },
+  { head: "Why Local Discovery Matters", sub: "Neighbors trust neighbors", body: "Residents here value personal recommendations above all else. V-Hub replicates that word-of-mouth trust digitally — every listing is reviewed by our team, every result is geo-specific, and every search leads directly to a real person in the community." },
   { head: "A Directory Built for Seniors", sub: "Simple. Fast. No apps required.", body: "Forget complicated apps or confusing websites. V-Hub is designed to be used on any device — phone, tablet, or computer — with large text, clear layouts, and no technical know-how required. Just search and call." },
 ];
 
