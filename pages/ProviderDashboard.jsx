@@ -642,12 +642,15 @@ export default function ProviderDashboard() {
   const [view, setView]             = useState("dashboard"); // dashboard | edit | account
   const [reviews, setReviews]       = useState([]);
   const [classifiedAd, setClassifiedAd] = useState(null);
-  const [classifiedForm, setClassifiedForm] = useState({ headline: "", body: "", image_url: "", village: "" });
+  const [classifiedForm, setClassifiedForm] = useState({ headline: "", body: "", image_url: "", village: "", address: "", deal_expires_at: "" });
   const [classifiedSaving, setClassifiedSaving] = useState(false);
   const [classifiedSaved, setClassifiedSaved] = useState(false);
   const [classifiedImageFile, setClassifiedImageFile] = useState(null);
   const [classifiedImagePreview, setClassifiedImagePreview] = useState(null);
   const classifiedImageRef = useRef(null);
+  const [nextAdForm, setNextAdForm] = useState({ headline: "", body: "", address: "", village: "", deal_expires_at: "" });
+  const [nextAdSaving, setNextAdSaving] = useState(false);
+  const [nextAdSaved, setNextAdSaved] = useState(false);
   const [svcMap, setSvcMap]         = useState({});
   const [areaMap, setAreaMap]       = useState({});
   const [dbCategories, setDbCategories] = useState([]);
@@ -758,8 +761,22 @@ export default function ProviderDashboard() {
     try {
       const ads = await ClassifiedAd.filter({ provider_id: pid });
       const active = (ads || []).find(a => a.is_active) || null;
+      const anyAd = active || (ads || [])[0] || null;
       setClassifiedAd(active);
-      if (active) setClassifiedForm({ headline: active.headline || "", body: active.body || "", image_url: active.image_url || "", village: active.village || "" });
+      if (active) {
+        setClassifiedForm({
+          headline: active.headline || "", body: active.body || "",
+          image_url: active.image_url || "", village: active.village || "",
+          address: active.address || "", deal_expires_at: active.deal_expires_at ? active.deal_expires_at.slice(0,10) : "",
+        });
+      }
+      if (anyAd && anyAd.next_headline) {
+        setNextAdForm({
+          headline: anyAd.next_headline || "", body: anyAd.next_body || "",
+          address: anyAd.next_address || "", village: anyAd.next_village || "",
+          deal_expires_at: anyAd.next_deal_expires_at ? anyAd.next_deal_expires_at.slice(0,10) : "",
+        });
+      }
     } catch { setClassifiedAd(null); }
   };
 
@@ -1238,219 +1255,312 @@ export default function ProviderDashboard() {
           <span style={{ fontSize: 10, fontWeight: 400, color: INK_FADE, fontFamily: SANS, letterSpacing: 0.5 }}>$10/month add-on</span>
         </div>
 
-        {/* Not subscribed — upsell */}
+        {/* ── NOT SUBSCRIBED — Stripe buy button ── */}
         {!provider.classifieds_addon && (
           <div style={{ background: "#F9F3E3", border: "2px solid #2E7D32", borderRadius: 8, padding: "16px 18px", marginBottom: 16 }}>
             <div style={{ fontSize: 14, fontWeight: 900, color: "#2E7D32", marginBottom: 6, fontFamily: SERIF, textTransform: "uppercase", letterSpacing: 1 }}>
-              📰 Run a Classified Ad
+              📰 Run a Classified Ad — $10/Month
             </div>
-            <div style={{ fontSize: 13, color: INK, lineHeight: 1.7, fontFamily: SANS, marginBottom: 12 }}>
-              Add a classified ad to the V-Hub Classifieds page for just <strong>$10/month</strong>. 
-              Promote deals, specials, seasonal offers — seen by every resident searching The Villages.
+            <div style={{ fontSize: 13, color: INK, lineHeight: 1.7, fontFamily: SANS, marginBottom: 10 }}>
+              Get your deals and specials in front of every resident searching The Villages. Your ad goes live the moment you subscribe.
             </div>
-            <div style={{ fontSize: 12, color: INK_FADE, fontFamily: SANS, marginBottom: 14 }}>
-              ✓ Same-size ad card as all providers &nbsp;·&nbsp; ✓ A–Z listing &nbsp;·&nbsp; ✓ Searchable by village &nbsp;·&nbsp; ✓ Photo optional
+            <div style={{ fontSize: 12, color: INK_FADE, fontFamily: SANS, marginBottom: 14, lineHeight: 1.8 }}>
+              ✓ A–Z listing with your deal &nbsp;·&nbsp; ✓ Address & directions &nbsp;·&nbsp; ✓ Expiration date on the deal &nbsp;·&nbsp; ✓ Queue your next ad &nbsp;·&nbsp; ✓ Photo optional
             </div>
-            <div style={{ fontSize: 11, color: INK_FADE, fontStyle: "italic", fontFamily: SANS }}>
-              Contact <a href="mailto:admin@v-hub.us" style={{ color: "#2E7D32" }}>admin@v-hub.us</a> to activate the Classifieds add-on for your account.
-            </div>
+            <button
+              onClick={async () => {
+                try {
+                  const resp = await fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/createClassifiedsCheckout", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                      provider_record_id: provider.id,
+                      provider_email: provider.login_email || provider.email,
+                      provider_name: provider.business_name,
+                    }),
+                  });
+                  const data = await resp.json();
+                  if (data.url) window.location.href = data.url;
+                  else alert("Could not start checkout: " + (data.error || "unknown error"));
+                } catch (e) {
+                  alert("Error starting checkout. Please try again.");
+                }
+              }}
+              style={{
+                background: `linear-gradient(180deg,#9A6030,${BROWN_BTN})`,
+                color: PAPER, border: "2px solid #2E7D32", borderRadius: 6,
+                padding: "11px 28px", fontSize: 13, fontWeight: 900,
+                cursor: "pointer", letterSpacing: 1, fontFamily: SERIF,
+              }}
+            >
+              Subscribe — $10/mo →
+            </button>
           </div>
         )}
 
-        {/* Subscribed — ad editor */}
+        {/* ── SUBSCRIBED — Ad editor ── */}
         {provider.classifieds_addon && (
-          <div style={{ background: PAPER_MID, border: `1.5px solid #2E7D32`, borderRadius: 8, padding: "16px 18px", marginBottom: 16 }}>
-            <div style={{ fontSize: 13, color: "#2E7D32", fontWeight: 700, fontFamily: SANS, marginBottom: 12, display: "flex", alignItems: "center", gap: 8 }}>
+          <div style={{ background: PAPER_MID, border: "1.5px solid #2E7D32", borderRadius: 8, padding: "16px 18px", marginBottom: 16 }}>
+
+            {/* Status bar */}
+            <div style={{ fontSize: 13, color: "#2E7D32", fontWeight: 700, fontFamily: SANS, marginBottom: 14, display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
               ✅ Classifieds Add-On Active
-              {classifiedAd && (
-                <span style={{ fontSize: 11, background: "#2E7D32", color: "#fff", borderRadius: 10, padding: "2px 10px" }}>
-                  Ad Live
-                </span>
+              {classifiedAd ? (
+                <span style={{ fontSize: 11, background: "#2E7D32", color: "#fff", borderRadius: 10, padding: "2px 10px" }}>Ad Live</span>
+              ) : (
+                <span style={{ fontSize: 11, background: "#888", color: "#fff", borderRadius: 10, padding: "2px 10px" }}>No ad yet</span>
               )}
             </div>
 
             {/* Live preview */}
             {classifiedAd && (
-              <div style={{ marginBottom: 14 }}>
-                <div style={{ fontSize: 11, color: INK_FADE, fontFamily: SANS, marginBottom: 6, textTransform: "uppercase", letterSpacing: 1 }}>Current Ad Preview</div>
+              <div style={{ marginBottom: 16 }}>
+                <div style={{ fontSize: 11, color: INK_FADE, fontFamily: SANS, marginBottom: 6, textTransform: "uppercase", letterSpacing: 1, fontWeight: 700 }}>Current Live Ad</div>
                 <div style={{
                   background: "#F5EDD6", border: "2px solid #1A1209", borderRadius: 2,
-                  padding: "14px 14px 12px", fontFamily: "'Times New Roman', serif",
-                  maxWidth: 280, position: "relative",
+                  padding: "12px 12px 10px", fontFamily: "'Times New Roman', serif",
+                  maxWidth: 260, position: "relative",
                 }}>
                   <div style={{ position: "absolute", top: 4, left: 4, right: 4, borderTop: "1px solid #1A1209" }} />
                   <div style={{ position: "absolute", bottom: 4, left: 4, right: 4, borderBottom: "1px solid #1A1209" }} />
                   {classifiedAd.image_url && (
-                    <img src={classifiedAd.image_url} alt="" style={{ width: "100%", height: 100, objectFit: "cover", borderRadius: 1, marginBottom: 8, display: "block" }} />
+                    <img src={classifiedAd.image_url} alt="" style={{ width: "100%", height: 90, objectFit: "cover", borderRadius: 1, marginBottom: 6, display: "block" }} />
                   )}
-                  <div style={{ fontSize: 12, fontWeight: 700, textAlign: "center", textTransform: "uppercase", letterSpacing: 1, borderBottom: "1px solid #C8B89A", paddingBottom: 5, marginBottom: 6 }}>
+                  <div style={{ fontSize: 12, fontWeight: 700, textAlign: "center", textTransform: "uppercase", letterSpacing: 1, borderBottom: "1px solid #C8B89A", paddingBottom: 4, marginBottom: 5 }}>
                     {classifiedAd.headline}
                   </div>
+                  {classifiedAd.deal_expires_at && (
+                    <div style={{ fontSize: 10, color: "#2E7D32", fontWeight: 700, textAlign: "center", marginBottom: 4 }}>
+                      Deal thru {new Date(classifiedAd.deal_expires_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                    </div>
+                  )}
                   <div style={{ fontSize: 11, color: "#1A1209", lineHeight: 1.5 }}>{classifiedAd.body}</div>
-                  <div style={{ fontSize: 10, color: "#6B5B3E", textAlign: "center", borderTop: "1px solid #C8B89A", paddingTop: 5, marginTop: 6, fontStyle: "italic" }}>
+                  {classifiedAd.address && <div style={{ fontSize: 10, color: "#00836B", fontWeight: 700, marginTop: 5 }}>📍 {classifiedAd.address}</div>}
+                  <div style={{ fontSize: 10, color: "#6B5B3E", textAlign: "center", borderTop: "1px solid #C8B89A", paddingTop: 4, marginTop: 5, fontStyle: "italic" }}>
                     {classifiedAd.provider_name}{classifiedAd.village ? ` · ${classifiedAd.village}` : ""}
                   </div>
                 </div>
               </div>
             )}
 
-            {/* Edit form */}
+            {/* ── Current / Edit Ad Form ── */}
             <div style={{ fontSize: 12, fontWeight: 700, color: INK, fontFamily: SANS, textTransform: "uppercase", letterSpacing: 1, marginBottom: 10 }}>
-              {classifiedAd ? "Edit Your Ad" : "Create Your Ad"}
+              {classifiedAd ? "✏️ Edit Current Ad" : "➕ Create Your Ad"}
             </div>
 
-            <div style={{ marginBottom: 10 }}>
-              <label style={lbS}>Ad Headline *</label>
-              <input
-                style={inS}
-                placeholder="e.g. Buy 2 Get 2 Free — Summer Tire Special"
-                value={classifiedForm.headline}
-                onChange={e => setClassifiedForm(p => ({ ...p, headline: e.target.value }))}
-                maxLength={80}
-              />
-              <div style={{ fontSize: 10, color: INK_FADE, fontFamily: SANS, marginTop: 2 }}>{classifiedForm.headline.length}/80 characters</div>
-            </div>
-
-            <div style={{ marginBottom: 10 }}>
-              <label style={lbS}>Ad Body *</label>
-              <textarea
-                style={{ ...inS, minHeight: 80, resize: "vertical", lineHeight: 1.6 }}
-                placeholder="Describe your deal, offer, or promotion in detail…"
-                value={classifiedForm.body}
-                onChange={e => setClassifiedForm(p => ({ ...p, body: e.target.value }))}
-                maxLength={300}
-              />
-              <div style={{ fontSize: 10, color: INK_FADE, fontFamily: SANS, marginTop: 2 }}>{classifiedForm.body.length}/300 characters</div>
-            </div>
-
-            <div style={{ marginBottom: 10 }}>
-              <label style={lbS}>Your Village / Location</label>
-              <input
-                style={inS}
-                placeholder="e.g. Bedford"
-                value={classifiedForm.village}
-                onChange={e => setClassifiedForm(p => ({ ...p, village: e.target.value }))}
-              />
-            </div>
-
-            <div style={{ marginBottom: 14 }}>
-              <label style={lbS}>Ad Image (optional)</label>
-              <input
-                ref={classifiedImageRef}
-                type="file"
-                accept="image/*"
-                style={{ display: "none" }}
-                onChange={e => {
-                  const file = e.target.files[0];
-                  if (!file) return;
-                  setClassifiedImageFile(file);
-                  const reader = new FileReader();
-                  reader.onload = ev => setClassifiedImagePreview(ev.target.result);
-                  reader.readAsDataURL(file);
-                }}
-              />
-              <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
-                <button
-                  type="button"
-                  onClick={() => classifiedImageRef.current?.click()}
-                  style={{ background: PAPER, border: `1.5px solid ${PAPER_DK}`, color: INK, borderRadius: 4, padding: "7px 14px", fontSize: 12, cursor: "pointer", fontFamily: SANS }}
-                >
-                  📷 {classifiedImagePreview || classifiedForm.image_url ? "Change Photo" : "Upload Photo"}
-                </button>
-                {(classifiedImagePreview || classifiedForm.image_url) && (
-                  <>
-                    <img
-                      src={classifiedImagePreview || classifiedForm.image_url}
-                      alt="preview"
-                      style={{ height: 44, width: 70, objectFit: "cover", borderRadius: 3, border: `1px solid ${PAPER_DK}` }}
-                    />
-                    <button
-                      type="button"
-                      onClick={() => { setClassifiedImageFile(null); setClassifiedImagePreview(null); setClassifiedForm(p => ({ ...p, image_url: "" })); if (classifiedImageRef.current) classifiedImageRef.current.value = ""; }}
-                      style={{ background: "none", border: "none", color: "#c00", fontSize: 18, cursor: "pointer", padding: 0 }}
-                    >✕</button>
-                  </>
-                )}
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px 14px", marginBottom: 10 }}>
+              <div style={{ gridColumn: "1/-1" }}>
+                <label style={lbS}>Ad Headline * <span style={{ fontSize: 10, fontWeight: 400, color: INK_FADE }}>(max 80 chars)</span></label>
+                <input
+                  style={inS}
+                  placeholder="e.g. Buy 2 Get 2 Free — Summer Tire Special"
+                  value={classifiedForm.headline}
+                  onChange={e => setClassifiedForm(p => ({ ...p, headline: e.target.value.slice(0, 80) }))}
+                />
+                <div style={{ fontSize: 10, color: INK_FADE, fontFamily: SANS, marginTop: 1 }}>{classifiedForm.headline.length}/80</div>
               </div>
-              <div style={{ fontSize: 10, color: INK_FADE, fontFamily: SANS, marginTop: 4 }}>All ad images are cropped to the same size for a uniform look.</div>
+              <div style={{ gridColumn: "1/-1" }}>
+                <label style={lbS}>Ad Body — Describe the deal * <span style={{ fontSize: 10, fontWeight: 400, color: INK_FADE }}>(max 300 chars)</span></label>
+                <textarea
+                  style={{ ...inS, minHeight: 78, resize: "vertical", lineHeight: 1.6 }}
+                  placeholder="Describe the deal, offer, or promotion in detail…"
+                  value={classifiedForm.body}
+                  onChange={e => setClassifiedForm(p => ({ ...p, body: e.target.value.slice(0, 300) }))}
+                />
+                <div style={{ fontSize: 10, color: INK_FADE, fontFamily: SANS, marginTop: 1 }}>{classifiedForm.body.length}/300</div>
+              </div>
+              <div>
+                <label style={lbS}>Business Address</label>
+                <input style={inS} placeholder="123 Main St, The Villages" value={classifiedForm.address} onChange={e => setClassifiedForm(p => ({ ...p, address: e.target.value }))} />
+              </div>
+              <div>
+                <label style={lbS}>Village / Area</label>
+                <input style={inS} placeholder="e.g. Brownwood" value={classifiedForm.village} onChange={e => setClassifiedForm(p => ({ ...p, village: e.target.value }))} />
+              </div>
+              <div>
+                <label style={lbS}>Deal Expires On</label>
+                <input type="date" style={inS} value={classifiedForm.deal_expires_at ? classifiedForm.deal_expires_at.slice(0, 10) : ""} onChange={e => setClassifiedForm(p => ({ ...p, deal_expires_at: e.target.value }))} />
+                <div style={{ fontSize: 10, color: INK_FADE, fontFamily: SANS, marginTop: 1 }}>Leave blank if ongoing</div>
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", justifyContent: "flex-end" }}>
+                <label style={lbS}>Ad Photo (optional)</label>
+                <input ref={classifiedImageRef} type="file" accept="image/*" style={{ display: "none" }}
+                  onChange={e => {
+                    const file = e.target.files[0];
+                    if (!file) return;
+                    setClassifiedImageFile(file);
+                    const reader = new FileReader();
+                    reader.onload = ev => setClassifiedImagePreview(ev.target.result);
+                    reader.readAsDataURL(file);
+                  }}
+                />
+                <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                  <button type="button" onClick={() => classifiedImageRef.current?.click()}
+                    style={{ background: PAPER, border: `1.5px solid ${PAPER_DK}`, color: INK, borderRadius: 4, padding: "7px 12px", fontSize: 12, cursor: "pointer", fontFamily: SANS }}
+                  >
+                    📷 {classifiedImagePreview || classifiedForm.image_url ? "Change" : "Upload"}
+                  </button>
+                  {(classifiedImagePreview || classifiedForm.image_url) && (
+                    <>
+                      <img src={classifiedImagePreview || classifiedForm.image_url} alt="preview"
+                        style={{ height: 38, width: 60, objectFit: "cover", borderRadius: 3, border: `1px solid ${PAPER_DK}` }} />
+                      <button type="button"
+                        onClick={() => { setClassifiedImageFile(null); setClassifiedImagePreview(null); setClassifiedForm(p => ({ ...p, image_url: "" })); if (classifiedImageRef.current) classifiedImageRef.current.value = ""; }}
+                        style={{ background: "none", border: "none", color: "#c00", fontSize: 18, cursor: "pointer", padding: 0 }}
+                      >✕</button>
+                    </>
+                  )}
+                </div>
+              </div>
             </div>
 
             {classifiedSaved && (
-              <div style={{ background: "#E8F5E9", border: "1.5px solid #2E7D32", borderRadius: 6, padding: "10px 14px", marginBottom: 12, fontSize: 13, color: "#2E7D32", fontFamily: SANS }}>
+              <div style={{ background: "#E8F5E9", border: "1.5px solid #2E7D32", borderRadius: 6, padding: "9px 14px", marginBottom: 10, fontSize: 13, color: "#2E7D32", fontFamily: SANS }}>
                 ✓ Your classified ad has been saved and is now live!
               </div>
             )}
 
-            <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+            <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginBottom: 20 }}>
               <button
                 onClick={async () => {
-                  if (!classifiedForm.headline.trim() || !classifiedForm.body.trim()) {
-                    alert("Please fill in the headline and body.");
-                    return;
-                  }
-                  setClassifiedSaving(true);
-                  setClassifiedSaved(false);
+                  if (!classifiedForm.headline.trim() || !classifiedForm.body.trim()) { alert("Please fill in the headline and body."); return; }
+                  setClassifiedSaving(true); setClassifiedSaved(false);
                   try {
                     let imageUrl = classifiedForm.image_url;
-                    // Upload image if a new file was selected
                     if (classifiedImageFile) {
-                      const formData = new FormData();
-                      formData.append("file", classifiedImageFile);
-                      const uploadResp = await fetch(
-                        `https://api.base44.app/api/apps/69d062aca815ce8e697894b1/storage/upload`,
-                        { method: "POST", body: formData }
-                      );
-                      const uploadData = await uploadResp.json();
-                      imageUrl = uploadData.file_url || uploadData.url || imageUrl;
+                      const fd = new FormData(); fd.append("file", classifiedImageFile);
+                      const up = await fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/storage/upload", { method: "POST", body: fd });
+                      const upd = await up.json();
+                      imageUrl = upd.file_url || upd.url || imageUrl;
                     }
                     const adData = {
                       provider_id: provider.id,
                       provider_name: provider.business_name,
                       village: classifiedForm.village,
+                      address: classifiedForm.address,
                       headline: classifiedForm.headline,
                       body: classifiedForm.body,
                       image_url: imageUrl,
+                      deal_expires_at: classifiedForm.deal_expires_at || null,
                       is_active: true,
                     };
-                    if (classifiedAd) {
-                      await ClassifiedAd.update(classifiedAd.id, adData);
-                    } else {
-                      await ClassifiedAd.create(adData);
-                    }
+                    if (classifiedAd) { await ClassifiedAd.update(classifiedAd.id, adData); }
+                    else { await ClassifiedAd.create(adData); }
                     await loadClassified(provider.id);
-                    setClassifiedSaved(true);
-                    setClassifiedImageFile(null);
-                    setClassifiedImagePreview(null);
-                  } catch(e) {
-                    alert("Error saving ad. Please try again.");
-                  } finally {
-                    setClassifiedSaving(false);
-                  }
+                    setClassifiedSaved(true); setClassifiedImageFile(null); setClassifiedImagePreview(null);
+                  } catch { alert("Error saving ad. Please try again."); }
+                  finally { setClassifiedSaving(false); }
                 }}
-                style={{ background: `linear-gradient(180deg,#9A6030,${BROWN_BTN})`, color: PAPER, border: "2px solid #2E7D32", borderRadius: 5, padding: "10px 24px", fontSize: 13, fontWeight: 700, cursor: classifiedSaving ? "not-allowed" : "pointer", letterSpacing: 1, fontFamily: SERIF, opacity: classifiedSaving ? 0.7 : 1 }}
+                style={{ background: `linear-gradient(180deg,#9A6030,${BROWN_BTN})`, color: PAPER, border: "2px solid #2E7D32", borderRadius: 5, padding: "10px 22px", fontSize: 13, fontWeight: 700, cursor: classifiedSaving ? "not-allowed" : "pointer", letterSpacing: 1, fontFamily: SERIF, opacity: classifiedSaving ? 0.7 : 1 }}
               >
                 {classifiedSaving ? "Saving…" : classifiedAd ? "Update Ad" : "Publish Ad"}
               </button>
-
               {classifiedAd && (
                 <button
                   onClick={async () => {
-                    if (!window.confirm("Remove your classified ad?")) return;
+                    if (!window.confirm("Remove your current classified ad?")) return;
                     await ClassifiedAd.update(classifiedAd.id, { is_active: false });
-                    setClassifiedAd(null);
-                    setClassifiedForm({ headline: "", body: "", image_url: "", village: "" });
-                    setClassifiedSaved(false);
+                    setClassifiedAd(null); setClassifiedForm({ headline: "", body: "", image_url: "", village: "", address: "", deal_expires_at: "" }); setClassifiedSaved(false);
                   }}
-                  style={{ background: PAPER, border: "1.5px solid #c00", color: "#c00", borderRadius: 5, padding: "10px 18px", fontSize: 13, cursor: "pointer", fontFamily: SANS }}
-                >
-                  Remove Ad
-                </button>
+                  style={{ background: PAPER, border: "1.5px solid #c00", color: "#c00", borderRadius: 5, padding: "10px 16px", fontSize: 13, cursor: "pointer", fontFamily: SANS }}
+                >Remove Ad</button>
               )}
             </div>
+
+            {/* ── QUEUE NEXT AD ── */}
+            <div style={{ borderTop: `2px dashed ${PAPER_DK}`, paddingTop: 14 }}>
+              <div style={{ fontSize: 12, fontWeight: 700, color: INK, fontFamily: SANS, textTransform: "uppercase", letterSpacing: 1, marginBottom: 4 }}>
+                📅 Queue Next Ad
+              </div>
+              <div style={{ fontSize: 12, color: INK_FADE, fontFamily: SANS, marginBottom: 10, lineHeight: 1.6 }}>
+                When your current deal expires, this ad goes live automatically — zero downtime.
+                {classifiedAd?.next_headline && <span style={{ color: "#2E7D32", fontWeight: 700 }}> ✓ Next ad is queued!</span>}
+              </div>
+
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px 14px" }}>
+                <div style={{ gridColumn: "1/-1" }}>
+                  <label style={lbS}>Next Headline</label>
+                  <input style={inS} placeholder="Next deal headline…" value={nextAdForm.headline}
+                    onChange={e => setNextAdForm(p => ({ ...p, headline: e.target.value.slice(0, 80) }))} />
+                </div>
+                <div style={{ gridColumn: "1/-1" }}>
+                  <label style={lbS}>Next Ad Body</label>
+                  <textarea style={{ ...inS, minHeight: 70, resize: "vertical", lineHeight: 1.6 }} placeholder="Describe the next deal…"
+                    value={nextAdForm.body} onChange={e => setNextAdForm(p => ({ ...p, body: e.target.value.slice(0, 300) }))} />
+                </div>
+                <div>
+                  <label style={lbS}>Address</label>
+                  <input style={inS} placeholder="Business address" value={nextAdForm.address}
+                    onChange={e => setNextAdForm(p => ({ ...p, address: e.target.value }))} />
+                </div>
+                <div>
+                  <label style={lbS}>Village / Area</label>
+                  <input style={inS} placeholder="e.g. Brownwood" value={nextAdForm.village}
+                    onChange={e => setNextAdForm(p => ({ ...p, village: e.target.value }))} />
+                </div>
+                <div>
+                  <label style={lbS}>Next Deal Expires On</label>
+                  <input type="date" style={inS} value={nextAdForm.deal_expires_at}
+                    onChange={e => setNextAdForm(p => ({ ...p, deal_expires_at: e.target.value }))} />
+                </div>
+              </div>
+
+              {nextAdSaved && (
+                <div style={{ background: "#E8F5E9", border: "1.5px solid #2E7D32", borderRadius: 6, padding: "9px 14px", marginTop: 10, fontSize: 13, color: "#2E7D32", fontFamily: SANS }}>
+                  ✓ Next ad queued! It will go live when your current deal expires.
+                </div>
+              )}
+
+              <div style={{ display: "flex", gap: 10, marginTop: 12 }}>
+                <button
+                  onClick={async () => {
+                    if (!nextAdForm.headline.trim() || !nextAdForm.body.trim()) { alert("Please fill in the next ad headline and body."); return; }
+                    setNextAdSaving(true); setNextAdSaved(false);
+                    try {
+                      const target = classifiedAd || { id: null };
+                      const nextData = {
+                        next_headline: nextAdForm.headline,
+                        next_body: nextAdForm.body,
+                        next_address: nextAdForm.address,
+                        next_village: nextAdForm.village,
+                        next_deal_expires_at: nextAdForm.deal_expires_at || null,
+                      };
+                      if (target.id) {
+                        await ClassifiedAd.update(target.id, nextData);
+                      } else {
+                        // No current ad — create a placeholder with the queued data
+                        await ClassifiedAd.create({
+                          provider_id: provider.id, provider_name: provider.business_name,
+                          is_active: false, ...nextData,
+                        });
+                      }
+                      await loadClassified(provider.id);
+                      setNextAdSaved(true);
+                    } catch { alert("Error saving next ad. Please try again."); }
+                    finally { setNextAdSaving(false); }
+                  }}
+                  style={{ background: PAPER_MID, border: "1.5px solid #2E7D32", color: "#2E7D32", borderRadius: 5, padding: "9px 20px", fontSize: 12, fontWeight: 700, cursor: nextAdSaving ? "not-allowed" : "pointer", fontFamily: SANS, opacity: nextAdSaving ? 0.7 : 1 }}
+                >
+                  {nextAdSaving ? "Saving…" : "Save Queued Ad"}
+                </button>
+                {(classifiedAd?.next_headline) && (
+                  <button
+                    onClick={async () => {
+                      if (!window.confirm("Clear the queued next ad?")) return;
+                      await ClassifiedAd.update(classifiedAd.id, { next_headline: null, next_body: null, next_address: null, next_village: null, next_deal_expires_at: null });
+                      await loadClassified(provider.id);
+                      setNextAdForm({ headline: "", body: "", address: "", village: "", deal_expires_at: "" });
+                      setNextAdSaved(false);
+                    }}
+                    style={{ background: PAPER, border: "1.5px solid #c00", color: "#c00", borderRadius: 5, padding: "9px 14px", fontSize: 12, cursor: "pointer", fontFamily: SANS }}
+                  >Clear Queue</button>
+                )}
+              </div>
+            </div>
+
           </div>
         )}
 
-        {/* ── REVIEWS ─────────────────────────────────────────────── */}
         {/* Reviews */}
         <div style={{ ...shS, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <span>⭐ V-Hub Reviews</span>
