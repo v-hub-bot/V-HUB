@@ -30,7 +30,7 @@ function daysLeft(d) { if (!d) return null; return Math.ceil((new Date(d) - new 
 // ── PIN GATE ──────────────────────────────────────────────────────────────────
 function PinGate({ onUnlock }) {
   const [pin, setPin] = useState(""); const [err, setErr] = useState(false);
-  const go = () => { if (PINS.includes(pin)) onUnlock(); else { setErr(true); setPin(""); setTimeout(() => setErr(false), 2500); } };
+  const go = () => { if (PINS.includes(pin)) onUnlock(pin); else { setErr(true); setPin(""); setTimeout(() => setErr(false), 2500); } };
   return (
     <div style={{ minHeight: "100vh", background: T.parchment, display: "flex", alignItems: "center", justifyContent: "center" }}>
       <div style={{ background: T.cream, borderRadius: 12, padding: "40px 32px", boxShadow: `0 8px 32px ${T.shadow}`, textAlign: "center", width: 300, border: `2px solid ${T.border}` }}>
@@ -175,6 +175,7 @@ function ProvidersTab({ providers, setProviders, catMap, svcMap, areaMap, fullSv
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          pin: adminPin,
           provider_record_id: p.id,
           business_name: p.business_name,
           owner_name: p.owner_name,
@@ -212,7 +213,7 @@ You can resend manually from the Email button.`);
     const res = await fetch(`https://v-hub-app-edf7f8e8.base44.app/functions/adminUpdateProvider`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id, fields }),
+      body: JSON.stringify({ pin: adminPin, id, fields }),
     });
     const data = await res.json();
     if (data.error) throw new Error(data.error);
@@ -222,7 +223,7 @@ You can resend manually from the Email button.`);
     const res = await fetch(`https://v-hub-app-edf7f8e8.base44.app/functions/adminUpdateProvider`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id, delete: true }),
+      body: JSON.stringify({ pin: adminPin, id, delete: true }),
     });
     const data = await res.json();
     if (data.error) throw new Error(data.error);
@@ -419,7 +420,7 @@ function ReviewsTab({ reviews, setReviews, providers }) {
   const approve = async (r) => {
     await fetch(`https://v-hub-app-edf7f8e8.base44.app/functions/adminUpdateReview`, {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id: r.id, fields: { is_approved: true } }),
+      body: JSON.stringify({ pin: adminPin, id: r.id, fields: { is_approved: true } }),
     });
     setReviews(p => p.map(x => x.id === r.id ? { ...x, is_approved: true } : x));
   };
@@ -427,7 +428,7 @@ function ReviewsTab({ reviews, setReviews, providers }) {
     if (!window.confirm("Delete?")) return;
     await fetch(`https://v-hub-app-edf7f8e8.base44.app/functions/adminUpdateReview`, {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id: r.id, delete: true }),
+      body: JSON.stringify({ pin: adminPin, id: r.id, delete: true }),
     });
     setReviews(p => p.filter(x => x.id !== r.id));
   };
@@ -612,7 +613,7 @@ function AddProviderTab({ onAdded, categories, services: allServices, serviceAre
       const body = { ...form, vh_number: vh, trial_start_date: now, trial_end_date: trialEnd, profile_views: 0, search_appearances: 0, years_in_business: form.years_in_business ? Number(form.years_in_business) : 0 };
       const createRes = await fetch(`https://v-hub-app-edf7f8e8.base44.app/functions/adminUpdateProvider`, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ create: true, fields: body }),
+        body: JSON.stringify({ pin: adminPin, create: true, fields: body }),
       });
       const createData = await createRes.json();
       if (createData.error) throw new Error(createData.error);
@@ -742,7 +743,7 @@ function AddProviderTab({ onAdded, categories, services: allServices, serviceAre
 }
 
 // ── MAIN DASHBOARD ────────────────────────────────────────────────────────────
-function Dashboard() {
+function Dashboard({ adminPin }) {
   const [providers, setProviders] = useState([]);
   const [reviews, setReviews] = useState([]);
   const [leads, setLeads] = useState([]);
@@ -757,9 +758,10 @@ function Dashboard() {
     setLoading(true);
     try {
       // Use backend function with service role to bypass RLS (PIN-gate has no auth context)
-          const res = await fetch(`https://v-hub-app-edf7f8e8.base44.app/functions/getAdminData`, {
-        method: 'GET',
+      const res = await fetch(`https://v-hub-app-edf7f8e8.base44.app/functions/getAdminData`, {
+        method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ pin: adminPin }),
       });
       const data = await res.json();
       if (data.error) throw new Error(data.error);
@@ -838,5 +840,6 @@ function Dashboard() {
 
 export default function Wekcadmin() {
   const [unlocked, setUnlocked] = useState(false);
-  return unlocked ? <Dashboard /> : <PinGate onUnlock={() => setUnlocked(true)} />;
+  const [adminPin, setAdminPin] = useState("");
+  return unlocked ? <Dashboard adminPin={adminPin} /> : <PinGate onUnlock={(p) => { setAdminPin(p); setUnlocked(true); }} />;
 }
