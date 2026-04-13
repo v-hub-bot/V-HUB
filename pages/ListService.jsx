@@ -49,8 +49,8 @@ const RED_RULE  = "#8B1A1A";
 // ── Service categories (STATIC - v3) ────────────────────────────────────────
 const CATS = [
   { id: "c1", name: "Home Services", icon: "🏠", services: [
-    "Home Improvements","General Repairs","Cleaning Services (Home & Pool)","Painting (Interior/Exterior)",
-    "Garage Door Services","Window Installation/Repair","HVAC","Plumbing","Roofing",
+    "Home Improvements","General Repairs","Cleaning Services","Painting (Interior/Exterior)",
+    "Garage Door Services","Window Installation/Repair","HVAC","Plumbing","Roofing","Home Watch",
   ]},
   { id: "c2", name: "Home Systems & Utilities", icon: "💡", services: [
     "Handyman Services","Security & Home Watch","Pest Control","Appliance Repair",
@@ -58,7 +58,7 @@ const CATS = [
   ]},
   { id: "c3", name: "Yard & Outdoor", icon: "🌿", services: [
     "Lawn Mowing","Sod Installation","Tree Trimming & Pruning/Removal","Lawn Fertilization",
-    "Irrigation/Sprinkler Services","Landscaping","Hardscaping","Pressure Washing","Driveway Repair/Cleaning/Painting",
+    "Irrigation/Sprinkler Services","Landscaping","Hardscaping","Pressure Washing","Driveway Repair/Cleaning/Painting","Pool & Spa Services",
   ]},
   { id: "c4", name: "Golf Cart Services", icon: "⛳", services: [
     "Rentals","Repairs","Detailing","Lighting Upgrades","Improvements/Customizations","Battery Replacement","Tire Services",
@@ -73,7 +73,7 @@ const CATS = [
     "Veterinary Services","Grooming","Pet Sitting/Walking","Pet Training","Mobile Grooming",
   ]},
   { id: "c8", name: "Transportation", icon: "🚐", services: [
-    "Medical Transport","Airport Transport","Local Rides","Errand Services","Courier/Delivery Services",
+    "Medical Transport","Airport Transport","Local Rides","Errand Services","Courier/Delivery Services","Vehicle Transport",
   ]},
   { id: "c9", name: "Professional Services", icon: "💼", services: [
     "Accounting & Bookkeeping","Notary Services","IT Support","Legal Services","Business Consulting","Tax Preparation",
@@ -347,7 +347,7 @@ export default function ListService() {
     const SVCS_STATIC = [
       { id: "s01", category_id: "69d09c14d5ee9e7be9aa301b", name: "Home Improvements", is_active: true },
       { id: "s02", category_id: "69d09c14d5ee9e7be9aa301b", name: "General Repairs", is_active: true },
-      { id: "s03", category_id: "69d09c14d5ee9e7be9aa301b", name: "Cleaning Services (Home & Pool)", is_active: true },
+      { id: "s03", category_id: "69d09c14d5ee9e7be9aa301b", name: "Cleaning Services", is_active: true },
       { id: "s04", category_id: "69d09c14d5ee9e7be9aa301b", name: "Painting (Interior/Exterior)", is_active: true },
       { id: "s05", category_id: "69d09c14d5ee9e7be9aa301b", name: "Garage Door Services", is_active: true },
       { id: "s06", category_id: "69d09c14d5ee9e7be9aa301b", name: "Window Installation/Repair", is_active: true },
@@ -407,6 +407,9 @@ export default function ListService() {
       { id: "s60", category_id: "69d181fe57b60e0aecf4067e", name: "Legal Services", is_active: true },
       { id: "s61", category_id: "69d181fe57b60e0aecf4067e", name: "Business Consulting", is_active: true },
       { id: "s62", category_id: "69d181fe57b60e0aecf4067e", name: "Tax Preparation", is_active: true },
+      { id: "s63", category_id: "69d09c14d5ee9e7be9aa301b", name: "Home Watch", is_active: true },
+      { id: "s64", category_id: "69d09c14d5ee9e7be9aa301c", name: "Pool & Spa Services", is_active: true },
+      { id: "s65", category_id: "69d09c14d5ee9e7be9aa3021", name: "Vehicle Transport", is_active: true },
     ];
     const AREAS_STATIC = [
       { id: "va001", name: "Alhambra", is_active: true },

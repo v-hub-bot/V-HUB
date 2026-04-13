@@ -806,7 +806,7 @@ export default function ProviderDashboard() {
       const res = await fetch("https://v-hub-app-edf7f8e8.base44.app/functions/cancelSubscription", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ stripe_subscription_id: provider.stripe_subscription_id }),
+        body: JSON.stringify({ stripe_subscription_id: provider.stripe_subscription_id, provider_record_id: provider.id }),
       });
       const data = await res.json();
       if (data.success) {

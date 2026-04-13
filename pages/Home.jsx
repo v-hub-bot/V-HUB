@@ -60,7 +60,7 @@ const NEWSPAPER_CONTENT = {
     headline: "TRUSTED NAMES, LOCAL ROOTS",
     subhead: "Established providers bring decades of expertise to your door",
     body: [
-      "Many of The Villages' most beloved service providers have called this community home for over a decade. From family-owned landscaping operations to licensed electricians who know every neighborhood street by name, local expertise makes all the difference.",
+      "Many of The Villages' most beloved service providers have called this community home for over a decade. From family-owned landscaping operations to skilled tradespeople who know every neighborhood street by name, local expertise makes all the difference.",
       "V-Hub reviews every listing before it goes live. Browse by home repair, landscaping, pet care, tech help, cleaning, transportation, and more — contact providers directly, no fees, no middlemen.",
     ]
   },
@@ -85,17 +85,17 @@ const NEWSPAPER_CONTENT = {
     ]
   },
   classifieds: {
-    headline: "CLASSIFIEDS & NOTICES",
-    subhead: "Local announcements from across the community",
+    headline: "COMMUNITY SPOTLIGHT",
+    subhead: "Local service highlights from across The Villages",
     body: [
-      "HANDYMAN SERVICES — Experienced, licensed contractor available for all interior and exterior repairs. Serving Historic Side and Established Villages. Call for free estimate.",
-      "PET SITTING — Loving, attentive care while you travel. References available. Villages of Poinciana area.",
-      "TECH HELP — Smartphone, tablet, and computer setup for seniors. Patient, friendly instruction at your home.",
-      "LANDSCAPING — Weekly lawn maintenance, seasonal cleanup, and irrigation inspection. All Villages areas served.",
-      "HOUSE CLEANING — Reliable, thorough cleaning service available weekly or bi-weekly. Serving Brownwood, Lake Sumter Landing, and surrounding villages. References upon request.",
-      "TRANSPORTATION — Safe, dependable rides to medical appointments, shopping, and community events. Serving all Villages areas. Call to schedule.",
-      "PET GROOMING — Full-service mobile grooming coming to your driveway. Dogs and cats welcome. Serving Spanish Springs and surrounding neighborhoods.",
-      "POOL SERVICE — Licensed pool technician available for weekly maintenance, repairs, and seasonal openings. All Villages communities served.",
+      "HOME SERVICES — From handyman repairs to full renovations, V-Hub connects residents with experienced home professionals across every village.",
+      "PET CARE — Dog walkers, groomers, pet sitters, and veterinary services — V-Hub lists trusted pet care providers throughout The Villages.",
+      "TECH HELP — Smartphone setup, tablet troubleshooting, Wi-Fi support, and computer help — patient, senior-friendly tech professionals available.",
+      "LAWN & LANDSCAPING — Weekly mowing, fertilization, irrigation, tree trimming, and full landscape design — serving all 97 villages.",
+      "HOUSE CLEANING — Weekly and bi-weekly housekeeping, deep cleaning, and move-in/move-out services from trusted local providers.",
+      "TRANSPORTATION — Medical transport, airport rides, local errands, and community event shuttle services across The Villages.",
+      "PERSONAL CARE — Hair stylists, nail technicians, massage therapists, and wellness professionals who come to your home.",
+      "POOL & SPA — Pool maintenance, spa servicing, chemical balancing, and seasonal inspections from licensed local technicians.",
     ]
   },
   safetyTrust: {
@@ -117,7 +117,7 @@ const NEWSPAPER_CONTENT = {
       "Look up a handyman in Fenney, a pet groomer near Marsh Bend, or a tech helper in Brownwood Square — V-Hub surfaces exactly who serves your area, nothing more.",
       "Every provider is reviewed by the V-Hub team before their listing goes live. Residents can leave reviews, rate their experience, and help neighbors make confident, informed choices.",
       "Whether you are new to The Villages or have lived here for years, V-Hub is the go-to directory for finding trusted help — fast, local, and always free to search.",
-      "Home repair specialists on V-Hub include general contractors, handymen, and tradespeople covering everything from minor fixes to major renovations. No job is too small when the right pro is just a click away.",
+      "Home repair specialists on V-Hub include handymen and tradespeople covering everything from minor fixes to major renovations. No job is too small when the right pro is just a click away.",
       "Landscaping professionals listed on V-Hub cover lawn maintenance, full irrigation system installations, and everything in between. Many offer seasonal packages tailored to Florida's year-round growing season.",
       "Tech help providers specialize in working with seniors — setting up smartphones, configuring tablets, troubleshooting Wi-Fi, and teaching residents how to use video calling to stay connected with family. Patience and clarity are their hallmarks.",
       "Cleaning services range from weekly housekeeping to deep move-in cleans. Many providers serve specific villages and can accommodate residents with special scheduling needs or health sensitivities.",
@@ -1309,7 +1309,7 @@ export default function Home() {
             <p style={hd}>HOW V-HUB WORKS FOR PROVIDERS</p>
             <p style={sub}>Reach the exact neighborhoods you serve</p>
             <p style={para}>Listing your business on V-Hub puts you directly in front of Villages residents searching for the services you offer. No cold calls, no wasted advertising — just direct connections with neighbors who need exactly what you do.</p>
-            <p style={para}>Providers choose which villages they serve, which categories they appear under, and what their profile says. Your listing is always in your control, and upgrades are available to boost your visibility across additional neighborhoods.</p>
+            <p style={para}>Providers choose which villages they serve, which categories they appear under, and what their profile says. Your listing is always in your control — you choose the services and villages you serve, and your profile is editable anytime.</p>
             <p style={para}>Providers across The Villages are already listed and being found by residents every day. Click List Your Service above to get started — it only takes a few minutes to create your profile.</p>
           </div>
         </div>
