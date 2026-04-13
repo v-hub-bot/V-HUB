@@ -307,6 +307,10 @@ export default function ListService() {
   const [description,  setDescription]  = useState("");
   const [years,        setYears]        = useState("");
   const [license,      setLicense]      = useState("");
+  const [loginEmail,   setLoginEmail]   = useState("");
+  const [loginPass,    setLoginPass]    = useState("");
+  const [loginPass2,   setLoginPass2]   = useState("");
+  const [showPass,     setShowPass]     = useState(false);
 
   // Services & areas
   const [openCat,  setOpenCat]  = useState(null);
@@ -542,6 +546,9 @@ export default function ListService() {
     if (!email.trim())        e.email        = true;
     if (selSvcs.length === 0) e.svcs         = true;
     if (selAreas.length === 0) e.areas       = true;
+    if (!loginEmail.trim()) e.loginEmail = true;
+    if (!loginPass.trim() || loginPass.length < 6) e.loginPass = true;
+    if (loginPass !== loginPass2) e.loginPass2 = true;
     setErrors(e);
     return Object.keys(e).length === 0;
   };
@@ -588,6 +595,8 @@ export default function ListService() {
           service_names:     svcNames,
           area_names:        areaNames,
           category_name:     catName,
+          login_email:       loginEmail || email,
+          login_password:    loginPass,
         }),
       });
       const data = await res.json();
@@ -731,7 +740,7 @@ export default function ListService() {
               </div>
               <div>
                 <label style={{ ...lbS, color: errors.email ? RED_RULE : INK_FADE }}>Email Address *</label>
-                <input style={{ ...inS, borderColor: errors.email ? RED_RULE : PAPER_DK }} value={email} onChange={e => setEmail(e.target.value)} placeholder="you@example.com" type="email" />
+                <input style={{ ...inS, borderColor: errors.email ? RED_RULE : PAPER_DK }} value={email} onChange={e => { setEmail(e.target.value); if (!loginEmail || loginEmail === email) setLoginEmail(e.target.value); }} placeholder="you@example.com" type="email" />
                 {errBox("email", "Required")}
               </div>
               <div>
@@ -886,6 +895,58 @@ export default function ListService() {
                   admin@v-hub.us
                 </div>
               </a>
+            </div>
+          </div>
+
+          {/* Section 4 — Account Setup */}
+          <div style={{ borderTop: `2px solid ${INK}`, paddingTop: 22, marginBottom: 8 }}>
+            <div style={{ ...shS, marginBottom: 18 }}>Section 4 — Provider Hub Login *</div>
+            <div style={{ background: "#E8F5E9", border: "2px solid #4CAF50", borderRadius: 10, padding: "14px 16px", marginBottom: 18, fontSize: 13, color: "#2E7D32", lineHeight: 1.7 }}>
+              🔐 <strong>Choose your login credentials</strong> for the V-Hub Provider Hub. You'll use these to access your dashboard, view stats, and manage your listing after approval.
+            </div>
+
+            <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: "12px 16px" }}>
+              <div style={{ gridColumn: isMobile ? "1" : "1 / -1" }}>
+                <label style={{ ...lbS, color: errors.loginEmail ? RED_RULE : INK_FADE }}>Login Email *</label>
+                <input
+                  style={{ ...inS, borderColor: errors.loginEmail ? RED_RULE : PAPER_DK }}
+                  value={loginEmail}
+                  onChange={e => setLoginEmail(e.target.value)}
+                  placeholder="The email you'll use to log in"
+                  type="email"
+                />
+                {errors.loginEmail && <div style={{ fontSize: 11, color: RED_RULE, marginTop: 3 }}>Required</div>}
+                <div style={{ fontSize: 11, color: INK_FADE, marginTop: 4, fontStyle: "italic" }}>Can be the same as your business email above, or a different one.</div>
+              </div>
+
+              <div>
+                <label style={{ ...lbS, color: errors.loginPass ? RED_RULE : INK_FADE }}>Password * <span style={{ fontWeight: 400, textTransform: "none", fontSize: 11 }}>(min. 6 characters)</span></label>
+                <div style={{ position: "relative" }}>
+                  <input
+                    style={{ ...inS, borderColor: errors.loginPass ? RED_RULE : PAPER_DK, paddingRight: 44 }}
+                    value={loginPass}
+                    onChange={e => setLoginPass(e.target.value)}
+                    placeholder="Create a password"
+                    type={showPass ? "text" : "password"}
+                  />
+                  <button onClick={() => setShowPass(p => !p)} type="button" style={{ position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", fontSize: 16, color: INK_FADE }}>
+                    {showPass ? "🙈" : "👁️"}
+                  </button>
+                </div>
+                {errors.loginPass && <div style={{ fontSize: 11, color: RED_RULE, marginTop: 3 }}>Must be at least 6 characters</div>}
+              </div>
+
+              <div>
+                <label style={{ ...lbS, color: errors.loginPass2 ? RED_RULE : INK_FADE }}>Confirm Password *</label>
+                <input
+                  style={{ ...inS, borderColor: errors.loginPass2 ? RED_RULE : PAPER_DK }}
+                  value={loginPass2}
+                  onChange={e => setLoginPass2(e.target.value)}
+                  placeholder="Re-enter your password"
+                  type={showPass ? "text" : "password"}
+                />
+                {errors.loginPass2 && <div style={{ fontSize: 11, color: RED_RULE, marginTop: 3 }}>Passwords do not match</div>}
+              </div>
             </div>
           </div>
 

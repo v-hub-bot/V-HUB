@@ -51,6 +51,8 @@ Deno.serve(async (req) => {
       service_names,  // human-readable names for email notification
       area_names,     // human-readable names for email notification
       category_name,  // human-readable category for email notification
+      login_email,    // provider's chosen login email
+      login_password, // provider's chosen login password
     } = body;
 
     // Validate required fields
@@ -86,6 +88,8 @@ Deno.serve(async (req) => {
       is_active:           false,
       profile_views:       0,
       search_appearances:  0,
+      login_email:         login_email || email,
+      login_password:      login_password || "",
     });
 
     // ── Notify admin ────────────────────────────────────────────────────

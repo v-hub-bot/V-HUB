@@ -359,6 +359,15 @@ You can resend manually from the Email button.`);
                 {/* Notes */}
                 {p.notes && <div style={{ fontSize: 12, color: T.brownLight, background: "#fff8e1", borderRadius: 6, padding: "8px 10px", marginBottom: 10 }}>📝 {p.notes}</div>}
 
+                {/* Login credentials */}
+                {(p.login_email || p.login_password) && (
+                  <div style={{ background: "#E8F5E9", border: "1px solid #A5D6A7", borderRadius: 8, padding: "10px 14px", marginBottom: 10 }}>
+                    <div style={{ fontSize: 11, color: "#2E7D32", fontFamily: T.sans, fontWeight: 700, marginBottom: 6, textTransform: "uppercase", letterSpacing: 1 }}>🔐 Provider Hub Login</div>
+                    {p.login_email && <div style={{ fontSize: 13, color: "#1A0A00", fontFamily: T.sans, marginBottom: 4 }}><strong>Email:</strong> {p.login_email}</div>}
+                    {p.login_password && <div style={{ fontSize: 13, color: "#1A0A00", fontFamily: T.sans }}><strong>Password:</strong> {p.login_password}</div>}
+                  </div>
+                )}
+
                 {/* Stripe info */}
                 {(p.stripe_customer_id || p.stripe_subscription_id) && (
                   <div style={{ fontSize: 11, color: "#aaa", fontFamily: T.sans, marginBottom: 8 }}>
