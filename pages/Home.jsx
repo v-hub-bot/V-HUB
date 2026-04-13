@@ -741,20 +741,11 @@ function SearchBox({ cats, svcs, areas, onSearch, selSvc, setSelSvc, selArea, se
           </button>
         </a>
       </div>
-      <button onClick={e => { e.stopPropagation(); onSearch(selSvc, selArea); }} style={{
-        width: "100%", background: `linear-gradient(180deg,#9A6030,${BROWN_BTN} 60%,#5A3010)`,
-        border: `3px solid ${YELLOW}`, boxShadow: `0 0 0 1.5px ${YELLOW}, 0 0 10px 2px rgba(255,220,0,0.35)`,
-        borderRadius: 5, color: "#F5E8CC", fontFamily: "'Times New Roman', serif",
-        fontWeight: 700, fontSize: 14, letterSpacing: 3, padding: "13px", cursor: "pointer", boxSizing: "border-box",
-        marginBottom: 12,
-      }}>
-        FIND SERVICES
-      </button>
       <div style={{ display: "flex", gap: 8, marginBottom: 5 }}>
         <div style={{ flex: 1, fontSize: 11, fontWeight: 700, color: INK, fontFamily: "'Times New Roman', serif" }}>What service do you need?</div>
         <div style={{ flex: 1, fontSize: 11, fontWeight: 700, color: INK, fontFamily: "'Times New Roman', serif" }}>Where do you need it?</div>
       </div>
-      <div style={{ display: "flex", gap: 8 }}>
+      <div style={{ display: "flex", gap: 8, marginBottom: 10 }}>
         <div style={{ flex: 1, minWidth: 0, position: "relative" }}>
           <DropBtn label={svcLabel} isOpen={sOpen} onClick={e => { e.stopPropagation(); if (sOpen) { setSOpen(false); setOpenCat(null); } else { setSOpen(true); setVOpen(false); } }} />
           <SvcDropdown open={sOpen} cats={cats} svcs={svcs} openCat={openCat} selSvc={selSvc} setOpenCat={setOpenCat} setSelSvc={s => { setSelSvc(s); setSOpen(false); }} setSOpen={setSOpen} />
@@ -764,6 +755,15 @@ function SearchBox({ cats, svcs, areas, onSearch, selSvc, setSelSvc, selArea, se
           <VilDropdown open={vOpen} areas={areas} selArea={selArea} setSelArea={a => { setSelArea(a); setVOpen(false); }} setVOpen={setVOpen} />
         </div>
       </div>
+      <button onClick={e => { e.stopPropagation(); onSearch(selSvc, selArea); }} style={{
+        width: "100%", background: `linear-gradient(180deg,#9A6030,${BROWN_BTN} 60%,#5A3010)`,
+        border: `3px solid ${YELLOW}`, boxShadow: `0 0 0 1.5px ${YELLOW}, 0 0 10px 2px rgba(255,220,0,0.35)`,
+        borderRadius: 5, color: "#F5E8CC", fontFamily: "'Times New Roman', serif",
+        fontWeight: 700, fontSize: 14, letterSpacing: 3, padding: "13px", cursor: "pointer", boxSizing: "border-box",
+        marginTop: 10,
+      }}>
+        FIND SERVICES
+      </button>
     </div>
   );
 }
