@@ -283,11 +283,12 @@ function VillageSelect({ selAreas, setSelAreas, dbAreas }) {
   const [openGroup, setOpenGroup] = useState(null);
 
   const MACRO_GROUPS = [
-    { key: "historic",    label: "🌴 Historic Side",       villages: ["Alhambra","Ashland","Belle Aire","Belvedere","Bonita","Buttonwood","Calumet Grove","Country Club Hills","De Allende","De La Vista","Del Mar","DeLuna","El Cortez","Hacienda","Haciendas of Mission Hills","La Reynalda","La Zamora","LaBelle","Largo","Orange Blossom Gardens","Pennecamp","Piedmont","Pine Ridge","Poinciana","Rio Ranchero","Santo Domingo","Spanish Springs","Tamarind Grove","Valle Verde","Virginia Trace"] },
-    { key: "established", label: "🏡 Established Villages", villages: ["Amelia","Bonnybrook","Caroline","Charlotte","Chatham","DeSoto","Dunedin","Fernandina","Gilchrist","Glenbrook","Hadley","Hawkins","Hemingway","Hillsborough","Lake Deaton","Lynnhaven","Mira Mesa","Palo Alto","Pinellas","Polo Ridge","Rio Grande","Rio Ponderosa","Sabal Chase","Silver Lake","Springdale","Summerhill","Sunset Pointe","Tierra Del Sol","Woodbury"] },
-    { key: "newer",       label: "🌿 Newer Villages",       villages: ["Chitty Chatty","Citrus Grove","Dabney","Duval","Fenney","Hammock at Fenney","Lakeshore Cottages","Liberty Park","Linden","Mallory Square","Marsh Bend","McClure","Monarch Grove","Newell","Pine Hills","Richmond","Sanibel","Santiago","Tall Trees"] },
-    { key: "eastport",    label: "🌊 Eastport",             villages: ["Bradford","Bridgeport at Creekside Landing","Bridgeport at Lake Miona","Bridgeport at Lake Sumter","Bridgeport at Laurel Valley","Bridgeport at Miona Shores","Bridgeport at Mission Hills","Cason Hammock","Collier","Collier at Alden Bungalows","Collier at Antrim Dells","Lake Denham","Osceola Hills","Osceola Hills at Soaring Eagle Preserve","Winifred"] },
-    { key: "st_john",     label: "⛪ St. John's Area",      villages: ["St. Catherine","St. Charles","St. James","St. Johns"] },
+    { key: "historic",     label: "🌴 Historic Side / Spanish Springs Area", villages: ["Alhambra","Country Club","Del Mar","El Cortez","Hacienda","La Reynalda","La Zamora","Mira Mesa","Orange Blossom","Silver Lake","Spring Arbor","Valle Verde"] },
+    { key: "established_n", label: "🏡 Established Villages (North of SR-466A)", villages: ["Ashland","Belle Aire","Belvedere","Bonita","Bonnybrook","Bridgeport at Laurel Valley","Bridgeport at Mission Hills","Calumet Grove","Caroline","Chatham","Duval","Glenbrook","Hadley","Hemingway","Lynnhaven","Mallory Square","Pennecamp","Poinciana","Sabal Chase","Santiago","Sunset Pointe","Tall Trees","Virginia Trace","Winifred"] },
+    { key: "established_s", label: "🏡 Established Villages (South of SR-466A)", villages: ["Charlotte","Collier","Dunedin","Fernandina","Gilchrist","Hillsborough","LaBelle","Lake Deaton","Osceola Hills","Pinellas","Sanibel"] },
+    { key: "newer",        label: "🌿 Newer Villages (south of SR 44)", villages: ["Bradford","Cason Hammock","Chitty Chatty","Citrus Grove","DeLuna","DeSoto","Fenney","Hammock at Fenney","Hawkins","Linden","Marsh Bend","McClure","Monarch Grove","Richmond","St. Catherine","St. Johns"] },
+    { key: "eastport",     label: "🌊 Eastport / newest development area", villages: ["Moultrie Creek","Newell","Lake Denham","Dabney","Shady Brook"] },
+    { key: "family",       label: "🏠 Family / non-age-restricted villages", villages: ["Bison Valley","Oak Meadows","Oxford Oaks","Middleton"] },
   ];
 
   // Build name→id map from live DB areas
