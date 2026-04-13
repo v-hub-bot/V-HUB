@@ -953,8 +953,10 @@ export default function ListService() {
           {/* Submit */}
           <div style={{ borderTop: `2px solid ${INK}`, paddingTop: 22, textAlign: "center" }}>
             <div style={{ fontSize: 13, color: INK_FADE, fontStyle: "italic", marginBottom: 16, lineHeight: 1.6 }}>
-              By submitting, you agree to be listed in V-Hub's public directory.<br />
-              Admin will contact you to confirm and activate your profile.
+              By submitting, you agree to V-Hub's{" "}
+              <a href="/Terms" style={{ color: BROWN_BTN }}>Terms of Service</a> and{" "}
+              <a href="/Privacy" style={{ color: BROWN_BTN }}>Privacy Policy</a>, and consent to your business being listed in V-Hub's public directory.
+              Admin will review and activate your profile — usually within 1 business day.
             </div>
             <button
               onClick={handleSubmit}
@@ -976,7 +978,7 @@ export default function ListService() {
 
         {/* Footer */}
         <div style={{ textAlign: "center", padding: "14px 16px", borderTop: `2px double ${INK}`, fontSize: 11, color: INK_FADE, fontStyle: "italic", background: PAPER }}>
-          © V-Hub · The Villages, Florida · <a href="/" style={{ color: INK_FADE }}>Home</a>
+          © 2026 V-Hub · The Villages, Florida · <a href="/" style={{ color: INK_FADE }}>Home</a> · <a href="/Terms" style={{ color: INK_FADE }}>Terms</a> · <a href="/Privacy" style={{ color: INK_FADE }}>Privacy</a>
         </div>
       </div>
     );
@@ -1260,7 +1262,7 @@ export default function ListService() {
 
       {/* Footer */}
       <div style={{ textAlign: "center", padding: "14px 20px", borderTop: `2px double ${INK}`, fontSize: 11, color: INK_FADE, fontStyle: "italic", background: PAPER }}>
-        © V-Hub · The Villages, Florida · A community-first directory · <a href="/" style={{ color: INK_FADE }}>Home</a>
+        © 2026 V-Hub · The Villages, Florida · <a href="/" style={{ color: INK_FADE }}>Home</a> · <a href="/Terms" style={{ color: INK_FADE }}>Terms</a> · <a href="/Privacy" style={{ color: INK_FADE }}>Privacy</a>
       </div>
     </div>
   );

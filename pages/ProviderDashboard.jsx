@@ -234,6 +234,16 @@ function VillageSelect({ selAreas, setSelAreas }) {
 }
 
 // ── LOGIN SCREEN ──────────────────────────────────────────────────────────
+// ── SHA-256 password hashing (Web Crypto API) ─────────────────────────────
+async function hashPassword(plain) {
+  if (!plain) return "";
+  // If already a 64-char hex SHA-256, return as-is (already hashed)
+  if (/^[0-9a-f]{64}$/.test(plain)) return plain;
+  const enc = new TextEncoder();
+  const buf = await crypto.subtle.digest("SHA-256", enc.encode(plain));
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, "0")).join("");
+}
+
 function LoginScreen({ onLogin }) {
   const [loginEmail, setLoginEmail] = useState("");
   const [loginPass, setLoginPass]   = useState("");
@@ -266,7 +276,10 @@ function LoginScreen({ onLogin }) {
         setLoading(false);
         return;
       }
-      if (storedPass !== loginPass) {
+      // Support both legacy plaintext and new hashed passwords
+      const hashedInput = await hashPassword(loginPass);
+      const isMatch = storedPass === loginPass || storedPass === hashedInput;
+      if (!isMatch) {
         setError("Incorrect password. Please try again or contact admin@v-hub.us for help.");
         setLoading(false);
         return;
@@ -517,7 +530,7 @@ export default function ProviderDashboard() {
     if (newPass && newPass.length < 6) { setAccMsg("⚠ Password must be at least 6 characters."); return; }
     if (newPass && newPass !== newPass2) { setAccMsg("⚠ Passwords do not match."); return; }
     const updates = { login_email: newLoginEmail.trim() };
-    if (newPass) updates.login_password = newPass;
+    if (newPass) updates.login_password = await hashPassword(newPass);
     try {
       await Provider.update(provider.id, updates);
       const fresh = await Provider.get(provider.id);
@@ -947,7 +960,7 @@ export default function ProviderDashboard() {
 
       {/* Footer */}
       <div style={{ textAlign: "center", padding: "14px 16px", borderTop: `2px double ${INK}`, fontSize: 11, color: INK_FADE, fontStyle: "italic", background: PAPER, fontFamily: SERIF }}>
-        © V-Hub · The Villages, Florida · <a href="/" style={{ color: INK_FADE }}>Home</a> · <a href="mailto:admin@v-hub.us" style={{ color: INK_FADE }}>admin@v-hub.us</a>
+        © 2026 V-Hub · The Villages, Florida · <a href="/" style={{ color: INK_FADE }}>Home</a> · <a href="/Terms" style={{ color: INK_FADE }}>Terms</a> · <a href="/Privacy" style={{ color: INK_FADE }}>Privacy</a> · <a href="mailto:admin@v-hub.us" style={{ color: INK_FADE }}>admin@v-hub.us</a>
       </div>
     </div>
   );

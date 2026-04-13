@@ -39,6 +39,21 @@ function generateVhNumber(existing: string[]): string {
   throw new Error('Could not generate unique VH number');
 }
 
+// Generate SHA-256 hash using Web Crypto
+async function sha256(plain: string): Promise<string> {
+  const enc = new TextEncoder();
+  const buf = await crypto.subtle.digest("SHA-256", enc.encode(plain));
+  return Array.from(new Uint8Array(buf)).map((b) => b.toString(16).padStart(2, "0")).join("");
+}
+
+// Generate a random readable temp password
+function genTempPassword(): string {
+  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789";
+  return Array.from(crypto.getRandomValues(new Uint8Array(8)))
+    .map((b) => chars[b % chars.length])
+    .join("");
+}
+
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
@@ -65,10 +80,15 @@ Deno.serve(async (req) => {
     const trialEnd = new Date(now);
     trialEnd.setDate(trialEnd.getDate() + 45);
 
+    const tempPassword = genTempPassword();
+    const hashedPassword = await sha256(tempPassword);
+
     const record = await base44.asServiceRole.entities.Provider.create({
       business_name,
       owner_name,
       email,
+      login_email: email,
+      login_password: hashedPassword,
       phone: phone || '',
       website: website || '',
       address: address || '',
@@ -108,6 +128,13 @@ Deno.serve(async (req) => {
             <div style="font-size: 14px; color: #333;">📋 Your V-Hub ID: <strong>${vh_number}</strong></div>
             <div style="font-size: 14px; color: #333; margin-top: 6px;">📅 Trial ends: <strong>${trialEndFormatted}</strong></div>
             <div style="font-size: 14px; color: #333; margin-top: 6px;">💰 After trial: <strong>$12/month</strong> to stay listed</div>
+          </div>
+          <div style="background: #E8F5E9; border: 2px solid #4CAF50; border-radius: 10px; padding: 18px; margin: 20px 0;">
+            <div style="font-size: 14px; font-weight: 700; color: #2E7D32; margin-bottom: 10px;">🔐 YOUR PROVIDER HUB LOGIN</div>
+            <div style="font-size: 14px; color: #333; margin-bottom: 6px;">Visit: <a href="https://v-hub-app-edf7f8e8.base44.app/ProviderDashboard" style="color: #2E7D32;">v-hub.us → Provider Hub</a></div>
+            <div style="font-size: 14px; color: #333; margin-bottom: 6px;"><strong>Email:</strong> ${email}</div>
+            <div style="font-size: 14px; color: #333; margin-bottom: 10px;"><strong>Temporary Password:</strong> <span style="font-family: 'Courier New', monospace; font-weight: 900; font-size: 16px; background: #f0f0f0; padding: 2px 8px; border-radius: 4px;">${tempPassword}</span></div>
+            <div style="font-size: 12px; color: #666; font-style: italic;">Please change your password after your first login via Account Settings in the dashboard.</div>
           </div>
           <p style="font-size: 14px; color: #5A3010; margin: 0 0 12px;">
             Your listing is now live and visible to residents across The Villages. When your trial nears its end, we'll send you a reminder and a simple link to set up your billing.

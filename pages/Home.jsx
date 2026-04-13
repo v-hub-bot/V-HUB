@@ -593,7 +593,7 @@ function Results({ results, areas, cats, svcs, onReset, onSel, selArea, selCatId
 
         {/* ── FOOTER ── */}
         <div style={{ borderTop: `2px solid ${INK}`, padding: "10px 16px", textAlign: "center", fontSize: 10, color: INK_FADE, fontStyle: "italic" }}>
-          © 2026 V-Hub · The Villages, Florida · Find Local Services · All rights reserved
+          © 2026 V-Hub · The Villages, Florida · <a href="/Terms" style={{ color: INK_FADE }}>Terms</a> · <a href="/Privacy" style={{ color: INK_FADE }}>Privacy</a>
         </div>
 
       </div>
@@ -1301,7 +1301,7 @@ export default function Home() {
 
         {/* Footer */}
         <div style={{ padding: "10px 14px", textAlign: "center", fontSize: 10, color: INK_FADE, fontStyle: "italic" }}>
-          © 2026 V-Hub · The Villages, Florida · Find Local Services · All rights reserved
+          © 2026 V-Hub · The Villages, Florida · <a href="/Terms" style={{ color: INK_FADE }}>Terms</a> · <a href="/Privacy" style={{ color: INK_FADE }}>Privacy</a>
         </div>
 
       </div>

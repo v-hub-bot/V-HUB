@@ -4,6 +4,14 @@ import { Provider, ProviderReview, LeadInquiry, ServiceSearchStat, Category, Ser
 const PINS = ["6185", "1357"];
 const LOGO = "https://media.base44.com/images/public/69d062aca815ce8e697894b1/a9af95bc3_V-Hublogo.png";
 
+
+// SHA-256 for admin password setting
+async function sha256(plain) {
+  if (!plain) return "";
+  const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(plain));
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, "0")).join("");
+}
+
 const T = {
   parchment: "#F5EDD6", parchmentDark: "#E8D9B0",
   brown: "#5C3317", brownLight: "#8B5E3C", brownDark: "#3B1F0A",
@@ -219,6 +227,17 @@ You can resend manually from the Email button.`);
     if (data.error) throw new Error(data.error);
     return data;
   };
+  const setProviderPassword = async (id, newPass) => {
+    if (!newPass || newPass.length < 6) { setSetPassMsg("⚠ Password must be at least 6 characters."); return; }
+    const hashed = await sha256(newPass);
+    await adminUpdate(id, { login_password: hashed, login_email: providers.find(p => p.id === id)?.login_email || providers.find(p => p.id === id)?.email || "" });
+    setProviders(prev => prev.map(p => p.id === id ? { ...p, login_password: hashed } : p));
+    setSetPassId(null);
+    setSetPassVal("");
+    setSetPassMsg("");
+    alert("✅ Password set! Provider can now log into Provider Hub.");
+  };
+
   const adminDelete = async (id) => {
     const res = await fetch(`https://v-hub-app-edf7f8e8.base44.app/functions/adminUpdateProvider`, {
       method: 'POST',
@@ -370,18 +389,43 @@ You can resend manually from the Email button.`);
                 {p.notes && <div style={{ fontSize: 12, color: T.brownLight, background: "#fff8e1", borderRadius: 6, padding: "8px 10px", marginBottom: 10 }}>📝 {p.notes}</div>}
 
                 {/* Login credentials */}
-                {(!p.login_password) && (
-                  <div style={{ fontSize: 11, color: "#c0392b", fontWeight: 700, background: "#ffeaea", border: "1px solid #c0392b", borderRadius: 4, padding: "3px 8px", marginBottom: 6, fontFamily: T.sans }}>
-                    ⚠️ No login password set — provider cannot log into Provider Hub. Edit their record to add one.
+                <div style={{ background: p.login_password ? "#E8F5E9" : "#ffeaea", border: `1px solid ${p.login_password ? "#A5D6A7" : "#c0392b"}`, borderRadius: 8, padding: "10px 14px", marginBottom: 10 }}>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 6 }}>
+                    <div style={{ fontSize: 11, color: p.login_password ? "#2E7D32" : "#c0392b", fontFamily: T.sans, fontWeight: 700, textTransform: "uppercase", letterSpacing: 1 }}>
+                      {p.login_password ? "🔐 Provider Hub Login" : "⚠️ No Login Password"}
+                    </div>
+                    <button
+                      onClick={() => { setSetPassId(setPassId === p.id ? null : p.id); setSetPassVal(""); setSetPassMsg(""); }}
+                      style={{ fontSize: 11, background: "#8B4513", color: "#fff", border: "none", borderRadius: 4, padding: "3px 10px", cursor: "pointer", fontFamily: T.sans }}
+                    >
+                      {setPassId === p.id ? "Cancel" : (p.login_password ? "Change Password" : "Set Password")}
+                    </button>
                   </div>
-                )}
-                {(p.login_email || p.login_password) && (
-                  <div style={{ background: "#E8F5E9", border: "1px solid #A5D6A7", borderRadius: 8, padding: "10px 14px", marginBottom: 10 }}>
-                    <div style={{ fontSize: 11, color: "#2E7D32", fontFamily: T.sans, fontWeight: 700, marginBottom: 6, textTransform: "uppercase", letterSpacing: 1 }}>🔐 Provider Hub Login</div>
-                    {p.login_email && <div style={{ fontSize: 13, color: "#1A0A00", fontFamily: T.sans, marginBottom: 4 }}><strong>Email:</strong> {p.login_email}</div>}
-                    {p.login_password && <div style={{ fontSize: 13, color: "#1A0A00", fontFamily: T.sans }}><strong>Password:</strong> {p.login_password}</div>}
-                  </div>
-                )}
+                  {p.login_email && <div style={{ fontSize: 13, color: "#1A0A00", fontFamily: T.sans, marginBottom: 2 }}><strong>Email:</strong> {p.login_email || p.email}</div>}
+                  {p.login_password
+                    ? <div style={{ fontSize: 12, color: "#2E7D32", fontFamily: T.sans }}>✓ Password is set (hashed)</div>
+                    : <div style={{ fontSize: 12, color: "#c0392b", fontFamily: T.sans }}>Provider cannot log in until a password is set.</div>
+                  }
+                  {setPassId === p.id && (
+                    <div style={{ marginTop: 10, display: "flex", gap: 8, flexDirection: "column" }}>
+                      <input
+                        type="password"
+                        value={setPassVal}
+                        onChange={e => setSetPassVal(e.target.value)}
+                        placeholder="New password (min 6 chars)..."
+                        style={{ padding: "8px 10px", border: "1px solid #8B4513", borderRadius: 6, fontSize: 13, fontFamily: T.sans, width: "100%", boxSizing: "border-box" }}
+                        onKeyDown={e => e.key === "Enter" && setProviderPassword(p.id, setPassVal)}
+                      />
+                      {setPassMsg && <div style={{ fontSize: 12, color: "#c0392b", fontFamily: T.sans }}>{setPassMsg}</div>}
+                      <button
+                        onClick={() => setProviderPassword(p.id, setPassVal)}
+                        style={{ background: "#2e7d32", color: "#fff", border: "none", borderRadius: 6, padding: "8px 16px", cursor: "pointer", fontWeight: 700, fontSize: 13, fontFamily: T.sans }}
+                      >
+                        Save Password
+                      </button>
+                    </div>
+                  )}
+                </div>
 
                 {/* Stripe info */}
                 {(p.stripe_customer_id || p.stripe_subscription_id) && (
