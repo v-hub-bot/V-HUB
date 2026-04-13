@@ -165,23 +165,12 @@ function ProvidersTab({ providers, setProviders, catMap, svcMap, areaMap, fullSv
     if (!window.confirm(`Approve ${p.business_name} and send them a confirmation email?`)) return;
     setApproving(p.id);
     try {
-      // Step 1 — Update the provider record via SDK (works without auth for admin)
+      // Backend handles DB update + email via service role
       const now = new Date();
       const trialEnd = new Date(now);
       trialEnd.setDate(trialEnd.getDate() + 45);
       const trialStartStr = now.toISOString().split('T')[0];
       const trialEndStr = trialEnd.toISOString().split('T')[0];
-
-      await Provider.update(p.id, {
-        is_active: true,
-        is_visible: true,
-        subscription_status: "trial",
-        trial_start_date: trialStartStr,
-        trial_end_date: trialEndStr,
-        reminder_sent: false,
-      });
-
-      // Step 2 — Send approval email via backend function (correct URL)
       const res = await fetch("https://v-hub-697894b1.base44.app/functions/approveProvider", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -194,7 +183,7 @@ function ProvidersTab({ providers, setProviders, catMap, svcMap, areaMap, fullSv
           services: p.services || [],
           service_areas: p.service_areas || [],
           vh_number: p.vh_number,
-          email_only: true,
+          email_only: false,
         }),
       });
 
@@ -219,9 +208,30 @@ You can resend manually from the Email button.`);
     setApproving(null);
   };
 
-  const toggleActive = async (p) => { await Provider.update(p.id, { is_active: !p.is_active }); setProviders(prev => prev.map(x => x.id === p.id ? { ...x, is_active: !p.is_active } : x)); };
-  const toggleVisible = async (p) => { await Provider.update(p.id, { is_visible: !p.is_visible }); setProviders(prev => prev.map(x => x.id === p.id ? { ...x, is_visible: !p.is_visible } : x)); };
-  const del = async (p) => { if (!window.confirm(`Delete ${p.business_name}?`)) return; await Provider.delete(p.id); setProviders(prev => prev.filter(x => x.id !== p.id)); };
+  const APP_ID = '69d062aca815ce8e697894b1';
+  const adminUpdate = async (id, fields) => {
+    const res = await fetch(`https://api.base44.com/api/apps/${APP_ID}/functions/adminUpdateProvider`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id, fields }),
+    });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+    return data;
+  };
+  const adminDelete = async (id) => {
+    const res = await fetch(`https://api.base44.com/api/apps/${APP_ID}/functions/adminUpdateProvider`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id, delete: true }),
+    });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+    return data;
+  };
+  const toggleActive = async (p) => { await adminUpdate(p.id, { is_active: !p.is_active }); setProviders(prev => prev.map(x => x.id === p.id ? { ...x, is_active: !p.is_active } : x)); };
+  const toggleVisible = async (p) => { await adminUpdate(p.id, { is_visible: !p.is_visible }); setProviders(prev => prev.map(x => x.id === p.id ? { ...x, is_visible: !p.is_visible } : x)); };
+  const del = async (p) => { if (!window.confirm(`Delete ${p.business_name}?`)) return; await adminDelete(p.id); setProviders(prev => prev.filter(x => x.id !== p.id)); };
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
@@ -407,8 +417,22 @@ function ReviewsTab({ reviews, setReviews, providers }) {
   const [filter, setFilter] = useState("pending");
   const provMap = {}; providers.forEach(p => { provMap[p.id] = p.business_name; });
   const shown = reviews.filter(r => filter === "all" ? true : filter === "pending" ? !r.is_approved : r.is_approved);
-  const approve = async (r) => { await ProviderReview.update(r.id, { is_approved: true }); setReviews(p => p.map(x => x.id === r.id ? { ...x, is_approved: true } : x)); };
-  const remove = async (r) => { if (!window.confirm("Delete?")) return; await ProviderReview.delete(r.id); setReviews(p => p.filter(x => x.id !== r.id)); };
+  const APP_ID = '69d062aca815ce8e697894b1';
+  const approve = async (r) => {
+    await fetch(`https://api.base44.com/api/apps/${APP_ID}/functions/adminUpdateReview`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: r.id, fields: { is_approved: true } }),
+    });
+    setReviews(p => p.map(x => x.id === r.id ? { ...x, is_approved: true } : x));
+  };
+  const remove = async (r) => {
+    if (!window.confirm("Delete?")) return;
+    await fetch(`https://api.base44.com/api/apps/${APP_ID}/functions/adminUpdateReview`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: r.id, delete: true }),
+    });
+    setReviews(p => p.filter(x => x.id !== r.id));
+  };
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
       <div style={{ display: "flex", gap: 8 }}>
@@ -588,7 +612,14 @@ function AddProviderTab({ onAdded, categories, services: allServices, serviceAre
     const trialEnd = new Date(Date.now() + 45 * 86400000).toISOString();
     try {
       const body = { ...form, vh_number: vh, trial_start_date: now, trial_end_date: trialEnd, profile_views: 0, search_appearances: 0, years_in_business: form.years_in_business ? Number(form.years_in_business) : 0 };
-      const newP = await Provider.create(body);
+      const APP_ID_CREATE = '69d062aca815ce8e697894b1';
+      const createRes = await fetch(`https://api.base44.com/api/apps/${APP_ID_CREATE}/functions/adminUpdateProvider`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ create: true, fields: body }),
+      });
+      const createData = await createRes.json();
+      if (createData.error) throw new Error(createData.error);
+      const newP = createData.record;
       setDone({ name: newP.business_name, vh: newP.vh_number });
       onAdded(newP);
       setForm(empty);
@@ -728,19 +759,22 @@ function Dashboard() {
   const load = async () => {
     setLoading(true);
     try {
-      const [p, r, l, s, cats, svcs, areas] = await Promise.all([
-        Provider.list(), ProviderReview.list(), LeadInquiry.list(),
-        ServiceSearchStat.list(), Category.list(), Service.list(), ServiceArea.list(),
-      ]);
-      setProviders(Array.isArray(p) ? p : []);
-      setReviews(Array.isArray(r) ? r : []);
-      setLeads(Array.isArray(l) ? l : []);
-      setStats(Array.isArray(s) ? s : []);
-      setCategories(Array.isArray(cats) ? cats.filter(c => c.is_active) : []);
-      // Load ALL services & areas so lookup maps resolve IDs even if later deactivated
-      setServices(Array.isArray(svcs) ? svcs : []);
-      setServiceAreas(Array.isArray(areas) ? areas : []);
-    } catch (e) { console.error(e); }
+      // Use backend function with service role to bypass RLS (PIN-gate has no auth context)
+      const APP_ID = '69d062aca815ce8e697894b1';
+      const res = await fetch(`https://api.base44.com/api/apps/${APP_ID}/functions/getAdminData`, {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' },
+      });
+      const data = await res.json();
+      if (data.error) throw new Error(data.error);
+      setProviders(Array.isArray(data.providers) ? data.providers : []);
+      setReviews(Array.isArray(data.reviews) ? data.reviews : []);
+      setLeads(Array.isArray(data.leads) ? data.leads : []);
+      setStats(Array.isArray(data.stats) ? data.stats : []);
+      setCategories(Array.isArray(data.categories) ? data.categories.filter(c => c.is_active) : []);
+      setServices(Array.isArray(data.services) ? data.services : []);
+      setServiceAreas(Array.isArray(data.serviceAreas) ? data.serviceAreas : []);
+    } catch (e) { console.error('Admin data load error:', e); }
     setLoading(false);
   };
 
