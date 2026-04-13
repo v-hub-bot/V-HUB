@@ -181,17 +181,19 @@ export default function Classifieds() {
 
         {/* Dateline strip */}
         <div style={{
-          borderBottom: `1px solid ${INK}`,
-          padding: "4px 14px",
+          borderTop: `3px double ${INK}`,
+          borderBottom: `3px double ${INK}`,
+          padding: "5px 14px",
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
           boxSizing: "border-box",
           width: "100%",
+          background: PAPER_MID,
         }}>
           <span style={{ fontSize: 10, color: INK_FADE, fontFamily: SERIF, fontStyle: "italic" }}>{today}</span>
           <span style={{ fontSize: 10, color: INK_FADE, fontFamily: SANS, fontWeight: 700, letterSpacing: 1, textTransform: "uppercase", textAlign: "center" }}>The Villages, FL</span>
-          <span style={{ fontSize: 10, color: INK_FADE, fontFamily: SERIF, fontStyle: "italic" }}>Free</span>
+          <span style={{ fontSize: 10, color: INK_FADE, fontFamily: SERIF, fontStyle: "italic" }}>Classifieds</span>
         </div>
 
         {/* Logo row — compact, same as homepage */}
