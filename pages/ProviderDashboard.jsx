@@ -534,6 +534,12 @@ function LoginScreen({ onLogin, onForgot }) {
             >
               Forgot your password?
             </button>
+            <div style={{ marginTop: 10, fontSize: 12, color: INK_FADE, fontFamily: SANS }}>
+              Having trouble?{" "}
+              <a href="mailto:admin@v-hub.us?subject=Provider Hub Login Help" style={{ color: BROWN_BTN, fontWeight: 700, textDecoration: "none" }}>
+                Contact admin@v-hub.us
+              </a>
+            </div>
           </div>
 
           <div style={{ textAlign: "center", marginTop: 16, fontSize: 12, color: INK_FADE, fontStyle: "italic", fontFamily: SANS }}>
