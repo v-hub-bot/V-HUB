@@ -1182,8 +1182,8 @@ export default function Home() {
                 fetchPriority="high"
                 decoding="sync"
                 style={{
-                  width: 72, height: 72,
-                  objectFit: "contain",
+                  width: "100%", height: "100%",
+                  objectFit: "fill",
                   display: "block",
                 }}
               />
