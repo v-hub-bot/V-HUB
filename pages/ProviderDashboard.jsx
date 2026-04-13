@@ -1,5 +1,5 @@
-import { useState, useEffect, useRef } from "react";
-import { Provider, ProviderReview, Service, ServiceArea, Category } from "@/api/entities";
+import React, { useState, useEffect, useRef } from "react";
+import { Provider, ProviderReview, Service, ServiceArea, Category, ClassifiedAd } from "@/api/entities";
 
 // ── SEO ───────────────────────────────────────────────────────────────────
 function useMeta(title) {
@@ -17,6 +17,8 @@ const YELLOW    = "#FFDB00";
 const RED_RULE  = "#8B1A1A";
 const GREEN     = "#1A6B3C";
 const TEAL      = "#00836B";
+const NAVY      = "#1B3D6F";
+const GREEN_BORDER = "#2E7D32";
 const SANS      = "'Helvetica Neue', Arial, sans-serif";
 const SERIF     = "'Times New Roman', Georgia, serif";
 
@@ -639,6 +641,13 @@ export default function ProviderDashboard() {
   const [resetProviderId, setResetProviderId] = useState("");
   const [view, setView]             = useState("dashboard"); // dashboard | edit | account
   const [reviews, setReviews]       = useState([]);
+  const [classifiedAd, setClassifiedAd] = useState(null);
+  const [classifiedForm, setClassifiedForm] = useState({ headline: "", body: "", image_url: "", village: "" });
+  const [classifiedSaving, setClassifiedSaving] = useState(false);
+  const [classifiedSaved, setClassifiedSaved] = useState(false);
+  const [classifiedImageFile, setClassifiedImageFile] = useState(null);
+  const [classifiedImagePreview, setClassifiedImagePreview] = useState(null);
+  const classifiedImageRef = useRef(null);
   const [svcMap, setSvcMap]         = useState({});
   const [areaMap, setAreaMap]       = useState({});
   const [dbCategories, setDbCategories] = useState([]);
@@ -697,6 +706,7 @@ export default function ProviderDashboard() {
             seedForm(p);
             setNewLoginEmail(p.login_email || p.email || "");
             loadReviews(p.id);
+      loadClassified(p.id);
             setAuthState("dashboard");
           } else {
             sessionStorage.removeItem("vhub_provider_id");
@@ -743,6 +753,15 @@ export default function ProviderDashboard() {
       setAreaMap(am);
     });
   }, []);
+
+  const loadClassified = async (pid) => {
+    try {
+      const ads = await ClassifiedAd.filter({ provider_id: pid });
+      const active = (ads || []).find(a => a.is_active) || null;
+      setClassifiedAd(active);
+      if (active) setClassifiedForm({ headline: active.headline || "", body: active.body || "", image_url: active.image_url || "", village: active.village || "" });
+    } catch { setClassifiedAd(null); }
+  };
 
   const loadReviews = async (pid) => {
     try {
@@ -1213,6 +1232,225 @@ export default function ProviderDashboard() {
           </button>
         </div>
 
+        {/* ── CLASSIFIED AD SECTION ─────────────────────────── */}
+        <div style={{ ...shS, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <span>📰 My Classified Ad</span>
+          <span style={{ fontSize: 10, fontWeight: 400, color: INK_FADE, fontFamily: SANS, letterSpacing: 0.5 }}>$10/month add-on</span>
+        </div>
+
+        {/* Not subscribed — upsell */}
+        {!provider.classifieds_addon && (
+          <div style={{ background: "#F9F3E3", border: "2px solid #2E7D32", borderRadius: 8, padding: "16px 18px", marginBottom: 16 }}>
+            <div style={{ fontSize: 14, fontWeight: 900, color: "#2E7D32", marginBottom: 6, fontFamily: SERIF, textTransform: "uppercase", letterSpacing: 1 }}>
+              📰 Run a Classified Ad
+            </div>
+            <div style={{ fontSize: 13, color: INK, lineHeight: 1.7, fontFamily: SANS, marginBottom: 12 }}>
+              Add a classified ad to the V-Hub Classifieds page for just <strong>$10/month</strong>. 
+              Promote deals, specials, seasonal offers — seen by every resident searching The Villages.
+            </div>
+            <div style={{ fontSize: 12, color: INK_FADE, fontFamily: SANS, marginBottom: 14 }}>
+              ✓ Same-size ad card as all providers &nbsp;·&nbsp; ✓ A–Z listing &nbsp;·&nbsp; ✓ Searchable by village &nbsp;·&nbsp; ✓ Photo optional
+            </div>
+            <div style={{ fontSize: 11, color: INK_FADE, fontStyle: "italic", fontFamily: SANS }}>
+              Contact <a href="mailto:admin@v-hub.us" style={{ color: "#2E7D32" }}>admin@v-hub.us</a> to activate the Classifieds add-on for your account.
+            </div>
+          </div>
+        )}
+
+        {/* Subscribed — ad editor */}
+        {provider.classifieds_addon && (
+          <div style={{ background: PAPER_MID, border: `1.5px solid #2E7D32`, borderRadius: 8, padding: "16px 18px", marginBottom: 16 }}>
+            <div style={{ fontSize: 13, color: "#2E7D32", fontWeight: 700, fontFamily: SANS, marginBottom: 12, display: "flex", alignItems: "center", gap: 8 }}>
+              ✅ Classifieds Add-On Active
+              {classifiedAd && (
+                <span style={{ fontSize: 11, background: "#2E7D32", color: "#fff", borderRadius: 10, padding: "2px 10px" }}>
+                  Ad Live
+                </span>
+              )}
+            </div>
+
+            {/* Live preview */}
+            {classifiedAd && (
+              <div style={{ marginBottom: 14 }}>
+                <div style={{ fontSize: 11, color: INK_FADE, fontFamily: SANS, marginBottom: 6, textTransform: "uppercase", letterSpacing: 1 }}>Current Ad Preview</div>
+                <div style={{
+                  background: "#F5EDD6", border: "2px solid #1A1209", borderRadius: 2,
+                  padding: "14px 14px 12px", fontFamily: "'Times New Roman', serif",
+                  maxWidth: 280, position: "relative",
+                }}>
+                  <div style={{ position: "absolute", top: 4, left: 4, right: 4, borderTop: "1px solid #1A1209" }} />
+                  <div style={{ position: "absolute", bottom: 4, left: 4, right: 4, borderBottom: "1px solid #1A1209" }} />
+                  {classifiedAd.image_url && (
+                    <img src={classifiedAd.image_url} alt="" style={{ width: "100%", height: 100, objectFit: "cover", borderRadius: 1, marginBottom: 8, display: "block" }} />
+                  )}
+                  <div style={{ fontSize: 12, fontWeight: 700, textAlign: "center", textTransform: "uppercase", letterSpacing: 1, borderBottom: "1px solid #C8B89A", paddingBottom: 5, marginBottom: 6 }}>
+                    {classifiedAd.headline}
+                  </div>
+                  <div style={{ fontSize: 11, color: "#1A1209", lineHeight: 1.5 }}>{classifiedAd.body}</div>
+                  <div style={{ fontSize: 10, color: "#6B5B3E", textAlign: "center", borderTop: "1px solid #C8B89A", paddingTop: 5, marginTop: 6, fontStyle: "italic" }}>
+                    {classifiedAd.provider_name}{classifiedAd.village ? ` · ${classifiedAd.village}` : ""}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Edit form */}
+            <div style={{ fontSize: 12, fontWeight: 700, color: INK, fontFamily: SANS, textTransform: "uppercase", letterSpacing: 1, marginBottom: 10 }}>
+              {classifiedAd ? "Edit Your Ad" : "Create Your Ad"}
+            </div>
+
+            <div style={{ marginBottom: 10 }}>
+              <label style={lbS}>Ad Headline *</label>
+              <input
+                style={inS}
+                placeholder="e.g. Buy 2 Get 2 Free — Summer Tire Special"
+                value={classifiedForm.headline}
+                onChange={e => setClassifiedForm(p => ({ ...p, headline: e.target.value }))}
+                maxLength={80}
+              />
+              <div style={{ fontSize: 10, color: INK_FADE, fontFamily: SANS, marginTop: 2 }}>{classifiedForm.headline.length}/80 characters</div>
+            </div>
+
+            <div style={{ marginBottom: 10 }}>
+              <label style={lbS}>Ad Body *</label>
+              <textarea
+                style={{ ...inS, minHeight: 80, resize: "vertical", lineHeight: 1.6 }}
+                placeholder="Describe your deal, offer, or promotion in detail…"
+                value={classifiedForm.body}
+                onChange={e => setClassifiedForm(p => ({ ...p, body: e.target.value }))}
+                maxLength={300}
+              />
+              <div style={{ fontSize: 10, color: INK_FADE, fontFamily: SANS, marginTop: 2 }}>{classifiedForm.body.length}/300 characters</div>
+            </div>
+
+            <div style={{ marginBottom: 10 }}>
+              <label style={lbS}>Your Village / Location</label>
+              <input
+                style={inS}
+                placeholder="e.g. Bedford"
+                value={classifiedForm.village}
+                onChange={e => setClassifiedForm(p => ({ ...p, village: e.target.value }))}
+              />
+            </div>
+
+            <div style={{ marginBottom: 14 }}>
+              <label style={lbS}>Ad Image (optional)</label>
+              <input
+                ref={classifiedImageRef}
+                type="file"
+                accept="image/*"
+                style={{ display: "none" }}
+                onChange={e => {
+                  const file = e.target.files[0];
+                  if (!file) return;
+                  setClassifiedImageFile(file);
+                  const reader = new FileReader();
+                  reader.onload = ev => setClassifiedImagePreview(ev.target.result);
+                  reader.readAsDataURL(file);
+                }}
+              />
+              <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
+                <button
+                  type="button"
+                  onClick={() => classifiedImageRef.current?.click()}
+                  style={{ background: PAPER, border: `1.5px solid ${PAPER_DK}`, color: INK, borderRadius: 4, padding: "7px 14px", fontSize: 12, cursor: "pointer", fontFamily: SANS }}
+                >
+                  📷 {classifiedImagePreview || classifiedForm.image_url ? "Change Photo" : "Upload Photo"}
+                </button>
+                {(classifiedImagePreview || classifiedForm.image_url) && (
+                  <>
+                    <img
+                      src={classifiedImagePreview || classifiedForm.image_url}
+                      alt="preview"
+                      style={{ height: 44, width: 70, objectFit: "cover", borderRadius: 3, border: `1px solid ${PAPER_DK}` }}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => { setClassifiedImageFile(null); setClassifiedImagePreview(null); setClassifiedForm(p => ({ ...p, image_url: "" })); if (classifiedImageRef.current) classifiedImageRef.current.value = ""; }}
+                      style={{ background: "none", border: "none", color: "#c00", fontSize: 18, cursor: "pointer", padding: 0 }}
+                    >✕</button>
+                  </>
+                )}
+              </div>
+              <div style={{ fontSize: 10, color: INK_FADE, fontFamily: SANS, marginTop: 4 }}>All ad images are cropped to the same size for a uniform look.</div>
+            </div>
+
+            {classifiedSaved && (
+              <div style={{ background: "#E8F5E9", border: "1.5px solid #2E7D32", borderRadius: 6, padding: "10px 14px", marginBottom: 12, fontSize: 13, color: "#2E7D32", fontFamily: SANS }}>
+                ✓ Your classified ad has been saved and is now live!
+              </div>
+            )}
+
+            <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+              <button
+                onClick={async () => {
+                  if (!classifiedForm.headline.trim() || !classifiedForm.body.trim()) {
+                    alert("Please fill in the headline and body.");
+                    return;
+                  }
+                  setClassifiedSaving(true);
+                  setClassifiedSaved(false);
+                  try {
+                    let imageUrl = classifiedForm.image_url;
+                    // Upload image if a new file was selected
+                    if (classifiedImageFile) {
+                      const formData = new FormData();
+                      formData.append("file", classifiedImageFile);
+                      const uploadResp = await fetch(
+                        `https://api.base44.app/api/apps/69d062aca815ce8e697894b1/storage/upload`,
+                        { method: "POST", body: formData }
+                      );
+                      const uploadData = await uploadResp.json();
+                      imageUrl = uploadData.file_url || uploadData.url || imageUrl;
+                    }
+                    const adData = {
+                      provider_id: provider.id,
+                      provider_name: provider.business_name,
+                      village: classifiedForm.village,
+                      headline: classifiedForm.headline,
+                      body: classifiedForm.body,
+                      image_url: imageUrl,
+                      is_active: true,
+                    };
+                    if (classifiedAd) {
+                      await ClassifiedAd.update(classifiedAd.id, adData);
+                    } else {
+                      await ClassifiedAd.create(adData);
+                    }
+                    await loadClassified(provider.id);
+                    setClassifiedSaved(true);
+                    setClassifiedImageFile(null);
+                    setClassifiedImagePreview(null);
+                  } catch(e) {
+                    alert("Error saving ad. Please try again.");
+                  } finally {
+                    setClassifiedSaving(false);
+                  }
+                }}
+                style={{ background: `linear-gradient(180deg,#9A6030,${BROWN_BTN})`, color: PAPER, border: "2px solid #2E7D32", borderRadius: 5, padding: "10px 24px", fontSize: 13, fontWeight: 700, cursor: classifiedSaving ? "not-allowed" : "pointer", letterSpacing: 1, fontFamily: SERIF, opacity: classifiedSaving ? 0.7 : 1 }}
+              >
+                {classifiedSaving ? "Saving…" : classifiedAd ? "Update Ad" : "Publish Ad"}
+              </button>
+
+              {classifiedAd && (
+                <button
+                  onClick={async () => {
+                    if (!window.confirm("Remove your classified ad?")) return;
+                    await ClassifiedAd.update(classifiedAd.id, { is_active: false });
+                    setClassifiedAd(null);
+                    setClassifiedForm({ headline: "", body: "", image_url: "", village: "" });
+                    setClassifiedSaved(false);
+                  }}
+                  style={{ background: PAPER, border: "1.5px solid #c00", color: "#c00", borderRadius: 5, padding: "10px 18px", fontSize: 13, cursor: "pointer", fontFamily: SANS }}
+                >
+                  Remove Ad
+                </button>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* ── REVIEWS ─────────────────────────────────────────────── */}
         {/* Reviews */}
         <div style={{ ...shS, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <span>⭐ V-Hub Reviews</span>

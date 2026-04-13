@@ -26,25 +26,22 @@
       "type": "string"
     },
     "service_areas": {
-      "type": "array",
-      "items": {
-        "type": "string"
-      }
+      "type": "array"
     },
     "category_id": {
       "type": "string"
     },
     "services": {
-      "type": "array",
-      "items": {
-        "type": "string"
-      }
+      "type": "array"
     },
     "subscription_status": {
       "type": "string"
     },
     "subscription_tier": {
       "type": "string"
+    },
+    "classifieds_addon": {
+      "type": "boolean"
     },
     "is_visible": {
       "type": "boolean"
@@ -53,7 +50,7 @@
       "type": "boolean"
     },
     "years_in_business": {
-      "type": "number"
+      "type": "string"
     },
     "license_number": {
       "type": "string"

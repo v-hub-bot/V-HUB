@@ -1270,7 +1270,15 @@ export default function Home() {
         {/* NAV */}
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", background: PAPER }}>
           <div style={{ padding: "8px", textAlign: "center", borderRight: `1px solid ${INK}`, fontSize: 11, fontWeight: 700, letterSpacing: 2, color: INK, textTransform: "uppercase" }}>Local Services</div>
-          <div style={{ padding: "8px", textAlign: "center", fontSize: 11, fontWeight: 700, letterSpacing: 2, color: INK, textTransform: "uppercase" }}>Classifieds</div>
+          <a href="/Classifieds" style={{ textDecoration: "none" }}>
+            <div style={{
+              padding: "8px", textAlign: "center", fontSize: 11, fontWeight: 700,
+              letterSpacing: 2, color: "#2E7D32", textTransform: "uppercase",
+              border: "2px solid #2E7D32", borderRadius: 3, margin: "2px",
+              boxShadow: "0 0 6px rgba(46,125,50,0.3)",
+              cursor: "pointer",
+            }}>📰 Classifieds</div>
+          </a>
         </div>
 
         <Rule />
