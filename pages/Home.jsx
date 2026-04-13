@@ -520,13 +520,12 @@ function ClassifiedAd({ p, onSel, svcs }) {
       )}
 
       {/* Footer: years / license */}
-      <div style={{ marginTop: 10, display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 6 }}>
-        <div style={{ display: "flex", gap: 14, flexWrap: "wrap" }}>
+      {(p.years_in_business || p.license_number) && (
+        <div style={{ marginTop: 10, display: "flex", gap: 14, flexWrap: "wrap" }}>
           {p.years_in_business && <span style={{ fontSize: 10, color: INK_FADE, fontStyle: "italic", fontFamily: "'Times New Roman', serif" }}>Est. {new Date().getFullYear() - Math.round(p.years_in_business)} · {p.years_in_business} yrs in business</span>}
           {p.license_number && <span style={{ fontSize: 10, color: INK_FADE, fontStyle: "italic", fontFamily: "'Times New Roman', serif" }}>Lic# {p.license_number}</span>}
         </div>
-
-      </div>
+      )}
     </div>
   );
 }

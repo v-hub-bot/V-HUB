@@ -163,6 +163,7 @@ function ProvidersTab({ providers, setProviders, catMap, svcMap, areaMap, fullSv
     if (filter === "hidden") return !p.is_active;
     if (filter === "trial") return p.subscription_status === "trial";
     if (filter === "paid") return ["active", "paid"].includes(p.subscription_status);
+    if (filter === "pending") return p.subscription_status === "pending" || (!p.is_active && p.onboarding_type === "self_signup");
     if (filter === "expiring") { const d = daysLeft(p.trial_end_date); return d !== null && d >= 0 && d <= 7; }
     return true;
   });
@@ -256,7 +257,7 @@ You can resend manually from the Email button.`);
     <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
       <input placeholder="🔍 Search name, email, phone, VH#..." value={search} onChange={e => setSearch(e.target.value)} style={S.inp} />
       <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-        {["all", "active", "hidden", "trial", "paid", "expiring"].map(f => (
+        {["all", "pending", "active", "hidden", "trial", "paid", "expiring"].map(f => (
           <button key={f} onClick={() => setFilter(f)} style={S.filterBtn(filter === f)}>
             {f === "all" ? `All (${providers.length})` : f.charAt(0).toUpperCase() + f.slice(1)}
           </button>
