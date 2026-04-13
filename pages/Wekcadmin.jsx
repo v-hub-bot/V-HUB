@@ -660,6 +660,7 @@ function AddProviderTab({ onAdded, categories, services: allServices, serviceAre
 
   const save = async () => {
     if (!form.business_name || !form.email) return alert("Business name and email are required.");
+    if (!form.owner_name) return alert("Owner name is required to send the welcome email.");
     if (!form.category_id) return alert("Please select a category.");
     if (form.services.length === 0) return alert("Please select at least one service.");
     if (form.service_areas.length === 0) return alert("Please select at least one village.");
