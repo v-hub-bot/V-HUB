@@ -519,17 +519,13 @@ function ClassifiedAd({ p, onSel, svcs }) {
         </div>
       )}
 
-      {/* Footer: years / license / view profile */}
+      {/* Footer: years / license */}
       <div style={{ marginTop: 10, display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 6 }}>
         <div style={{ display: "flex", gap: 14, flexWrap: "wrap" }}>
           {p.years_in_business && <span style={{ fontSize: 10, color: INK_FADE, fontStyle: "italic", fontFamily: "'Times New Roman', serif" }}>Est. {new Date().getFullYear() - Math.round(p.years_in_business)} · {p.years_in_business} yrs in business</span>}
           {p.license_number && <span style={{ fontSize: 10, color: INK_FADE, fontStyle: "italic", fontFamily: "'Times New Roman', serif" }}>Lic# {p.license_number}</span>}
         </div>
-        {onSel && (
-          <button onClick={handleClick} style={{ background: BROWN_BTN, color: PAPER, border: "none", borderRadius: 4, padding: "5px 14px", fontSize: 11, cursor: "pointer", fontFamily: "'Times New Roman', serif", fontWeight: 700, letterSpacing: 1 }}>
-            View Profile →
-          </button>
-        )}
+
       </div>
     </div>
   );
