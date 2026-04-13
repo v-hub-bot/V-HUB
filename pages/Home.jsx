@@ -968,7 +968,7 @@ export default function Home() {
     setSelCatR(selSvc);
     let all = [];
     try {
-      const resp = await fetch('https://v-hub-697894b1.base44.app/functions/getProviders', { method: 'POST', headers: { 'Content-Type': 'application/json' } });
+      const resp = await fetch('https://v-hub-app-edf7f8e8.base44.app/functions/getProviders', { method: 'POST', headers: { 'Content-Type': 'application/json' } });
       const data = await resp.json();
       all = data.providers || [];
     } catch(e) { all = []; }

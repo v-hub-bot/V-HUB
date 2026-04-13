@@ -1,7 +1,7 @@
-// v3 - redeploy 2026-04-12
+// v4 - Deno.serve pattern, matches all other functions
 import Stripe from "npm:stripe@14";
 
-export default async function handler(req: Request): Promise<Response> {
+Deno.serve(async (req: Request): Promise<Response> => {
   const corsHeaders = {
     "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Methods": "POST, OPTIONS",
@@ -22,10 +22,12 @@ export default async function handler(req: Request): Promise<Response> {
 
     const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY")!, { apiVersion: "2023-10-16" });
 
-    // Cancel at period end (provider keeps access until billing cycle ends)
+    // Cancel at period end — provider keeps listing until billing cycle ends
     const subscription = await stripe.subscriptions.update(stripe_subscription_id, {
       cancel_at_period_end: true,
     });
+
+    console.log("Subscription cancel_at_period_end set for:", stripe_subscription_id);
 
     return new Response(JSON.stringify({ success: true, cancel_at: subscription.cancel_at }), {
       headers: corsHeaders,
@@ -34,4 +36,4 @@ export default async function handler(req: Request): Promise<Response> {
     console.error("cancelSubscription error:", err);
     return new Response(JSON.stringify({ error: (err as any).message }), { status: 500, headers: corsHeaders });
   }
-}
+});

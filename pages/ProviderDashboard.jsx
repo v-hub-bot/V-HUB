@@ -535,7 +535,7 @@ export default function ProviderDashboard() {
     setPaymentLoading(true);
     setPaymentError("");
     try {
-      const res = await fetch("https://v-hub-697894b1.base44.app/functions/createCheckoutSession", {
+      const res = await fetch("https://v-hub-app-edf7f8e8.base44.app/functions/createCheckoutSession", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -565,7 +565,7 @@ export default function ProviderDashboard() {
     }
     setCancelLoading(true);
     try {
-      const res = await fetch("https://v-hub-697894b1.base44.app/functions/cancelSubscription", {
+      const res = await fetch("https://v-hub-app-edf7f8e8.base44.app/functions/cancelSubscription", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ stripe_subscription_id: provider.stripe_subscription_id }),
