@@ -247,37 +247,50 @@ export default function Classifieds() {
 
   return (
     <div style={{ minHeight: "100vh", background: "#DDD3B0", fontFamily: SERIF }}>
+      <link rel="preconnect" href="https://fonts.googleapis.com" />
+      <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet" />
 
       {/* ═══════════ MASTHEAD ═══════════ */}
       <div style={{ background: PAPER, borderBottom: `4px double ${INK}` }}>
 
         {/* Top strip — date + edition */}
-        <div style={{ borderBottom: `1px solid ${INK}`, padding: "4px 16px", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 4 }}>
-          <div style={{ fontSize: 10, color: INK_FADE, fontFamily: SERIF, fontStyle: "italic" }}>
+        <div style={{ borderBottom: `1px solid ${INK}`, padding: "4px 12px", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 4, overflow: "hidden" }}>
+          <div style={{ fontSize: 10, color: INK_FADE, fontFamily: SERIF, fontStyle: "italic", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", maxWidth: "40%" }}>
             {todayLine()}
           </div>
-          <div style={{ fontSize: 10, color: INK_FADE, fontFamily: SERIF, letterSpacing: 1, textTransform: "uppercase" }}>
+          <div style={{ fontSize: 10, color: INK_FADE, fontFamily: SERIF, letterSpacing: 1, textTransform: "uppercase", flexShrink: 0 }}>
             The Villages, Florida
           </div>
-          <div style={{ fontSize: 10, color: INK_FADE, fontFamily: SERIF, fontStyle: "italic" }}>
-            Complimentary Edition
+          <div style={{ fontSize: 10, color: INK_FADE, fontFamily: SERIF, fontStyle: "italic", flexShrink: 0 }}>
+            Complimentary
           </div>
         </div>
 
-        {/* Logo + nameplate */}
-        <div style={{ textAlign: "center", padding: "14px 16px 6px" }}>
+        {/* Logo + nameplate — same layout as homepage */}
+        <div style={{ padding: "18px 14px 8px" }}>
+          {/* Logo row: icon | stacked title */}
           <a href="/" style={{ textDecoration: "none" }}>
-            <img
-              src="https://media.base44.com/images/public/69d062aca815ce8e697894b1/a9af95bc3_V-Hublogo.png"
-              alt="V-Hub"
-              style={{ height: 48, display: "block", margin: "0 auto 8px" }}
-            />
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 12 }}>
+              <img
+                src="https://base44.app/api/apps/69d062aca815ce8e697894b1/files/mp/public/69d062aca815ce8e697894b1/f14a7cbd0_logo_icon_small.png"
+                alt="V-Hub logo"
+                style={{ width: 100, height: 100, objectFit: "contain", flexShrink: 0 }}
+              />
+              <div style={{ textAlign: "center", lineHeight: 1, fontFamily: SERIF }}>
+                <div style={{ fontStyle: "italic", fontWeight: 700, fontFamily: "'Great Vibes', cursive", fontSize: 62, color: "#003366", WebkitTextStroke: "0.6px #003366", textShadow: "0.5px 0.5px 0 #001a40", lineHeight: 1 }}>V</div>
+                <div style={{ fontSize: 22, fontWeight: 900, color: INK, letterSpacing: 4, lineHeight: 1, margin: "1px 0" }}>—</div>
+                <div style={{ fontSize: 52, fontWeight: 900, color: INK, letterSpacing: -1, lineHeight: 1 }}>Hub</div>
+              </div>
+            </div>
           </a>
-          <div style={{ fontSize: 28, fontWeight: 900, letterSpacing: 5, textTransform: "uppercase", color: INK, fontFamily: SERIF, lineHeight: 1 }}>
-            The Villages Classifieds
-          </div>
-          <div style={{ fontSize: 11, fontStyle: "italic", color: INK_FADE, marginTop: 4, letterSpacing: 0.5, fontFamily: SERIF }}>
-            Exclusive deals &amp; special offers from your local service providers
+          {/* Section title below logo */}
+          <div style={{ textAlign: "center", marginTop: 10 }}>
+            <div style={{ fontSize: 22, fontWeight: 900, letterSpacing: 4, textTransform: "uppercase", color: INK, fontFamily: SERIF, lineHeight: 1.2 }}>
+              The Villages Classifieds
+            </div>
+            <div style={{ fontSize: 11, fontStyle: "italic", color: INK_FADE, marginTop: 4, letterSpacing: 0.5, fontFamily: SERIF }}>
+              Exclusive deals &amp; special offers from your local service providers
+            </div>
           </div>
         </div>
 
@@ -342,13 +355,12 @@ export default function Classifieds() {
       </div>
 
       {/* ── Ink banner bar ── */}
-      <div style={{ background: INK, color: PAPER, padding: "5px 16px", fontSize: 10, letterSpacing: 1.5, textAlign: "center", textTransform: "uppercase", fontFamily: SANS, fontWeight: 700 }}>
+      <div style={{ background: INK, color: PAPER, padding: "5px 12px", fontSize: 10, letterSpacing: 1, textAlign: "center", textTransform: "uppercase", fontFamily: SANS, fontWeight: 700, wordBreak: "break-word" }}>
         {loading ? "Loading…" : (
           <>
             {displayItems.length} {displayItems.length === 1 ? "Advertiser" : "Advertisers"}
-            {villageFilter ? ` · Showing: ${villageFilter}` : " · Across The Villages"}
+            {villageFilter ? ` · ${villageFilter}` : " · All Villages"}
             {" · "}{ads.length} Active Deal{ads.length !== 1 ? "s" : ""}
-            {" · "}{todayLine()}
           </>
         )}
       </div>
