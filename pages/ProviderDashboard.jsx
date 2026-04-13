@@ -434,14 +434,23 @@ function LoginScreen({ onLogin, onForgot }) {
     if (!loginEmail.trim() || !loginPass.trim()) { setError("Please enter your email and password."); return; }
     setLoading(true);
     try {
-      // Find provider by login_email (or fall back to business email)
-      let results = await Provider.filter({ login_email: loginEmail.trim().toLowerCase() });
-      if (!results || results.length === 0) {
-        // Fallback: check business email field
-        results = await Provider.filter({ email: loginEmail.trim().toLowerCase() });
+      // Support login by email OR VH number (e.g. VH-1234 or vh-1234)
+      const loginInput = loginEmail.trim();
+      const isVH = /^vh-?\d{4}$/i.test(loginInput);
+      let results = [];
+      if (isVH) {
+        // Normalize to uppercase with dash e.g. VH-1234
+        const vhNorm = loginInput.toUpperCase().replace(/^VH(\d)/, 'VH-$1');
+        results = await Provider.filter({ vh_number: vhNorm });
+      } else {
+        // Try login_email first, then business email
+        results = await Provider.filter({ login_email: loginInput.toLowerCase() });
+        if (!results || results.length === 0) {
+          results = await Provider.filter({ email: loginInput.toLowerCase() });
+        }
       }
       if (!results || results.length === 0) {
-        setError("No account found with that email. Check your login email or contact admin@v-hub.us");
+        setError("No account found. Try your email or VH number (e.g. VH-1234), or contact admin@v-hub.us");
         setLoading(false);
         return;
       }
@@ -499,7 +508,7 @@ function LoginScreen({ onLogin, onForgot }) {
             <div style={{ fontSize: 36, marginBottom: 8 }}>🔐</div>
             <div style={{ fontSize: 16, fontWeight: 900, color: INK, textTransform: "uppercase", letterSpacing: 2, fontFamily: SERIF }}>Sign In to Your Hub</div>
             <div style={{ fontSize: 13, color: INK_FADE, fontStyle: "italic", marginTop: 6, lineHeight: 1.6, fontFamily: SERIF }}>
-              Use the email & password you chose when you listed your business.
+              Use your email or VH account number, plus the password you created when you listed your business.
             </div>
           </div>
 
@@ -511,12 +520,12 @@ function LoginScreen({ onLogin, onForgot }) {
 
           <form onSubmit={handleLogin}>
             <div style={{ marginBottom: 14 }}>
-              <label style={lbS}>Email Address</label>
+              <label style={lbS}>Email Address or VH Number</label>
               <input
-                type="email"
+                type="text"
                 value={loginEmail}
                 onChange={e => setLoginEmail(e.target.value)}
-                placeholder="you@example.com"
+                placeholder="your@email.com or VH-1234"
                 style={inS}
                 autoComplete="email"
               />
