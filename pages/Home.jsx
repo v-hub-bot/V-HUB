@@ -164,7 +164,7 @@ function Burger({ currentUser }) {
             <div style={{ padding: "8px 7px", flex: 1, overflowY: "auto" }}>
               {[
                 { label: "Home", href: "/" },
-                { label: "List Your Business", href: "/ListService" },
+                { label: "List Your Service", href: "/ListService" },
                 { label: "Provider Hub", href: "/ProviderDashboard", highlight: true },
               ].map((l, i) => (
                 <a key={i} href={l.href} style={{ textDecoration: "none" }}>
@@ -707,16 +707,31 @@ function SearchBox({ cats, svcs, areas, onSearch, selSvc, setSelSvc, selArea, se
 
   return (
     <div style={{ background: PAPER_MID, border: `2px solid ${PAPER_DK}`, borderRadius: 6, padding: "14px 12px", width: "100%", boxSizing: "border-box" }}>
-      <a href="/ListService" style={{ textDecoration: "none", display: "block", marginBottom: 8 }}>
-        <button style={{
-          width: "100%", background: `linear-gradient(180deg,#9A6030,${BROWN_BTN} 60%,#5A3010)`,
-          border: `3px solid ${BROWN_BTN}`,
-          borderRadius: 5, color: "#F5E8CC", fontFamily: "'Times New Roman', serif",
-          fontWeight: 700, fontSize: 14, letterSpacing: 3, padding: "13px", cursor: "pointer", boxSizing: "border-box",
-        }}>
-          LIST YOUR SERVICE
-        </button>
-      </a>
+      {/* Split provider buttons */}
+      <div style={{ display: "flex", gap: 6, marginBottom: 8 }}>
+        <a href="/ListService" style={{ textDecoration: "none", flex: 1 }}>
+          <button style={{
+            width: "100%", background: `linear-gradient(180deg,#9A6030,${BROWN_BTN} 60%,#5A3010)`,
+            border: `3px solid ${BROWN_BTN}`,
+            borderRadius: 5, color: "#F5E8CC", fontFamily: "'Times New Roman', serif",
+            fontWeight: 700, fontSize: 11, letterSpacing: 1.5, padding: "12px 6px", cursor: "pointer", boxSizing: "border-box",
+            textTransform: "uppercase", lineHeight: 1.3,
+          }}>
+            📋 List Your<br/>Service
+          </button>
+        </a>
+        <a href="/ProviderDashboard" style={{ textDecoration: "none", flex: 1 }}>
+          <button style={{
+            width: "100%", background: `linear-gradient(180deg,#9A6030,${BROWN_BTN} 60%,#5A3010)`,
+            border: `3px solid ${BROWN_BTN}`,
+            borderRadius: 5, color: "#F5E8CC", fontFamily: "'Times New Roman', serif",
+            fontWeight: 700, fontSize: 11, letterSpacing: 1.5, padding: "12px 6px", cursor: "pointer", boxSizing: "border-box",
+            textTransform: "uppercase", lineHeight: 1.3,
+          }}>
+            🔐 Provider<br/>Hub Sign In
+          </button>
+        </a>
+      </div>
       <button onClick={e => { e.stopPropagation(); onSearch(selSvc, selArea); }} style={{
         width: "100%", background: `linear-gradient(180deg,#9A6030,${BROWN_BTN} 60%,#5A3010)`,
         border: `3px solid ${YELLOW}`, boxShadow: `0 0 0 1.5px ${YELLOW}, 0 0 10px 2px rgba(255,220,0,0.35)`,
