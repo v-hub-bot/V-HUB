@@ -1158,6 +1158,8 @@ export default function Home() {
           .np-mobile-top, .np-mobile-bot { display: none; }
         }
       `}</style>
+      {/* Preload logo so it's ready instantly on navigation */}
+      <link rel="preload" as="image" href="https://base44.app/api/apps/69d062aca815ce8e697894b1/files/mp/public/69d062aca815ce8e697894b1/f14a7cbd0_logo_icon_small.png" />
 
       <div style={{
         minHeight: "100vh",
@@ -1193,7 +1195,7 @@ export default function Home() {
             {/* Left: V-Hub logo icon */}
             <div style={{ flexShrink: 0, width: 100, height: 100, display: "flex", alignItems: "center", justifyContent: "center" }}>
               <img
-                src="https://base44.app/api/apps/69d062aca815ce8e697894b1/files/mp/public/69d062aca815ce8e697894b1/d5e005e56_logo_icon_tight.png"
+                src="https://base44.app/api/apps/69d062aca815ce8e697894b1/files/mp/public/69d062aca815ce8e697894b1/f14a7cbd0_logo_icon_small.png"
                 alt="V-Hub logo icon"
                 loading="eager"
                 fetchPriority="high"
