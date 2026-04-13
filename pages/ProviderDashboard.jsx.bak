@@ -458,7 +458,7 @@ function LoginScreen({ onLogin, onForgot }) {
       // Check password
       const storedPass = prov.login_password || "";
       if (!storedPass) {
-        setError("No password found for this account. Use \"Forgot your password?\" below to set one up — we\'ll email you a reset link.");
+        setError("Your account was set up by admin and has no password yet. Please email admin@v-hub.us to set up your login credentials.");
         setLoading(false);
         return;
       }
