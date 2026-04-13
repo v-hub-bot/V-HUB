@@ -207,6 +207,7 @@ function ProvidersTab({ providers, setProviders, catMap, svcMap, areaMap, fullSv
           services: p.services || [],
           service_areas: p.service_areas || [],
           vh_number: p.vh_number,
+          login_email: p.login_email || p.email,
           email_only: false,
         }),
       });

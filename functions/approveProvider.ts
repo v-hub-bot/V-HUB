@@ -1,6 +1,8 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.23';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
 
 const SENDGRID_API_KEY = Deno.env.get('SENDGRID_API_KEY') || '';
+const SERVICE_TOKEN = Deno.env.get('BASE44_SERVICE_TOKEN') || '';
+const APP_ID = Deno.env.get('BASE44_APP_ID') || '69d062aca815ce8e697894b1';
 const APP_URL = "https://v-hub-app-edf7f8e8.base44.app";
 const LOGO_URL = "https://media.base44.com/images/public/69d062aca815ce8e697894b1/a9af95bc3_V-Hublogo.png";
 
@@ -31,42 +33,135 @@ async function sendEmail(to: string, subject: string, htmlBody: string) {
   }
 }
 
-/** Resolve service IDs (or plain text) to human-readable names */
-async function resolveServiceNames(
-  ids: string[],
-  base44: any
-): Promise<string> {
-  if (!ids || ids.length === 0) return 'your selected services';
+/** Fetch all records from an entity using the service token */
+async function fetchEntity(entityName: string): Promise<any[]> {
   try {
-    const allServices = await base44.asServiceRole.entities.Service.list();
-    const map = new Map(allServices.map((s: any) => [s.id, s.name]));
-    const names = ids.map((id) => map.get(id) || id); // fallback to raw value if not found
-    return names.join(', ');
+    const url = `https://api.base44.app/api/apps/${APP_ID}/entities/${entityName}`;
+    const res = await fetch(url, {
+      headers: {
+        'Authorization': `Bearer ${SERVICE_TOKEN}`,
+        'Content-Type': 'application/json',
+      },
+    });
+    if (!res.ok) {
+      console.error(`fetchEntity ${entityName} failed:`, res.status, await res.text());
+      return [];
+    }
+    const data = await res.json();
+    return Array.isArray(data) ? data : (data.records || data.items || []);
   } catch (e) {
-    console.error('resolveServiceNames failed:', e);
-    return ids.join(', ');
+    console.error(`fetchEntity ${entityName} error:`, e);
+    return [];
   }
 }
 
-/** Resolve service area IDs (or plain text) to human-readable names */
-async function resolveAreaNames(
-  ids: string[],
-  base44: any
-): Promise<string> {
+/** Update a single entity record using the service token */
+async function updateEntity(entityName: string, id: string, fields: Record<string, any>): Promise<boolean> {
+  try {
+    const url = `https://api.base44.app/api/apps/${APP_ID}/entities/${entityName}/${id}`;
+    const res = await fetch(url, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `Bearer ${SERVICE_TOKEN}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(fields),
+    });
+    if (!res.ok) {
+      console.error(`updateEntity ${entityName}/${id} failed:`, res.status, await res.text());
+      return false;
+    }
+    return true;
+  } catch (e) {
+    console.error(`updateEntity error:`, e);
+    return false;
+  }
+}
+
+/** Legacy short-code maps for old-style IDs */
+const SERVICE_LEGACY_MAP: Record<string, string> = {
+  s01: "Website Design", s02: "Website Maintenance", s03: "SEO", s04: "Social Media Management",
+  s05: "Graphic Design", s06: "Logo Design", s07: "Content Writing", s08: "Email Marketing",
+  s09: "Google Ads", s10: "Business Consulting", s11: "Tax Preparation", s12: "Bookkeeping",
+  s13: "Notary Services", s14: "Financial Planning", s15: "Insurance Services", s16: "Legal Services",
+  s17: "Home Inspection", s18: "Plumbing", s19: "Lawn Care", s20: "Landscaping", s21: "Tree Service",
+  s22: "Pest Control", s23: "Pool Service", s24: "Pressure Washing", s25: "House Cleaning",
+  s26: "Window Cleaning", s27: "Gutter Cleaning", s28: "AC Service", s29: "Electrical",
+  s30: "Handyman", s31: "Painting", s32: "Flooring", s33: "Roofing", s34: "Fencing",
+  s35: "Screen Repair", s36: "Appliance Repair", s37: "Computer Repair", s38: "TV Mounting",
+  s39: "Smart Home Setup", s40: "Security Cameras", s41: "Moving Services", s42: "Junk Removal",
+  s43: "Garage Organization", s44: "Storage Solutions", s45: "Interior Design", s46: "Staging",
+  s47: "Photography", s48: "Pet Grooming", s49: "Dog Walking", s50: "Pet Sitting",
+  s51: "Veterinary Services", s52: "Alterations", s53: "Dry Cleaning", s54: "Tutoring",
+  s55: "Music Lessons", s56: "Dance Lessons", s57: "Personal Training", s58: "Yoga",
+  s59: "Massage Therapy", s60: "Acupuncture", s61: "Healthcare/Medical", s62: "Caregiving",
+  s63: "Transportation", s64: "Pool Cleaning", s65: "Golf Cart Repair", s66: "Auto Detailing",
+};
+
+const AREA_LEGACY_MAP: Record<string, string> = {
+  va001: "Alhambra", va002: "Amelia", va003: "Antelope", va004: "Ashland", va005: "Bonnybrook",
+  va006: "Calumet Grove", va007: "Chatham", va008: "Citrus Grove", va009: "Collier",
+  va010: "Countryman", va011: "Cypress Landing", va012: "DeSoto", va013: "Dunedin",
+  va014: "El Camino Real", va015: "Fenney", va016: "Fernandina", va017: "Gilchrist",
+  va018: "Glenbrook", va019: "Gilchrist", va020: "Hadley", va021: "Hammond",
+  va022: "Harbor Hills", va023: "Hemming", va024: "Hernando", va025: "Hillsborough",
+  va026: "Hooten", va027: "Hutchinson", va028: "Indigo East", va029: "Jaguar",
+  va030: "Lake Deaton", va031: "Lake Miona Heights", va032: "Largo Vista",
+  va033: "Linden", va034: "Magnolia", va035: "Mallory Square", va036: "Marion Landing",
+  va037: "Marsh Bend", va038: "McAlister", va039: "Midway", va040: "Moultrie Creek",
+  va041: "Mubarak", va042: "Myrtlewood", va043: "Nassau", va044: "Newell",
+  va045: "Orange Blossom Gardens", va046: "Osceola Hills", va047: "Palmer",
+  va048: "Pennecamp", va049: "Pine Hills", va050: "Pinellas", va051: "Poinciana",
+  va052: "Polo Ridge", va053: "Redhawk", va054: "Rio Grande", va055: "Romero",
+  va056: "Sanibel", va057: "Santiago", va058: "Sarasota", va059: "Sharon Rose Wilder",
+  va060: "Silver Lake", va061: "Simms", va062: "Soaring Eagle", va063: "Springdale",
+  va064: "Summerhill", va065: "Sumter Landing Area", va066: "Sunset Pointe",
+  va067: "Tamarind Grove", va068: "Tamarind Hills", va069: "Tierra del Sol",
+  va070: "Treasury", va071: "Turtle Mound", va072: "Twin Oaks", va073: "Umber Ridge",
+  va074: "Updike", va075: "Velocity", va076: "Vera Cruz", va077: "Vicar",
+  va078: "Victoria", va079: "Villa Valencia", va080: "Virginia Trace",
+  va081: "Vista Lago", va082: "Volusia", va083: "Wahoo", va084: "Walnut Grove",
+  va085: "Waterford", va086: "Wellington", va087: "Westport", va088: "Weybridge",
+  va089: "Whispering Pines", va090: "Whitfield", va091: "Windsor Park",
+  va092: "Woodbury", va093: "Woodlands", va094: "Woodstock", va095: "Worthington",
+  va096: "Wyndham", va097: "Yellar",
+};
+
+/** Resolve service IDs to human-readable names */
+async function resolveServiceNames(ids: string[]): Promise<string> {
+  if (!ids || ids.length === 0) return 'your selected services';
+  try {
+    const allServices = await fetchEntity('Service');
+    const map = new Map(allServices.map((s: any) => [s.id, s.name]));
+    const names = ids.map((id) => {
+      // Try DB lookup first, then legacy map, then raw
+      return map.get(id) || SERVICE_LEGACY_MAP[id] || id;
+    });
+    return names.join(', ');
+  } catch (e) {
+    console.error('resolveServiceNames failed:', e);
+    // Fall back to legacy map only
+    return ids.map(id => SERVICE_LEGACY_MAP[id] || id).join(', ');
+  }
+}
+
+/** Resolve service area IDs to human-readable names */
+async function resolveAreaNames(ids: string[]): Promise<string> {
   if (!ids || ids.length === 0) return 'your selected villages';
   try {
-    const allAreas = await base44.asServiceRole.entities.ServiceArea.list();
+    const allAreas = await fetchEntity('ServiceArea');
     const map = new Map(allAreas.map((a: any) => [a.id, a.name]));
-    const names = ids.map((id) => map.get(id) || id); // fallback to raw value if not found
+    const names = ids.map((id) => {
+      return map.get(id) || AREA_LEGACY_MAP[id] || id;
+    });
     return names.join(', ');
   } catch (e) {
     console.error('resolveAreaNames failed:', e);
-    return ids.join(', ');
+    return ids.map(id => AREA_LEGACY_MAP[id] || id).join(', ');
   }
 }
 
 Deno.serve(async (req) => {
-  // Handle CORS preflight
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: CORS_HEADERS });
   }
@@ -74,20 +169,20 @@ Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
 
-  // Admin PIN validation
-  const VALID_PINS = ["6185", "1357"];
-  const ADMIN_EMAILS = ["kimberlycook1980@gmail.com", "5bebegurlz@gmail.com", "evansrus@comcast.net"];
-  const body = await req.json().catch(() => ({}));
-  const pinProvided = body.pin && VALID_PINS.includes(String(body.pin));
-  let userIsAdmin = false;
-  try {
-    const me = await base44.auth.me();
-    if (me?.email && ADMIN_EMAILS.includes(me.email.toLowerCase())) userIsAdmin = true;
-  } catch (_) {}
-  if (!pinProvided && !userIsAdmin) {
-    return Response.json({ error: "Unauthorized" }, { status: 401, headers: CORS_HEADERS });
-  }
-    // body already parsed above
+    // Admin PIN / email validation
+    const VALID_PINS = ["6185", "1357"];
+    const ADMIN_EMAILS = ["kimberlycook1980@gmail.com", "5bebegurlz@gmail.com", "evansrus@comcast.net"];
+    const body = await req.json().catch(() => ({}));
+    const pinProvided = body.pin && VALID_PINS.includes(String(body.pin));
+    let userIsAdmin = false;
+    try {
+      const me = await base44.auth.me();
+      if (me?.email && ADMIN_EMAILS.includes(me.email.toLowerCase())) userIsAdmin = true;
+    } catch (_) {}
+    if (!pinProvided && !userIsAdmin) {
+      return Response.json({ error: "Unauthorized" }, { status: 401, headers: CORS_HEADERS });
+    }
+
     const {
       provider_record_id,
       business_name,
@@ -97,7 +192,8 @@ Deno.serve(async (req) => {
       services,
       service_areas,
       vh_number,
-      email_only, // if true, skip DB update (frontend already did it)
+      login_email,       // optional: provider's login email
+      email_only,        // if true, skip DB update (frontend already did it)
     } = body;
 
     if (!provider_record_id) {
@@ -106,20 +202,19 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Set up 45-day trial dates (always compute, used for email display)
+    // Set up 45-day trial dates
     const now = new Date();
     const trialEnd = new Date(now);
     trialEnd.setDate(trialEnd.getDate() + 45);
-
     const trialStartStr = now.toISOString().split('T')[0];
     const trialEndStr = trialEnd.toISOString().split('T')[0];
     const trialEndFormatted = trialEnd.toLocaleDateString('en-US', {
       weekday: 'long', month: 'long', day: 'numeric', year: 'numeric'
     });
 
-    // Update the provider record — only if not email_only mode
+    // Update the provider record via direct REST API
     if (!email_only) {
-      await base44.asServiceRole.entities.Provider.update(provider_record_id, {
+      const updated = await updateEntity('Provider', provider_record_id, {
         is_active: true,
         is_visible: true,
         subscription_status: "trial",
@@ -128,11 +223,17 @@ Deno.serve(async (req) => {
         trial_end_date: trialEndStr,
         reminder_sent: false,
       });
+      if (!updated) {
+        console.error('Provider update failed for:', provider_record_id);
+      }
     }
 
-    // ── Resolve human-readable names BEFORE building the email ──────────
-    const servicesList = await resolveServiceNames(services || [], base44);
-    const areasList = await resolveAreaNames(service_areas || [], base44);
+    // Resolve human-readable names
+    const servicesList = await resolveServiceNames(services || []);
+    const areasList = await resolveAreaNames(service_areas || []);
+
+    // Determine login email to show in the email
+    const displayLoginEmail = login_email || email;
 
     // ── Send confirmation email to provider ─────────────────────────────
     let emailError: string | null = null;
@@ -169,6 +270,23 @@ Deno.serve(async (req) => {
                 <div style="font-size:13px;color:#333;"><strong>Villages Served:</strong> ${areasList}</div>
               </div>
 
+              <!-- Login Info -->
+              <div style="background:#E8EAF6;border:2px solid #3F51B5;border-radius:10px;padding:20px;margin-bottom:20px;">
+                <div style="font-weight:800;color:#1A237E;font-size:14px;margin-bottom:12px;text-transform:uppercase;letter-spacing:1px;">🔐 Your Login Credentials</div>
+                <div style="font-size:13px;color:#1A237E;line-height:1.9;">
+                  <strong>Login Email:</strong> ${displayLoginEmail}<br/>
+                  <strong>Password:</strong> The password you created when you signed up<br/>
+                </div>
+                <div style="text-align:center;margin-top:14px;">
+                  <a href="${APP_URL}/ProviderDashboard" style="display:inline-block;background:#3F51B5;color:#fff;text-decoration:none;padding:11px 24px;border-radius:8px;font-weight:700;font-size:13px;letter-spacing:1px;">
+                    🔑 Log In to Provider Dashboard →
+                  </a>
+                </div>
+                <div style="font-size:12px;color:#5C6BC0;margin-top:10px;text-align:center;">
+                  Forgot your password? Use the "Forgot Password" link on the login page.
+                </div>
+              </div>
+
               <!-- 45-Day Trial Box -->
               <div style="background:#E8F5E9;border:2px solid #4CAF50;border-radius:10px;padding:20px;margin-bottom:20px;text-align:center;">
                 <div style="font-size:28px;margin-bottom:6px;">🌴</div>
@@ -197,7 +315,7 @@ Deno.serve(async (req) => {
                 </div>
               </div>
 
-              <!-- Provider Dashboard -->
+              <!-- Provider Dashboard features -->
               <div style="background:#E3F2FD;border:1px solid #90CAF9;border-radius:10px;padding:18px 20px;margin-bottom:24px;">
                 <div style="font-weight:800;color:#1565C0;font-size:14px;margin-bottom:10px;text-transform:uppercase;letter-spacing:1px;">📊 Your Provider Dashboard</div>
                 <div style="font-size:13px;color:#1A237E;line-height:1.8;margin-bottom:14px;">
@@ -213,7 +331,7 @@ Deno.serve(async (req) => {
                   </a>
                 </div>
                 <div style="font-size:12px;color:#555;margin-top:10px;text-align:center;">
-                  Log in at <strong>${APP_URL}</strong> — click <strong>Provider Login</strong> — use your registration email
+                  Visit <strong>${APP_URL}</strong> → click <strong>Provider Login</strong>
                 </div>
               </div>
 
@@ -269,7 +387,7 @@ Deno.serve(async (req) => {
             <p style="font-size:13px;color:#555;margin:0 0 8px;">• Services: ${servicesList}</p>
             <p style="font-size:13px;color:#555;margin:0 0 8px;">• Villages: ${areasList}</p>
             <p style="font-size:13px;color:#555;margin:0 0 8px;">• Trial ends: <strong>${trialEndFormatted}</strong></p>
-            <p style="font-size:13px;color:#555;margin:0;">• Provider welcome email: ${emailError ? '❌ FAILED — ' + emailError : '✅ Sent'}</p>
+            <p style="font-size:13px;color:#555;margin:0;">• Provider welcome email: ${emailError ? '❌ FAILED — ' + emailError : '✅ Sent to ' + email}</p>
             <div style="text-align:center;margin-top:20px;">
               <a href="${APP_URL}/Wekcadmin" style="background:#5C3317;color:#fff;text-decoration:none;padding:10px 22px;border-radius:6px;font-size:13px;font-weight:700;">View Admin Dashboard →</a>
             </div>
