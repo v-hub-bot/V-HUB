@@ -698,7 +698,12 @@ export default function ProviderDashboard() {
     if (!newLoginEmail.trim()) { setAccMsg("⚠ Email cannot be empty."); return; }
     if (newPass && newPass.length < 6) { setAccMsg("⚠ Password must be at least 6 characters."); return; }
     if (newPass && newPass !== newPass2) { setAccMsg("⚠ Passwords do not match."); return; }
-    const updates = { login_email: newLoginEmail.trim() };
+
+    const oldEmail = (provider.login_email || provider.email || "").trim().toLowerCase();
+    const newEmail = newLoginEmail.trim().toLowerCase();
+    const emailChanged = oldEmail && newEmail && oldEmail !== newEmail;
+
+    const updates = { login_email: newEmail };
     if (newPass) updates.login_password = await hashPassword(newPass);
     try {
       await Provider.update(provider.id, updates);
@@ -706,8 +711,28 @@ export default function ProviderDashboard() {
       setProvider(fresh);
       sessionStorage.setItem("vhub_provider_id", fresh.id);
       setNewPass(""); setNewPass2("");
-      setAccMsg("✓ Account settings updated!");
-      setTimeout(() => setAccMsg(""), 4000);
+
+      // Send email change notification to OLD address
+      if (emailChanged) {
+        fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/notifyEmailChange", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            old_email: oldEmail,
+            new_email: newEmail,
+            business_name: provider.business_name,
+          }),
+        }).catch(() => {});
+      }
+
+      if (emailChanged) {
+        setAccMsg("✓ Account updated! A confirmation was sent to your old email address.");
+      } else if (newPass) {
+        setAccMsg("✓ Password updated successfully!");
+      } else {
+        setAccMsg("✓ Account settings updated!");
+      }
+      setTimeout(() => setAccMsg(""), 6000);
     } catch { setAccMsg("⚠ Error updating. Please try again."); }
   };
 
