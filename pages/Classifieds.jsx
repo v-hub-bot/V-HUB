@@ -11,8 +11,10 @@ const BROWN_BTN  = "#7A4520";
 const GREEN      = "#2E7D32";
 const NAVY       = "#1B3D6F";
 const TEAL       = "#00836B";
+const SERIF      = "'Times New Roman', Georgia, serif";
+const SANS       = "'Arial', sans-serif";
 
-// All 72 villages for dropdown
+// All villages for dropdown
 const ALL_VILLAGES = [
   "Alhambra","Amelia","Ashland","Belle Aire","Belvedere","Bonita","Bonnybrook",
   "Bradford","Briar Meadow","Bridgeport at Creekside Landing","Bridgeport at Lake Miona",
@@ -33,10 +35,6 @@ const ALL_VILLAGES = [
   "Tamarind Grove","Tierra Del Sol","Valle Verde","Virginia Trace","Winifred","Woodbury"
 ];
 
-function Rule({ thick } = {}) {
-  return <div style={{ borderTop: thick ? `3px double ${INK}` : `1px solid ${INK}`, margin: 0 }} />;
-}
-
 function daysUntil(dateStr) {
   if (!dateStr) return null;
   return Math.ceil((new Date(dateStr) - new Date()) / 86400000);
@@ -47,17 +45,23 @@ function fmtDate(d) {
   return new Date(d).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
 }
 
+function todayLine() {
+  return new Date().toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric" });
+}
+
 function ExpiryBadge({ date }) {
   if (!date) return null;
   const days = daysUntil(date);
-  if (days < 0) return <span style={{ background: "#c00", color: "#fff", fontSize: 9, borderRadius: 3, padding: "2px 6px", fontWeight: 700, letterSpacing: 0.5 }}>EXPIRED</span>;
-  if (days === 0) return <span style={{ background: "#E65100", color: "#fff", fontSize: 9, borderRadius: 3, padding: "2px 6px", fontWeight: 700 }}>ENDS TODAY</span>;
-  if (days <= 3) return <span style={{ background: "#FF6F00", color: "#fff", fontSize: 9, borderRadius: 3, padding: "2px 6px", fontWeight: 700 }}>ENDS IN {days}D</span>;
-  return <span style={{ background: GREEN, color: "#fff", fontSize: 9, borderRadius: 3, padding: "2px 6px", fontWeight: 700 }}>THRU {fmtDate(date)}</span>;
+  if (days < 0)  return <span style={{ background: "#8B0000", color: "#fff", fontSize: 9, borderRadius: 2, padding: "2px 7px", fontWeight: 700, letterSpacing: 0.8, textTransform: "uppercase", fontFamily: SANS }}>Expired</span>;
+  if (days === 0) return <span style={{ background: "#C62828", color: "#fff", fontSize: 9, borderRadius: 2, padding: "2px 7px", fontWeight: 700, letterSpacing: 0.8, fontFamily: SANS }}>Ends Today</span>;
+  if (days <= 3)  return <span style={{ background: "#E65100", color: "#fff", fontSize: 9, borderRadius: 2, padding: "2px 7px", fontWeight: 700, letterSpacing: 0.8, fontFamily: SANS }}>Ends in {days} day{days > 1 ? "s" : ""}</span>;
+  if (days <= 14) return <span style={{ background: BROWN_BTN, color: "#F5E8CC", fontSize: 9, borderRadius: 2, padding: "2px 7px", fontWeight: 700, letterSpacing: 0.8, fontFamily: SANS }}>Thru {fmtDate(date)}</span>;
+  return <span style={{ background: GREEN, color: "#fff", fontSize: 9, borderRadius: 2, padding: "2px 7px", fontWeight: 700, letterSpacing: 0.8, fontFamily: SANS }}>Thru {fmtDate(date)}</span>;
 }
 
 function AdCard({ ad }) {
   const expired = ad.deal_expires_at && daysUntil(ad.deal_expires_at) < 0;
+  const [hovered, setHovered] = useState(false);
 
   const trackClick = () => {
     fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/trackEvent", {
@@ -74,99 +78,132 @@ function AdCard({ ad }) {
   return (
     <div
       onClick={trackClick}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
       style={{
-        background: expired ? "#F0EAD6" : PAPER,
-        border: `2px solid ${expired ? PAPER_DK : INK}`,
-        borderRadius: 2,
-        padding: "14px 14px 12px",
-        fontFamily: "'Times New Roman', serif",
+        background: expired ? "#EEE5CC" : PAPER,
+        border: `2px solid ${INK}`,
+        borderRadius: 0,                    // sharp newspaper corners
+        padding: "0",
+        fontFamily: SERIF,
         display: "flex",
         flexDirection: "column",
-        gap: 5,
         boxSizing: "border-box",
         width: "100%",
-        minHeight: 240,
+        minHeight: 260,
         position: "relative",
-        opacity: expired ? 0.7 : 1,
+        opacity: expired ? 0.65 : 1,
         cursor: "pointer",
+        boxShadow: hovered && !expired ? "3px 3px 10px rgba(26,18,9,0.18)" : "2px 2px 6px rgba(26,18,9,0.08)",
+        transition: "box-shadow 0.15s",
       }}>
-      {/* Decorative inner border */}
-      <div style={{ position: "absolute", top: 4, left: 4, right: 4, borderTop: `1px solid ${INK}` }} />
-      <div style={{ position: "absolute", bottom: 4, left: 4, right: 4, borderBottom: `1px solid ${INK}` }} />
 
-      {/* Image */}
+      {/* ── Top rule strip ── */}
+      <div style={{ borderBottom: `3px double ${INK}`, padding: "8px 12px 6px", background: expired ? "#E8DEC5" : PAPER_MID }}>
+        {/* Category tag line */}
+        <div style={{ fontSize: 9, fontWeight: 700, textTransform: "uppercase", letterSpacing: 2, color: INK_FADE, fontFamily: SANS, textAlign: "center", marginBottom: 4 }}>
+          ✦ Advertisement ✦
+        </div>
+        {/* Big headline */}
+        <div style={{ fontSize: 14, fontWeight: 900, color: INK, textAlign: "center", textTransform: "uppercase", letterSpacing: 0.8, lineHeight: 1.25, fontFamily: SERIF }}>
+          {ad.headline}
+        </div>
+        {/* Expiry badge */}
+        <div style={{ textAlign: "center", marginTop: 5 }}>
+          <ExpiryBadge date={ad.deal_expires_at} />
+        </div>
+      </div>
+
+      {/* ── Image (if any) ── */}
       {ad.image_url && (
         <img
           src={ad.image_url}
           alt={ad.headline}
-          style={{ width: "100%", height: 110, objectFit: "cover", borderRadius: 1, border: `1px solid ${PAPER_DK}`, display: "block", flexShrink: 0 }}
+          style={{ width: "100%", height: 115, objectFit: "cover", display: "block", borderBottom: `1px solid ${INK}`, flexShrink: 0 }}
         />
       )}
 
-      {/* Headline + expiry badge */}
-      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4, borderBottom: `1px solid ${PAPER_DK}`, paddingBottom: 5 }}>
-        <div style={{ fontSize: 13, fontWeight: 700, color: INK, textAlign: "center", textTransform: "uppercase", letterSpacing: 1, lineHeight: 1.3 }}>
-          {ad.headline}
-        </div>
-        <ExpiryBadge date={ad.deal_expires_at} />
-      </div>
-
-      {/* Body */}
-      <div style={{ fontSize: 12, color: INK, lineHeight: 1.6, flex: 1 }}>
+      {/* ── Body copy ── */}
+      <div style={{ padding: "10px 12px", fontSize: 12, color: INK, lineHeight: 1.75, flex: 1, fontFamily: SERIF, textAlign: "justify" }}>
         {ad.body}
       </div>
 
-      {/* Address */}
+      {/* ── Address ── */}
       {ad.address && (
-        <div style={{ fontSize: 11, color: TEAL, fontWeight: 700, display: "flex", alignItems: "center", gap: 4, marginTop: 2 }}>
+        <div style={{ padding: "0 12px 8px", fontSize: 11, color: TEAL, fontWeight: 700, fontFamily: SANS, display: "flex", alignItems: "center", gap: 4 }}>
           📍 {ad.address}
         </div>
       )}
 
-      {/* Footer — provider + village */}
+      {/* ── Footer nameplate ── */}
       <div style={{
-        fontSize: 10, color: INK_FADE, textAlign: "center",
-        borderTop: `1px solid ${PAPER_DK}`, paddingTop: 5, marginTop: 2,
-        fontStyle: "italic", letterSpacing: 0.5,
+        borderTop: `2px solid ${INK}`,
+        padding: "6px 12px 8px",
+        background: INK,
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "center",
+        gap: 6,
+        flexWrap: "wrap",
       }}>
-        <strong style={{ fontStyle: "normal" }}>{ad.provider_name}</strong>
-        {ad.village ? ` · ${ad.village}` : ""}
+        <div style={{ fontSize: 11, fontWeight: 700, color: PAPER, fontFamily: SANS, letterSpacing: 0.5 }}>
+          {ad.provider_name}
+        </div>
+        {ad.village && (
+          <div style={{ fontSize: 10, color: PAPER_DK, fontFamily: SERIF, fontStyle: "italic" }}>
+            📍 {ad.village}
+          </div>
+        )}
       </div>
     </div>
   );
 }
 
-// Card shown when a provider has the add-on but no active ad yet
+// Placeholder — provider has addon but no active ad
 function PlaceholderCard({ provider }) {
   return (
     <div style={{
-      background: PAPER, border: `2px dashed ${PAPER_DK}`, borderRadius: 2,
-      padding: "20px 14px", fontFamily: "'Times New Roman', serif",
-      display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
-      gap: 8, boxSizing: "border-box", width: "100%", minHeight: 180, textAlign: "center",
+      background: PAPER,
+      border: `2px dashed ${PAPER_DK}`,
+      borderRadius: 0,
+      padding: "0",
+      fontFamily: SERIF,
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+      justifyContent: "center",
+      boxSizing: "border-box",
+      width: "100%",
+      minHeight: 200,
+      textAlign: "center",
+      gap: 0,
     }}>
-      <div style={{ fontSize: 13, fontWeight: 700, color: INK_FADE, textTransform: "uppercase", letterSpacing: 1 }}>
-        {provider.business_name}
+      <div style={{ borderBottom: `1px solid ${PAPER_DK}`, width: "100%", padding: "8px 12px 6px", background: PAPER_MID, textAlign: "center" }}>
+        <div style={{ fontSize: 9, textTransform: "uppercase", letterSpacing: 2, color: INK_FADE, fontFamily: SANS }}>✦ Coming Soon ✦</div>
       </div>
-      <div style={{ fontSize: 11, color: INK_FADE, fontStyle: "italic" }}>
-        No active deal at the moment — check back soon!
+      <div style={{ padding: "18px 16px", display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}>
+        <div style={{ fontSize: 14, fontWeight: 900, color: INK, textTransform: "uppercase", letterSpacing: 0.8 }}>
+          {provider.business_name}
+        </div>
+        <div style={{ width: 40, borderTop: `1px solid ${PAPER_DK}` }} />
+        <div style={{ fontSize: 11, color: INK_FADE, fontStyle: "italic", lineHeight: 1.6 }}>
+          No active deal at the moment.<br />Check back soon!
+        </div>
+        {provider.address && (
+          <div style={{ fontSize: 11, color: TEAL, fontWeight: 700, fontFamily: SANS }}>📍 {provider.address}</div>
+        )}
       </div>
-      {provider.address && (
-        <div style={{ fontSize: 11, color: TEAL, fontWeight: 700 }}>📍 {provider.address}</div>
-      )}
-      <div style={{ fontSize: 10, color: INK_FADE }}>{provider.service_areas_text || ""}</div>
     </div>
   );
 }
 
 export default function Classifieds() {
-  const [ads, setAds] = useState([]);          // active ClassifiedAd records
-  const [addonProviders, setAddonProviders] = useState([]); // all providers with classifieds_addon
+  const [ads, setAds] = useState([]);
+  const [addonProviders, setAddonProviders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [villageFilter, setVillageFilter] = useState("");
 
-  // Read ?village= from URL on mount
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const v = params.get("village");
@@ -178,116 +215,115 @@ export default function Classifieds() {
       ClassifiedAd.filter({ is_active: true }).catch(() => []),
       Provider.filter({ classifieds_addon: true, is_active: true }).catch(() => []),
     ]).then(([adData, provData]) => {
-      // Sort ads A-Z by provider name
       const sorted = [...adData].sort((a, b) => (a.provider_name || "").localeCompare(b.provider_name || ""));
       setAds(sorted);
-      // Sort providers A-Z
       const sortedProv = [...provData].sort((a, b) => (a.business_name || "").localeCompare(b.business_name || ""));
       setAddonProviders(sortedProv);
     }).finally(() => setLoading(false));
   }, []);
 
-  // Build the combined display list:
-  // - Show all providers with classifieds_addon (even if no active ad)
-  // - Merge in their active ad if they have one
-  // - Filter by search text and village
   const displayItems = (() => {
     const q = search.toLowerCase().trim();
     const v = villageFilter.toLowerCase().trim();
-
     return addonProviders
       .map(provider => {
         const ad = ads.find(a => a.provider_id === provider.id);
         return { provider, ad };
       })
       .filter(({ provider, ad }) => {
-        // Village filter — check provider's service_areas array AND ad.village
         if (v) {
           const provAreas = (provider.service_areas || []).map(a => (typeof a === "string" ? a : a.name || "").toLowerCase());
           const adVillage = (ad?.village || "").toLowerCase();
           const provAddress = (provider.address || "").toLowerCase();
-          const matchesVillage = provAreas.some(a => a.includes(v)) || adVillage.includes(v) || provAddress.includes(v);
-          if (!matchesVillage) return false;
+          if (![...provAreas, adVillage, provAddress].some(s => s.includes(v))) return false;
         }
-        // Text search — provider name, services, headline, body, address, village
         if (q) {
-          const haystack = [
-            provider.business_name,
-            ad?.provider_name,
-            ad?.village,
-            ad?.headline,
-            ad?.body,
-            ad?.address,
-            provider.address,
-            ...(provider.service_areas || []).map(a => typeof a === "string" ? a : a.name || ""),
-          ].join(" ").toLowerCase();
+          const haystack = [provider.business_name, ad?.provider_name, ad?.village, ad?.headline, ad?.body, ad?.address, provider.address, ...(provider.service_areas || []).map(a => typeof a === "string" ? a : a.name || "")].join(" ").toLowerCase();
           if (!haystack.includes(q)) return false;
         }
         return true;
       });
   })();
 
-  const hasActiveAd = (providerId) => ads.some(a => a.provider_id === providerId);
-
   return (
-    <div style={{ minHeight: "100vh", background: PAPER_MID, fontFamily: "'Times New Roman', serif" }}>
+    <div style={{ minHeight: "100vh", background: "#DDD3B0", fontFamily: SERIF }}>
 
-      {/* ── MASTHEAD ── */}
-      <div style={{ background: PAPER, borderBottom: `3px double ${INK}`, padding: "14px 16px 10px" }}>
-        <div style={{ textAlign: "center", marginBottom: 6 }}>
+      {/* ═══════════ MASTHEAD ═══════════ */}
+      <div style={{ background: PAPER, borderBottom: `4px double ${INK}` }}>
+
+        {/* Top strip — date + edition */}
+        <div style={{ borderBottom: `1px solid ${INK}`, padding: "4px 16px", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 4 }}>
+          <div style={{ fontSize: 10, color: INK_FADE, fontFamily: SERIF, fontStyle: "italic" }}>
+            {todayLine()}
+          </div>
+          <div style={{ fontSize: 10, color: INK_FADE, fontFamily: SERIF, letterSpacing: 1, textTransform: "uppercase" }}>
+            The Villages, Florida
+          </div>
+          <div style={{ fontSize: 10, color: INK_FADE, fontFamily: SERIF, fontStyle: "italic" }}>
+            Complimentary Edition
+          </div>
+        </div>
+
+        {/* Logo + nameplate */}
+        <div style={{ textAlign: "center", padding: "14px 16px 6px" }}>
           <a href="/" style={{ textDecoration: "none" }}>
-            <img src="https://media.base44.com/images/public/69d062aca815ce8e697894b1/a9af95bc3_V-Hublogo.png" alt="V-Hub" style={{ height: 52, marginBottom: 2 }} />
+            <img
+              src="https://media.base44.com/images/public/69d062aca815ce8e697894b1/a9af95bc3_V-Hublogo.png"
+              alt="V-Hub"
+              style={{ height: 48, display: "block", margin: "0 auto 8px" }}
+            />
           </a>
-        </div>
-        <Rule thick />
-        <div style={{ textAlign: "center", padding: "8px 0 4px" }}>
-          <div style={{ fontSize: 22, fontWeight: 700, letterSpacing: 3, textTransform: "uppercase", color: INK }}>
-            THE VILLAGES CLASSIFIEDS
+          <div style={{ fontSize: 28, fontWeight: 900, letterSpacing: 5, textTransform: "uppercase", color: INK, fontFamily: SERIF, lineHeight: 1 }}>
+            The Villages Classifieds
           </div>
-          <div style={{ fontSize: 12, fontStyle: "italic", color: INK_FADE, marginTop: 2 }}>
-            Exclusive deals & special offers from local service providers
+          <div style={{ fontSize: 11, fontStyle: "italic", color: INK_FADE, marginTop: 4, letterSpacing: 0.5, fontFamily: SERIF }}>
+            Exclusive deals &amp; special offers from your local service providers
           </div>
         </div>
-        <Rule />
 
-        {/* Controls */}
-        <div style={{ display: "flex", flexDirection: "column", gap: 8, marginTop: 10 }}>
-          {/* Row 1: Back + search */}
+        {/* Rule */}
+        <div style={{ borderTop: `1px solid ${INK}`, borderBottom: `3px double ${INK}`, height: 4, margin: "8px 16px" }} />
+
+        {/* ── Controls ── */}
+        <div style={{ padding: "10px 16px 14px", display: "flex", flexDirection: "column", gap: 8 }}>
           <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
             <a href="/" style={{ textDecoration: "none", flexShrink: 0 }}>
               <button style={{
-                background: `linear-gradient(180deg,#9A6030,${BROWN_BTN} 60%,#5A3010)`,
-                border: `2px solid ${NAVY}`, borderRadius: 4, color: "#F5E8CC",
-                fontFamily: "'Times New Roman', serif", fontWeight: 700, fontSize: 11,
-                letterSpacing: 1, padding: "8px 12px", cursor: "pointer",
+                background: `linear-gradient(180deg, #9A6030, ${BROWN_BTN} 60%, #5A2F10)`,
+                border: `2px solid ${NAVY}`,
+                borderRadius: 3, color: "#F5E8CC",
+                fontFamily: SERIF, fontWeight: 700, fontSize: 12,
+                letterSpacing: 1, padding: "8px 14px", cursor: "pointer",
+                boxShadow: "1px 1px 3px rgba(0,0,0,0.3)",
               }}>← Home</button>
             </a>
             <input
               type="text"
               value={search}
               onChange={e => setSearch(e.target.value)}
-              placeholder="Search provider name, service, deal…"
+              placeholder="Search ads — provider name, deal, keyword…"
               style={{
-                flex: 1, padding: "8px 12px", fontSize: 13,
-                fontFamily: "'Times New Roman', serif",
-                border: `2px solid ${GREEN}`, borderRadius: 4,
+                flex: 1, padding: "9px 13px", fontSize: 13,
+                fontFamily: SERIF,
+                border: `2px solid ${GREEN}`,
+                borderRadius: 3,
                 background: PAPER, color: INK, outline: "none", boxSizing: "border-box",
               }}
             />
           </div>
 
-          {/* Row 2: Village filter */}
           <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-            <div style={{ fontSize: 11, fontWeight: 700, color: INK_FADE, letterSpacing: 1, textTransform: "uppercase", flexShrink: 0, fontFamily: "'Times New Roman', serif" }}>
-              📍 Village:
-            </div>
+            <span style={{ fontSize: 11, fontWeight: 700, color: INK_FADE, letterSpacing: 1, textTransform: "uppercase", flexShrink: 0, fontFamily: SANS }}>
+              📍 Filter by Village:
+            </span>
             <select
               value={villageFilter}
               onChange={e => setVillageFilter(e.target.value)}
               style={{
                 flex: 1, padding: "8px 12px", fontSize: 13,
-                fontFamily: "'Times New Roman', serif",
-                border: `2px solid ${GREEN}`, borderRadius: 4,
+                fontFamily: SERIF,
+                border: `2px solid ${GREEN}`,
+                borderRadius: 3,
                 background: PAPER, color: INK, outline: "none", boxSizing: "border-box",
               }}
             >
@@ -297,56 +333,69 @@ export default function Classifieds() {
             {villageFilter && (
               <button
                 onClick={() => setVillageFilter("")}
-                style={{ background: "none", border: `1px solid ${PAPER_DK}`, borderRadius: 4, color: INK_FADE, fontSize: 11, padding: "6px 10px", cursor: "pointer", flexShrink: 0, fontFamily: "'Times New Roman', serif" }}
-              >✕ Clear</button>
+                style={{ background: "none", border: `1px solid ${PAPER_DK}`, borderRadius: 3, color: INK_FADE, fontSize: 11, padding: "7px 10px", cursor: "pointer", flexShrink: 0, fontFamily: SANS }}>
+                ✕ Clear
+              </button>
             )}
           </div>
         </div>
       </div>
 
-      {/* ── STATS BAR ── */}
-      <div style={{ background: INK, color: PAPER, padding: "5px 16px", fontSize: 11, letterSpacing: 1, textAlign: "center" }}>
-        {loading ? "Loading classifieds…" : (
+      {/* ── Ink banner bar ── */}
+      <div style={{ background: INK, color: PAPER, padding: "5px 16px", fontSize: 10, letterSpacing: 1.5, textAlign: "center", textTransform: "uppercase", fontFamily: SANS, fontWeight: 700 }}>
+        {loading ? "Loading…" : (
           <>
-            {displayItems.length} {displayItems.length === 1 ? "provider" : "providers"}
-            {villageFilter ? ` in ${villageFilter}` : " across The Villages"}
-            {" — "}{ads.length} active deal{ads.length !== 1 ? "s" : ""} — A–Z order
+            {displayItems.length} {displayItems.length === 1 ? "Advertiser" : "Advertisers"}
+            {villageFilter ? ` · Showing: ${villageFilter}` : " · Across The Villages"}
+            {" · "}{ads.length} Active Deal{ads.length !== 1 ? "s" : ""}
+            {" · "}{todayLine()}
           </>
         )}
       </div>
 
-      {/* ── CONTENT ── */}
-      <div style={{ padding: "16px 12px", maxWidth: 960, margin: "0 auto" }}>
+      {/* ═══════════ ADS GRID ═══════════ */}
+      <div style={{ padding: "18px 14px 32px", maxWidth: 980, margin: "0 auto" }}>
+
         {loading && (
-          <div style={{ textAlign: "center", padding: 40, color: INK_FADE, fontSize: 14 }}>
-            Loading classifieds…
+          <div style={{ textAlign: "center", padding: 48, color: INK_FADE, fontSize: 15, fontStyle: "italic", fontFamily: SERIF }}>
+            Setting type… loading classifieds…
           </div>
         )}
 
         {!loading && (
           <>
             <style>{`
-              .ad-grid {
+              .classified-grid {
                 display: grid;
                 grid-template-columns: repeat(3, 1fr);
-                gap: 14px;
+                gap: 16px;
               }
-              @media (max-width: 720px) { .ad-grid { grid-template-columns: repeat(2, 1fr); } }
-              @media (max-width: 460px) { .ad-grid { grid-template-columns: 1fr; } }
+              @media (max-width: 740px) { .classified-grid { grid-template-columns: repeat(2, 1fr); } }
+              @media (max-width: 480px) { .classified-grid { grid-template-columns: 1fr; } }
             `}</style>
+
+            {/* Section header rule */}
+            <div style={{ textAlign: "center", marginBottom: 14 }}>
+              <div style={{ borderTop: `3px double ${INK}`, marginBottom: 5 }} />
+              <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 3, textTransform: "uppercase", color: INK_FADE, fontFamily: SANS }}>
+                ✦ &nbsp; Paid Advertisements — Local Service Providers &nbsp; ✦
+              </div>
+              <div style={{ borderBottom: `3px double ${INK}`, marginTop: 5 }} />
+            </div>
 
             {displayItems.length === 0 ? (
               <div style={{
-                textAlign: "center", padding: "40px 20px", color: INK_FADE,
-                fontStyle: "italic", fontSize: 15, border: `1px dashed ${PAPER_DK}`,
-                borderRadius: 4, background: PAPER, margin: "20px 0",
+                textAlign: "center", padding: "40px 20px",
+                color: INK_FADE, fontStyle: "italic", fontSize: 15,
+                border: `2px dashed ${PAPER_DK}`,
+                background: PAPER, margin: "20px 0", fontFamily: SERIF,
               }}>
                 {search || villageFilter
-                  ? `No results for "${[villageFilter, search].filter(Boolean).join(" · ")}" — try a different search or clear the filter.`
-                  : "No providers have active classifieds yet. Check back soon!"}
+                  ? `No ads match "${[villageFilter, search].filter(Boolean).join(" · ")}" — try clearing the filter.`
+                  : "No classifieds posted yet. Check back soon!"}
               </div>
             ) : (
-              <div className="ad-grid">
+              <div className="classified-grid">
                 {displayItems.map(({ provider, ad }) =>
                   ad
                     ? <AdCard key={provider.id} ad={ad} />
@@ -354,19 +403,34 @@ export default function Classifieds() {
                 )}
               </div>
             )}
+
+            {/* ── FOOTER CTA ── */}
+            <div style={{ marginTop: 28, borderTop: `3px double ${INK}`, paddingTop: 14 }}>
+              <div style={{ background: PAPER, border: `2px solid ${INK}`, padding: "14px 18px", textAlign: "center" }}>
+                <div style={{ fontSize: 13, fontWeight: 700, textTransform: "uppercase", letterSpacing: 2, color: INK, fontFamily: SANS, marginBottom: 5 }}>
+                  Advertise Here
+                </div>
+                <div style={{ fontSize: 12, color: INK_FADE, fontFamily: SERIF, lineHeight: 1.7 }}>
+                  Are you a V-Hub provider? Add a classified ad to your listing for just{" "}
+                  <strong style={{ color: INK }}>$10/month</strong> and reach thousands of Villages residents.
+                </div>
+                <div style={{ marginTop: 10 }}>
+                  <a href="/ProviderDashboard" style={{ textDecoration: "none" }}>
+                    <button style={{
+                      background: `linear-gradient(180deg, #9A6030, ${BROWN_BTN} 60%, #5A2F10)`,
+                      border: `2px solid ${NAVY}`, borderRadius: 3,
+                      color: "#F5E8CC", fontFamily: SANS, fontWeight: 700,
+                      fontSize: 12, letterSpacing: 1, padding: "9px 20px", cursor: "pointer",
+                      boxShadow: "1px 1px 3px rgba(0,0,0,0.25)",
+                    }}>
+                      Sign In to Provider Hub →
+                    </button>
+                  </a>
+                </div>
+              </div>
+            </div>
           </>
         )}
-
-        {/* Footer CTA */}
-        <div style={{
-          marginTop: 24, padding: "12px 16px",
-          borderTop: `2px double ${INK}`, textAlign: "center",
-          fontSize: 11, color: INK_FADE, fontStyle: "italic",
-        }}>
-          Are you a V-Hub provider?{" "}
-          <a href="/ProviderDashboard" style={{ color: BROWN_BTN, fontWeight: 700 }}>Sign in to your Provider Hub</a>{" "}
-          and add a classified ad for just $10/month.
-        </div>
       </div>
     </div>
   );
