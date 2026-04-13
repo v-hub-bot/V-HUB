@@ -208,9 +208,8 @@ You can resend manually from the Email button.`);
     setApproving(null);
   };
 
-  const APP_ID = '69d062aca815ce8e697894b1';
   const adminUpdate = async (id, fields) => {
-    const res = await fetch(`https://api.base44.com/api/apps/${APP_ID}/functions/adminUpdateProvider`, {
+    const res = await fetch(`https://v-hub-697894b1.base44.app/functions/adminUpdateProvider`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id, fields }),
@@ -220,7 +219,7 @@ You can resend manually from the Email button.`);
     return data;
   };
   const adminDelete = async (id) => {
-    const res = await fetch(`https://api.base44.com/api/apps/${APP_ID}/functions/adminUpdateProvider`, {
+    const res = await fetch(`https://v-hub-697894b1.base44.app/functions/adminUpdateProvider`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id, delete: true }),
@@ -417,9 +416,8 @@ function ReviewsTab({ reviews, setReviews, providers }) {
   const [filter, setFilter] = useState("pending");
   const provMap = {}; providers.forEach(p => { provMap[p.id] = p.business_name; });
   const shown = reviews.filter(r => filter === "all" ? true : filter === "pending" ? !r.is_approved : r.is_approved);
-  const APP_ID = '69d062aca815ce8e697894b1';
   const approve = async (r) => {
-    await fetch(`https://api.base44.com/api/apps/${APP_ID}/functions/adminUpdateReview`, {
+    await fetch(`https://v-hub-697894b1.base44.app/functions/adminUpdateReview`, {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id: r.id, fields: { is_approved: true } }),
     });
@@ -427,7 +425,7 @@ function ReviewsTab({ reviews, setReviews, providers }) {
   };
   const remove = async (r) => {
     if (!window.confirm("Delete?")) return;
-    await fetch(`https://api.base44.com/api/apps/${APP_ID}/functions/adminUpdateReview`, {
+    await fetch(`https://v-hub-697894b1.base44.app/functions/adminUpdateReview`, {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id: r.id, delete: true }),
     });
@@ -612,8 +610,7 @@ function AddProviderTab({ onAdded, categories, services: allServices, serviceAre
     const trialEnd = new Date(Date.now() + 45 * 86400000).toISOString();
     try {
       const body = { ...form, vh_number: vh, trial_start_date: now, trial_end_date: trialEnd, profile_views: 0, search_appearances: 0, years_in_business: form.years_in_business ? Number(form.years_in_business) : 0 };
-      const APP_ID_CREATE = '69d062aca815ce8e697894b1';
-      const createRes = await fetch(`https://api.base44.com/api/apps/${APP_ID_CREATE}/functions/adminUpdateProvider`, {
+      const createRes = await fetch(`https://v-hub-697894b1.base44.app/functions/adminUpdateProvider`, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ create: true, fields: body }),
       });
@@ -760,8 +757,7 @@ function Dashboard() {
     setLoading(true);
     try {
       // Use backend function with service role to bypass RLS (PIN-gate has no auth context)
-      const APP_ID = '69d062aca815ce8e697894b1';
-      const res = await fetch(`https://api.base44.com/api/apps/${APP_ID}/functions/getAdminData`, {
+          const res = await fetch(`https://v-hub-697894b1.base44.app/functions/getAdminData`, {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' },
       });
