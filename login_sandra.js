@@ -1,5 +1,5 @@
 const WebSocket = require('ws');
-const wsUrl = 'wss://connect.browserbase.com/debug/78a7a397-a131-4056-b60e-c34084f70033/devtools/page/2E1F05566CA049FDDCF7568A8ABA048B?debug=true';
+const wsUrl = 'wss://connect.browserbase.com/debug/4ee05d9e-3396-4c8e-a4aa-156831c37d1a/devtools/page/3DC106FB47C44FFBE3A3CECA9562CE47?debug=true';
 const ws = new WebSocket(wsUrl);
 let id = 1;
 const pending = {};
@@ -24,30 +24,30 @@ ws.on('message', data => {
   }
 });
 
-ws.on('open', async () => {
-  function setVal(sel, val) {
-    return `(function(){
-      const el = document.querySelector('${sel}');
-      if(!el) return 'NOT FOUND: ${sel}';
-      const setter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype,'value').set;
-      setter.call(el, ${JSON.stringify(val)});
-      el.dispatchEvent(new Event('input',{bubbles:true}));
-      el.dispatchEvent(new Event('change',{bubbles:true}));
-      return 'set: '+el.value;
-    })()`;
-  }
+function setInput(placeholder, val) {
+  return `(function(){
+    const el = Array.from(document.querySelectorAll('input')).find(i => i.placeholder && i.placeholder.includes(${JSON.stringify(placeholder.split(' ')[0])}));
+    if(!el) return 'NOT FOUND placeholder containing: ${placeholder.split(' ')[0]}';
+    const setter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype,'value').set;
+    setter.call(el, ${JSON.stringify(val)});
+    el.dispatchEvent(new Event('input',{bubbles:true}));
+    el.dispatchEvent(new Event('change',{bubbles:true}));
+    return 'set ok: ' + el.value;
+  })()`;
+}
 
-  await send(setVal('input[placeholder="your@email.com or VH-1234"]', 'sandra@mapleleafclean.com'));
-  await send(setVal('input[placeholder="Your V-Hub password"]', 'CleanTest99'));
-  const r = await send(`(function(){
+ws.on('open', async () => {
+  await new Promise(r => setTimeout(r, 1500));
+  await send(setInput('your@email', 'tom@blueheronfl.com'), 100);
+  await send(setInput('V-Hub password', 'TestEdit99'), 100);
+  await send(`(function(){
     const btns = Array.from(document.querySelectorAll('button'));
-    const btn = btns.find(b => b.textContent.includes('SIGN IN') || b.textContent.includes('Sign In'));
-    if(btn){btn.click(); return 'clicked: '+btn.textContent.trim();}
-    return 'not found';
+    const btn = btns.find(b => /sign in/i.test(b.textContent));
+    if(btn){ btn.click(); return 'clicked sign in'; }
+    return 'btn not found — ' + btns.map(b=>b.textContent.trim().substring(0,20)).join(', ');
   })()`, 300);
-  
-  await new Promise(r => setTimeout(r, 2500));
-  const url = await send(`window.location.href`);
+  await new Promise(r => setTimeout(r, 3000));
+  const url = await send(`window.location.href`, 100);
   ws.close();
 });
 
