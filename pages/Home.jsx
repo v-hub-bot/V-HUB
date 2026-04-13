@@ -1186,7 +1186,7 @@ export default function Home() {
         </div>
 
         {/* ── MASTHEAD ── */}
-        <div style={{ background: PAPER, padding: "10px 14px 8px" }}>
+        <div style={{ background: PAPER, padding: "18px 14px 8px" }}>
           {/* Top row: logo | stacked title | burger */}
           <div style={{ display: "flex", alignItems: "center" }}>
             {/* Left: V-Hub logo icon */}
@@ -1308,11 +1308,69 @@ export default function Home() {
           </div>
         </div>
 
-        <Rule style={{ marginTop: 8 }} />
+        {/* ── NEWSPAPER FOOTER ── */}
+        <div style={{ background: PAPER_MID, borderTop: `3px double ${INK}`, marginTop: 24 }}>
 
-        {/* Footer */}
-        <div style={{ padding: "10px 14px", textAlign: "center", fontSize: 10, color: INK_FADE, fontStyle: "italic" }}>
-          © 2026 V-Hub · The Villages, Florida · <a href="/Terms" style={{ color: INK_FADE }}>Terms</a> · <a href="/Privacy" style={{ color: INK_FADE }}>Privacy</a>
+          {/* Thick rule */}
+          <div style={{ height: 2, background: INK, margin: "0 0 0 0" }} />
+
+          {/* Footer content */}
+          <div style={{ padding: "20px 20px 10px", display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px 20px" }}>
+            {/* Col 1 - About */}
+            <div>
+              <div style={{ fontSize: 11, fontWeight: 900, color: INK, letterSpacing: 2, textTransform: "uppercase", borderBottom: `1px solid ${INK}`, paddingBottom: 4, marginBottom: 8 }}>About V-Hub</div>
+              <div style={{ fontSize: 11, color: INK, lineHeight: 1.6, fontFamily: "'Times New Roman', serif" }}>
+                V-Hub is the local services directory for residents of The Villages, FL — connecting neighbors with trusted local providers.
+              </div>
+            </div>
+            {/* Col 2 - Quick Links */}
+            <div>
+              <div style={{ fontSize: 11, fontWeight: 900, color: INK, letterSpacing: 2, textTransform: "uppercase", borderBottom: `1px solid ${INK}`, paddingBottom: 4, marginBottom: 8 }}>Quick Links</div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
+                <a href="/ListService" style={{ fontSize: 11, color: INK, textDecoration: "none", fontFamily: "'Times New Roman', serif" }}>📋 List Your Service</a>
+                <a href="/ProviderDashboard" style={{ fontSize: 11, color: INK, textDecoration: "none", fontFamily: "'Times New Roman', serif" }}>🔑 Provider Login</a>
+                <a href="/Terms" style={{ fontSize: 11, color: INK, textDecoration: "none", fontFamily: "'Times New Roman', serif" }}>📜 Terms of Service</a>
+                <a href="/Privacy" style={{ fontSize: 11, color: INK, textDecoration: "none", fontFamily: "'Times New Roman', serif" }}>🔒 Privacy Policy</a>
+              </div>
+            </div>
+            {/* Col 3 - Contact */}
+            <div>
+              <div style={{ fontSize: 11, fontWeight: 900, color: INK, letterSpacing: 2, textTransform: "uppercase", borderBottom: `1px solid ${INK}`, paddingBottom: 4, marginBottom: 8 }}>Contact</div>
+              <div style={{ fontSize: 11, color: INK, lineHeight: 1.7, fontFamily: "'Times New Roman', serif" }}>
+                <div>✉️ <a href="mailto:info@v-hub.us" style={{ color: INK }}>info@v-hub.us</a></div>
+                <div>📍 The Villages, Florida</div>
+              </div>
+            </div>
+            {/* Col 4 - Legal */}
+            <div>
+              <div style={{ fontSize: 11, fontWeight: 900, color: INK, letterSpacing: 2, textTransform: "uppercase", borderBottom: `1px solid ${INK}`, paddingBottom: 4, marginBottom: 8 }}>Legal</div>
+              <div style={{ fontSize: 11, color: INK, lineHeight: 1.6, fontFamily: "'Times New Roman', serif" }}>
+                V-Hub is a directory service. We do not endorse, guarantee, or warrant any provider listed herein. Use of this site constitutes acceptance of our <a href="/Terms" style={{ color: INK }}>Terms of Service</a> and <a href="/Privacy" style={{ color: INK }}>Privacy Policy</a>.
+              </div>
+            </div>
+          </div>
+
+          {/* Bottom rule + copyright */}
+          <div style={{ height: 1, background: INK, margin: "0 20px" }} />
+          <div style={{ padding: "10px 20px 18px", textAlign: "center" }}>
+            <div style={{ fontSize: 10, color: INK_FADE, fontStyle: "italic", fontFamily: "'Times New Roman', serif", letterSpacing: 1 }}>
+              © {new Date().getFullYear()} V-Hub · The Villages, Florida · All Rights Reserved
+            </div>
+            <div style={{ fontSize: 9, color: INK_FADE, marginTop: 3, fontFamily: "'Times New Roman', serif", letterSpacing: 0.5 }}>
+              V-Hub is not affiliated with The Villages® or its affiliates. Provider listings are independent businesses.
+            </div>
+          </div>
+
+          {/* Newspaper bottom edge — stacked pages */}
+          <div style={{ position: "relative", height: 24 }}>
+            <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 24, background: "#b8a070", boxShadow: "0 -2px 6px rgba(0,0,0,0.3)" }} />
+            <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 20, background: "#c9b484" }} />
+            <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 16, background: "#d8c496" }} />
+            <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 12, background: "#e6d4a8" }} />
+            <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 8, background: PAPER }} />
+            <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 3, background: "linear-gradient(0deg, #1a0a00 0%, #3d2200 100%)" }} />
+          </div>
+
         </div>
 
       </div>
