@@ -139,7 +139,7 @@ function Overview({ providers, reviews, leads }) {
 }
 
 // ── PROVIDERS TAB ─────────────────────────────────────────────────────────────
-function ProvidersTab({ providers, setProviders, catMap, svcMap, areaMap, fullSvcMap, fullAreaMap }) {
+function ProvidersTab({ providers, setProviders, catMap, svcMap, areaMap, fullSvcMap, fullAreaMap, adminPin }) {
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("all");
   const [expanded, setExpanded] = useState(null);
@@ -413,7 +413,7 @@ You can resend manually from the Email button.`);
 }
 
 // ── REVIEWS TAB ───────────────────────────────────────────────────────────────
-function ReviewsTab({ reviews, setReviews, providers }) {
+function ReviewsTab({ reviews, setReviews, providers, adminPin }) {
   const [filter, setFilter] = useState("pending");
   const provMap = {}; providers.forEach(p => { provMap[p.id] = p.business_name; });
   const shown = reviews.filter(r => filter === "all" ? true : filter === "pending" ? !r.is_approved : r.is_approved);
@@ -575,7 +575,7 @@ function AnalyticsTab({ providers, reviews, leads, stats, catMap, svcMap, fullSv
 }
 
 // ── ADD PROVIDER TAB ──────────────────────────────────────────────────────────
-function AddProviderTab({ onAdded, categories, services: allServices, serviceAreas: allAreas }) {
+function AddProviderTab({ onAdded, categories, services: allServices, serviceAreas: allAreas, adminPin }) {
   const services = allServices.filter(s => s.is_active !== false);
   const serviceAreas = allAreas.filter(a => a.is_active !== false);
   const empty = { business_name: "", owner_name: "", email: "", phone: "", website: "", description: "", address: "", license_number: "", years_in_business: "", google_review_url: "", notes: "", subscription_status: "trial", subscription_tier: "basic", onboarding_type: "admin_added", is_active: true, is_visible: true, category_id: "", services: [], service_areas: [] };
@@ -828,11 +828,11 @@ function Dashboard({ adminPin }) {
 
       <div style={{ padding: 14, maxWidth: 800, margin: "0 auto" }}>
         {tab === "Overview" && <Overview providers={providers} reviews={reviews} leads={leads} />}
-        {tab === "Providers" && <ProvidersTab providers={providers} setProviders={setProviders} catMap={catMap} svcMap={svcMap} areaMap={areaMap} fullSvcMap={fullSvcMap} fullAreaMap={fullAreaMap} />}
-        {tab === "Reviews" && <ReviewsTab reviews={reviews} setReviews={setReviews} providers={providers} />}
+        {tab === "Providers" && <ProvidersTab providers={providers} setProviders={setProviders} catMap={catMap} svcMap={svcMap} areaMap={areaMap} fullSvcMap={fullSvcMap} fullAreaMap={fullAreaMap} adminPin={adminPin} />}
+        {tab === "Reviews" && <ReviewsTab reviews={reviews} setReviews={setReviews} providers={providers} adminPin={adminPin} />}
         {tab === "Leads" && <LeadsTab leads={leads} providers={providers} />}
         {tab === "Analytics" && <AnalyticsTab providers={providers} reviews={reviews} leads={leads} stats={stats} catMap={catMap} svcMap={svcMap} fullSvcMap={fullSvcMap} />}
-        {tab === "Add Provider" && <AddProviderTab onAdded={p => { setProviders(prev => [p, ...prev]); setTab("Providers"); }} categories={categories} services={services} serviceAreas={serviceAreas} />}
+        {tab === "Add Provider" && <AddProviderTab onAdded={p => { setProviders(prev => [p, ...prev]); setTab("Providers"); }} categories={categories} services={services} serviceAreas={serviceAreas} adminPin={adminPin} />}
       </div>
     </div>
   );
