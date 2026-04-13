@@ -31,6 +31,40 @@ async function sendEmail(to: string, subject: string, htmlBody: string) {
   }
 }
 
+/** Resolve service IDs (or plain text) to human-readable names */
+async function resolveServiceNames(
+  ids: string[],
+  base44: any
+): Promise<string> {
+  if (!ids || ids.length === 0) return 'your selected services';
+  try {
+    const allServices = await base44.asServiceRole.entities.Service.list();
+    const map = new Map(allServices.map((s: any) => [s.id, s.name]));
+    const names = ids.map((id) => map.get(id) || id); // fallback to raw value if not found
+    return names.join(', ');
+  } catch (e) {
+    console.error('resolveServiceNames failed:', e);
+    return ids.join(', ');
+  }
+}
+
+/** Resolve service area IDs (or plain text) to human-readable names */
+async function resolveAreaNames(
+  ids: string[],
+  base44: any
+): Promise<string> {
+  if (!ids || ids.length === 0) return 'your selected villages';
+  try {
+    const allAreas = await base44.asServiceRole.entities.ServiceArea.list();
+    const map = new Map(allAreas.map((a: any) => [a.id, a.name]));
+    const names = ids.map((id) => map.get(id) || id); // fallback to raw value if not found
+    return names.join(', ');
+  } catch (e) {
+    console.error('resolveAreaNames failed:', e);
+    return ids.join(', ');
+  }
+}
+
 Deno.serve(async (req) => {
   // Handle CORS preflight
   if (req.method === "OPTIONS") {
@@ -81,12 +115,14 @@ Deno.serve(async (req) => {
       });
     }
 
+    // ── Resolve human-readable names BEFORE building the email ──────────
+    const servicesList = await resolveServiceNames(services || [], base44);
+    const areasList = await resolveAreaNames(service_areas || [], base44);
+
     // ── Send confirmation email to provider ─────────────────────────────
     let emailError: string | null = null;
     if (email) {
       try {
-        const servicesList = (services || []).join(', ') || 'your selected services';
-        const areasList = (service_areas || []).join(', ') || 'your selected villages';
         const vhDisplay = vh_number
           ? `<div style="font-size:13px;color:#333;margin-bottom:6px;"><strong>VH Number:</strong> <span style="font-family:'Courier New',monospace;font-weight:900;font-size:15px;">${vh_number}</span></div>`
           : '';
@@ -215,6 +251,8 @@ Deno.serve(async (req) => {
             <p style="font-size:14px;color:#333;margin:0 0 12px;"><strong>${business_name}</strong> has been approved and is now live on V-Hub.</p>
             <p style="font-size:13px;color:#555;margin:0 0 8px;">• VH Number: <strong>${vh_number || 'N/A'}</strong></p>
             <p style="font-size:13px;color:#555;margin:0 0 8px;">• Contact: ${owner_name} — ${email}</p>
+            <p style="font-size:13px;color:#555;margin:0 0 8px;">• Services: ${servicesList}</p>
+            <p style="font-size:13px;color:#555;margin:0 0 8px;">• Villages: ${areasList}</p>
             <p style="font-size:13px;color:#555;margin:0 0 8px;">• Trial ends: <strong>${trialEndFormatted}</strong></p>
             <p style="font-size:13px;color:#555;margin:0;">• Provider welcome email: ${emailError ? '❌ FAILED — ' + emailError : '✅ Sent'}</p>
             <div style="text-align:center;margin-top:20px;">
