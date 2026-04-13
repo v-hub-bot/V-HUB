@@ -116,10 +116,12 @@ function StatusBanner({ provider, onUpgrade, onCancel, paymentLoading, cancelLoa
             : `After your trial ends on ${endFmt}, stay listed for just $12/month. Cancel anytime.`}
         </div>
         {urgent && (
-          {paymentError && <div style={{ fontSize: 12, color: "#BF360C", marginTop: 6, fontFamily: SANS }}>{paymentError}</div>}
-          <button onClick={onUpgrade} disabled={paymentLoading} style={{ marginTop: 10, background: "#E65100", color: "#fff", border: "none", borderRadius: 6, padding: "9px 22px", fontWeight: 700, cursor: paymentLoading ? "default" : "pointer", fontSize: 13, fontFamily: SANS, opacity: paymentLoading ? 0.7 : 1 }}>
-            {paymentLoading ? "Redirecting to Stripe…" : "Set Up Billing — $12/mo →"}
-          </button>
+          <div>
+            {paymentError && <div style={{ fontSize: 12, color: "#BF360C", marginTop: 6, fontFamily: SANS }}>{paymentError}</div>}
+            <button onClick={onUpgrade} disabled={paymentLoading} style={{ marginTop: 10, background: "#E65100", color: "#fff", border: "none", borderRadius: 6, padding: "9px 22px", fontWeight: 700, cursor: paymentLoading ? "default" : "pointer", fontSize: 13, fontFamily: SANS, opacity: paymentLoading ? 0.7 : 1 }}>
+              {paymentLoading ? "Redirecting to Stripe…" : "Set Up Billing — $12/mo →"}
+            </button>
+          </div>
         )}
       </div>
     );
