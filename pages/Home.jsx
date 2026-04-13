@@ -1174,7 +1174,7 @@ export default function Home() {
           {/* Top row: palm | title (centered) | burger */}
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
             {/* Left: V-Hub logo icon */}
-            <div style={{ flexShrink: 0, width: 72, height: 72, display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <div style={{ flexShrink: 0, width: 100, height: 72, display: "flex", alignItems: "center", justifyContent: "center" }}>
               <img
                 src="https://base44.app/api/apps/69d062aca815ce8e697894b1/files/mp/public/69d062aca815ce8e697894b1/d5e005e56_logo_icon_tight.png"
                 alt="V-Hub logo icon"
@@ -1182,8 +1182,8 @@ export default function Home() {
                 fetchPriority="high"
                 decoding="sync"
                 style={{
-                  width: "100%", height: "100%",
-                  objectFit: "fill",
+                  width: 100, height: 72,
+                  objectFit: "contain",
                   display: "block",
                 }}
               />
