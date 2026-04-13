@@ -155,7 +155,7 @@ function Overview({ providers, reviews, leads, fullAreaMap }) {
 }
 
 // ── PROVIDERS TAB ─────────────────────────────────────────────────────────────
-function ProvidersTab({ providers, setProviders, catMap, svcMap, areaMap, fullSvcMap, fullAreaMap, adminPin }) {
+function ProvidersTab({ providers, setProviders, catMap, svcMap, areaMap, fullSvcMap, fullAreaMap, adminPin, allCategories, allServices, allAreas }) {
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("all");
   const [expanded, setExpanded] = useState(null);
@@ -278,12 +278,15 @@ You can resend manually from the Email button.`);
       notes: p.notes || "",
       subscription_tier: p.subscription_tier || "basic",
       subscription_status: p.subscription_status || "trial",
+      category_id: p.category_id || "",
+      services: Array.isArray(p.services) ? [...p.services] : [],
+      service_areas: Array.isArray(p.service_areas) ? [...p.service_areas] : [],
     });
   };
 
   const saveEdit = async (id) => {
     setEditSaving(true);
-    await adminUpdate(id, {
+    const payload = {
       business_name: editForm.business_name,
       owner_name: editForm.owner_name,
       email: editForm.email,
@@ -297,8 +300,12 @@ You can resend manually from the Email button.`);
       notes: editForm.notes,
       subscription_tier: editForm.subscription_tier,
       subscription_status: editForm.subscription_status,
-    });
-    setProviders(prev => prev.map(x => x.id === id ? { ...x, ...editForm, years_in_business: editForm.years_in_business ? Number(editForm.years_in_business) : 0 } : x));
+      category_id: editForm.category_id,
+      services: editForm.services,
+      service_areas: editForm.service_areas,
+    };
+    await adminUpdate(id, payload);
+    setProviders(prev => prev.map(x => x.id === id ? { ...x, ...payload } : x));
     setEditId(null);
     setEditSaving(false);
   };
@@ -561,8 +568,83 @@ You can resend manually from the Email button.`);
                         style={{ width: "100%", padding: "7px 10px", fontSize: 13, fontFamily: T.sans, border: `1px solid ${T.border}`, borderRadius: 6, boxSizing: "border-box", resize: "vertical" }}
                       />
                     </div>
-                    <div style={{ fontSize: 10, color: "#888", fontFamily: T.sans, marginTop: 4, marginBottom: 10, fontStyle: "italic" }}>
-                      Note: To change services/villages, use the provider's own dashboard or contact them directly.
+                    {/* ── Category ── */}
+                    <div style={{ marginTop: 8 }}>
+                      <div style={{ fontSize: 10, color: T.brownLight, fontFamily: T.sans, fontWeight: 700, marginBottom: 2 }}>Category</div>
+                      <select
+                        value={editForm.category_id || ""}
+                        onChange={e => setEditForm(f => ({ ...f, category_id: e.target.value, services: [] }))}
+                        style={{ width: "100%", padding: "7px 10px", fontSize: 13, fontFamily: T.sans, border: `1px solid ${T.border}`, borderRadius: 6 }}
+                      >
+                        <option value="">— Select category —</option>
+                        {allCategories.filter(c => c.is_active !== false).map(c => (
+                          <option key={c.id} value={c.id}>{c.name}</option>
+                        ))}
+                      </select>
+                    </div>
+                    {/* ── Services multi-select ── */}
+                    <div style={{ marginTop: 8 }}>
+                      <div style={{ fontSize: 10, color: T.brownLight, fontFamily: T.sans, fontWeight: 700, marginBottom: 4 }}>
+                        Services <span style={{ fontWeight: 400, color: "#999" }}>(click to toggle)</span>
+                      </div>
+                      <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+                        {allServices
+                          .filter(s => !editForm.category_id || s.category_id === editForm.category_id)
+                          .filter(s => s.is_active !== false)
+                          .map(s => {
+                            const selected = (editForm.services || []).includes(s.id);
+                            return (
+                              <button key={s.id} type="button"
+                                onClick={() => setEditForm(f => ({
+                                  ...f,
+                                  services: selected
+                                    ? f.services.filter(x => x !== s.id)
+                                    : [...(f.services || []), s.id]
+                                }))}
+                                style={{
+                                  padding: "4px 10px", fontSize: 12, fontFamily: T.sans, borderRadius: 20, cursor: "pointer",
+                                  border: selected ? `2px solid ${T.brownDark}` : `1px solid ${T.border}`,
+                                  background: selected ? T.brownDark : "#fff",
+                                  color: selected ? "#fff" : T.brownLight,
+                                  fontWeight: selected ? 700 : 400,
+                                }}
+                              >{s.name}</button>
+                            );
+                          })}
+                        {allServices.filter(s => !editForm.category_id || s.category_id === editForm.category_id).length === 0 &&
+                          <div style={{ fontSize: 12, color: "#999", fontFamily: T.sans }}>Select a category first</div>}
+                      </div>
+                    </div>
+                    {/* ── Service Areas (Villages) multi-select ── */}
+                    <div style={{ marginTop: 8 }}>
+                      <div style={{ fontSize: 10, color: T.brownLight, fontFamily: T.sans, fontWeight: 700, marginBottom: 4 }}>
+                        Service Areas / Villages <span style={{ fontWeight: 400, color: "#999" }}>(click to toggle)</span>
+                      </div>
+                      <div style={{ display: "flex", flexWrap: "wrap", gap: 5, maxHeight: 140, overflowY: "auto", padding: "6px", background: "#fafafa", border: `1px solid ${T.border}`, borderRadius: 6 }}>
+                        {allAreas.filter(a => a.is_active !== false).map(a => {
+                          const selected = (editForm.service_areas || []).includes(a.id);
+                          return (
+                            <button key={a.id} type="button"
+                              onClick={() => setEditForm(f => ({
+                                ...f,
+                                service_areas: selected
+                                  ? f.service_areas.filter(x => x !== a.id)
+                                  : [...(f.service_areas || []), a.id]
+                              }))}
+                              style={{
+                                padding: "3px 9px", fontSize: 11, fontFamily: T.sans, borderRadius: 14, cursor: "pointer",
+                                border: selected ? `2px solid #00796B` : `1px solid ${T.border}`,
+                                background: selected ? "#00796B" : "#fff",
+                                color: selected ? "#fff" : "#555",
+                                fontWeight: selected ? 700 : 400,
+                              }}
+                            >{a.name}</button>
+                          );
+                        })}
+                      </div>
+                      <div style={{ fontSize: 10, color: "#888", fontFamily: T.sans, marginTop: 4 }}>
+                        {(editForm.service_areas || []).length} village{(editForm.service_areas || []).length !== 1 ? "s" : ""} selected
+                      </div>
                     </div>
                     <div style={{ display: "flex", gap: 8 }}>
                       <button onClick={() => saveEdit(p.id)} disabled={editSaving} style={{ ...S.btn("#2e7d32"), opacity: editSaving ? 0.6 : 1 }}>
@@ -1017,7 +1099,7 @@ function Dashboard({ adminPin }) {
 
       <div style={{ padding: 14, maxWidth: 800, margin: "0 auto" }}>
         {tab === "Overview" && <Overview providers={providers} reviews={reviews} leads={leads} fullAreaMap={fullAreaMap} />}
-        {tab === "Providers" && <ProvidersTab providers={providers} setProviders={setProviders} catMap={catMap} svcMap={svcMap} areaMap={areaMap} fullSvcMap={fullSvcMap} fullAreaMap={fullAreaMap} adminPin={adminPin} />}
+        {tab === "Providers" && <ProvidersTab providers={providers} setProviders={setProviders} catMap={catMap} svcMap={svcMap} areaMap={areaMap} fullSvcMap={fullSvcMap} fullAreaMap={fullAreaMap} adminPin={adminPin} allCategories={categories} allServices={services} allAreas={serviceAreas} />}
         {tab === "Reviews" && <ReviewsTab reviews={reviews} setReviews={setReviews} providers={providers} adminPin={adminPin} />}
         {tab === "Leads" && <LeadsTab leads={leads} providers={providers} />}
         {tab === "Analytics" && <AnalyticsTab providers={providers} reviews={reviews} leads={leads} stats={stats} catMap={catMap} svcMap={svcMap} fullSvcMap={fullSvcMap} />}
