@@ -111,11 +111,11 @@ const NEWSPAPER_CONTENT = {
     headline: "HOME SERVICES AT YOUR DOOR",
     subhead: "From repairs to landscaping — trusted pros serve every village",
     body: [
-      "Whether you need a leaky faucet fixed, windows replaced, or your lawn trimmed before the weekend, V-Hub connects you with licensed, vetted professionals across every neighborhood.",
+      "Whether you need a leaky faucet fixed, windows replaced, or your lawn trimmed before the weekend, V-Hub connects you with local service professionals across every neighborhood.",
       "Categories include Home Repair, Landscaping, Cleaning, Pet Care, Tech Help, Transportation, and Personal Assistance. Find the right provider for your village today.",
       "Every provider listed on V-Hub is geo-specific to The Villages — so results are always relevant to your street, your neighborhood, your community.",
       "Look up a handyman in Fenney, a pet groomer near Marsh Bend, or a tech helper in Brownwood Square — V-Hub surfaces exactly who serves your area, nothing more.",
-      "Providers are vetted by the V-Hub team before listing. Residents can leave reviews, rate their experience, and help neighbors make confident, informed choices.",
+      "Every provider is reviewed by the V-Hub team before their listing goes live. Residents can leave reviews, rate their experience, and help neighbors make confident, informed choices.",
       "Whether you are new to The Villages or have lived here for years, V-Hub is the go-to directory for finding trusted help — fast, local, and always free to search.",
       "Home repair specialists on V-Hub range from licensed general contractors handling major renovations to skilled handymen available for same-week appointments. No job is too small when the right pro is just a click away.",
       "Landscaping professionals listed on V-Hub maintain hundreds of Villages properties each week — from manicured front lawns to full irrigation system installations. Many offer seasonal packages tailored to Florida's year-round growing season.",
@@ -1308,9 +1308,9 @@ export default function Home() {
           <div>
             <p style={hd}>HOW V-HUB WORKS FOR PROVIDERS</p>
             <p style={sub}>Reach the exact neighborhoods you serve</p>
-            <p style={para}>Listing your business on V-Hub puts you in front of thousands of Villages residents who are actively searching for the services you offer. No cold calls, no wasted advertising — just direct connections with neighbors who need exactly what you do.</p>
+            <p style={para}>Listing your business on V-Hub puts you directly in front of Villages residents searching for the services you offer. No cold calls, no wasted advertising — just direct connections with neighbors who need exactly what you do.</p>
             <p style={para}>Providers choose which villages they serve, which categories they appear under, and what their profile says. Your listing is always in your control, and upgrades are available to boost your visibility across additional neighborhoods.</p>
-            <p style={para}>Join dozens of trusted local providers already growing their business through V-Hub. Click List Your Service above to get started — it only takes a few minutes to create your profile and start being found.</p>
+            <p style={para}>Providers across The Villages are already listed and being found by residents every day. Click List Your Service above to get started — it only takes a few minutes to create your profile.</p>
           </div>
         </div>
 
