@@ -37,6 +37,22 @@ Deno.serve(async (req: Request) => {
         return Response.json({ error: "Invalid JSON" }, { status: 400, headers: CORS });
       }
 
+      // Session restore: look up provider by ID (no password needed — ID is already trusted from sessionStorage)
+      if (body?.session_restore === true) {
+        const { provider_id } = body;
+        if (!provider_id) {
+          return Response.json({ error: "Missing provider_id" }, { status: 400, headers: CORS });
+        }
+        try {
+          const prov = await base44.asServiceRole.entities.Provider.get(provider_id);
+          if (!prov) return Response.json({ success: false, error: "Not found" }, { status: 404, headers: CORS });
+          const { login_password, login_email, notes, stripe_customer_id, stripe_subscription_id, ...safe } = prov;
+          return Response.json({ success: true, provider: safe }, { status: 200, headers: CORS });
+        } catch (e: any) {
+          return Response.json({ success: false, error: e.message }, { status: 500, headers: CORS });
+        }
+      }
+
       if (body?.login === true) {
         const { identifier, password } = body;
         if (!identifier?.trim() || !password?.trim()) {

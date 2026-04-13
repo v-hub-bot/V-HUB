@@ -676,18 +676,29 @@ export default function ProviderDashboard() {
 
   // ── Check for existing session on mount ───────────────────────────────
   useEffect(() => {
-    // URL auto-login: ?auto=PROVIDERID (dev/testing only, removed after use)
+    // URL auto-login: ?auto=PROVIDERID or #auto=PROVIDERID (dev/testing only)
     const autoParams = new URLSearchParams(window.location.search);
-    const autoId = autoParams.get("auto");
+    let autoId = autoParams.get("auto");
+    // Also check hash fragment: #auto=PROVIDERID
+    if (!autoId && window.location.hash.startsWith("#auto=")) {
+      autoId = window.location.hash.slice(6);
+    }
     if (autoId) {
       window.history.replaceState({}, "", window.location.pathname);
       sessionStorage.setItem("vhub_provider_id", autoId);
     }
     const savedId = sessionStorage.getItem("vhub_provider_id");
     if (savedId) {
-      Provider.get(savedId)
-        .then(p => {
-          if (p) {
+      // Use backend function instead of entity SDK — works without Base44 auth session
+      fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/getProviders", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ session_restore: true, provider_id: savedId }),
+      })
+        .then(r => r.json())
+        .then(data => {
+          if (data.success && data.provider) {
+            const p = data.provider;
             setProvider(p);
             seedForm(p);
             setNewLoginEmail(p.login_email || p.email || "");
