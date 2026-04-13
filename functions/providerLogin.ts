@@ -1,78 +1,80 @@
-import base44 from "../.base44/sdk.js";
+// providerLogin v4 - uses createClientFromRequest for service role
+import { createClientFromRequest } from "npm:@base44/sdk@0.8.25";
 
 const CORS = {
-  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Origin": "https://v-hub-app-edf7f8e8.base44.app",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
   "Access-Control-Allow-Headers": "Content-Type",
+  "Content-Type": "application/json",
 };
 
-async function sha256(plain: string): Promise<string> {
-  const enc = new TextEncoder();
-  const buf = await crypto.subtle.digest("SHA-256", enc.encode(plain));
-  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, "0")).join("");
+async function sha256(s: string): Promise<string> {
+  const b = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(s));
+  return Array.from(new Uint8Array(b)).map((x: number) => x.toString(16).padStart(2, "0")).join("");
 }
 
-// v2
-export default async function handler(req: Request): Promise<Response> {
+Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: CORS });
   if (req.method !== "POST") return new Response("Method Not Allowed", { status: 405, headers: CORS });
 
-  let body: any;
-  try { body = await req.json(); } catch { return new Response(JSON.stringify({ error: "Invalid JSON" }), { status: 400, headers: { ...CORS, "Content-Type": "application/json" } }); }
+  let body: Record<string, unknown> = {};
+  try { body = await req.json(); } catch {
+    return new Response(JSON.stringify({ error: "Invalid JSON" }), { status: 400, headers: CORS });
+  }
 
-  const { identifier, password } = body || {};
+  const identifier = ((body.identifier as string) || "").trim();
+  const password   = (body.password   as string) || "";
   if (!identifier || !password) {
-    return new Response(JSON.stringify({ error: "Missing identifier or password" }), { status: 400, headers: { ...CORS, "Content-Type": "application/json" } });
+    return new Response(JSON.stringify({ error: "Missing identifier or password" }), { status: 400, headers: CORS });
   }
 
   try {
-    const db = base44.asServiceRole.entities;
-    const loginInput = identifier.trim();
-    const isVH = /^vh-?\d{4}$/i.test(loginInput);
+    const base44 = createClientFromRequest(req);
+    const sr = base44.asServiceRole;
+    const isVH = /^vh-?\d{3,6}$/i.test(identifier);
 
-    let results: any[] = [];
+    let rows: Record<string, unknown>[] = [];
     if (isVH) {
-      const vhNorm = loginInput.toUpperCase().replace(/^VH(\d)/, "VH-$1");
-      results = await db.Provider.filter({ vh_number: vhNorm });
+      const vhNorm = identifier.toUpperCase().replace(/^VH(\d)/, "VH-$1");
+      rows = (await sr.entities.Provider.filter({ vh_number: vhNorm })) || [];
     } else {
-      const email = loginInput.toLowerCase();
-      const byLoginEmail = await db.Provider.filter({ login_email: email });
-      const byEmail = await db.Provider.filter({ email: email });
+      const em = identifier.toLowerCase();
+      const a = (await sr.entities.Provider.filter({ login_email: em })) || [];
+      const b = (await sr.entities.Provider.filter({ email: em }))       || [];
       const seen = new Set<string>();
-      for (const p of [...(byLoginEmail || []), ...(byEmail || [])]) {
-        if (!seen.has(p.id)) { seen.add(p.id); results.push(p); }
+      for (const p of [...a, ...b]) {
+        const pid = p.id as string;
+        if (!seen.has(pid)) { seen.add(pid); rows.push(p); }
       }
     }
 
-    if (!results.length) {
-      return new Response(JSON.stringify({ error: "No account found. Try your email or VH number (e.g. VH-1234), or contact admin@v-hub.us" }), { status: 401, headers: { ...CORS, "Content-Type": "application/json" } });
+    if (!rows.length) {
+      return new Response(JSON.stringify({ error: "No account found. Try your email or VH number, or contact admin@v-hub.us" }), { status: 401, headers: CORS });
     }
 
-    // Hash the submitted password
-    const hashedInput = await sha256(password);
-
-    // Find matching account
-    const prov = results.find(p => {
-      const stored = (p.login_password || "").trim();
-      if (!stored) return false;
-      return stored === password || stored === hashedInput;
+    const hashed = await sha256(password);
+    const match = rows.find(p => {
+      const s = ((p.login_password as string) || "").trim();
+      return s && (s === password || s === hashed);
     });
 
-    if (!prov) {
-      const hasNoPass = results.some(p => !p.login_password);
-      if (hasNoPass && results.length === 1) {
-        return new Response(JSON.stringify({ error: "No password set for this account. Use 'Forgot your password?' to set one up." }), { status: 401, headers: { ...CORS, "Content-Type": "application/json" } });
+    if (!match) {
+      if (rows.some(p => !p.login_password) && rows.length === 1) {
+        return new Response(JSON.stringify({ error: "No password set. Use 'Forgot your password?' to set one up." }), { status: 401, headers: CORS });
       }
-      return new Response(JSON.stringify({ error: "Incorrect password. Please try again." }), { status: 401, headers: { ...CORS, "Content-Type": "application/json" } });
+      return new Response(JSON.stringify({ error: "Incorrect password. Please try again." }), { status: 401, headers: CORS });
     }
 
-    // Return provider data — strip sensitive fields
-    const { login_password, notes, stripe_customer_id, stripe_subscription_id, ...safe } = prov;
+    const safe: Record<string, unknown> = { ...match };
+    delete safe.login_password;
+    delete safe.notes;
+    delete safe.stripe_customer_id;
+    delete safe.stripe_subscription_id;
 
-    return new Response(JSON.stringify({ success: true, provider: safe }), { status: 200, headers: { ...CORS, "Content-Type": "application/json" } });
+    return new Response(JSON.stringify({ success: true, provider: safe }), { headers: CORS });
 
-  } catch (err: any) {
-    console.error("providerLogin error:", err);
-    return new Response(JSON.stringify({ error: "Server error. Please try again." }), { status: 500, headers: { ...CORS, "Content-Type": "application/json" } });
+  } catch (e: unknown) {
+    console.error("providerLogin error:", e instanceof Error ? e.message : e);
+    return new Response(JSON.stringify({ error: "Server error. Please try again." }), { status: 500, headers: CORS });
   }
-}
+});
