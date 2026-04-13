@@ -162,6 +162,9 @@ function ProvidersTab({ providers, setProviders, catMap, svcMap, areaMap, fullSv
   const [editId, setEditId] = useState(null);
   const [editForm, setEditForm] = useState({});
   const [editSaving, setEditSaving] = useState(false);
+  const [setPassId, setSetPassId] = useState(null);
+  const [setPassVal, setSetPassVal] = useState("");
+  const [setPassMsg, setSetPassMsg] = useState("");
 
   // Resolve a value that might be an ID or text
   const resolveName = (val, map) => (fullSvcMap[val] || fullAreaMap[val] || map[val] || val);
