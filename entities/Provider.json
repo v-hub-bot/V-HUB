@@ -26,24 +26,22 @@
       "type": "string"
     },
     "service_areas": {
-      "type": "array"
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
     },
     "category_id": {
       "type": "string"
     },
     "services": {
-      "type": "array"
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
     },
     "subscription_status": {
-      "type": "string",
-      "enum": [
-        "pending",
-        "trial",
-        "active",
-        "cancelled",
-        "past_due",
-        "trial_expired"
-      ]
+      "type": "string"
     },
     "subscription_tier": {
       "type": "string"
@@ -88,11 +86,7 @@
       "type": "string"
     },
     "onboarding_type": {
-      "type": "string",
-      "enum": [
-        "self",
-        "admin"
-      ]
+      "type": "string"
     },
     "vh_number": {
       "type": "string"
@@ -101,6 +95,12 @@
       "type": "boolean"
     },
     "notes": {
+      "type": "string"
+    },
+    "login_email": {
+      "type": "string"
+    },
+    "login_password": {
       "type": "string"
     }
   },
