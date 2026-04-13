@@ -623,15 +623,21 @@ function DropBtn({ label, isOpen, onClick }) {
   );
 }
 
-// ── Service Dropdown (inline, no portal) ─────────────────────────────────────
+// ── Service Dropdown (opens ABOVE, scrolls to top on open) ──────────────────
 function SvcDropdown({ open, cats, svcs, openCat, selSvc, setOpenCat, setSelSvc, setSOpen }) {
+  const scrollRef = React.useRef(null);
+  React.useEffect(() => {
+    if (open && scrollRef.current) {
+      scrollRef.current.scrollTop = 0;
+    }
+  }, [open]);
   if (!open) return null;
   return (
-    <div onClick={e => e.stopPropagation()} style={{
-      position: "absolute", top: "calc(100% + 2px)", left: 0, right: 0,
+    <div ref={scrollRef} onClick={e => e.stopPropagation()} style={{
+      position: "absolute", bottom: "calc(100% + 2px)", left: 0, right: 0,
       background: PAPER, border: `2px solid ${INK}`, borderRadius: 4,
-      zIndex: 9999, boxShadow: "0 8px 28px rgba(0,0,0,0.4)",
-      maxHeight: 400, overflowY: "auto",
+      zIndex: 9999, boxShadow: "0 -8px 28px rgba(0,0,0,0.4)",
+      maxHeight: 380, overflowY: "auto",
     }}>
       {cats.length === 0 && <div style={{ padding: 12, fontSize: 12, color: INK_FADE }}>Loading...</div>}
       {cats.map(c => {
@@ -647,7 +653,7 @@ function SvcDropdown({ open, cats, svcs, openCat, selSvc, setOpenCat, setSelSvc,
                 {c.icon} {c.name}
               </div>
               <div
-                onClick={e => { e.stopPropagation(); setOpenCat(isExpanded ? null : c.id); }}
+                onClick={e => { e.stopPropagation(); setOpenCat(isExpanded ? null : c.id); if (!isExpanded && scrollRef.current) scrollRef.current.scrollTop = 0; }}
                 style={{ padding: "10px 14px", fontSize: 10, color: parentSelected ? "#fff" : INK, cursor: "pointer", borderLeft: `1px solid ${PAPER_DK}`, display: "flex", alignItems: "center" }}>
                 {isExpanded ? "▲" : "▼"}
               </div>
@@ -669,16 +675,22 @@ function SvcDropdown({ open, cats, svcs, openCat, selSvc, setOpenCat, setSelSvc,
   );
 }
 
-// ── Village Dropdown (inline, no portal) ─────────────────────────────────────
+// ── Village Dropdown (opens ABOVE, scrolls to top on open) ──────────────────
 function VilDropdown({ open, areas, selArea, setSelArea, setVOpen }) {
+  const scrollRef = React.useRef(null);
+  React.useEffect(() => {
+    if (open && scrollRef.current) {
+      scrollRef.current.scrollTop = 0;
+    }
+  }, [open]);
   if (!open) return null;
   const sorted = [...areas].sort((a, b) => a.name.localeCompare(b.name));
   return (
-    <div onClick={e => e.stopPropagation()} style={{
-      position: "absolute", top: "calc(100% + 2px)", left: 0, right: 0,
+    <div ref={scrollRef} onClick={e => e.stopPropagation()} style={{
+      position: "absolute", bottom: "calc(100% + 2px)", left: 0, right: 0,
       background: PAPER, border: `2px solid ${INK}`, borderRadius: 4,
-      zIndex: 9999, boxShadow: "0 8px 28px rgba(0,0,0,0.4)",
-      maxHeight: 400, overflowY: "auto",
+      zIndex: 9999, boxShadow: "0 -8px 28px rgba(0,0,0,0.4)",
+      maxHeight: 380, overflowY: "auto",
     }}>
       {sorted.map(v => (
         <div key={v.id}
