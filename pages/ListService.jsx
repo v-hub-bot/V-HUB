@@ -1159,6 +1159,56 @@ export default function ListService() {
             )}
           </div>
 
+
+          {/* Section 4 — Account Setup */}
+          <div style={{ borderTop: `2px solid ${INK}`, paddingTop: 22, marginBottom: 8 }}>
+            <div style={{ ...shS, marginBottom: 18 }}>Section 4 — Provider Hub Login *</div>
+            <div style={{ background: "#E8F5E9", border: "2px solid #4CAF50", borderRadius: 10, padding: "14px 16px", marginBottom: 18, fontSize: 13, color: "#2E7D32", lineHeight: 1.7 }}>
+              🔐 <strong>Choose your login credentials</strong> for the V-Hub Provider Hub. You'll use these to access your dashboard, view stats, and manage your listing after approval.
+            </div>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px 16px" }}>
+              <div style={{ gridColumn: "1 / -1" }}>
+                <label style={{ ...lbS, color: errors.loginEmail ? RED_RULE : INK_FADE }}>Login Email *</label>
+                <input
+                  style={{ ...inS, borderColor: errors.loginEmail ? RED_RULE : PAPER_DK }}
+                  value={loginEmail}
+                  onChange={e => setLoginEmail(e.target.value)}
+                  placeholder="The email you'll use to log in"
+                  type="email"
+                />
+                {errors.loginEmail && <div style={{ fontSize: 11, color: RED_RULE, marginTop: 3 }}>Required</div>}
+                <div style={{ fontSize: 11, color: INK_FADE, marginTop: 4, fontStyle: "italic" }}>Can be the same as your business email above, or a different one.</div>
+              </div>
+              <div>
+                <label style={{ ...lbS, color: errors.loginPass ? RED_RULE : INK_FADE }}>Password * <span style={{ fontWeight: 400, textTransform: "none", fontSize: 11 }}>(min. 6 characters)</span></label>
+                <div style={{ position: "relative" }}>
+                  <input
+                    style={{ ...inS, borderColor: errors.loginPass ? RED_RULE : PAPER_DK, paddingRight: 44 }}
+                    value={loginPass}
+                    onChange={e => setLoginPass(e.target.value)}
+                    placeholder="Create a password"
+                    type={showPass ? "text" : "password"}
+                  />
+                  <button onClick={() => setShowPass(p => !p)} type="button" style={{ position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", fontSize: 16, color: INK_FADE }}>
+                    {showPass ? "🙈" : "👁️"}
+                  </button>
+                </div>
+                {errors.loginPass && <div style={{ fontSize: 11, color: RED_RULE, marginTop: 3 }}>Must be at least 6 characters</div>}
+              </div>
+              <div>
+                <label style={{ ...lbS, color: errors.loginPass2 ? RED_RULE : INK_FADE }}>Confirm Password *</label>
+                <input
+                  style={{ ...inS, borderColor: errors.loginPass2 ? RED_RULE : PAPER_DK }}
+                  value={loginPass2}
+                  onChange={e => setLoginPass2(e.target.value)}
+                  placeholder="Re-enter your password"
+                  type={showPass ? "text" : "password"}
+                />
+                {errors.loginPass2 && <div style={{ fontSize: 11, color: RED_RULE, marginTop: 3 }}>Passwords do not match</div>}
+              </div>
+            </div>
+          </div>
+
           {/* Submit */}
           <div style={{ borderTop: `2px solid ${INK}`, paddingTop: 20, textAlign: "center" }}>
             <div style={{ fontSize: 12, color: INK_FADE, fontStyle: "italic", marginBottom: 14, lineHeight: 1.6 }}>
