@@ -1169,38 +1169,53 @@ export default function Home() {
         boxShadow: "0 2px 40px rgba(0,0,0,0.28)",
       }}>
 
+        {/* ── NEWSPAPER TOP EDGE ── */}
+        <div style={{
+          background: "linear-gradient(180deg, #2a1800 0%, #3d2200 40%, #5a3510 70%, #7a5028 100%)",
+          height: 18,
+          boxShadow: "0 4px 12px rgba(0,0,0,0.55), 0 2px 4px rgba(0,0,0,0.4), inset 0 -2px 6px rgba(0,0,0,0.3)",
+          borderBottom: "2px solid #1a0a00",
+          position: "relative",
+          zIndex: 2,
+        }}>
+          {/* Subtle paper texture lines */}
+          <div style={{ position: "absolute", inset: 0, background: "repeating-linear-gradient(90deg, transparent, transparent 40px, rgba(255,255,255,0.03) 40px, rgba(255,255,255,0.03) 41px)" }} />
+        </div>
+        {/* Drop shadow strip below edge */}
+        <div style={{
+          height: 8,
+          background: "linear-gradient(180deg, rgba(0,0,0,0.18) 0%, transparent 100%)",
+          marginBottom: 0,
+        }} />
+
         {/* ── MASTHEAD ── */}
-        <div style={{ background: PAPER, padding: "14px 14px 8px" }}>
-          {/* Top row: palm | title (centered) | burger */}
+        <div style={{ background: PAPER, padding: "10px 14px 8px" }}>
+          {/* Top row: logo | stacked title | burger */}
           <div style={{ display: "flex", alignItems: "center" }}>
-            {/* Left: V-Hub logo icon — fixed width to balance burger */}
-            <div style={{ flexShrink: 0, width: 100, height: 80, display: "flex", alignItems: "center", justifyContent: "center" }}>
+            {/* Left: V-Hub logo icon */}
+            <div style={{ flexShrink: 0, width: 100, height: 100, display: "flex", alignItems: "center", justifyContent: "center" }}>
               <img
                 src="https://base44.app/api/apps/69d062aca815ce8e697894b1/files/mp/public/69d062aca815ce8e697894b1/d5e005e56_logo_icon_tight.png"
                 alt="V-Hub logo icon"
                 loading="eager"
                 fetchPriority="high"
                 decoding="sync"
-                style={{
-                  width: 100, height: 80,
-                  objectFit: "contain",
-                  display: "block",
-                }}
+                style={{ width: 100, height: 100, objectFit: "contain", display: "block" }}
               />
             </div>
-            {/* Center: V-Hub title — truly centered by using absolute positioning trick */}
-            <div style={{ flex: 1, textAlign: "center", fontSize: 52, fontWeight: 900, color: INK, fontFamily: "'Times New Roman', serif", letterSpacing: -1, lineHeight: 1 }}>
-              <span style={{ fontStyle: "italic", fontWeight: 700, fontFamily: "'Great Vibes', cursive", fontSize: "1.35em", color: BROWN_BTN, WebkitTextStroke: "0.6px " + BROWN_BTN, textShadow: `0.5px 0.5px 0 ${BROWN_BTN}` }}>V</span>
-              <span>-Hub</span>
+            {/* Center: Stacked V / — / Hub */}
+            <div style={{ flex: 1, textAlign: "center", lineHeight: 1, fontFamily: "'Times New Roman', serif" }}>
+              <div style={{ fontStyle: "italic", fontWeight: 700, fontFamily: "'Great Vibes', cursive", fontSize: 62, color: BROWN_BTN, WebkitTextStroke: "0.6px " + BROWN_BTN, textShadow: `0.5px 0.5px 0 ${BROWN_BTN}`, lineHeight: 1 }}>V</div>
+              <div style={{ fontSize: 22, fontWeight: 900, color: INK, letterSpacing: 4, lineHeight: 1, margin: "1px 0" }}>—</div>
+              <div style={{ fontSize: 52, fontWeight: 900, color: INK, letterSpacing: -1, lineHeight: 1 }}>Hub</div>
             </div>
-            {/* Right: burger — padded to 100px to match left side */}
-            <div style={{ flexShrink: 0, width: 100, display: "flex", justifyContent: "flex-end" }}><Burger currentUser={currentUser} /></div>
+            {/* Right: burger — same width as logo */}
+            <div style={{ flexShrink: 0, width: 100, display: "flex", justifyContent: "flex-end", alignItems: "center" }}><Burger currentUser={currentUser} /></div>
           </div>
           {/* Tagline */}
           <div style={{ fontSize: 13, fontStyle: "italic", color: INK_FADE, textAlign: "center", margin: "6px 0 10px" }}>
             Connecting You to Local Services in The Villages!
           </div>
-          {/* List Your Service button removed — accessible via burger menu */}
         </div>
 
         <Rule thick />
