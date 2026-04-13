@@ -670,6 +670,7 @@ function AddProviderTab({ onAdded, categories, services: allServices, serviceAre
       const res = await fetch(`https://v-hub-app-edf7f8e8.base44.app/functions/addProviderByAdmin`, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          pin: adminPin,
           business_name: form.business_name,
           owner_name: form.owner_name,
           email: form.email,

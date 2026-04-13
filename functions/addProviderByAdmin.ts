@@ -55,9 +55,30 @@ function genTempPassword(): string {
 }
 
 Deno.serve(async (req) => {
+  if (req.method === "OPTIONS") {
+    return new Response(null, { headers: {
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Methods": "POST, OPTIONS",
+      "Access-Control-Allow-Headers": "Content-Type, Authorization",
+    }});
+  }
   try {
     const base44 = createClientFromRequest(req);
     const body = await req.json().catch(() => ({}));
+
+    // ── Admin auth check ──────────────────────────────────────────────────
+    const VALID_PINS = ["6185", "1357"];
+    const ADMIN_EMAILS = ["kimberlycook1980@gmail.com", "5bebegurlz@gmail.com", "evansrus@comcast.net"];
+    const pinProvided = body.pin && VALID_PINS.includes(String(body.pin));
+    let userIsAdmin = false;
+    try {
+      const me = await base44.auth.me();
+      if (me?.email && ADMIN_EMAILS.includes(me.email.toLowerCase())) userIsAdmin = true;
+    } catch (_) {}
+    if (!pinProvided && !userIsAdmin) {
+      return Response.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    // ─────────────────────────────────────────────────────────────────────
 
     const {
       business_name, owner_name, email, phone,
