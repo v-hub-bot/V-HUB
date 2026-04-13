@@ -159,6 +159,9 @@ function ProvidersTab({ providers, setProviders, catMap, svcMap, areaMap, fullSv
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("all");
   const [expanded, setExpanded] = useState(null);
+  const [editId, setEditId] = useState(null);
+  const [editForm, setEditForm] = useState({});
+  const [editSaving, setEditSaving] = useState(false);
 
   // Resolve a value that might be an ID or text
   const resolveName = (val, map) => (fullSvcMap[val] || fullAreaMap[val] || map[val] || val);
@@ -259,6 +262,47 @@ You can resend manually from the Email button.`);
   };
   const toggleActive = async (p) => { await adminUpdate(p.id, { is_active: !p.is_active }); setProviders(prev => prev.map(x => x.id === p.id ? { ...x, is_active: !p.is_active } : x)); };
   const toggleVisible = async (p) => { await adminUpdate(p.id, { is_visible: !p.is_visible }); setProviders(prev => prev.map(x => x.id === p.id ? { ...x, is_visible: !p.is_visible } : x)); };
+  const startEdit = (p) => {
+    setEditId(p.id);
+    setEditForm({
+      business_name: p.business_name || "",
+      owner_name: p.owner_name || "",
+      email: p.email || "",
+      phone: p.phone || "",
+      website: p.website || "",
+      address: p.address || "",
+      description: p.description || "",
+      years_in_business: p.years_in_business || "",
+      license_number: p.license_number || "",
+      google_review_url: p.google_review_url || "",
+      notes: p.notes || "",
+      subscription_tier: p.subscription_tier || "basic",
+      subscription_status: p.subscription_status || "trial",
+    });
+  };
+
+  const saveEdit = async (id) => {
+    setEditSaving(true);
+    await adminUpdate(id, {
+      business_name: editForm.business_name,
+      owner_name: editForm.owner_name,
+      email: editForm.email,
+      phone: editForm.phone,
+      website: editForm.website,
+      address: editForm.address,
+      description: editForm.description,
+      years_in_business: editForm.years_in_business ? Number(editForm.years_in_business) : 0,
+      license_number: editForm.license_number,
+      google_review_url: editForm.google_review_url,
+      notes: editForm.notes,
+      subscription_tier: editForm.subscription_tier,
+      subscription_status: editForm.subscription_status,
+    });
+    setProviders(prev => prev.map(x => x.id === id ? { ...x, ...editForm, years_in_business: editForm.years_in_business ? Number(editForm.years_in_business) : 0 } : x));
+    setEditId(null);
+    setEditSaving(false);
+  };
+
   const del = async (p) => { if (!window.confirm(`Delete ${p.business_name}?`)) return; await adminDelete(p.id); setProviders(prev => prev.filter(x => x.id !== p.id)); };
 
   return (
@@ -458,9 +502,76 @@ You can resend manually from the Email button.`);
                   <button onClick={() => toggleActive(p)} style={S.btn(p.is_active ? "#8B4513" : "#555")}>{p.is_active ? "Deactivate" : "Activate Only"}</button>
                   <button onClick={() => toggleVisible(p)} style={S.btn(T.teal)}>{p.is_visible === false ? "Make Visible" : "Hide Listing"}</button>
                   <button onClick={() => del(p)} style={S.btn(T.red)}>Delete</button>
+                  <button onClick={() => startEdit(p)} style={S.btn("#5a3010")}>✏️ Edit Details</button>
                   {p.email && <a href={`mailto:${p.email}`} style={{ ...S.btn(T.brownLight), textDecoration: "none" }}>✉️ Email</a>}
                   {p.phone && <a href={`tel:${p.phone}`} style={{ ...S.btn("#777"), textDecoration: "none" }}>📞 Call</a>}
                 </div>
+                {/* ── INLINE EDIT FORM ── */}
+                {editId === p.id && (
+                  <div style={{ marginTop: 16, background: "#fff", border: `2px solid ${T.brownDark}`, borderRadius: 10, padding: 16 }}>
+                    <div style={{ fontWeight: 800, fontSize: 13, color: T.brownDark, fontFamily: T.sans, marginBottom: 12, textTransform: "uppercase", letterSpacing: 1 }}>✏️ Edit Provider Details</div>
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+                      {[
+                        ["Business Name", "business_name"],
+                        ["Owner Name", "owner_name"],
+                        ["Email", "email"],
+                        ["Phone", "phone"],
+                        ["Website", "website"],
+                        ["Address", "address"],
+                        ["Years in Business", "years_in_business"],
+                        ["License #", "license_number"],
+                        ["Google Review URL", "google_review_url"],
+                      ].map(([label, key]) => (
+                        <div key={key}>
+                          <div style={{ fontSize: 10, color: T.brownLight, fontFamily: T.sans, fontWeight: 700, marginBottom: 2 }}>{label}</div>
+                          <input
+                            value={editForm[key] || ""}
+                            onChange={e => setEditForm(f => ({ ...f, [key]: e.target.value }))}
+                            style={{ width: "100%", padding: "7px 10px", fontSize: 13, fontFamily: T.sans, border: `1px solid ${T.border}`, borderRadius: 6, boxSizing: "border-box" }}
+                          />
+                        </div>
+                      ))}
+                      <div>
+                        <div style={{ fontSize: 10, color: T.brownLight, fontFamily: T.sans, fontWeight: 700, marginBottom: 2 }}>Subscription Status</div>
+                        <select value={editForm.subscription_status} onChange={e => setEditForm(f => ({ ...f, subscription_status: e.target.value }))}
+                          style={{ width: "100%", padding: "7px 10px", fontSize: 13, fontFamily: T.sans, border: `1px solid ${T.border}`, borderRadius: 6 }}>
+                          <option value="trial">Trial</option>
+                          <option value="active">Active</option>
+                          <option value="pending">Pending</option>
+                          <option value="expired">Expired</option>
+                          <option value="cancelled">Cancelled</option>
+                        </select>
+                      </div>
+                      <div>
+                        <div style={{ fontSize: 10, color: T.brownLight, fontFamily: T.sans, fontWeight: 700, marginBottom: 2 }}>Subscription Tier</div>
+                        <select value={editForm.subscription_tier} onChange={e => setEditForm(f => ({ ...f, subscription_tier: e.target.value }))}
+                          style={{ width: "100%", padding: "7px 10px", fontSize: 13, fontFamily: T.sans, border: `1px solid ${T.border}`, borderRadius: 6 }}>
+                          <option value="basic">Basic</option>
+                          <option value="featured">Featured</option>
+                          <option value="premium">Premium</option>
+                        </select>
+                      </div>
+                    </div>
+                    <div style={{ marginTop: 8 }}>
+                      <div style={{ fontSize: 10, color: T.brownLight, fontFamily: T.sans, fontWeight: 700, marginBottom: 2 }}>Notes (internal)</div>
+                      <textarea
+                        value={editForm.notes || ""}
+                        onChange={e => setEditForm(f => ({ ...f, notes: e.target.value }))}
+                        rows={2}
+                        style={{ width: "100%", padding: "7px 10px", fontSize: 13, fontFamily: T.sans, border: `1px solid ${T.border}`, borderRadius: 6, boxSizing: "border-box", resize: "vertical" }}
+                      />
+                    </div>
+                    <div style={{ fontSize: 10, color: "#888", fontFamily: T.sans, marginTop: 4, marginBottom: 10, fontStyle: "italic" }}>
+                      Note: To change services/villages, use the provider's own dashboard or contact them directly.
+                    </div>
+                    <div style={{ display: "flex", gap: 8 }}>
+                      <button onClick={() => saveEdit(p.id)} disabled={editSaving} style={{ ...S.btn("#2e7d32"), opacity: editSaving ? 0.6 : 1 }}>
+                        {editSaving ? "Saving..." : "💾 Save Changes"}
+                      </button>
+                      <button onClick={() => setEditId(null)} style={S.btn("#888")}>Cancel</button>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </div>
