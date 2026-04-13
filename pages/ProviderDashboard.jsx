@@ -344,8 +344,10 @@ export default function ProviderDashboard() {
   );
 
   // Not logged in — show sign in prompt
+  // Not logged in — show sign in prompt
   if (authState === "unauthenticated") return (
     <div style={{ minHeight: "100vh", background: PAPER, backgroundImage: "repeating-linear-gradient(0deg,transparent,transparent 27px,rgba(28,15,0,0.03) 27px,rgba(28,15,0,0.03) 28px)", fontFamily: "'Times New Roman', Georgia, serif" }}>
+      {/* Top bar */}
       <div style={{ background: INK, padding: "10px 20px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
         <a href="/" style={{ textDecoration: "none" }}>
           <button style={{ background: "rgba(255,255,255,0.1)", border: `1.5px solid ${PAPER_DK}`, color: PAPER, borderRadius: 6, padding: "7px 16px", fontSize: 13, cursor: "pointer", fontWeight: 700 }}>← Home</button>
@@ -354,41 +356,74 @@ export default function ProviderDashboard() {
         <div style={{ width: 80 }} />
       </div>
 
-      <div style={{ textAlign: "center", padding: "24px 20px 18px", borderBottom: `3px double ${INK}` }}>
-        <div style={{ fontSize: 10, letterSpacing: 5, textTransform: "uppercase", color: INK_FADE, fontStyle: "italic", marginBottom: 2 }}>The Villages, Florida</div>
+      {/* Page header */}
+      <div style={{ textAlign: "center", padding: "28px 20px 20px", borderBottom: `3px double ${INK}` }}>
         <div style={{ fontSize: 30, fontWeight: 900, color: INK, letterSpacing: 3, textTransform: "uppercase" }}>Provider Hub</div>
         <div style={{ height: 2, background: RED_RULE, margin: "8px auto", width: 200 }} />
         <div style={{ fontSize: 13, color: INK_FADE, fontStyle: "italic" }}>Manage your listing · View your stats · Read your reviews</div>
       </div>
 
+      {/* Sign-in card */}
       <div style={{ maxWidth: 480, margin: "40px auto", padding: "0 20px" }}>
         <div style={{ background: PAPER_MID, border: `2px solid ${PAPER_DK}`, borderRadius: 8, padding: "32px 28px", textAlign: "center" }}>
           <div style={{ fontSize: 42, marginBottom: 12 }}>🔐</div>
           <div style={{ fontSize: 18, fontWeight: 900, color: INK, textTransform: "uppercase", letterSpacing: 2, marginBottom: 10 }}>Provider Sign In</div>
           <div style={{ fontSize: 13, color: INK_FADE, fontStyle: "italic", marginBottom: 24, lineHeight: 1.7 }}>
-            Sign in with the email address you used to register your business with V-Hub. If you were added by our team, use that same email to access your dashboard.
+            Sign in with the email and password you created when you set up your account.
           </div>
-          <a href="/login?redirect=/ProviderDashboard">
+
+          {/* Primary: Sign In */}
+          <a href="/login?redirect=/ProviderDashboard" style={{ textDecoration: "none" }}>
             <button style={{
               background: `linear-gradient(180deg,#9A6030,${BROWN_BTN} 60%,#5A3010)`,
               color: PAPER, border: `3px solid ${YELLOW}`,
               boxShadow: `0 0 0 1.5px ${YELLOW}, 0 0 10px 2px rgba(255,220,0,0.25)`,
               borderRadius: 6, padding: "14px 40px", fontSize: 14, fontWeight: 900, cursor: "pointer",
               fontFamily: "'Times New Roman', serif", letterSpacing: 2, textTransform: "uppercase", width: "100%",
+              marginBottom: 14,
             }}>
               Sign In to My Dashboard →
             </button>
           </a>
-          <div style={{ marginTop: 20, fontSize: 12, color: INK_FADE, fontStyle: "italic" }}>
-            New provider?{" "}
-            <a href="/ListService" style={{ color: BROWN_BTN, fontWeight: 700 }}>List your business here</a>
+
+          {/* Divider */}
+          <div style={{ display: "flex", alignItems: "center", gap: 10, margin: "6px 0 16px" }}>
+            <div style={{ flex: 1, height: 1, background: PAPER_DK }} />
+            <span style={{ fontSize: 11, color: INK_FADE, textTransform: "uppercase", letterSpacing: 1 }}>First time signing in?</span>
+            <div style={{ flex: 1, height: 1, background: PAPER_DK }} />
           </div>
+
+          {/* Secondary: Create Account */}
+          <div style={{ fontSize: 13, color: INK_FADE, marginBottom: 14, lineHeight: 1.7 }}>
+            If you were added to V-Hub by our team, or if you've never signed in before, you'll need to create a password for your account first.
+          </div>
+          <a href="/register?redirect=/ProviderDashboard" style={{ textDecoration: "none" }}>
+            <button style={{
+              background: "transparent",
+              color: BROWN_BTN, border: `2px solid ${BROWN_BTN}`,
+              borderRadius: 6, padding: "12px 40px", fontSize: 13, fontWeight: 900, cursor: "pointer",
+              fontFamily: "'Times New Roman', serif", letterSpacing: 1, textTransform: "uppercase", width: "100%",
+            }}>
+              Create My Account →
+            </button>
+          </a>
+
+          {/* Footer note */}
+          <div style={{ marginTop: 24, paddingTop: 16, borderTop: `1px solid ${PAPER_DK}`, fontSize: 12, color: INK_FADE, fontStyle: "italic" }}>
+            Not listed yet?{" "}
+            <a href="/ListService" style={{ color: BROWN_BTN, fontWeight: 700 }}>List your business here →</a>
+          </div>
+        </div>
+
+        {/* Help text */}
+        <div style={{ textAlign: "center", marginTop: 16, fontSize: 12, color: INK_FADE, fontStyle: "italic" }}>
+          Need help accessing your account?{" "}
+          <a href="mailto:admin@v-hub.us" style={{ color: BROWN_BTN, fontWeight: 700 }}>Contact admin@v-hub.us</a>
         </div>
       </div>
     </div>
   );
 
-  // Authenticated but no provider record found
   if (authState === "authenticated" && providerState === "not_found") return (
     <div style={{ minHeight: "100vh", background: PAPER, fontFamily: "'Times New Roman', serif" }}>
       <div style={{ background: INK, padding: "10px 20px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
