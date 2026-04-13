@@ -194,7 +194,7 @@ function ProvidersTab({ providers, setProviders, catMap, svcMap, areaMap, fullSv
       trialEnd.setDate(trialEnd.getDate() + 45);
       const trialStartStr = now.toISOString().split('T')[0];
       const trialEndStr = trialEnd.toISOString().split('T')[0];
-      const res = await fetch("https://v-hub-app-edf7f8e8.base44.app/functions/approveProvider", {
+      const res = await fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/approveProvider", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -233,7 +233,7 @@ You can resend manually from the Email button.`);
   };
 
   const adminUpdate = async (id, fields) => {
-    const res = await fetch(`https://v-hub-app-edf7f8e8.base44.app/functions/adminUpdateProvider`, {
+    const res = await fetch(`https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/adminUpdateProvider`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ pin: adminPin, id, fields }),
@@ -254,7 +254,7 @@ You can resend manually from the Email button.`);
   };
 
   const adminDelete = async (id) => {
-    const res = await fetch(`https://v-hub-app-edf7f8e8.base44.app/functions/adminUpdateProvider`, {
+    const res = await fetch(`https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/adminUpdateProvider`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ pin: adminPin, id, delete: true }),
@@ -672,7 +672,7 @@ function ReviewsTab({ reviews, setReviews, providers, adminPin }) {
   const provMap = {}; providers.forEach(p => { provMap[p.id] = p.business_name; });
   const shown = reviews.filter(r => filter === "all" ? true : filter === "pending" ? !r.is_approved : r.is_approved);
   const approve = async (r) => {
-    await fetch(`https://v-hub-app-edf7f8e8.base44.app/functions/adminUpdateReview`, {
+    await fetch(`https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/adminUpdateReview`, {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ pin: adminPin, id: r.id, fields: { is_approved: true } }),
     });
@@ -680,7 +680,7 @@ function ReviewsTab({ reviews, setReviews, providers, adminPin }) {
   };
   const remove = async (r) => {
     if (!window.confirm("Delete?")) return;
-    await fetch(`https://v-hub-app-edf7f8e8.base44.app/functions/adminUpdateReview`, {
+    await fetch(`https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/adminUpdateReview`, {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ pin: adminPin, id: r.id, delete: true }),
     });
@@ -863,7 +863,7 @@ function AddProviderTab({ onAdded, categories, services: allServices, serviceAre
     setSaving(true);
     try {
       // Use addProviderByAdmin — handles VH# dedup, temp password, and welcome email
-      const res = await fetch(`https://v-hub-app-edf7f8e8.base44.app/functions/addProviderByAdmin`, {
+      const res = await fetch(`https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/addProviderByAdmin`, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           pin: adminPin,
@@ -1032,7 +1032,7 @@ function Dashboard({ adminPin }) {
     setLoading(true);
     try {
       // Use backend function with service role to bypass RLS (PIN-gate has no auth context)
-      const res = await fetch(`https://v-hub-app-edf7f8e8.base44.app/functions/getAdminData`, {
+      const res = await fetch(`https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/getAdminData`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ pin: adminPin }),

@@ -773,7 +773,7 @@ export default function ProviderDashboard() {
     setPaymentLoading(true);
     setPaymentError("");
     try {
-      const res = await fetch("https://v-hub-app-edf7f8e8.base44.app/functions/createCheckoutSession", {
+      const res = await fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/createCheckoutSession", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -803,7 +803,7 @@ export default function ProviderDashboard() {
     }
     setCancelLoading(true);
     try {
-      const res = await fetch("https://v-hub-app-edf7f8e8.base44.app/functions/cancelSubscription", {
+      const res = await fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/cancelSubscription", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ stripe_subscription_id: provider.stripe_subscription_id, provider_record_id: provider.id }),

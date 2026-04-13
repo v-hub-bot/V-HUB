@@ -974,7 +974,7 @@ export default function Home() {
     let ENTITY_SVC_MAP = {};   // real Service entity ID -> service name
     try {
       const [provResp, areaEntities, svcEntities] = await Promise.all([
-        fetch('https://v-hub-app-edf7f8e8.base44.app/functions/getProviders', { method: 'POST', headers: { 'Content-Type': 'application/json' } }),
+        fetch('https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/getProviders', { method: 'POST', headers: { 'Content-Type': 'application/json' } }),
         ServiceArea.list().catch(() => []),
         Service.list().catch(() => []),
       ]);
