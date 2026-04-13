@@ -139,13 +139,13 @@ function Overview({ providers, reviews, leads }) {
 }
 
 // ── PROVIDERS TAB ─────────────────────────────────────────────────────────────
-function ProvidersTab({ providers, setProviders, catMap, svcMap, areaMap }) {
+function ProvidersTab({ providers, setProviders, catMap, svcMap, areaMap, fullSvcMap, fullAreaMap }) {
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("all");
   const [expanded, setExpanded] = useState(null);
 
   // Resolve a value that might be an ID or text
-  const resolveName = (val, map) => map[val] || val;
+  const resolveName = (val, map) => (fullSvcMap[val] || fullAreaMap[val] || map[val] || val);
 
   const filtered = providers.filter(p => {
     const q = search.toLowerCase();
@@ -454,7 +454,7 @@ function LeadsTab({ leads, providers }) {
 }
 
 // ── ANALYTICS TAB ─────────────────────────────────────────────────────────────
-function AnalyticsTab({ providers, reviews, leads, stats, catMap, svcMap }) {
+function AnalyticsTab({ providers, reviews, leads, stats, catMap, svcMap, fullSvcMap }) {
   const paid = providers.filter(p => ["active", "paid"].includes(p.subscription_status)).length;
   const trial = providers.filter(p => p.subscription_status === "trial").length;
   const byMonth = {};
@@ -462,7 +462,7 @@ function AnalyticsTab({ providers, reviews, leads, stats, catMap, svcMap }) {
   const months = Object.entries(byMonth).sort((a, b) => a[0].localeCompare(b[0]));
   const maxM = Math.max(...months.map(m => m[1]), 1);
   const subMap2 = {}; providers.forEach(p => { const s = p.subscription_status || "unknown"; subMap2[s] = (subMap2[s] || 0) + 1; });
-  const svcCount = {}; providers.forEach(p => (Array.isArray(p.services) ? p.services : []).forEach(s => { const n = svcMap[s] || s; svcCount[n] = (svcCount[n] || 0) + 1; }));
+  const svcCount = {}; providers.forEach(p => (Array.isArray(p.services) ? p.services : []).forEach(s => { const n = fullSvcMap[s] || svcMap[s] || s; svcCount[n] = (svcCount[n] || 0) + 1; }));
   const topSvcs = Object.entries(svcCount).sort((a, b) => b[1] - a[1]).slice(0, 10);
   const maxS = Math.max(...topSvcs.map(s => s[1]), 1);
   const avgRating = reviews.length > 0 ? (reviews.reduce((s, r) => s + (r.rating || 0), 0) / reviews.length).toFixed(1) : "—";
@@ -543,7 +543,9 @@ function AnalyticsTab({ providers, reviews, leads, stats, catMap, svcMap }) {
 }
 
 // ── ADD PROVIDER TAB ──────────────────────────────────────────────────────────
-function AddProviderTab({ onAdded, categories, services, serviceAreas }) {
+function AddProviderTab({ onAdded, categories, services: allServices, serviceAreas: allAreas }) {
+  const services = allServices.filter(s => s.is_active !== false);
+  const serviceAreas = allAreas.filter(a => a.is_active !== false);
   const empty = { business_name: "", owner_name: "", email: "", phone: "", website: "", description: "", address: "", license_number: "", years_in_business: "", google_review_url: "", notes: "", subscription_status: "trial", subscription_tier: "basic", onboarding_type: "admin_added", is_active: true, is_visible: true, category_id: "", services: [], service_areas: [] };
   const [form, setForm] = useState(empty);
   const [saving, setSaving] = useState(false);
@@ -726,18 +728,27 @@ function Dashboard() {
       setLeads(Array.isArray(l) ? l : []);
       setStats(Array.isArray(s) ? s : []);
       setCategories(Array.isArray(cats) ? cats.filter(c => c.is_active) : []);
-      setServices(Array.isArray(svcs) ? svcs.filter(s => s.is_active) : []);
-      setServiceAreas(Array.isArray(areas) ? areas.filter(a => a.is_active) : []);
+      // Load ALL services & areas so lookup maps resolve IDs even if later deactivated
+      setServices(Array.isArray(svcs) ? svcs : []);
+      setServiceAreas(Array.isArray(areas) ? areas : []);
     } catch (e) { console.error(e); }
     setLoading(false);
   };
 
   useEffect(() => { load(); }, []);
 
-  // Build lookup maps: id → name
+  // Build lookup maps: id → name (entity IDs)
   const catMap = {}; categories.forEach(c => { catMap[c.id] = c.name; });
   const svcMap = {}; services.forEach(s => { svcMap[s.id] = s.name; });
   const areaMap = {}; serviceAreas.forEach(a => { areaMap[a.id] = a.name; });
+
+  // Legacy short-code maps for providers created before entity migration
+  const LEGACY_SVC_MAP = {"s01":"Home Improvements","s02":"General Repairs","s03":"Cleaning Services (Home & Pool)","s04":"Painting (Interior/Exterior)","s05":"Garage Door Services","s06":"Window Installation/Repair","s07":"HVAC","s08":"Plumbing","s09":"Roofing","s10":"Handyman Services","s11":"Security & Home Watch","s12":"Pest Control","s13":"Appliance Repair","s14":"Electrical & Lighting","s15":"Flooring (Tile, Wood, Carpet)","s16":"Home Organization","s17":"Smart Home Installation","s18":"Pool & Spa Services","s19":"Lawn Mowing","s20":"Sod Installation","s21":"Tree Trimming & Pruning/Removal","s22":"Lawn Fertilization","s23":"Irrigation/Sprinkler Services","s24":"Landscaping","s25":"Hardscaping","s26":"Pressure Washing","s27":"Driveway Repair/Cleaning/Painting","s28":"Rentals","s29":"Repairs","s30":"Detailing","s31":"Lighting Upgrades","s32":"Improvements/Customizations","s33":"Battery Replacement","s34":"Tire Services","s35":"Auto Repairs","s36":"Auto Detailing","s37":"Oil Changes","s38":"Tire Services","s39":"Mobile Mechanic","s40":"Hair Stylists","s41":"Nail Technicians","s42":"Spa Services","s43":"Home Health Aides","s44":"Massage Therapists","s45":"Personal Trainers","s46":"Makeup Artists","s47":"Veterinary Services","s48":"Grooming","s49":"Pet Sitting/Walking","s50":"Pet Training","s51":"Mobile Grooming","s52":"Medical Transport","s53":"Airport Transport","s54":"Local Rides","s55":"Errand Services","s56":"Courier/Delivery Services","s57":"Accounting & Bookkeeping","s58":"Notary Services","s59":"IT Support","s60":"Legal Services","s61":"Business Consulting","s62":"Tax Preparation"};
+  const LEGACY_AREA_MAP = {"va001":"Alhambra","va002":"Amelia","va003":"Ashland","va004":"Belle Aire","va005":"Belvedere","va006":"Bonita","va007":"Bonnybrook","va008":"Bradford","va009":"Briar Meadow","va010":"Bridgeport at Creekside Landing","va011":"Bridgeport at Lake Miona","va012":"Bridgeport at Lake Sumter","va013":"Bridgeport at Laurel Valley","va014":"Bridgeport at Miona Shores","va015":"Bridgeport at Mission Hills","va016":"Buttonwood","va017":"Calumet Grove","va018":"Caroline","va019":"Cason Hammock","va020":"Charlotte","va021":"Chatham","va022":"Chitty Chatty","va023":"Citrus Grove","va024":"Collier","va025":"Collier at Alden Bungalows","va026":"Collier at Antrim Dells","va027":"Country Club Hills","va028":"Dabney","va029":"De Allende","va030":"De La Vista","va031":"Del Mar","va032":"DeLuna","va033":"DeSoto","va034":"Dunedin","va035":"Duval","va036":"El Cortez","va037":"Fenney","va038":"Fernandina","va039":"Gilchrist","va040":"Glenbrook","va041":"Hacienda","va042":"Haciendas of Mission Hills","va043":"Hadley","va044":"Hammock at Fenney","va045":"Hawkins","va046":"Hemingway","va047":"Hillsborough","va048":"La Reynalda","va049":"La Zamora","va050":"LaBelle","va051":"Lake Deaton","va052":"Lake Denham","va053":"Lakeshore Cottages","va054":"Largo","va055":"Liberty Park","va056":"Linden","va057":"Lynnhaven","va058":"Mallory Square","va059":"Marsh Bend","va060":"McClure","va061":"Mira Mesa","va062":"Monarch Grove","va063":"Newell","va064":"Orange Blossom Gardens","va065":"Osceola Hills","va066":"Osceola Hills at Soaring Eagle Preserve","va067":"Palo Alto","va068":"Pennecamp","va069":"Piedmont","va070":"Pine Hills","va071":"Pine Ridge","va072":"Pinellas","va073":"Poinciana","va074":"Polo Ridge","va075":"Richmond","va076":"Rio Grande","va077":"Rio Ponderosa","va078":"Rio Ranchero","va079":"Sabal Chase","va080":"Sanibel","va081":"Santiago","va082":"Santo Domingo","va083":"Silver Lake","va084":"Springdale","va085":"St. Catherine","va086":"St. Charles","va087":"St. James","va088":"St. Johns","va089":"Summerhill","va090":"Sunset Pointe","va091":"Tall Trees","va092":"Tamarind Grove","va093":"Tierra Del Sol","va094":"Valle Verde","va095":"Virginia Trace","va096":"Winifred","va097":"Woodbury"};
+
+  // Merged maps: entity IDs take priority, legacy codes fill the gaps
+  const fullSvcMap = { ...LEGACY_SVC_MAP, ...svcMap };
+  const fullAreaMap = { ...LEGACY_AREA_MAP, ...areaMap };
 
   const pendingReviews = reviews.filter(r => !r.is_approved);
   const TABS = ["Overview", "Providers", "Reviews", "Leads", "Analytics", "Add Provider"];
@@ -776,10 +787,10 @@ function Dashboard() {
 
       <div style={{ padding: 14, maxWidth: 800, margin: "0 auto" }}>
         {tab === "Overview" && <Overview providers={providers} reviews={reviews} leads={leads} />}
-        {tab === "Providers" && <ProvidersTab providers={providers} setProviders={setProviders} catMap={catMap} svcMap={svcMap} areaMap={areaMap} />}
+        {tab === "Providers" && <ProvidersTab providers={providers} setProviders={setProviders} catMap={catMap} svcMap={svcMap} areaMap={areaMap} fullSvcMap={fullSvcMap} fullAreaMap={fullAreaMap} />}
         {tab === "Reviews" && <ReviewsTab reviews={reviews} setReviews={setReviews} providers={providers} />}
         {tab === "Leads" && <LeadsTab leads={leads} providers={providers} />}
-        {tab === "Analytics" && <AnalyticsTab providers={providers} reviews={reviews} leads={leads} stats={stats} catMap={catMap} svcMap={svcMap} />}
+        {tab === "Analytics" && <AnalyticsTab providers={providers} reviews={reviews} leads={leads} stats={stats} catMap={catMap} svcMap={svcMap} fullSvcMap={fullSvcMap} />}
         {tab === "Add Provider" && <AddProviderTab onAdded={p => { setProviders(prev => [p, ...prev]); setTab("Providers"); }} categories={categories} services={services} serviceAreas={serviceAreas} />}
       </div>
     </div>
