@@ -712,7 +712,8 @@ function SearchBox({ cats, svcs, areas, onSearch, selSvc, setSelSvc, selArea, se
         <a href="/ListService" style={{ textDecoration: "none", flex: 1 }}>
           <button style={{
             width: "100%", background: `linear-gradient(180deg,#9A6030,${BROWN_BTN} 60%,#5A3010)`,
-            border: `3px solid ${BROWN_BTN}`,
+            border: `3px solid ${YELLOW}`,
+            boxShadow: `0 0 0 1.5px ${YELLOW}, 0 0 10px 2px rgba(255,220,0,0.3)`,
             borderRadius: 5, color: "#F5E8CC", fontFamily: "'Times New Roman', serif",
             fontWeight: 700, fontSize: 11, letterSpacing: 1.5, padding: "12px 6px", cursor: "pointer", boxSizing: "border-box",
             textTransform: "uppercase", lineHeight: 1.3,
