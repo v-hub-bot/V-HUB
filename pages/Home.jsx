@@ -973,17 +973,74 @@ export default function Home() {
       all = data.providers || [];
     } catch(e) { all = []; }
 
-    // Match providers by village name (case-insensitive) or "all villages"
-      const areaMatch = !selArea || (() => {
-        const village = selArea.name.toLowerCase();
-        const provAreas = (p.service_areas || []);
-        return provAreas.some(a => {
-          const aLow = String(a).toLowerCase();
-          return aLow === "all" || aLow === "all villages" || aLow.includes(village) || village.includes(aLow);
-        });
+    // ── Legacy ID lookup maps ──────────────────────────────────────────────
+    const LEGACY_VA = {"va001":"Alhambra","va002":"Amelia","va003":"Ashland","va004":"Belle Aire","va005":"Belvedere","va006":"Bonita","va007":"Bonnybrook","va008":"Bradford","va009":"Briar Meadow","va010":"Bridgeport at Creekside Landing","va011":"Bridgeport at Lake Miona","va012":"Bridgeport at Lake Sumter","va013":"Bridgeport at Laurel Valley","va014":"Bridgeport at Miona Shores","va015":"Bridgeport at Mission Hills","va016":"Buttonwood","va017":"Calumet Grove","va018":"Caroline","va019":"Cason Hammock","va020":"Charlotte","va021":"Chatham","va022":"Chitty Chatty","va023":"Citrus Grove","va024":"Collier","va025":"Collier at Alden Bungalows","va026":"Collier at Antrim Dells","va027":"Country Club Hills","va028":"Dabney","va029":"De Allende","va030":"De La Vista","va031":"Del Mar","va032":"DeLuna","va033":"DeSoto","va034":"Dunedin","va035":"Duval","va036":"El Cortez","va037":"Fenney","va038":"Fernandina","va039":"Gilchrist","va040":"Glenbrook","va041":"Hacienda","va042":"Haciendas of Mission Hills","va043":"Hadley","va044":"Hammock at Fenney","va045":"Hawkins","va046":"Hemingway","va047":"Hillsborough","va048":"La Reynalda","va049":"La Zamora","va050":"LaBelle","va051":"Lake Deaton","va052":"Lake Denham","va053":"Lakeshore Cottages","va054":"Largo","va055":"Liberty Park","va056":"Linden","va057":"Lynnhaven","va058":"Mallory Square","va059":"Marsh Bend","va060":"McClure","va061":"Mira Mesa","va062":"Monarch Grove","va063":"Newell","va064":"Orange Blossom Gardens","va065":"Osceola Hills","va066":"Osceola Hills at Soaring Eagle Preserve","va067":"Palo Alto","va068":"Pennecamp","va069":"Piedmont","va070":"Pine Hills","va071":"Pine Ridge","va072":"Pinellas","va073":"Poinciana","va074":"Polo Ridge","va075":"Richmond","va076":"Rio Grande","va077":"Rio Ponderosa","va078":"Rio Ranchero","va079":"Sabal Chase","va080":"Sanibel","va081":"Santiago","va082":"Santo Domingo","va083":"Silver Lake","va084":"Springdale","va085":"St. Catherine","va086":"St. Charles","va087":"St. James","va088":"St. Johns","va089":"Summerhill","va090":"Sunset Pointe","va091":"Tall Trees","va092":"Tamarind Grove","va093":"Tierra Del Sol","va094":"Valle Verde","va095":"Virginia Trace","va096":"Winifred","va097":"Woodbury"};
+    const LEGACY_SVC_MAP = {"s01":"Home Improvements","s02":"General Repairs","s03":"Cleaning Services","s04":"Painting (Interior/Exterior)","s05":"Garage Door Services","s06":"Window Installation/Repair","s07":"HVAC","s08":"Plumbing","s09":"Roofing","s10":"Handyman Services","s11":"Security & Home Watch","s12":"Pest Control","s13":"Appliance Repair","s14":"Electrical & Lighting","s15":"Flooring (Tile, Wood, Carpet)","s16":"Home Organization","s17":"Smart Home Installation","s18":"Pool & Spa Services","s19":"Lawn Mowing","s20":"Sod Installation","s21":"Tree Trimming & Pruning/Removal","s22":"Lawn Fertilization","s23":"Irrigation/Sprinkler Services","s24":"Landscaping","s25":"Hardscaping","s26":"Pressure Washing","s27":"Driveway Repair/Cleaning/Painting","s28":"Rentals","s29":"Repairs","s30":"Detailing","s31":"Lighting Upgrades","s32":"Improvements/Customizations","s33":"Battery Replacement","s34":"Tire Services","s35":"Auto Repairs","s36":"Auto Detailing","s37":"Oil Changes","s38":"Tire Services","s39":"Mobile Mechanic","s40":"Hair Stylists","s41":"Nail Technicians","s42":"Spa Services","s43":"Home Health Aides","s44":"Massage Therapists","s45":"Personal Trainers","s46":"Makeup Artists","s47":"Veterinary Services","s48":"Grooming","s49":"Pet Sitting/Walking","s50":"Pet Training","s51":"Mobile Grooming","s52":"Medical Transport","s53":"Airport Transport","s54":"Local Rides","s55":"Errand Services","s56":"Courier/Delivery Services","s57":"Accounting & Bookkeeping","s58":"Notary Services","s59":"IT Support","s60":"Legal Services","s61":"Business Consulting","s62":"Tax Preparation","s63":"Home Watch","s64":"Pool & Spa Services","s65":"Vehicle Transport"};
+    // Macro entity ID → group name (for old test providers)
+    const MACRO_AREA = {"69d06c4a4f1e1017a77a7018":"historic","69d06c4a4f1e1017a77a7019":"established","69d06c4a4f1e1017a77a701a":"newer","69d06c4a4f1e1017a77a701b":"eastport","69d06c4a4f1e1017a77a701c":"family"};
+
+    // Resolve a provider area value to a lowercase name string
+    const resolveAreaName = (a) => {
+      const s = String(a).toLowerCase().trim();
+      if (LEGACY_VA[s]) return LEGACY_VA[s].toLowerCase();
+      if (MACRO_AREA[a]) return MACRO_AREA[a]; // "historic", "established", etc.
+      // Entity ID from new 64-village list — we check by name inclusion later
+      return s; // raw value (may be entity ID or plain text)
+    };
+
+    // Check if a provider area value matches the selected village name
+    const areaValMatchesVillage = (aVal, villageName) => {
+      const vl = villageName.toLowerCase();
+      const resolved = resolveAreaName(aVal);
+      if (resolved === vl) return true;
+      if (resolved.includes(vl) || vl.includes(resolved)) return true;
+      // For macro text codes: "historic"/"established"/"newer"/"eastport"/"family" — always show
+      const macroGroups = ["historic", "established", "newer", "eastport", "family", "all", "all villages"];
+      if (macroGroups.includes(resolved)) return true;
+      return false;
+    };
+
+    const out = all.filter(p => {
+      // Only show active + visible providers
+      if (!p.is_active || p.is_visible === false) return false;
+
+      // ── Service match ────────────────────────────────────────────────────
+      const svcMatch = !selSvc || (() => {
+        const provSvcs = Array.isArray(p.services) ? p.services : [];
+        const provCatId = p.category_id || "";
+        if (selSvc._isCat) {
+          // Category-level selection: match if provider's category matches
+          if (provCatId === selSvc.id) return true;
+          // Also match if any of provider's services belong to that category
+          const catSvcIds = SVCS_STATIC.filter(s => s.category_id === selSvc.id).map(s => s.id);
+          if (provSvcs.some(sid => catSvcIds.includes(sid))) return true;
+          // Text-based services (old providers): check if service name matches category
+          const catSvcNames = SVCS_STATIC.filter(s => s.category_id === selSvc.id).map(s => s.name.toLowerCase());
+          if (provSvcs.some(sv => catSvcNames.some(cn => String(sv).toLowerCase().includes(cn) || cn.includes(String(sv).toLowerCase())))) return true;
+          return false;
+        } else {
+          // Specific service selected
+          if (provSvcs.includes(selSvc.id)) return true;
+          // Try resolving provider service IDs to names and compare
+          const selName = selSvc.name.toLowerCase();
+          if (provSvcs.some(sv => {
+            const resolved = LEGACY_SVC_MAP[sv] || String(sv);
+            return resolved.toLowerCase().includes(selName) || selName.includes(resolved.toLowerCase());
+          })) return true;
+          return false;
+        }
       })();
-      return areaMatch && svcMatch;
+
+      // ── Area match ───────────────────────────────────────────────────────
+      const areaMatch = !selArea || (() => {
+        const villageName = selArea.name.toLowerCase();
+        const provAreas = Array.isArray(p.service_areas) ? p.service_areas : [];
+        return provAreas.some(a => areaValMatchesVillage(a, villageName));
+      })();
+
+      return svcMatch && areaMatch;
     });
+
     // Fetch approved V-Hub reviews for matched providers and sort by rating
     const ids = out.map(p => p.id);
     let reviewMap = {};
