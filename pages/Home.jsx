@@ -61,7 +61,7 @@ const NEWSPAPER_CONTENT = {
     subhead: "Established providers bring decades of expertise to your door",
     body: [
       "Many of The Villages' most beloved service providers have called this community home for over a decade. From family-owned landscaping operations to licensed electricians who know every neighborhood street by name, local expertise makes all the difference.",
-      "V-Hub's verified directory ensures every listing meets the community's high standards. Browse by home repair, landscaping, pet care, tech help, cleaning, transportation, and more — contact providers directly, no fees, no middlemen.",
+      "V-Hub reviews every listing before it goes live. Browse by home repair, landscaping, pet care, tech help, cleaning, transportation, and more — contact providers directly, no fees, no middlemen.",
     ]
   },
   howItWorks: {
@@ -100,9 +100,9 @@ const NEWSPAPER_CONTENT = {
   },
   safetyTrust: {
     headline: "YOUR SAFETY, OUR PRIORITY",
-    subhead: "V-Hub verifies every provider before they appear in results",
+    subhead: "Every listing is reviewed by our team before going live",
     body: [
-      "Every business listed on V-Hub goes through a review process before appearing in search results. We check licensing where applicable, verify service areas, and monitor resident feedback to ensure quality stays high.",
+      "Every business listed on V-Hub is reviewed by our team before appearing in search results. License numbers are self-reported by providers. We monitor resident feedback to ensure quality stays high.",
       "Residents are encouraged to leave honest reviews after working with any provider. Your feedback helps your neighbors make better decisions — and keeps the directory trustworthy for the whole community.",
       "If you ever have a concern about a listed provider, contact us directly at admin@v-hub.us — our team reviews every submission and acts quickly to protect the community's standards.",
     ]
@@ -585,8 +585,11 @@ function Results({ results, areas, cats, svcs, onReset, onSel, selArea, selCatId
         {/* ── ADS ── */}
         <div style={{ padding: "4px 16px 24px" }}>
           {results.length === 0 ? (
-            <div style={{ textAlign: "center", padding: "60px 20px", color: INK_FADE, fontSize: 14, fontStyle: "italic" }}>
-              No providers found for this search.<br />Try a different village or service.
+            <div style={{ textAlign: "center", padding: "48px 20px" }}>
+              <div style={{ fontSize: 28, marginBottom: 10 }}>🔍</div>
+              <div style={{ fontSize: 15, fontWeight: 700, color: INK, fontFamily: "'Times New Roman', serif", marginBottom: 6 }}>No providers found for this search</div>
+              <div style={{ fontSize: 13, color: INK_FADE, fontStyle: "italic", marginBottom: 14 }}>Try selecting a different village, a broader service category, or clear your filters and search again.</div>
+              <div style={{ fontSize: 12, color: INK_FADE }}>Know a local provider who should be listed? Have them visit <a href="/ListService" style={{ color: BROWN_BTN, fontWeight: 700 }}>List Your Service</a>.</div>
             </div>
           ) : results.map((p, i) => <ClassifiedAd key={p.id || i} p={p} onSel={onSel} svcs={svcs} />)}
         </div>
@@ -1340,7 +1343,7 @@ export default function Home() {
             <div>
               <div style={{ fontSize: 11, fontWeight: 900, color: INK, letterSpacing: 2, textTransform: "uppercase", borderBottom: `1px solid ${INK}`, paddingBottom: 4, marginBottom: 8 }}>Contact</div>
               <div style={{ fontSize: 11, color: INK, lineHeight: 1.7, fontFamily: "'Times New Roman', serif" }}>
-                <div>✉️ <a href="mailto:info@v-hub.us" style={{ color: INK }}>info@v-hub.us</a></div>
+                <div>✉️ <a href="mailto:admin@v-hub.us" style={{ color: INK }}>admin@v-hub.us</a></div>
                 <div>📍 The Villages, Florida</div>
               </div>
             </div>

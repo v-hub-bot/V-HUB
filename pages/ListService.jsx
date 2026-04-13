@@ -116,14 +116,14 @@ const MACRO_AREAS = [
 
 // ── Sidebar stories ────────────────────────────────────────────────────────
 const LEFT_STORIES = [
-  { head: "The Villages' Newest Search Engine Has Arrived", sub: "Local providers get found like never before", body: "V-Hub launched quietly last spring and has already become the go-to resource for residents hunting trusted local professionals. Unlike national platforms, every listing on V-Hub is specific to The Villages — no out-of-area results, no confusion, no middleman." },
+  { head: "Built Exclusively for The Villages", sub: "Local providers, local residents — no middleman", body: "V-Hub is the only directory built specifically for The Villages, FL. Unlike national platforms, every listing is geo-specific — no out-of-area results, no confusion. Residents search V-Hub to find real local professionals in their own neighborhood." },
   { head: "Why Local Discovery Matters", sub: "Neighbors trust neighbors", body: "Residents here value personal recommendations above all else. V-Hub replicates that word-of-mouth trust digitally — every provider is vetted, every listing is geo-specific, and every search leads directly to a real person in the community." },
   { head: "A Directory Built for Seniors", sub: "Simple. Fast. No apps required.", body: "Forget complicated apps or confusing websites. V-Hub is designed to be used on any device — phone, tablet, or computer — with large text, clear layouts, and no technical know-how required. Just search and call." },
 ];
 
 const RIGHT_STORIES = [
-  { head: "Your Listing Pays for Itself", sub: "Providers see new calls within days", body: "Businesses listed on V-Hub connect directly with residents at no commission. With direct contact and zero middlemen, your listing cost is recovered the moment your first job is booked." },
-  { head: "Be Seen Where Your Customers Are Looking", sub: "Residents search V-Hub first", body: "Villages residents prefer a local, community-focused directory over national search engines when looking for home services. Your V-Hub profile puts you exactly where that search is happening." },
+  { head: "Direct Connections, No Commission", sub: "Residents contact you directly — we never take a cut", body: "V-Hub connects residents directly with you — no booking fees, no commissions, no middlemen. Your contact info is right on your listing. When a resident reaches out, the conversation is entirely between you and them." },
+  { head: "Be Seen Where Your Customers Are Looking", sub: "A community-focused alternative to national search engines", body: "V-Hub is designed specifically for The Villages — a local, community-focused directory for residents who want to hire local. Your profile puts you in front of neighbors actively looking for the services you provide." },
   { head: "Building Community Through Commerce", sub: "Strong businesses make stronger neighborhoods", body: "V-Hub is not just a directory — it's an investment in The Villages community. When residents hire local, money stays local. Businesses grow. Neighborhoods thrive. Your listing is a step toward that stronger community." },
 ];
 
@@ -884,7 +884,7 @@ export default function ListService() {
 
           {/* ── Mobile success story strip ── */}
           <div style={{ background: PAPER_MID, border: `1.5px solid ${PAPER_DK}`, borderRadius: 8, padding: "16px 16px", marginBottom: 28 }}>
-            <div style={{ fontSize: 11, fontWeight: 900, color: INK, textTransform: "uppercase", letterSpacing: 2, marginBottom: 12, borderBottom: `2px solid ${INK}`, paddingBottom: 5 }}>Provider Success Stories</div>
+            <div style={{ fontSize: 11, fontWeight: 900, color: INK, textTransform: "uppercase", letterSpacing: 2, marginBottom: 12, borderBottom: `2px solid ${INK}`, paddingBottom: 5 }}>Why List on V-Hub?</div>
             <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
               {RIGHT_STORIES.map((s, i) => <Story key={i} {...s} isMobile={true} />)}
             </div>
@@ -1232,7 +1232,7 @@ export default function ListService() {
 
         {/* RIGHT SIDEBAR */}
         <div style={{ padding: "22px 20px 20px 18px" }}>
-          <div style={{ fontSize: 11, fontWeight: 900, letterSpacing: 3, textTransform: "uppercase", color: INK, borderBottom: `2px solid ${INK}`, paddingBottom: 4, marginBottom: 10, textAlign: "center" }}>Provider Success Stories</div>
+          <div style={{ fontSize: 11, fontWeight: 900, letterSpacing: 3, textTransform: "uppercase", color: INK, borderBottom: `2px solid ${INK}`, paddingBottom: 4, marginBottom: 10, textAlign: "center" }}>Why List on V-Hub?</div>
           {RIGHT_STORIES.map((s, i) => (
             <div key={i} style={{ marginBottom: 20, paddingBottom: 16, borderBottom: `1px solid ${PAPER_DK}` }}>
               <div style={{ fontSize: 13, fontWeight: 900, color: INK, lineHeight: 1.3, marginBottom: 2 }}>{s.head}</div>

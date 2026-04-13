@@ -144,6 +144,30 @@ function StatusBanner({ provider, onUpgrade, onCancel, paymentLoading, cancelLoa
     </div>
   );
 
+  // trial_expired — set by the daily automation when trial ends
+  if (status === "trial_expired") return (
+    <div style={{ background: "#FFF3E0", border: `2px solid ${RED_RULE}`, borderRadius: 10, padding: "16px 18px", marginBottom: 20 }}>
+      <div style={{ fontWeight: 900, color: RED_RULE, fontSize: 15, fontFamily: SERIF, marginBottom: 6 }}>⚠ Your Free Trial Has Ended</div>
+      <div style={{ fontSize: 13, color: INK_FADE, fontFamily: SANS, marginBottom: 12, lineHeight: 1.6 }}>
+        Your listing is currently <strong>hidden</strong> from search results. Subscribe for $12/month to go live again.
+      </div>
+      {paymentError && <div style={{ fontSize: 12, color: RED_RULE, marginBottom: 8, fontFamily: SANS }}>{paymentError}</div>}
+      <button onClick={onUpgrade} disabled={paymentLoading} style={{ background: `linear-gradient(180deg,#9A6030,${BROWN_BTN})`, color: PAPER, border: `2px solid ${YELLOW}`, borderRadius: 6, padding: "10px 24px", fontWeight: 900, fontSize: 13, cursor: paymentLoading ? "default" : "pointer", fontFamily: SERIF, letterSpacing: 1, opacity: paymentLoading ? 0.7 : 1 }}>
+        {paymentLoading ? "Redirecting to Stripe…" : "Subscribe — $12/mo →"}
+      </button>
+    </div>
+  );
+
+  // past_due — payment failed but subscription still open
+  if (status === "past_due") return (
+    <div style={{ background: "#FFF3E0", border: "2px solid #E65100", borderRadius: 10, padding: "14px 18px", marginBottom: 20 }}>
+      <div style={{ fontWeight: 900, color: "#BF360C", fontSize: 14, fontFamily: SERIF }}>⚠ Payment Failed — Action Required</div>
+      <div style={{ fontSize: 13, color: INK_FADE, fontFamily: SANS, marginTop: 4, lineHeight: 1.6 }}>
+        Your last payment was not processed. Please update your billing info to keep your listing live. Contact us at <strong>admin@v-hub.us</strong> if you need help.
+      </div>
+    </div>
+  );
+
   return null;
 }
 
@@ -787,6 +811,10 @@ export default function ProviderDashboard() {
       const data = await res.json();
       if (data.success) {
         const cancelDate = data.cancel_at ? new Date(data.cancel_at * 1000).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" }) : "end of billing period";
+        // Update provider record so dashboard reflects cancellation immediately
+        try {
+          await Provider.update(provider.id, { notes: `Cancellation requested. Active until ${cancelDate}.` });
+        } catch (_) {}
         alert(`Your subscription has been cancelled. You will remain listed until ${cancelDate}.`);
         const fresh = await Provider.get(provider.id);
         setProvider(fresh);

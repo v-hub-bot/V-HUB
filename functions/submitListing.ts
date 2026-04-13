@@ -24,6 +24,15 @@ async function sendEmail(to: string, subject: string, htmlBody: string) {
   }
 }
 
+/** SHA-256 hash using Web Crypto API */
+async function sha256(plain: string): Promise<string> {
+  if (!plain) return '';
+  // If already a 64-char hex SHA-256, return as-is
+  if (/^[0-9a-f]{64}$/.test(plain)) return plain;
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(plain));
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
 function genVHNumber(): string {
   // VH- followed by 4 random digits
   return 'VH-' + String(Math.floor(1000 + Math.random() * 9000));
@@ -52,13 +61,16 @@ Deno.serve(async (req) => {
       area_names,     // human-readable names for email notification
       category_name,  // human-readable category for email notification
       login_email,    // provider's chosen login email
-      login_password, // provider's chosen login password
+      login_password, // provider's chosen login password (plain text — will be hashed here)
     } = body;
 
     // Validate required fields
     if (!business_name || !owner_name || !phone || !email) {
       return Response.json({ error: 'Missing required fields' }, { status: 400 });
     }
+
+    // Hash password before storing — never store plain text
+    const hashed_password = login_password ? await sha256(login_password) : '';
 
     // Generate VH number
     const vh_number = genVHNumber();
@@ -90,7 +102,7 @@ Deno.serve(async (req) => {
       profile_views:       0,
       search_appearances:  0,
       login_email:         login_email || email,
-      login_password:      login_password || "",
+      login_password:      hashed_password,
     });
 
     // ── Notify admin ────────────────────────────────────────────────────
