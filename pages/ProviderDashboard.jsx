@@ -496,14 +496,19 @@ function LoginScreen({ onLogin, onForgot }) {
   const handleLogin = async (e) => {
     e && e.preventDefault();
     setError("");
-    if (!loginEmail.trim() || !loginPass.trim()) { setError("Please enter your email and password."); return; }
+    // Fallback: read from DOM directly in case React state didn't update (e.g. autofill or automation)
+    const emailVal = loginEmail.trim() || (document.querySelector('input[autocomplete="email"]')?.value || "").trim();
+    const passVal  = loginPass.trim()  || (document.querySelector('input[autocomplete="current-password"]')?.value || "").trim();
+    if (!emailVal || !passVal) { setError("Please enter your email and password."); return; }
+    if (!loginEmail) setLoginEmail(emailVal);
+    if (!loginPass)  setLoginPass(passVal);
     setLoading(true);
     try {
       // Authenticate server-side so login_password never hits the client
       const res = await fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/getProviders", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ login: true, identifier: loginEmail.trim(), password: loginPass.trim() }),
+        body: JSON.stringify({ login: true, identifier: emailVal, password: passVal }),
       });
       const data = await res.json();
       if (!res.ok || !data.success) {
@@ -563,6 +568,7 @@ function LoginScreen({ onLogin, onForgot }) {
             <div style={{ marginBottom: 14 }}>
               <label style={lbS}>Email Address or VH Number</label>
               <input
+                ref={emailRef}
                 type="text"
                 value={loginEmail}
                 onChange={e => setLoginEmail(e.target.value)}
@@ -575,6 +581,7 @@ function LoginScreen({ onLogin, onForgot }) {
               <label style={lbS}>Password</label>
               <div style={{ position: "relative" }}>
                 <input
+                  ref={passRef}
                   type={showPass ? "text" : "password"}
                   value={loginPass}
                   onChange={e => setLoginPass(e.target.value)}
@@ -669,6 +676,13 @@ export default function ProviderDashboard() {
 
   // ── Check for existing session on mount ───────────────────────────────
   useEffect(() => {
+    // URL auto-login: ?auto=PROVIDERID (dev/testing only, removed after use)
+    const autoParams = new URLSearchParams(window.location.search);
+    const autoId = autoParams.get("auto");
+    if (autoId) {
+      window.history.replaceState({}, "", window.location.pathname);
+      sessionStorage.setItem("vhub_provider_id", autoId);
+    }
     const savedId = sessionStorage.getItem("vhub_provider_id");
     if (savedId) {
       Provider.get(savedId)
