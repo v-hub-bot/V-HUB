@@ -60,7 +60,7 @@ function Stars({ rating = 0, size = 14 }) {
 }
 
 // ── Trial / Subscription Banner ─────────────────────────────────────────
-function StatusBanner({ provider, onUpgrade, onManageBilling, paymentLoading, billingLoading, paymentError }) {
+function StatusBanner({ provider, onUpgrade, onCancel, onManageBilling, paymentLoading, cancelLoading, billingLoading, paymentError, cancelError }) {
   const status = provider.subscription_status;
   const days = daysLeft(provider.trial_end_date);
   const endFmt = fmt(provider.trial_end_date);
@@ -69,16 +69,20 @@ function StatusBanner({ provider, onUpgrade, onManageBilling, paymentLoading, bi
   if (status === "active" || status === "paid") {
     return (
       <div style={{ background: "#E8F5E9", border: "2px solid #4CAF50", borderRadius: 10, padding: "18px 20px", marginBottom: 20 }}>
-        <div style={{ fontWeight: 900, color: "#1B5E20", fontSize: 15, fontFamily: SERIF, marginBottom: 4 }}>✅ Subscription Active</div>
-        <div style={{ fontSize: 13, color: "#2E7D32", fontFamily: SANS, marginBottom: 12, lineHeight: 1.6 }}>
-          Your listing is <strong>live</strong> and visible to residents across The Villages. Your subscription renews automatically each month.
+        <div style={{ fontWeight: 900, color: "#1B5E20", fontSize: 15, fontFamily: SERIF, marginBottom: 6 }}>✅ Subscription Active</div>
+        <div style={{ fontSize: 13, color: "#2E7D32", fontFamily: SANS, marginBottom: 4, lineHeight: 1.7 }}>
+          Your listing is <strong>live</strong> and visible to residents across The Villages.
         </div>
+        <div style={{ fontSize: 13, color: "#2E7D32", fontFamily: SANS, marginBottom: 14, lineHeight: 1.7 }}>
+          Your subscription will remain active and you will be charged <strong>$12/month</strong> automatically. You can cancel at any time.
+        </div>
+        {cancelError && <div style={{ fontSize: 12, color: "#B71C1C", marginBottom: 10, fontFamily: SANS, background: "#FFEBEE", borderRadius: 6, padding: "8px 12px" }}>{cancelError}</div>}
         <button
-          onClick={onManageBilling}
-          disabled={billingLoading}
-          style={{ background: "transparent", border: "1.5px solid #2E7D32", color: "#2E7D32", borderRadius: 6, padding: "8px 18px", fontSize: 12, fontWeight: 700, cursor: billingLoading ? "default" : "pointer", fontFamily: SANS, opacity: billingLoading ? 0.6 : 1 }}
+          onClick={onCancel}
+          disabled={cancelLoading}
+          style={{ background: "transparent", border: "2px solid #C62828", color: "#C62828", borderRadius: 6, padding: "9px 20px", fontSize: 13, fontWeight: 700, cursor: cancelLoading ? "not-allowed" : "pointer", fontFamily: SANS, opacity: cancelLoading ? 0.6 : 1 }}
         >
-          {billingLoading ? "Opening Stripe…" : "Manage or Cancel Subscription →"}
+          {cancelLoading ? "Cancelling…" : "Cancel My Subscription"}
         </button>
       </div>
     );
@@ -906,6 +910,8 @@ export default function ProviderDashboard() {
   const [paymentError, setPaymentError]     = useState("");
   const [paymentSuccess, setPaymentSuccess] = useState(false);
   const [cancelSuccess, setCancelSuccess]   = useState(false);
+  const [cancelError, setCancelError]       = useState("");
+  const [cancelAccessUntil, setCancelAccessUntil] = useState("");
   const [showNewPass, setShowNewPass] = useState(false);
 
   // Review form
@@ -1197,8 +1203,27 @@ export default function ProviderDashboard() {
   };
 
   const handleCancel = async () => {
-    // Redirect to Stripe billing portal for cancellation (cleaner UX)
-    await handleManageBilling();
+    if (!window.confirm("Are you sure you want to cancel your subscription? You'll keep access until your current billing period ends.")) return;
+    setCancelLoading(true);
+    setCancelError("");
+    try {
+      const res = await fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/cancelSubscription", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ provider_id: provider.id }),
+      });
+      const data = await res.json();
+      if (!res.ok || data.error) throw new Error(data.error || "Cancellation failed");
+      // Update local provider state
+      setProvider(prev => ({ ...prev, subscription_status: "cancelled" }));
+      setCancelAccessUntil(data.access_until || "");
+      setCancelSuccess(true);
+      setTimeout(() => setCancelSuccess(false), 8000);
+    } catch (err) {
+      setCancelError(err.message || "Something went wrong. Please try again.");
+    } finally {
+      setCancelLoading(false);
+    }
   };
 
     const avgRating = reviews.length > 0
@@ -1401,16 +1426,25 @@ export default function ProviderDashboard() {
           </div>
         )}
         {cancelSuccess && (
-          <div style={{ background: "#F3F4F6", border: "2px solid #9CA3AF", borderRadius: 10, padding: "16px 18px", marginBottom: 20, display: "flex", alignItems: "center", gap: 12 }}>
-            <div style={{ fontSize: 24 }}>✅</div>
+          <div style={{
+            position: "fixed", top: 24, left: "50%", transform: "translateX(-50%)",
+            background: "#1B5E20", color: "#fff", borderRadius: 12,
+            padding: "16px 24px", zIndex: 9999, boxShadow: "0 4px 24px rgba(0,0,0,0.25)",
+            display: "flex", alignItems: "center", gap: 14, minWidth: 300, maxWidth: "90vw"
+          }}>
+            <div style={{ fontSize: 26 }}>✅</div>
             <div>
-              <div style={{ fontWeight: 900, color: "#374151", fontSize: 14, fontFamily: SERIF }}>Subscription Cancelled</div>
-              <div style={{ fontSize: 13, color: "#6B7280", fontFamily: SANS, marginTop: 3 }}>Your cancellation was processed. Your listing will remain visible until the end of your current billing period.</div>
+              <div style={{ fontWeight: 900, fontSize: 14, fontFamily: SERIF, marginBottom: 3 }}>Subscription Cancelled</div>
+              <div style={{ fontSize: 13, opacity: 0.9, fontFamily: SANS, lineHeight: 1.5 }}>
+                {cancelAccessUntil
+                  ? `Your listing stays live until ${cancelAccessUntil}. No future charges.`
+                  : "Your cancellation was processed. No future charges."}
+              </div>
             </div>
-            <button onClick={() => setCancelSuccess(false)} style={{ marginLeft: "auto", background: "transparent", border: "none", color: "#888", fontSize: 18, cursor: "pointer" }}>✕</button>
+            <button onClick={() => setCancelSuccess(false)} style={{ marginLeft: "auto", background: "transparent", border: "none", color: "rgba(255,255,255,0.7)", fontSize: 20, cursor: "pointer", lineHeight: 1 }}>✕</button>
           </div>
         )}
-        <StatusBanner provider={provider} onUpgrade={handleUpgrade} onManageBilling={handleManageBilling} paymentLoading={paymentLoading} billingLoading={billingLoading} paymentError={paymentError} />
+        <StatusBanner provider={provider} onUpgrade={handleUpgrade} onCancel={handleCancel} onManageBilling={handleManageBilling} paymentLoading={paymentLoading} cancelLoading={cancelLoading} billingLoading={billingLoading} paymentError={paymentError} cancelError={cancelError} />
 
         {/* ── ANALYTICS DASHBOARD ─────────────────────────────── */}
         <AnalyticsDashboard provider={provider} reviews={reviews} />

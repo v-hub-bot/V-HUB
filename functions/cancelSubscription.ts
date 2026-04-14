@@ -1,60 +1,58 @@
-// v5 - added provider ownership verification before cancellation
+// Cancels a provider's Stripe subscription directly (at period end)
 import Stripe from "npm:stripe@14";
 import { createClientFromRequest } from "npm:@base44/sdk@0.8.23";
 
-Deno.serve(async (req: Request): Promise<Response> => {
-  const corsHeaders = {
-    "Access-Control-Allow-Origin": "*",
-    "Access-Control-Allow-Methods": "POST, OPTIONS",
-    "Access-Control-Allow-Headers": "Content-Type",
-    "Content-Type": "application/json",
-  };
+const CORS = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type",
+};
 
-  if (req.method === "OPTIONS") {
-    return new Response(null, { status: 204, headers: corsHeaders });
-  }
+Deno.serve(async (req: Request) => {
+  if (req.method === "OPTIONS") return new Response(null, { status: 204, headers: CORS });
 
   try {
-    const { stripe_subscription_id, provider_record_id } = await req.json();
+    const { provider_id } = await req.json();
+    if (!provider_id) return Response.json({ error: "Missing provider_id" }, { status: 400, headers: CORS });
 
-    if (!stripe_subscription_id) {
-      return new Response(JSON.stringify({ error: "Missing stripe_subscription_id" }), { status: 400, headers: corsHeaders });
-    }
-    if (!provider_record_id) {
-      return new Response(JSON.stringify({ error: "Missing provider_record_id" }), { status: 400, headers: corsHeaders });
-    }
-
-    // Verify that this subscription actually belongs to the claimed provider
     const base44 = createClientFromRequest(req);
     let provider: any = null;
     try {
-      provider = await base44.asServiceRole.entities.Provider.get(provider_record_id);
-    } catch (_) {}
-
-    if (!provider) {
-      return new Response(JSON.stringify({ error: "Provider not found" }), { status: 404, headers: corsHeaders });
+      provider = await base44.asServiceRole.entities.Provider.get(provider_id);
+    } catch (_) {
+      provider = await base44.entities.Provider.get(provider_id);
     }
 
-    // Ownership check: the subscription ID on the provider record must match
-    if (provider.stripe_subscription_id !== stripe_subscription_id) {
-      console.error(`Ownership mismatch: provider ${provider_record_id} has sub ${provider.stripe_subscription_id}, requested ${stripe_subscription_id}`);
-      return new Response(JSON.stringify({ error: "Subscription does not belong to this account" }), { status: 403, headers: corsHeaders });
+    if (!provider) return Response.json({ error: "Provider not found" }, { status: 404, headers: CORS });
+    if (!provider.stripe_subscription_id) {
+      return Response.json({ error: "No active subscription found." }, { status: 400, headers: CORS });
     }
 
     const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY")!, { apiVersion: "2023-10-16" });
 
-    // Cancel at period end — provider keeps listing until billing cycle ends
-    const subscription = await stripe.subscriptions.update(stripe_subscription_id, {
+    // Cancel at period end (they keep access until billing cycle ends)
+    const updated = await stripe.subscriptions.update(provider.stripe_subscription_id, {
       cancel_at_period_end: true,
     });
 
-    console.log("Subscription cancel_at_period_end set for provider:", provider_record_id, stripe_subscription_id);
+    // Update our DB
+    try {
+      await base44.asServiceRole.entities.Provider.update(provider_id, {
+        subscription_status: "cancelled",
+      });
+    } catch (_) {
+      await base44.entities.Provider.update(provider_id, {
+        subscription_status: "cancelled",
+      });
+    }
 
-    return new Response(JSON.stringify({ success: true, cancel_at: subscription.cancel_at }), {
-      headers: corsHeaders,
-    });
-  } catch (err) {
+    const periodEnd = updated.current_period_end
+      ? new Date(updated.current_period_end * 1000).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })
+      : null;
+
+    return Response.json({ success: true, access_until: periodEnd }, { headers: CORS });
+  } catch (err: any) {
     console.error("cancelSubscription error:", err);
-    return new Response(JSON.stringify({ error: (err as any).message }), { status: 500, headers: corsHeaders });
+    return Response.json({ error: err.message }, { status: 500, headers: CORS });
   }
 });
