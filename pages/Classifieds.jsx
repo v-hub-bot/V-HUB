@@ -215,28 +215,26 @@ export default function Classifieds() {
           <span style={{ fontSize: 10, color: INK_FADE, fontFamily: SERIF, fontStyle: "italic" }}>Deals of the Week</span>
         </div>
 
-        {/* Logo row — compact, same as homepage */}
-        <div style={{ display: "flex", alignItems: "center", padding: "12px 14px 4px", boxSizing: "border-box" }}>
-          {/* Logo icon */}
-          <a href="/" style={{ textDecoration: "none", flexShrink: 0 }}>
+        {/* Logo row — logo left, V-Hub centered, home button right — all balanced */}
+        <div style={{ display: "flex", alignItems: "center", padding: "10px 14px 6px", boxSizing: "border-box" }}>
+          {/* Left: logo — fixed 56px to balance right side */}
+          <a href="/" style={{ textDecoration: "none", flexShrink: 0, width: 56, display: "flex", alignItems: "center" }}>
             <img
               src="https://base44.app/api/apps/69d062aca815ce8e697894b1/files/mp/public/69d062aca815ce8e697894b1/f14a7cbd0_logo_icon_small.png"
               alt="V-Hub"
-              style={{ width: 72, height: 72, objectFit: "contain", display: "block" }}
+              style={{ width: 48, height: 48, objectFit: "contain", display: "block" }}
             />
           </a>
 
-          {/* V–Hub wordmark (center) */}
-          <a href="/" style={{ textDecoration: "none", flex: 1, textAlign: "center" }}>
-            <div style={{ lineHeight: 1 }}>
-              <div style={{ fontFamily: "'Great Vibes', cursive", fontSize: 48, color: "#003366", WebkitTextStroke: "0.5px #003366", lineHeight: 1 }}>V</div>
-              <div style={{ fontSize: 16, fontWeight: 900, color: INK, letterSpacing: 3, lineHeight: 1 }}>—</div>
-              <div style={{ fontSize: 38, fontWeight: 900, color: INK, letterSpacing: -1, lineHeight: 1 }}>Hub</div>
-            </div>
+          {/* Center: V-Hub inline on one line — truly centered */}
+          <a href="/" style={{ textDecoration: "none", flex: 1, display: "flex", alignItems: "baseline", justifyContent: "center", gap: 0 }}>
+            <span style={{ fontStyle: "italic", fontWeight: 700, fontFamily: "'Great Vibes', cursive", fontSize: 48, color: "#003366", WebkitTextStroke: "0.5px #003366", textShadow: "0.5px 0.5px 0 #001a40", lineHeight: 1 }}>V</span>
+            <span style={{ fontSize: 32, fontWeight: 900, color: INK, fontFamily: "'Times New Roman', serif", lineHeight: 1, margin: "0 2px" }}>-</span>
+            <span style={{ fontSize: 40, fontWeight: 900, color: INK, fontFamily: "'Times New Roman', serif", letterSpacing: -1, lineHeight: 1 }}>Hub</span>
           </a>
 
-          {/* Back button (right) */}
-          <div style={{ flexShrink: 0 }}>
+          {/* Right: Home button — fixed 56px width to balance logo */}
+          <div style={{ flexShrink: 0, width: 56, display: "flex", justifyContent: "flex-end", alignItems: "center" }}>
             <a href="/" style={{ textDecoration: "none" }}>
               <button style={{
                 background: `linear-gradient(180deg, #9A6030, ${BROWN_BTN} 60%, #5A2F10)`,
@@ -245,9 +243,9 @@ export default function Classifieds() {
                 color: "#F5E8CC",
                 fontFamily: SANS,
                 fontWeight: 700,
-                fontSize: 11,
+                fontSize: 10,
                 letterSpacing: 0.5,
-                padding: "8px 14px",
+                padding: "6px 10px",
                 cursor: "pointer",
                 whiteSpace: "nowrap",
               }}>← Home</button>
@@ -341,15 +339,32 @@ export default function Classifieds() {
         )}
 
         {!loading && items.length === 0 && (
-          <div style={{
-            textAlign: "center", padding: "36px 20px",
-            border: `2px dashed ${PAPER_DK}`, background: PAPER,
-            color: INK_FADE, fontStyle: "italic", fontSize: 14,
-            lineHeight: 1.7,
-          }}>
-            {search || village
-              ? `No deals match your search. Try clearing the filter.`
-              : `No deals posted yet. Check back soon!`}
+          <div style={{ padding: "28px 20px 36px", textAlign: "center" }}>
+            {/* Decorative rule */}
+            <div style={{ borderTop: `3px double ${INK}`, marginBottom: 20 }} />
+            <div style={{ fontSize: 28, marginBottom: 10 }}>🏘️</div>
+            <div style={{ fontSize: 15, fontWeight: 900, letterSpacing: 2, textTransform: "uppercase", color: INK, fontFamily: SERIF, marginBottom: 6 }}>
+              {search || village ? "No Matching Deals" : "Coming Soon to The Villages"}
+            </div>
+            <div style={{ fontSize: 12, fontStyle: "italic", color: INK_FADE, fontFamily: SERIF, lineHeight: 1.7, maxWidth: 300, margin: "0 auto 20px" }}>
+              {search || village
+                ? "No deals match your current filter. Try clearing the village selection or search term."
+                : "Deals of the Week showcases exclusive offers from local service providers. Check back soon — new deals are added every week."}
+            </div>
+            {!search && !village && (
+              <div style={{ border: `1px solid ${PAPER_DK}`, borderRadius: 6, background: PAPER_MID, padding: "14px 18px", maxWidth: 320, margin: "0 auto", textAlign: "left" }}>
+                <div style={{ fontSize: 11, fontWeight: 900, color: INK, letterSpacing: 1, textTransform: "uppercase", fontFamily: SANS, marginBottom: 8 }}>Are you a local provider?</div>
+                <div style={{ fontSize: 12, color: INK, fontFamily: SERIF, lineHeight: 1.6, marginBottom: 10 }}>
+                  Reach thousands of Villages residents with a featured deal. Add the Deals of the Week upgrade to your V-Hub listing.
+                </div>
+                <a href="/ListService" style={{ textDecoration: "none" }}>
+                  <div style={{ background: `linear-gradient(180deg,#9A6030,#7A4820 60%,#5A3010)`, color: "#F5E8CC", fontFamily: SANS, fontWeight: 700, fontSize: 11, letterSpacing: 1, textTransform: "uppercase", padding: "9px 16px", borderRadius: 4, textAlign: "center", cursor: "pointer" }}>
+                    List Your Service →
+                  </div>
+                </a>
+              </div>
+            )}
+            <div style={{ borderBottom: `3px double ${INK}`, marginTop: 24 }} />
           </div>
         )}
 
