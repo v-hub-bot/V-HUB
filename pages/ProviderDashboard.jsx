@@ -59,72 +59,84 @@ function Stars({ rating = 0, size = 14 }) {
   return <span style={{ fontSize: size, color: "#B8860B" }}>{"★".repeat(Math.floor(rating))}{"☆".repeat(5 - Math.floor(rating))}</span>;
 }
 
-// ── Trial / Subscription Banner ───────────────────────────────────────────
-function StatusBanner({ provider, onUpgrade, onCancel, paymentLoading, cancelLoading, paymentError }) {
+// ── Trial / Subscription Banner ─────────────────────────────────────────
+function StatusBanner({ provider, onUpgrade, onManageBilling, paymentLoading, billingLoading, paymentError }) {
   const status = provider.subscription_status;
   const days = daysLeft(provider.trial_end_date);
   const endFmt = fmt(provider.trial_end_date);
 
+  // Active paid subscriber
   if (status === "active" || status === "paid") {
     return (
-      <div style={{ background: "#E8F5E9", border: "2px solid #4CAF50", borderRadius: 10, padding: "14px 18px", marginBottom: 20 }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 8 }}>
-          <div>
-            <div style={{ fontWeight: 900, color: "#1B5E20", fontSize: 14, fontFamily: SERIF }}>✅ Active Subscriber</div>
-            <div style={{ fontSize: 12, color: "#2E7D32", fontFamily: SANS, marginTop: 3 }}>
-              Your listing is live and visible to residents across The Villages.
-            </div>
-          </div>
-          <button onClick={onCancel} disabled={cancelLoading} style={{ background: "transparent", border: "1.5px solid #888", color: "#666", borderRadius: 6, padding: "7px 16px", fontSize: 12, cursor: cancelLoading ? "default" : "pointer", fontFamily: SANS, opacity: cancelLoading ? 0.6 : 1 }}>
-            {cancelLoading ? "Processing…" : "Cancel Subscription"}
-          </button>
+      <div style={{ background: "#E8F5E9", border: "2px solid #4CAF50", borderRadius: 10, padding: "18px 20px", marginBottom: 20 }}>
+        <div style={{ fontWeight: 900, color: "#1B5E20", fontSize: 15, fontFamily: SERIF, marginBottom: 4 }}>✅ Subscription Active</div>
+        <div style={{ fontSize: 13, color: "#2E7D32", fontFamily: SANS, marginBottom: 12, lineHeight: 1.6 }}>
+          Your listing is <strong>live</strong> and visible to residents across The Villages. Your subscription renews automatically each month.
         </div>
+        <button
+          onClick={onManageBilling}
+          disabled={billingLoading}
+          style={{ background: "transparent", border: "1.5px solid #2E7D32", color: "#2E7D32", borderRadius: 6, padding: "8px 18px", fontSize: 12, fontWeight: 700, cursor: billingLoading ? "default" : "pointer", fontFamily: SANS, opacity: billingLoading ? 0.6 : 1 }}
+        >
+          {billingLoading ? "Opening Stripe…" : "Manage or Cancel Subscription →"}
+        </button>
       </div>
     );
   }
 
+  // Active trial
   if (status === "trial") {
-    const urgent = days !== null && days <= 7;
     const expired = days !== null && days < 0;
+    const urgent = !expired && days !== null && days <= 7;
+    const pct = days !== null ? Math.max(5, Math.min(100, ((45 - days) / 45) * 100)) : 50;
+
     if (expired) {
       return (
-        <div style={{ background: "#FFF3E0", border: `2px solid ${RED_RULE}`, borderRadius: 10, padding: "16px 18px", marginBottom: 20 }}>
+        <div style={{ background: "#FFF3E0", border: `2px solid ${RED_RULE}`, borderRadius: 10, padding: "18px 20px", marginBottom: 20 }}>
           <div style={{ fontWeight: 900, color: RED_RULE, fontSize: 15, fontFamily: SERIF, marginBottom: 6 }}>⚠ Your Free Trial Has Ended</div>
-          <div style={{ fontSize: 13, color: INK_FADE, fontFamily: SANS, marginBottom: 12, lineHeight: 1.6 }}>
-            Your listing is currently <strong>hidden</strong> from search results. Subscribe for $12/month to go live again.
-          </div>
-          {paymentError && <div style={{ fontSize: 12, color: RED_RULE, marginBottom: 8, fontFamily: SANS }}>{paymentError}</div>}
-          <button onClick={onUpgrade} disabled={paymentLoading} style={{ background: `linear-gradient(180deg,#9A6030,${BROWN_BTN})`, color: PAPER, border: `2px solid ${YELLOW}`, borderRadius: 6, padding: "10px 24px", fontWeight: 900, fontSize: 13, cursor: paymentLoading ? "default" : "pointer", fontFamily: SERIF, letterSpacing: 1, opacity: paymentLoading ? 0.7 : 1 }}>
-            {paymentLoading ? "Redirecting to Stripe…" : "Subscribe — $12/mo →"}
+          <div style={{ fontSize: 13, color: INK_FADE, fontFamily: SANS, marginBottom: 14, lineHeight: 1.6 }}>Your listing is currently <strong>hidden</strong> from search results. Subscribe for $12/month to go live again.</div>
+          {paymentError && <div style={{ fontSize: 12, color: RED_RULE, marginBottom: 10, fontFamily: SANS }}>{paymentError}</div>}
+          <button onClick={onUpgrade} disabled={paymentLoading} style={{ background: `linear-gradient(180deg,#9A6030,${BROWN_BTN})`, color: PAPER, border: `2px solid ${YELLOW}`, boxShadow: `0 0 10px 2px rgba(255,220,0,0.3)`, borderRadius: 8, padding: "12px 28px", fontWeight: 900, fontSize: 14, cursor: paymentLoading ? "default" : "pointer", fontFamily: SERIF, letterSpacing: 1, opacity: paymentLoading ? 0.7 : 1 }}>
+            {paymentLoading ? "Redirecting to Stripe…" : "Subscribe Now — $12/mo →"}
           </button>
         </div>
       );
     }
-    const pct = days !== null ? Math.max(5, Math.min(100, ((45 - days) / 45) * 100)) : 50;
+
     return (
-      <div style={{ background: urgent ? "#FFF3E0" : PAPER_MID, border: `2px solid ${urgent ? "#E65100" : PAPER_DK}`, borderRadius: 10, padding: "16px 18px", marginBottom: 20 }}>
+      <div style={{ background: urgent ? "#FFF3E0" : PAPER_MID, border: `2px solid ${urgent ? "#E65100" : PAPER_DK}`, borderRadius: 10, padding: "18px 20px", marginBottom: 20 }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8, flexWrap: "wrap", gap: 8 }}>
           <div style={{ fontWeight: 900, color: urgent ? "#BF360C" : BROWN_BTN, fontSize: 14, fontFamily: SERIF }}>
-            {urgent ? `⏰ Trial ends in ${days} day${days !== 1 ? "s" : ""}!` : `🎁 Free Trial Active — ${days} days left`}
+            {urgent ? `⏰ Trial ends in ${days} day${days !== 1 ? "s" : ""}!` : `🎁 Free Trial — ${days} day${days !== 1 ? "s" : ""} remaining`}
           </div>
-          <div style={{ fontSize: 12, color: INK_FADE, fontFamily: SANS }}>{endFmt}</div>
+          <div style={{ fontSize: 12, color: INK_FADE, fontFamily: SANS }}>Ends {endFmt}</div>
         </div>
-        <div style={{ background: "#D4C9A0", borderRadius: 4, height: 8, marginBottom: 8 }}>
+        <div style={{ background: "#D4C9A0", borderRadius: 4, height: 8, marginBottom: 14 }}>
           <div style={{ background: urgent ? "#E65100" : TEAL, borderRadius: 4, height: 8, width: `${pct}%`, transition: "width 0.5s" }} />
         </div>
-        <div style={{ fontSize: 12, color: INK_FADE, fontFamily: SANS, lineHeight: 1.6 }}>
-          {urgent
-            ? "Set up billing now to keep your listing live. Just $12/month — cancel anytime."
-            : `After your trial ends on ${endFmt}, stay listed for just $12/month. Cancel anytime.`}
-        </div>
-        {urgent && (
-          <div>
-            {paymentError && <div style={{ fontSize: 12, color: "#BF360C", marginTop: 6, fontFamily: SANS }}>{paymentError}</div>}
-            <button onClick={onUpgrade} disabled={paymentLoading} style={{ marginTop: 10, background: "#E65100", color: "#fff", border: "none", borderRadius: 6, padding: "9px 22px", fontWeight: 700, cursor: paymentLoading ? "default" : "pointer", fontSize: 13, fontFamily: SANS, opacity: paymentLoading ? 0.7 : 1 }}>
-              {paymentLoading ? "Redirecting to Stripe…" : "Set Up Billing — $12/mo →"}
-            </button>
+        <div style={{ background: "rgba(0,0,0,0.04)", borderRadius: 8, padding: "14px 16px" }}>
+          <div style={{ fontSize: 13, fontWeight: 900, color: INK, fontFamily: SERIF, marginBottom: 4 }}>Subscribe to keep your listing live after your trial</div>
+          <div style={{ fontSize: 12, color: INK_FADE, fontFamily: SANS, marginBottom: 12, lineHeight: 1.6 }}>
+            <strong>$12/month</strong> — Stay live and searchable. Cancel anytime. If you subscribe during your trial, billing won't start until after your trial ends.
           </div>
-        )}
+          {paymentError && <div style={{ fontSize: 12, color: RED_RULE, marginBottom: 8, fontFamily: SANS }}>{paymentError}</div>}
+          <button
+            onClick={onUpgrade}
+            disabled={paymentLoading}
+            style={{
+              background: paymentLoading ? PAPER_DK : `linear-gradient(180deg,#9A6030,${BROWN_BTN} 60%,#5A3010)`,
+              color: PAPER, border: `3px solid ${YELLOW}`,
+              boxShadow: `0 0 0 1.5px ${YELLOW}, 0 0 14px 3px rgba(255,220,0,0.3)`,
+              borderRadius: 8, padding: "13px 0", fontSize: 15, fontWeight: 900,
+              cursor: paymentLoading ? "not-allowed" : "pointer",
+              fontFamily: SERIF, letterSpacing: 1, textTransform: "uppercase",
+              width: "100%", opacity: paymentLoading ? 0.7 : 1,
+            }}
+          >
+            {paymentLoading ? "Redirecting to Stripe…" : "Subscribe Now — $12/month →"}
+          </button>
+          <div style={{ fontSize: 11, color: INK_FADE, fontFamily: SANS, marginTop: 8, textAlign: "center" }}>Secure payment via Stripe · Cancel anytime</div>
+        </div>
       </div>
     );
   }
@@ -137,42 +149,39 @@ function StatusBanner({ provider, onUpgrade, onCancel, paymentLoading, cancelLoa
   );
 
   if (status === "cancelled") return (
-    <div style={{ background: "#FAFAFA", border: "2px solid #CCC", borderRadius: 10, padding: "14px 18px", marginBottom: 20 }}>
+    <div style={{ background: "#FAFAFA", border: "2px solid #CCC", borderRadius: 10, padding: "16px 18px", marginBottom: 20 }}>
       <div style={{ fontWeight: 900, color: "#555", fontSize: 14, fontFamily: SERIF }}>⏸ Subscription Cancelled</div>
-      <div style={{ fontSize: 13, color: INK_FADE, fontFamily: SANS, marginTop: 4, lineHeight: 1.6 }}>Your listing is not currently visible. Contact us to reactivate.</div>
-      <button onClick={onUpgrade} disabled={paymentLoading} style={{ marginTop: 10, background: BROWN_BTN, color: PAPER, border: `2px solid ${YELLOW}`, borderRadius: 6, padding: "9px 22px", fontWeight: 700, cursor: paymentLoading ? "default" : "pointer", fontSize: 13, fontFamily: SANS, opacity: paymentLoading ? 0.7 : 1 }}>
+      <div style={{ fontSize: 13, color: INK_FADE, fontFamily: SANS, marginTop: 4, marginBottom: 12, lineHeight: 1.6 }}>Your listing is not currently visible. Resubscribe to go live again.</div>
+      {paymentError && <div style={{ fontSize: 12, color: RED_RULE, marginBottom: 8, fontFamily: SANS }}>{paymentError}</div>}
+      <button onClick={onUpgrade} disabled={paymentLoading} style={{ background: BROWN_BTN, color: PAPER, border: `2px solid ${YELLOW}`, borderRadius: 6, padding: "10px 24px", fontWeight: 700, cursor: paymentLoading ? "default" : "pointer", fontSize: 13, fontFamily: SERIF, opacity: paymentLoading ? 0.7 : 1 }}>
         {paymentLoading ? "Redirecting to Stripe…" : "Reactivate — $12/mo →"}
       </button>
     </div>
   );
 
-  // trial_expired — set by the daily automation when trial ends
   if (status === "trial_expired") return (
-    <div style={{ background: "#FFF3E0", border: `2px solid ${RED_RULE}`, borderRadius: 10, padding: "16px 18px", marginBottom: 20 }}>
+    <div style={{ background: "#FFF3E0", border: `2px solid ${RED_RULE}`, borderRadius: 10, padding: "18px 20px", marginBottom: 20 }}>
       <div style={{ fontWeight: 900, color: RED_RULE, fontSize: 15, fontFamily: SERIF, marginBottom: 6 }}>⚠ Your Free Trial Has Ended</div>
-      <div style={{ fontSize: 13, color: INK_FADE, fontFamily: SANS, marginBottom: 12, lineHeight: 1.6 }}>
-        Your listing is currently <strong>hidden</strong> from search results. Subscribe for $12/month to go live again.
-      </div>
-      {paymentError && <div style={{ fontSize: 12, color: RED_RULE, marginBottom: 8, fontFamily: SANS }}>{paymentError}</div>}
-      <button onClick={onUpgrade} disabled={paymentLoading} style={{ background: `linear-gradient(180deg,#9A6030,${BROWN_BTN})`, color: PAPER, border: `2px solid ${YELLOW}`, borderRadius: 6, padding: "10px 24px", fontWeight: 900, fontSize: 13, cursor: paymentLoading ? "default" : "pointer", fontFamily: SERIF, letterSpacing: 1, opacity: paymentLoading ? 0.7 : 1 }}>
-        {paymentLoading ? "Redirecting to Stripe…" : "Subscribe — $12/mo →"}
+      <div style={{ fontSize: 13, color: INK_FADE, fontFamily: SANS, marginBottom: 14, lineHeight: 1.6 }}>Your listing is currently <strong>hidden</strong> from search results. Subscribe for $12/month to go live again.</div>
+      {paymentError && <div style={{ fontSize: 12, color: RED_RULE, marginBottom: 10, fontFamily: SANS }}>{paymentError}</div>}
+      <button onClick={onUpgrade} disabled={paymentLoading} style={{ background: `linear-gradient(180deg,#9A6030,${BROWN_BTN})`, color: PAPER, border: `2px solid ${YELLOW}`, borderRadius: 8, padding: "12px 28px", fontWeight: 900, fontSize: 14, cursor: paymentLoading ? "default" : "pointer", fontFamily: SERIF, letterSpacing: 1, opacity: paymentLoading ? 0.7 : 1 }}>
+        {paymentLoading ? "Redirecting to Stripe…" : "Subscribe Now — $12/mo →"}
       </button>
     </div>
   );
 
-  // past_due — payment failed but subscription still open
   if (status === "past_due") return (
     <div style={{ background: "#FFF3E0", border: "2px solid #E65100", borderRadius: 10, padding: "14px 18px", marginBottom: 20 }}>
       <div style={{ fontWeight: 900, color: "#BF360C", fontSize: 14, fontFamily: SERIF }}>⚠ Payment Failed — Action Required</div>
-      <div style={{ fontSize: 13, color: INK_FADE, fontFamily: SANS, marginTop: 4, lineHeight: 1.6 }}>
-        Your last payment was not processed. Please update your billing info to keep your listing live. Contact us at <strong>admin@v-hub.us</strong> if you need help.
-      </div>
+      <div style={{ fontSize: 13, color: INK_FADE, fontFamily: SANS, marginTop: 4, marginBottom: 12, lineHeight: 1.6 }}>Your last payment was not processed. Update your billing to keep your listing live.</div>
+      <button onClick={onManageBilling} disabled={billingLoading} style={{ background: RED_RULE, color: "#fff", border: "none", borderRadius: 6, padding: "9px 22px", fontWeight: 700, cursor: billingLoading ? "default" : "pointer", fontSize: 13, fontFamily: SANS, opacity: billingLoading ? 0.7 : 1 }}>
+        {billingLoading ? "Opening…" : "Update Billing Info →"}
+      </button>
     </div>
   );
 
   return null;
 }
-
 
 // ── Service accordion for edit view ──────────────────────────────────────
 // Supports both real entity IDs and legacy short codes (s01, s19, etc.)
@@ -892,9 +901,11 @@ export default function ProviderDashboard() {
   const [newLoginEmail, setNewLoginEmail] = useState("");
   const [accMsg, setAccMsg]         = useState("");
   const [paymentLoading, setPaymentLoading] = useState(false);
+  const [billingLoading, setBillingLoading] = useState(false);
   const [cancelLoading, setCancelLoading]   = useState(false);
   const [paymentError, setPaymentError]     = useState("");
   const [paymentSuccess, setPaymentSuccess] = useState(false);
+  const [cancelSuccess, setCancelSuccess]   = useState(false);
   const [showNewPass, setShowNewPass] = useState(false);
 
   // Review form
@@ -958,8 +969,26 @@ export default function ProviderDashboard() {
     if (paymentResult === "success") {
       setPaymentSuccess(true);
       window.history.replaceState({}, "", window.location.pathname);
+      // Re-fetch provider so subscription_status reflects Stripe webhook update
+      const acctId = urlParams.get("acct") || sessionStorage.getItem("vhub_provider_id");
+      if (acctId) {
+        fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/getProviders", {
+          method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ session_restore: true, provider_id: acctId }),
+        }).then(r => r.json()).then(d => { if (d.success && d.provider) { setProvider(d.provider); seedForm(d.provider); } }).catch(() => {});
+      }
+    } else if (paymentResult === "portal_return") {
+      // Returned from Stripe billing portal — re-fetch provider to get updated status
+      window.history.replaceState({}, "", window.location.pathname);
+      const acctId = urlParams.get("acct") || sessionStorage.getItem("vhub_provider_id");
+      if (acctId) {
+        fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/getProviders", {
+          method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ session_restore: true, provider_id: acctId }),
+        }).then(r => r.json()).then(d => { if (d.success && d.provider) { setProvider(d.provider); seedForm(d.provider); setCancelSuccess(true); } }).catch(() => {});
+      }
     } else if (paymentResult === "cancelled") {
-      // just clear the URL param
+      // User clicked "Back" on Stripe checkout — just clear the URL
       window.history.replaceState({}, "", window.location.pathname);
     }
 
@@ -1146,36 +1175,30 @@ export default function ProviderDashboard() {
     setPaymentLoading(false);
   };
 
-  const handleCancel = async () => {
-    if (!window.confirm("Are you sure you want to cancel your V-Hub subscription? Your listing will be hidden at end of billing period.")) return;
-    if (!provider.stripe_subscription_id) {
-      alert("No active Stripe subscription found. Please contact admin@v-hub.us to cancel.");
-      return;
-    }
-    setCancelLoading(true);
+  const handleManageBilling = async () => {
+    setBillingLoading(true);
+    setPaymentError("");
     try {
-      const res = await fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/cancelSubscription", {
+      const res = await fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/createBillingPortal", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ stripe_subscription_id: provider.stripe_subscription_id, provider_record_id: provider.id }),
+        body: JSON.stringify({ provider_id: provider.id }),
       });
       const data = await res.json();
-      if (data.success) {
-        const cancelDate = data.cancel_at ? new Date(data.cancel_at * 1000).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" }) : "end of billing period";
-        // Update provider record so dashboard reflects cancellation immediately
-        try {
-          await Provider.update(provider.id, { notes: `Cancellation requested. Active until ${cancelDate}.` });
-        } catch (_) {}
-        alert(`Your subscription has been cancelled. You will remain listed until ${cancelDate}.`);
-        const fresh = await Provider.get(provider.id);
-        setProvider(fresh);
+      if (data.url) {
+        window.location.href = data.url;
       } else {
-        alert("Could not cancel. Please contact admin@v-hub.us");
+        setPaymentError(data.error || "Could not open billing portal. Contact admin@v-hub.us");
       }
     } catch {
-      alert("Connection error. Please contact admin@v-hub.us");
+      setPaymentError("Connection error. Please try again or contact admin@v-hub.us");
     }
-    setCancelLoading(false);
+    setBillingLoading(false);
+  };
+
+  const handleCancel = async () => {
+    // Redirect to Stripe billing portal for cancellation (cleaner UX)
+    await handleManageBilling();
   };
 
     const avgRating = reviews.length > 0
