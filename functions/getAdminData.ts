@@ -13,7 +13,7 @@ function getCorsHeaders(req: Request) {
   };
 }
 
-const ADMIN_EMAILS = ["kimberlycook1980@gmail.com", "5bebegurlz@gmail.com", "evansrus@comcast.net"];
+const ADMIN_EMAILS = ["kimberlycook1980@gmail.com", "5bebegurlz@gmail.com"];
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -25,7 +25,7 @@ Deno.serve(async (req) => {
 
     // Check for admin PIN in body (for PIN-gate access)
     const body = await req.json().catch(() => ({}));
-    const VALID_PINS = ["6185", "1357"];
+    const VALID_PINS = ["1357"];
     const pinProvided = body.pin && VALID_PINS.includes(String(body.pin));
 
     // Also allow if logged-in user is an admin

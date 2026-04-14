@@ -54,8 +54,8 @@ Deno.serve(async (req: Request) => {
 
   // ── Admin mode ────────────────────────────────────────────────────────
   const base44      = createClientFromRequest(req);
-  const VALID_PINS  = ["6185", "1357"];
-  const ADMIN_EMAILS = ["kimberlycook1980@gmail.com", "5bebegurlz@gmail.com", "evansrus@comcast.net"];
+  const VALID_PINS  = ["1357"];
+  const ADMIN_EMAILS = ["kimberlycook1980@gmail.com", "5bebegurlz@gmail.com"];
   const pinOk = body.pin && VALID_PINS.includes(String(body.pin));
   let isAdmin = false;
   try {

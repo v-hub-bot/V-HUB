@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Provider, ProviderReview, LeadInquiry, ServiceSearchStat, Category, Service, ServiceArea } from "@/api/entities";
 
-const PINS = ["6185", "1357"];
+const PINS = ["1357"];
 const LOGO = "https://media.base44.com/images/public/69d062aca815ce8e697894b1/a9af95bc3_V-Hublogo.png";
 
 

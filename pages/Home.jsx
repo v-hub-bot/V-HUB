@@ -1255,28 +1255,28 @@ export default function Home() {
         </div>
 
         {/* ── MASTHEAD ── */}
-        <div style={{ background: PAPER, padding: "18px 14px 8px" }}>
-          {/* Top row: logo | stacked title | burger */}
-          <div style={{ display: "flex", alignItems: "center" }}>
-            {/* Left: V-Hub logo icon */}
-            <div style={{ flexShrink: 0, width: 100, height: 100, display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <div style={{ background: PAPER, padding: "12px 10px 8px" }}>
+          {/* Single row: logo | V-Hub title inline | burger */}
+          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+            {/* Left: V-Hub logo icon — smaller to leave room for title */}
+            <div style={{ flexShrink: 0, width: 64, height: 64, display: "flex", alignItems: "center", justifyContent: "center" }}>
               <img
                 src="https://base44.app/api/apps/69d062aca815ce8e697894b1/files/mp/public/69d062aca815ce8e697894b1/f14a7cbd0_logo_icon_small.png"
                 alt="V-Hub logo icon"
                 loading="eager"
                 fetchPriority="high"
                 decoding="sync"
-                style={{ width: 100, height: 100, objectFit: "contain", display: "block" }}
+                style={{ width: 64, height: 64, objectFit: "contain", display: "block" }}
               />
             </div>
-            {/* Center: Stacked V / — / Hub */}
-            <div style={{ flex: 1, textAlign: "center", lineHeight: 1, fontFamily: "'Times New Roman', serif" }}>
-              <div style={{ fontStyle: "italic", fontWeight: 700, fontFamily: "'Great Vibes', cursive", fontSize: 62, color: "#003366", WebkitTextStroke: "0.6px #003366", textShadow: `0.5px 0.5px 0 #001a40`, lineHeight: 1 }}>V</div>
-              <div style={{ fontSize: 22, fontWeight: 900, color: INK, letterSpacing: 4, lineHeight: 1, margin: "1px 0" }}>—</div>
-              <div style={{ fontSize: 52, fontWeight: 900, color: INK, letterSpacing: -1, lineHeight: 1 }}>Hub</div>
+            {/* Center: V-Hub all on one line */}
+            <div style={{ flex: 1, textAlign: "center", display: "flex", alignItems: "baseline", justifyContent: "center", gap: 0 }}>
+              <span style={{ fontStyle: "italic", fontWeight: 700, fontFamily: "'Great Vibes', cursive", fontSize: 52, color: "#003366", WebkitTextStroke: "0.5px #003366", textShadow: "0.5px 0.5px 0 #001a40", lineHeight: 1 }}>V</span>
+              <span style={{ fontSize: 36, fontWeight: 900, color: INK, fontFamily: "'Times New Roman', serif", lineHeight: 1, margin: "0 2px" }}>-</span>
+              <span style={{ fontSize: 44, fontWeight: 900, color: INK, fontFamily: "'Times New Roman', serif", letterSpacing: -1, lineHeight: 1 }}>Hub</span>
             </div>
-            {/* Right: burger — same width as logo */}
-            <div style={{ flexShrink: 0, width: 100, display: "flex", justifyContent: "flex-end", alignItems: "center" }}><Burger currentUser={currentUser} /></div>
+            {/* Right: burger — smaller container */}
+            <div style={{ flexShrink: 0, width: 64, display: "flex", justifyContent: "flex-end", alignItems: "center" }}><Burger currentUser={currentUser} /></div>
           </div>
           {/* Tagline */}
           <div style={{ fontSize: 13, fontStyle: "italic", color: INK_FADE, textAlign: "center", margin: "6px 0 10px" }}>

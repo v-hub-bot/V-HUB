@@ -69,8 +69,8 @@ Deno.serve(async (req: Request) => {
     const body = await req.json().catch(() => ({}));
 
     // Auth check
-    const VALID_PINS = ["6185", "1357"];
-    const ADMIN_EMAILS = ["kimberlycook1980@gmail.com", "5bebegurlz@gmail.com", "evansrus@comcast.net"];
+    const VALID_PINS = ["1357"];
+    const ADMIN_EMAILS = ["kimberlycook1980@gmail.com", "5bebegurlz@gmail.com"];
     const pinOk = body.pin && VALID_PINS.includes(String(body.pin));
     let userIsAdmin = false;
     try { const me = await base44.auth.me(); if (me?.email && ADMIN_EMAILS.includes(me.email.toLowerCase())) userIsAdmin = true; } catch (_) {}
