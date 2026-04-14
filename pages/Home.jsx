@@ -1457,10 +1457,10 @@ export default function Home() {
         }}>
           {/* Header label */}
           <div style={{
-            padding: "8px 16px", textAlign: "center", fontSize: 12, fontWeight: 700,
-            letterSpacing: 2, color: INK, textTransform: "uppercase",
+            padding: "8px 16px", textAlign: "center", fontSize: 13, fontWeight: 900,
+            letterSpacing: 2, color: "#000", textTransform: "uppercase",
             borderBottom: `1px solid ${YELLOW}88`,
-          }}>Find Services</div>
+          }}>Classifieds</div>
           {/* Search box */}
           <div style={{ padding: "8px 12px 4px" }}>
             <SearchBox cats={cats} svcs={svcs} areas={areas} onSearch={doSearch} selSvc={selSvc} setSelSvc={setSelSvc} selArea={selArea} setSelArea={setSelArea} />
@@ -1474,20 +1474,21 @@ export default function Home() {
           style={{ width: "100%", height: 200, objectFit: "cover", objectPosition: "center 60%", display: "block" }}
         />
 
-        {/* CLASSIFIEDS BUTTON — full width under image, same weight green border */}
-        <a href="/Classifieds" style={{ textDecoration: "none", display: "block", width: "100%" }}>
+        {/* DEAL OF THE WEEK — full width, thick red border */}
+        <div style={{
+          border: "4px solid #CC0000",
+          outline: "1.5px solid #CC0000",
+          outlineOffset: "0px",
+          boxShadow: "0 0 10px 2px rgba(204,0,0,0.3)",
+          background: PAPER,
+          width: "100%", boxSizing: "border-box",
+        }}>
           <div style={{
-            padding: "10px 16px", textAlign: "center", fontSize: 12, fontWeight: 700,
-            letterSpacing: 2, color: "#1A6B3C", textTransform: "uppercase",
-            background: PAPER,
-            border: "3px solid #1A6B3C",
-            outline: "1.5px solid #1A6B3C",
-            outlineOffset: "0px",
-            boxShadow: "0 0 10px 2px rgba(26,107,60,0.3)",
-            cursor: "pointer",
-            width: "100%", boxSizing: "border-box",
-          }}>📰 &nbsp;Classifieds</div>
-        </a>
+            padding: "10px 16px", textAlign: "center", fontSize: 13, fontWeight: 900,
+            letterSpacing: 2, color: "#CC0000", textTransform: "uppercase",
+            fontFamily: "'Times New Roman', serif",
+          }}>🔥 Deal of the Week!</div>
+        </div>
 
         {/* LIST YOUR SERVICE + PROVIDER HUB — half width each, navy border */}
         <div style={{ display: "flex", width: "100%" }}>
