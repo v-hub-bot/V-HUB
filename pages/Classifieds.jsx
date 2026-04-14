@@ -212,7 +212,7 @@ export default function Classifieds() {
         }}>
           <span style={{ fontSize: 10, color: INK_FADE, fontFamily: SERIF, fontStyle: "italic" }}>{today}</span>
           <span style={{ fontSize: 10, color: INK_FADE, fontFamily: SANS, fontWeight: 700, letterSpacing: 1, textTransform: "uppercase", textAlign: "center" }}>The Villages, FL</span>
-          <span style={{ fontSize: 10, color: INK_FADE, fontFamily: SERIF, fontStyle: "italic" }}>Classifieds</span>
+          <span style={{ fontSize: 10, color: INK_FADE, fontFamily: SERIF, fontStyle: "italic" }}>Deals of the Week</span>
         </div>
 
         {/* Logo row — compact, same as homepage */}
@@ -258,7 +258,7 @@ export default function Classifieds() {
         {/* Section nameplate */}
         <div style={{ textAlign: "center", padding: "6px 14px 4px", borderTop: `1px solid ${PAPER_DK}` }}>
           <div style={{ fontSize: 20, fontWeight: 900, letterSpacing: 3, textTransform: "uppercase", color: INK, fontFamily: SERIF }}>
-            The Villages Classifieds
+            Deals of the Week
           </div>
           <div style={{ fontSize: 11, fontStyle: "italic", color: INK_FADE, marginTop: 3, fontFamily: SERIF }}>
             Exclusive deals &amp; special offers from local service providers
@@ -319,7 +319,7 @@ export default function Classifieds() {
         textTransform: "uppercase",
         boxSizing: "border-box", width: "100%",
       }}>
-        {loading ? "Loading…" : `${items.length} advertiser${items.length !== 1 ? "s" : ""} · ${ads.length} active deal${ads.length !== 1 ? "s" : ""}${village ? ` · ${village}` : ""}`}
+        {loading ? "Loading…" : `${items.length} provider${items.length !== 1 ? "s" : ""} · ${ads.length} active deal${ads.length !== 1 ? "s" : ""}${village ? ` · ${village}` : ""}`}
       </div>
 
       {/* ════════ ADS GRID ════════ */}
@@ -329,14 +329,14 @@ export default function Classifieds() {
         <div style={{ marginBottom: 14 }}>
           <div style={{ borderTop: `3px double ${INK}` }} />
           <div style={{ textAlign: "center", padding: "5px 0", fontSize: 10, fontWeight: 700, letterSpacing: 2, textTransform: "uppercase", color: INK_FADE, fontFamily: SANS }}>
-            ✦ Paid Advertisements — Local Service Providers ✦
+            ✦ This Week's Deals — Local Service Providers ✦
           </div>
           <div style={{ borderBottom: `3px double ${INK}` }} />
         </div>
 
         {loading && (
           <div style={{ textAlign: "center", padding: 48, color: INK_FADE, fontSize: 14, fontStyle: "italic" }}>
-            Loading classifieds…
+            Loading deals…
           </div>
         )}
 
@@ -348,8 +348,8 @@ export default function Classifieds() {
             lineHeight: 1.7,
           }}>
             {search || village
-              ? `No classifieds match your search. Try clearing the filter.`
-              : `No classifieds posted yet. Check back soon!`}
+              ? `No deals match your search. Try clearing the filter.`
+              : `No deals posted yet. Check back soon!`}
           </div>
         )}
 
