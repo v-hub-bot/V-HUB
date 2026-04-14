@@ -1,3 +1,4 @@
+// V-Hub Home — v2026-04-14a
 import React, { useState, useEffect, useRef } from "react"; // v3 - expanded content
 import { createPortal } from "react-dom";
 import { ServiceArea, Category, Service, Provider, ProviderReview, User } from "@/api/entities";

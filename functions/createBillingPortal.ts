@@ -1,6 +1,6 @@
 // Creates a Stripe Customer Portal session for a provider to manage/cancel their subscription
 import Stripe from "npm:stripe@14";
-import { createClient } from "npm:@base44/sdk@0.8.25";
+import { createClientFromRequest } from "npm:@base44/sdk@0.8.23";
 
 const CORS = {
   "Access-Control-Allow-Origin": "*",
@@ -15,10 +15,18 @@ Deno.serve(async (req: Request) => {
     const { provider_id } = await req.json();
     if (!provider_id) return Response.json({ error: "Missing provider_id" }, { status: 400, headers: CORS });
 
-    const sr = createClient({ appId: "69d062aca815ce8e697894b1" }).asServiceRole;
-    const provider = await sr.entities.Provider.get(provider_id);
+    const base44 = createClientFromRequest(req);
+    let provider: any = null;
+    try {
+      provider = await base44.asServiceRole.entities.Provider.get(provider_id);
+    } catch (_) {
+      provider = await base44.entities.Provider.get(provider_id);
+    }
+
     if (!provider) return Response.json({ error: "Provider not found" }, { status: 404, headers: CORS });
-    if (!provider.stripe_customer_id) return Response.json({ error: "No Stripe customer on file. Please contact admin@v-hub.us" }, { status: 400, headers: CORS });
+    if (!provider.stripe_customer_id) {
+      return Response.json({ error: "No Stripe customer on file. Please contact admin@v-hub.us to set up billing." }, { status: 400, headers: CORS });
+    }
 
     const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY")!, { apiVersion: "2023-10-16" });
 

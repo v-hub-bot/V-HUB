@@ -1394,32 +1394,28 @@ export default function ProviderDashboard() {
           <div style={{ background: "#E8F5E9", border: "2px solid #4CAF50", borderRadius: 10, padding: "16px 18px", marginBottom: 20, display: "flex", alignItems: "center", gap: 12 }}>
             <div style={{ fontSize: 28 }}>🎉</div>
             <div>
-              <div style={{ fontWeight: 900, color: "#1B5E20", fontSize: 15, fontFamily: SERIF }}>Payment Successful — Welcome to V-Hub!</div>
-              <div style={{ fontSize: 13, color: "#2E7D32", fontFamily: SANS, marginTop: 3 }}>Your subscription is active. Your listing is now live and visible to residents across The Villages.</div>
+              <div style={{ fontWeight: 900, color: "#1B5E20", fontSize: 15, fontFamily: SERIF }}>Payment Successful — You're Subscribed!</div>
+              <div style={{ fontSize: 13, color: "#2E7D32", fontFamily: SANS, marginTop: 3 }}>Your subscription is active at $12/month. Your listing is now live and visible to residents across The Villages.</div>
             </div>
             <button onClick={() => setPaymentSuccess(false)} style={{ marginLeft: "auto", background: "transparent", border: "none", color: "#888", fontSize: 18, cursor: "pointer" }}>✕</button>
           </div>
         )}
-        <StatusBanner provider={provider} onUpgrade={handleUpgrade} onCancel={handleCancel} paymentLoading={paymentLoading} cancelLoading={cancelLoading} paymentError={paymentError} />
+        {cancelSuccess && (
+          <div style={{ background: "#F3F4F6", border: "2px solid #9CA3AF", borderRadius: 10, padding: "16px 18px", marginBottom: 20, display: "flex", alignItems: "center", gap: 12 }}>
+            <div style={{ fontSize: 24 }}>✅</div>
+            <div>
+              <div style={{ fontWeight: 900, color: "#374151", fontSize: 14, fontFamily: SERIF }}>Subscription Cancelled</div>
+              <div style={{ fontSize: 13, color: "#6B7280", fontFamily: SANS, marginTop: 3 }}>Your cancellation was processed. Your listing will remain visible until the end of your current billing period.</div>
+            </div>
+            <button onClick={() => setCancelSuccess(false)} style={{ marginLeft: "auto", background: "transparent", border: "none", color: "#888", fontSize: 18, cursor: "pointer" }}>✕</button>
+          </div>
+        )}
+        <StatusBanner provider={provider} onUpgrade={handleUpgrade} onManageBilling={handleManageBilling} paymentLoading={paymentLoading} billingLoading={billingLoading} paymentError={paymentError} />
 
         {/* ── ANALYTICS DASHBOARD ─────────────────────────────── */}
         <AnalyticsDashboard provider={provider} reviews={reviews} />
 
-        {/* Trial timeline */}
-        {provider.subscription_status === "trial" && days !== null && days >= 0 && (
-          <div style={{ background: PAPER_MID, border: `1.5px solid ${PAPER_DK}`, borderRadius: 8, padding: "14px 18px", marginBottom: 24 }}>
-            <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, color: INK_FADE, fontFamily: SANS, marginBottom: 6 }}>
-              <span>Trial started {fmt(provider.trial_start_date)}</span>
-              <span>Ends {fmt(provider.trial_end_date)}</span>
-            </div>
-            <div style={{ background: "#D4C9A0", borderRadius: 4, height: 10 }}>
-              <div style={{ background: days <= 7 ? "#E65100" : TEAL, borderRadius: 4, height: 10, width: `${Math.max(5, Math.min(100, ((45 - days) / 45) * 100))}%`, transition: "width 0.5s" }} />
-            </div>
-            <div style={{ fontSize: 11, color: INK_FADE, fontFamily: SANS, marginTop: 5, textAlign: "center" }}>
-              {days} day{days !== 1 ? "s" : ""} remaining of your 45-day free trial
-            </div>
-          </div>
-        )}
+
 
         {/* Business Info */}
         <div style={{ ...shS }}>📋 Business Info</div>
