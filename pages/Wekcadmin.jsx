@@ -180,11 +180,44 @@ function ProvidersTab({ providers, setProviders, catMap, svcMap, areaMap, fullSv
     if (filter === "pending") return p.subscription_status === "pending";
     if (filter === "expiring") { const d = daysLeft(p.trial_end_date); return d !== null && d >= 0 && d <= 7; }
     if (filter === "archived") return p.subscription_status === "archived";
+    if (filter === "incomplete") return !p.email || !p.services || p.services.length === 0 || !p.service_areas || p.service_areas.length === 0;
     return true;
   });
 
   const [approving, setApproving] = useState(null);
   const [reactivating, setReactivating] = useState(null);
+  const [handing, setHanding] = useState(null);
+
+  const sendAccountToProvider = async (p) => {
+    if (!p.email) return alert("No email on file — edit the provider first and add their email, then send.");
+    if (!window.confirm(`Send ${p.business_name} their account credentials and welcome email to ${p.email}?`)) return;
+    setHanding(p.id);
+    try {
+      const res = await fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/approveProvider", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          pin: adminPin,
+          provider_record_id: p.id,
+          business_name: p.business_name,
+          owner_name: p.owner_name,
+          email: p.email,
+          phone: p.phone,
+          services: p.services || [],
+          service_areas: p.service_areas || [],
+          vh_number: p.vh_number,
+          login_email: p.login_email || p.email,
+          email_only: true,
+        }),
+      });
+      const data = await res.json();
+      if (data.error) throw new Error(data.error);
+      alert(`✅ Account details sent to ${p.email}! They can now log into Provider Hub with their VH number and password.`);
+    } catch(e) {
+      alert("❌ Error: " + e.message);
+    }
+    setHanding(null);
+  };
 
   const reactivateArchived = async (p) => {
     if (!window.confirm(`Reactivate ${p.business_name}? This will restore their listing and start a new 45-day trial.`)) return;
@@ -379,9 +412,9 @@ You can resend manually from the Email button.`);
       {/* ── STATUS FILTERS (only show when not in single-search mode) ── */}
       {!search && (
         <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-          {["all", "pending", "active", "hidden", "trial", "paid", "expiring", "archived"].map(f => (
+          {["all", "incomplete", "pending", "active", "hidden", "trial", "paid", "expiring", "archived"].map(f => (
             <button key={f} onClick={() => setFilter(f)} style={S.filterBtn(filter === f)}>
-              {f === "all" ? `All (${providers.length})` : f === "archived" ? `📁 Archived (${providers.filter(p => p.subscription_status === "archived").length})` : f.charAt(0).toUpperCase() + f.slice(1)}
+              {f === "all" ? `All (${providers.length})` : f === "archived" ? `📁 Archived (${providers.filter(p => p.subscription_status === "archived").length})` : f === "incomplete" ? `⚠ Incomplete (${providers.filter(p => !p.email || !p.services || p.services.length === 0 || !p.service_areas || p.service_areas.length === 0).length})` : f.charAt(0).toUpperCase() + f.slice(1)}
             </button>
           ))}
         </div>
@@ -446,6 +479,9 @@ You can resend manually from the Email button.`);
               {p.subscription_tier && <span style={S.badge(T.teal, "#e0f4f1")}>{p.subscription_tier}</span>}
               {dl !== null && dl >= 0 && <span style={S.badge(dl <= 3 ? T.red : T.gold, dl <= 3 ? "#fce8e8" : "#fff8e1")}>{dl === 0 ? "Expires today!" : `${dl}d left`}</span>}
               {dl !== null && dl < 0 && <span style={S.badge(T.red, "#fce8e8")}>Trial expired</span>}
+              {!p.email && <span style={S.badge("#B71C1C", "#ffebee")}>⚠ No Email</span>}
+              {(!p.services || p.services.length === 0) && <span style={S.badge("#E65100", "#fff3e0")}>⚠ No Services</span>}
+              {(!p.service_areas || p.service_areas.length === 0) && <span style={S.badge("#4A148C", "#f3e5f5")}>⚠ No Areas</span>}
             </div>
 
             {/* EXPANDED DETAIL */}
@@ -614,6 +650,14 @@ You can resend manually from the Email button.`);
                   <button onClick={() => toggleVisible(p)} style={S.btn(T.teal)}>{p.is_visible === false ? "Make Visible" : "Hide Listing"}</button>
                   <button onClick={() => del(p)} style={S.btn(T.red)}>Delete</button>
                   <button onClick={() => startEdit(p)} style={S.btn("#5a3010")}>✏️ Edit Details</button>
+                  <button
+                    onClick={() => sendAccountToProvider(p)}
+                    disabled={handing === p.id}
+                    style={{ ...S.btn("#1B3D6F"), fontWeight: 900, opacity: handing === p.id ? 0.7 : 1 }}
+                    title={p.email ? `Send login credentials to ${p.email}` : "Add email first"}
+                  >
+                    {handing === p.id ? "Sending…" : p.email ? "📤 Send Account to Provider" : "📤 Send Account (add email first)"}
+                  </button>
                   {p.email && <a href={`mailto:${p.email}`} style={{ ...S.btn(T.brownLight), textDecoration: "none" }}>✉️ Email</a>}
                   {p.phone && <a href={`tel:${p.phone}`} style={{ ...S.btn("#777"), textDecoration: "none" }}>📞 Call</a>}
                 </div>
@@ -1017,12 +1061,7 @@ function AddProviderTab({ onAdded, categories, services: allServices, serviceAre
   };
 
   const save = async () => {
-    if (!form.business_name.trim()) return alert("Business name is required.");
-    if (!form.owner_name.trim()) return alert("Owner name is required (needed for the welcome email).");
-    if (!form.email.trim()) return alert("Email is required.");
-    if (!form.category_id) return alert("Please select a service category.");
-    if (form.services.length === 0) return alert("Please select at least one specific service.");
-    if (form.service_areas.length === 0) return alert("Please select at least one service area (village).");
+    if (!form.business_name.trim()) return alert("Business name is required — everything else can be added later.");
     setSaving(true);
     try {
       const res = await fetch(`https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/addProviderByAdmin`, {
@@ -1049,7 +1088,7 @@ function AddProviderTab({ onAdded, categories, services: allServices, serviceAre
       });
       const data = await res.json();
       if (data.error) throw new Error(data.error);
-      setDone({ name: form.business_name, vh: data.vh_number, email: form.email, tempPass: data.temp_password });
+      setDone({ name: form.business_name, vh: data.vh_number, email: form.email, tempPass: data.temp_password, emailSent: data.email_sent, emailSkipped: data.email_skipped });
       onAdded({ ...form, id: data.id, vh_number: data.vh_number });
       setForm(empty);
       setSvcSearch("");
@@ -1061,18 +1100,22 @@ function AddProviderTab({ onAdded, categories, services: allServices, serviceAre
   return (
     <div style={S.card}>
       <div style={S.secTitle}>➕ Add Provider on Their Behalf</div>
-      <div style={{ fontSize: 13, color: T.brownLight, fontFamily: T.sans, marginBottom: 16, lineHeight: 1.6, background: T.parchmentDark, borderRadius: 6, padding: "10px 14px", borderLeft: `4px solid ${T.gold}` }}>
-        Use this form to build a listing for a provider you've spoken with. They'll receive a welcome email explaining that you created their profile, along with their VH account number, temporary password, and trial info. They can log in at any time to view stats and update their listing.
+      <div style={{ fontSize: 13, color: T.brownLight, fontFamily: T.sans, marginBottom: 16, lineHeight: 1.7, background: T.parchmentDark, borderRadius: 6, padding: "12px 14px", borderLeft: `4px solid ${T.gold}` }}>
+        <strong style={{ color: T.brownDark }}>Only Business Name is required.</strong> Add what you have — fill in email, areas, and services later. The provider goes live immediately with a 45-day free trial from today. Once you have their email, use <strong>"Send Account to Provider"</strong> from their profile to hand it off.
       </div>
 
       {done && (
         <div style={{ background: "#e8f5e9", border: `2px solid ${T.green}`, borderRadius: 10, padding: "18px 16px", marginBottom: 18, fontFamily: T.sans }}>
           <div style={{ fontSize: 15, fontWeight: 900, color: T.green, marginBottom: 8 }}>✅ {done.name} — Added Successfully!</div>
-          <div style={{ fontSize: 13, color: T.brownDark, lineHeight: 1.8 }}>
+          <div style={{ fontSize: 13, color: T.brownDark, lineHeight: 1.9 }}>
             <strong>Account #:</strong> {done.vh}<br />
-            <strong>Email sent to:</strong> {done.email}<br />
-            <strong>Temp password:</strong> <span style={{ fontFamily: "monospace", background: "#f0f0f0", padding: "2px 8px", borderRadius: 4, fontWeight: 700 }}>{done.tempPass}</span><br />
-            <span style={{ fontSize: 12, color: T.brownLight }}>Provider is live. They received their "we built your profile" email with login credentials and trial info.</span>
+            {done.tempPass && <><strong>Temp password:</strong> <span style={{ fontFamily: "monospace", background: "#f0f0f0", padding: "2px 8px", borderRadius: 4, fontWeight: 700 }}>{done.tempPass}</span><br /></>}
+            {done.emailSent && <div style={{ color: "#2E7D32", fontWeight: 700, marginTop: 6 }}>✅ Welcome email sent to {done.email}</div>}
+            {done.emailSkipped && (
+              <div style={{ background: "#fff3cd", border: "1px solid #E8431A", borderRadius: 6, padding: "8px 10px", marginTop: 8, fontSize: 12 }}>
+                ⚠️ <strong>No email on file</strong> — listing is live and searchable. When you get their email, find this account in Providers, edit it, and click <strong>"Send Account to Provider"</strong> to hand it off.
+              </div>
+            )}
           </div>
           <button onClick={() => setDone(null)} style={{ marginTop: 10, ...S.btn(T.brown), fontSize: 12 }}>Dismiss</button>
         </div>
@@ -1084,7 +1127,7 @@ function AddProviderTab({ onAdded, categories, services: allServices, serviceAre
         <div style={{ fontWeight: 900, fontSize: 11, color: T.brownLight, fontFamily: T.sans, textTransform: "uppercase", letterSpacing: 2, borderBottom: `1px solid ${T.border}`, paddingBottom: 6, marginTop: 4 }}>Business Info</div>
 
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
-          {[["Business Name *", "business_name", "text"], ["Owner Name *", "owner_name", "text"]].map(([lbl, k, t]) => (
+          {[["Business Name ✱", "business_name", "text"], ["Owner Name", "owner_name", "text"]].map(([lbl, k, t]) => (
             <div key={k}>
               <div style={{ fontSize: 11, color: T.brownLight, fontFamily: T.sans, marginBottom: 3 }}>{lbl}</div>
               <input type={t} value={form[k]} onChange={e => set(k, e.target.value)} style={S.inp} />
@@ -1093,7 +1136,7 @@ function AddProviderTab({ onAdded, categories, services: allServices, serviceAre
         </div>
 
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
-          {[["Email Address *", "email", "email"], ["Phone Number", "phone", "tel"]].map(([lbl, k, t]) => (
+          {[["Email Address", "email", "email"], ["Phone Number", "phone", "tel"]].map(([lbl, k, t]) => (
             <div key={k}>
               <div style={{ fontSize: 11, color: T.brownLight, fontFamily: T.sans, marginBottom: 3 }}>{lbl}</div>
               <input type={t} value={form[k]} onChange={e => set(k, e.target.value)} style={S.inp} />

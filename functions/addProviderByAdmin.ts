@@ -83,8 +83,8 @@ Deno.serve(async (req: Request) => {
       trial_days: inputTrialDays,
     } = body;
 
-    if (!business_name || !owner_name || !email) {
-      return Response.json({ error: 'business_name, owner_name, and email are required' }, { status: 400, headers: CORS });
+    if (!business_name) {
+      return Response.json({ error: 'business_name is required' }, { status: 400, headers: CORS });
     }
 
     // Get existing VH numbers
@@ -278,9 +278,17 @@ Deno.serve(async (req: Request) => {
 </body>
 </html>`;
 
-    await sendEmail(email, `Welcome to V-Hub — Your Listing for ${business_name} is Live!`, welcomeHtml);
+    let emailSent = false;
+    let emailSkipped = false;
+    if (email && email.trim()) {
+      await sendEmail(email, `Welcome to V-Hub — Your Listing for ${business_name} is Live!`, welcomeHtml);
+      emailSent = true;
+    } else {
+      emailSkipped = true;
+      console.log(`No email for ${business_name} — skipping welcome email. Send manually later.`);
+    }
 
-    return Response.json({ ok: true, id: record.id, vh_number, temp_password: tempPassword }, { headers: CORS });
+    return Response.json({ ok: true, id: record.id, vh_number, temp_password: tempPassword, email_sent: emailSent, email_skipped: emailSkipped }, { headers: CORS });
 
   } catch (error: unknown) {
     const msg = error instanceof Error ? error.message : String(error);
