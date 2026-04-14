@@ -709,8 +709,8 @@ function DropBtn({ label, isOpen, onClick }) {
   return (
     <button onClick={onClick} style={{
       width: "100%", background: PAPER,
-      border: `3px solid ${YELLOW}`,
-      boxShadow: `0 0 0 1.5px ${YELLOW}, 0 0 10px 2px rgba(255,220,0,0.35)`,
+      border: "3px solid #1A6B3C",
+      boxShadow: "0 0 0 1.5px #1A6B3C, 0 0 10px 2px rgba(26,107,60,0.3)",
       borderRadius: 5, padding: "10px 12px", fontSize: 13,
       fontFamily: "'Times New Roman', serif",
       color: isPlaceholder ? INK_FADE : INK,
@@ -1446,12 +1446,12 @@ export default function Home() {
 
         <Rule thick />
 
-        {/* FIND SERVICES SEARCH BLOCK — full width, yellow bordered */}
+        {/* FIND SERVICES SEARCH BLOCK — full width, green bordered */}
         <div style={{
-          border: `3px solid ${YELLOW}`,
-          outline: `1.5px solid ${YELLOW}`,
+          border: "4px solid #1A6B3C",
+          outline: "1.5px solid #1A6B3C",
           outlineOffset: "0px",
-          boxShadow: "0 0 10px 2px rgba(255,220,0,0.3)",
+          boxShadow: "0 0 10px 2px rgba(26,107,60,0.3)",
           background: PAPER,
           width: "100%", boxSizing: "border-box",
         }}>
@@ -1459,7 +1459,7 @@ export default function Home() {
           <div style={{
             padding: "8px 16px", textAlign: "center", fontSize: 13, fontWeight: 900,
             letterSpacing: 2, color: "#000", textTransform: "uppercase",
-            borderBottom: `1px solid ${YELLOW}88`,
+            borderBottom: "1px solid #1A6B3C88",
           }}>Classifieds</div>
           {/* Search box */}
           <div style={{ padding: "8px 12px 4px" }}>
@@ -1487,7 +1487,7 @@ export default function Home() {
             padding: "10px 16px", textAlign: "center", fontSize: 13, fontWeight: 900,
             letterSpacing: 2, color: "#CC0000", textTransform: "uppercase",
             fontFamily: "'Times New Roman', serif",
-          }}>🔥 Deal of the Week!</div>
+          }}>🔥 Deals of the Week!</div>
         </div>
 
         {/* LIST YOUR SERVICE + PROVIDER HUB — half width each, navy border */}
