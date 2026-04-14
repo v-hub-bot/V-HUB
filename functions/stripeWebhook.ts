@@ -188,10 +188,26 @@ Deno.serve(async (req: Request): Promise<Response> => {
     if (session.mode === "subscription") {
       const subscriptionId = session.subscription as string;
       const providerRecordId = session.metadata?.provider_record_id || session.metadata?.provider_id;
+      const addonType = session.metadata?.addon_type || "";
       let provider: any = null;
 
-      // ── Find and update the provider record ────────────────────────────
-      if (providerRecordId) {
+      // ── Classifieds Add-On: simple branch ─────────────────────────────
+      if (addonType === "classifieds" && providerRecordId) {
+        console.log(`Classifieds addon checkout completed: ${providerRecordId}`);
+        try {
+          await base44.asServiceRole.entities.Provider.update(providerRecordId, {
+            classifieds_addon: true,
+            classifieds_stripe_subscription_id: subscriptionId,
+          });
+          console.log("✅ Classifieds addon activated for:", providerRecordId);
+        } catch (err) {
+          console.error("Failed to activate classifieds addon:", err);
+        }
+        // No email needed for classifieds addon — provider is already in dashboard
+      }
+
+      // ── Main subscription checkout (non-addon) ──────────────────────
+      else if (providerRecordId) {
         try {
           provider = await base44.asServiceRole.entities.Provider.get(providerRecordId);
         } catch (_) {
@@ -267,7 +283,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
         } else {
           console.error("Provider not found for checkout session:", providerRecordId);
         }
-      }
+      } // end else-if (main subscription)
     }
   }
 

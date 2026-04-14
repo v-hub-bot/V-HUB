@@ -1190,6 +1190,34 @@ export default function ProviderDashboard() {
       window.history.replaceState({}, "", window.location.pathname);
     }
 
+    // Handle classifieds add-on payment return
+    const classifiedsResult = urlParams.get("classifieds_payment");
+    if (classifiedsResult === "success") {
+      window.history.replaceState({}, "", window.location.pathname);
+      const acctId = urlParams.get("acct") || sessionStorage.getItem("vhub_provider_id");
+      if (acctId) {
+        // Poll for a few seconds to give the Stripe webhook time to activate classifieds_addon
+        const poll = async () => {
+          for (let i = 0; i < 5; i++) {
+            await new Promise(r => setTimeout(r, 1500));
+            try {
+              const resp = await fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/getProviders", {
+                method: "POST", headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ session_restore: true, provider_id: acctId }),
+              });
+              const data = await resp.json();
+              if (data.success && data.provider) {
+                setProvider(data.provider);
+                seedForm(data.provider);
+                if (data.provider.classifieds_addon) break; // activated!
+              }
+            } catch (_) {}
+          }
+        };
+        poll();
+      }
+    }
+
     // Load entity data for name resolution and edit pickers
     Promise.all([
       Category.list().catch(() => []),
