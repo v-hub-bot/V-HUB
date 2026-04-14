@@ -1442,7 +1442,9 @@ export default function Home() {
         {/* FIND SERVICES SEARCH BLOCK — full width, yellow bordered */}
         <div style={{
           border: `3px solid ${YELLOW}`,
-          boxShadow: `0 0 0 1.5px ${YELLOW}, 0 0 10px 2px rgba(255,220,0,0.3)`,
+          outline: `1.5px solid ${YELLOW}`,
+          outlineOffset: "0px",
+          boxShadow: "0 0 10px 2px rgba(255,220,0,0.3)",
           background: PAPER,
           width: "100%", boxSizing: "border-box",
         }}>
@@ -1466,16 +1468,15 @@ export default function Home() {
         />
 
         {/* CLASSIFIEDS BUTTON — full width under image, same weight green border */}
-        <a href="/Classifieds" style={{
-          textDecoration: "none", display: "block",
-          border: "3px solid #1A6B3C",
-          boxShadow: "0 0 0 1.5px #1A6B3C, 0 0 10px 2px rgba(26,107,60,0.3)",
-          boxSizing: "border-box",
-        }}>
+        <a href="/Classifieds" style={{ textDecoration: "none", display: "block", width: "100%" }}>
           <div style={{
             padding: "10px 16px", textAlign: "center", fontSize: 12, fontWeight: 700,
             letterSpacing: 2, color: "#1A6B3C", textTransform: "uppercase",
             background: PAPER,
+            border: "3px solid #1A6B3C",
+            outline: "1.5px solid #1A6B3C",
+            outlineOffset: "0px",
+            boxShadow: "0 0 10px 2px rgba(26,107,60,0.3)",
             cursor: "pointer",
             width: "100%", boxSizing: "border-box",
           }}>📰 &nbsp;Classifieds</div>
