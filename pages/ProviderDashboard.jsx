@@ -484,6 +484,120 @@ function ResetPasswordScreen({ token, providerId, onSuccess }) {
   );
 }
 
+
+// ── FORGOT PASSWORD SCREEN ────────────────────────────────────────────────
+function ForgotPasswordScreen({ onBack }) {
+  const [email, setEmail] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [sent, setSent] = useState(false);
+  const [error, setError] = useState("");
+
+  const handleSubmit = async (e) => {
+    e && e.preventDefault();
+    const val = email.trim();
+    if (!val) { setError("Please enter your email address."); return; }
+    setLoading(true); setError("");
+    try {
+      const res = await fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/requestPasswordReset", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: val }),
+      });
+      const data = await res.json();
+      if (data.error) { setError(data.error); setLoading(false); return; }
+      setSent(true);
+    } catch {
+      setError("Something went wrong. Please try again or email admin@v-hub.us.");
+    }
+    setLoading(false);
+  };
+
+  return (
+    <div style={{ minHeight: "100vh", background: PAPER, backgroundImage: "repeating-linear-gradient(0deg,transparent,transparent 27px,rgba(28,15,0,0.03) 27px,rgba(28,15,0,0.03) 28px)", fontFamily: SERIF }}>
+      <link rel="preconnect" href="https://fonts.googleapis.com" />
+      <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet" />
+      <div style={{ background: PAPER, borderBottom: `3px double ${INK}` }}>
+        <div style={{ display: "flex", alignItems: "center", padding: "10px 14px 8px", boxSizing: "border-box" }}>
+          <a href="/" style={{ textDecoration: "none", flexShrink: 0, width: 56, display: "flex", alignItems: "center" }}>
+            <img src="https://base44.app/api/apps/69d062aca815ce8e697894b1/files/mp/public/69d062aca815ce8e697894b1/f14a7cbd0_logo_icon_small.png" alt="V-Hub" style={{ width: 48, height: 48, objectFit: "contain", display: "block" }} />
+          </a>
+          <a href="/" style={{ textDecoration: "none", flex: 1, display: "flex", alignItems: "baseline", justifyContent: "center", gap: 0 }}>
+            <span style={{ fontStyle: "italic", fontWeight: 700, fontFamily: "'Great Vibes', cursive", fontSize: 48, color: "#003366", WebkitTextStroke: "0.5px #003366", textShadow: "0.5px 0.5px 0 #001a40", lineHeight: 1 }}>V</span>
+            <span style={{ fontSize: 32, fontWeight: 900, color: INK, fontFamily: "'Times New Roman', serif", lineHeight: 1, margin: "0 2px" }}>-</span>
+            <span style={{ fontSize: 40, fontWeight: 900, color: INK, fontFamily: "'Times New Roman', serif", letterSpacing: -1, lineHeight: 1 }}>Hub</span>
+          </a>
+          <div style={{ flexShrink: 0, width: 56, display: "flex", justifyContent: "flex-end", alignItems: "center" }}>
+            <button onClick={onBack} style={{ background: `linear-gradient(180deg,#9A6030,${BROWN_BTN} 60%,#5A3010)`, border: `2px solid #1B3D6F`, borderRadius: 4, color: "#F5E8CC", fontFamily: SANS, fontWeight: 700, fontSize: 10, letterSpacing: 0.5, padding: "6px 10px", cursor: "pointer", whiteSpace: "nowrap" }}>← Back</button>
+          </div>
+        </div>
+      </div>
+      <div style={{ textAlign: "center", padding: "32px 20px 24px", borderBottom: `3px double ${INK}` }}>
+        <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 4, color: INK_FADE, textTransform: "uppercase", fontFamily: SERIF, marginBottom: 6 }}>The Villages, Florida</div>
+        <div style={{ fontSize: 28, fontWeight: 900, color: INK, letterSpacing: 3, textTransform: "uppercase", fontFamily: SERIF }}>Provider Hub</div>
+        <div style={{ height: 2, background: RED_RULE, margin: "10px auto", width: 180 }} />
+      </div>
+      <div style={{ maxWidth: 460, margin: "40px auto", padding: "0 20px 60px" }}>
+        <div style={{ background: PAPER_MID, border: `2px solid ${PAPER_DK}`, borderRadius: 10, padding: "32px 28px", boxShadow: "0 4px 24px rgba(28,15,0,0.10)" }}>
+          {sent ? (
+            <div style={{ textAlign: "center", padding: "20px 0" }}>
+              <div style={{ fontSize: 48, marginBottom: 16 }}>📬</div>
+              <div style={{ fontSize: 18, fontWeight: 900, color: INK, marginBottom: 10 }}>Check Your Email</div>
+              <div style={{ fontSize: 14, color: INK_FADE, fontFamily: SANS, lineHeight: 1.7, marginBottom: 24 }}>
+                If an account exists for <strong>{email}</strong>, a password reset link has been sent.<br/>
+                Check your spam folder if you don't see it within a few minutes.
+              </div>
+              <button onClick={onBack} style={{ background: `linear-gradient(180deg,#9A6030,${BROWN_BTN} 60%,#5A3010)`, color: PAPER, border: `3px solid ${YELLOW}`, boxShadow: `0 0 0 1.5px ${YELLOW}`, borderRadius: 8, padding: "12px 28px", fontSize: 14, fontWeight: 900, cursor: "pointer", fontFamily: SERIF, letterSpacing: 2, textTransform: "uppercase" }}>
+                Back to Sign In →
+              </button>
+            </div>
+          ) : (
+            <>
+              <div style={{ textAlign: "center", marginBottom: 24 }}>
+                <div style={{ fontSize: 36, marginBottom: 8 }}>🔑</div>
+                <div style={{ fontSize: 16, fontWeight: 900, color: INK, textTransform: "uppercase", letterSpacing: 2, fontFamily: SERIF }}>Reset Your Password</div>
+                <div style={{ fontSize: 13, color: INK_FADE, fontStyle: "italic", marginTop: 6, lineHeight: 1.6, fontFamily: SERIF }}>
+                  Enter the email address on your account and we'll send you a reset link.
+                </div>
+              </div>
+              {error && (
+                <div style={{ background: "#FEE", border: `1.5px solid ${RED_RULE}`, borderRadius: 6, padding: "10px 14px", marginBottom: 16, fontSize: 13, color: RED_RULE, fontFamily: SANS }}>
+                  ⚠ {error}
+                </div>
+              )}
+              <form onSubmit={handleSubmit}>
+                <div style={{ marginBottom: 20 }}>
+                  <label style={lbS}>Email Address</label>
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={e => setEmail(e.target.value)}
+                    placeholder="your@email.com"
+                    style={inS}
+                    autoFocus
+                    autoComplete="email"
+                  />
+                </div>
+                <button
+                  type="submit"
+                  disabled={loading}
+                  style={{ width: "100%", background: loading ? PAPER_DK : `linear-gradient(180deg,#9A6030,${BROWN_BTN} 60%,#5A3010)`, color: PAPER, border: `3px solid ${YELLOW}`, boxShadow: `0 0 0 1.5px ${YELLOW}, 0 0 12px 3px rgba(255,220,0,0.25)`, borderRadius: 8, padding: "15px 20px", fontSize: 15, fontWeight: 900, cursor: loading ? "not-allowed" : "pointer", fontFamily: SERIF, letterSpacing: 2, textTransform: "uppercase" }}
+                >
+                  {loading ? "Sending..." : "Send Reset Link →"}
+                </button>
+              </form>
+              <div style={{ textAlign: "center", marginTop: 20, paddingTop: 16, borderTop: `1px solid ${PAPER_DK}` }}>
+                <button onClick={onBack} style={{ background: "none", border: "none", color: BROWN_BTN, fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: SANS, textDecoration: "underline" }}>
+                  ← Back to Sign In
+                </button>
+              </div>
+            </>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ── LOGIN SCREEN ──────────────────────────────────────────────────────────
 // ── SHA-256 password hashing (Web Crypto API) ─────────────────────────────
 async function hashPassword(plain) {
@@ -574,7 +688,7 @@ function LoginScreen({ onLogin, onForgot }) {
             <div style={{ fontSize: 36, marginBottom: 8 }}>🔐</div>
             <div style={{ fontSize: 16, fontWeight: 900, color: INK, textTransform: "uppercase", letterSpacing: 2, fontFamily: SERIF }}>Sign In to Your Hub</div>
             <div style={{ fontSize: 13, color: INK_FADE, fontStyle: "italic", marginTop: 6, lineHeight: 1.6, fontFamily: SERIF }}>
-              Use your email or VH account number, plus the password you created when you listed your business.
+              Use your email or VH account number, plus your password. First time? Use the temporary password from your welcome email.
             </div>
           </div>
 
