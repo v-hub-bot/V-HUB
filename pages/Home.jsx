@@ -1291,23 +1291,11 @@ export default function Home() {
       };
       if (pass) {
         debugLog.matchedProviders.push(debugEntry);
-        console.log(`[PROVIDER_MATCH_DEBUG] ✅ MATCHED: ${p.business_name} (${p.id})`);
       } else {
         debugLog.excludedProviders.push(debugEntry);
-        console.log(`[PROVIDER_MATCH_DEBUG] ❌ EXCLUDED: ${p.business_name} (${p.id}) | reasons: ${exclusionReasons.join("; ")}`);
       }
       return pass;
     });
-
-    console.log("[PROVIDER_MATCH_DEBUG]", JSON.stringify({
-      selectedVillage: debugLog.selectedVillage,
-      selectedService: debugLog.selectedService,
-      candidateProviders: debugLog.candidateCount,
-      matchedCount: debugLog.matchedProviders.length,
-      excludedCount: debugLog.excludedProviders.length,
-      matchedProviders: debugLog.matchedProviders.map(p => p.business_name),
-      excludedProvidersWithReasons: debugLog.excludedProviders.map(p => ({ name: p.business_name, reasons: p.exclusion_reasons })),
-    }, null, 2));
 
     // Sort by rating field (no auth-gated calls on public page)
     const getScore = (p) => typeof p.rating === "number" ? p.rating : 0;

@@ -122,7 +122,7 @@ async function sendTrialStartEmail(opts: {
           <table style="width:100%;border-collapse:collapse;font-size:14px;color:#3A1A00;">
             <tr><td style="padding:5px 0;color:#7B5230;">Amount Due Today</td><td style="text-align:right;font-weight:900;font-size:18px;color:#2E7D32;">$0.00</td></tr>
             <tr><td style="padding:5px 0;color:#7B5230;">Trial Ends</td><td style="text-align:right;font-weight:700;">${trialEndDate}</td></tr>
-            <tr><td style="padding:5px 0;color:#7B5230;">After Trial</td><td style="text-align:right;">$29.99 / month</td></tr>
+            <tr><td style="padding:5px 0;color:#7B5230;">After Trial</td><td style="text-align:right;">$12 / month</td></tr>
             <tr><td style="padding:5px 0;color:#7B5230;">Subscription</td><td style="text-align:right;">V-Hub Basic Listing · Monthly</td></tr>
           </table>
         </div>
