@@ -1466,15 +1466,24 @@ export default function Home() {
 
         <Rule thick />
 
-        {/* FIND SERVICES BUTTON — full width, yellow border */}
+        {/* FIND SERVICES SEARCH BLOCK — full width, yellow bordered */}
         <div style={{
-          padding: "10px 16px", textAlign: "center", fontSize: 12, fontWeight: 700,
-          letterSpacing: 2, color: INK, textTransform: "uppercase",
           border: `3px solid ${YELLOW}`,
           boxShadow: `0 0 0 1.5px ${YELLOW}44, 0 2px 8px rgba(255,220,0,0.25)`,
           background: PAPER,
           width: "100%", boxSizing: "border-box",
-        }}>Find Services</div>
+        }}>
+          {/* Header label */}
+          <div style={{
+            padding: "8px 16px", textAlign: "center", fontSize: 12, fontWeight: 700,
+            letterSpacing: 2, color: INK, textTransform: "uppercase",
+            borderBottom: `1px solid ${YELLOW}88`,
+          }}>Find Services</div>
+          {/* Search box */}
+          <div style={{ padding: "8px 12px 4px" }}>
+            <SearchBox cats={cats} svcs={svcs} areas={areas} onSearch={doSearch} selSvc={selSvc} setSelSvc={setSelSvc} selArea={selArea} setSelArea={setSelArea} />
+          </div>
+        </div>
 
         {/* PHOTO */}
         <img
@@ -1520,9 +1529,6 @@ export default function Home() {
             <p style={hd}>{NEWSPAPER_CONTENT.howItWorks.headline}</p>
             <p style={sub}>{NEWSPAPER_CONTENT.howItWorks.subhead}</p>
             {NEWSPAPER_CONTENT.howItWorks.body.map((p,i) => <p key={i} style={{...para, marginBottom: 10}}>{p}</p>)}
-
-            {/* Search box */}
-            <SearchBox cats={cats} svcs={svcs} areas={areas} onSearch={doSearch} selSvc={selSvc} setSelSvc={setSelSvc} selArea={selArea} setSelArea={setSelArea} />
 
             {/* Story below search */}
             <div style={{ marginTop: 12 }}>
