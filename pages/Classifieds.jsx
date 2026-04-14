@@ -259,7 +259,7 @@ export default function Classifieds() {
             Deals of the Week
           </div>
           <div style={{ fontSize: 11, fontStyle: "italic", color: INK_FADE, marginTop: 3, fontFamily: SERIF }}>
-            Exclusive deals &amp; special offers from local service providers
+            Exclusive deals & special offers from local service providers
           </div>
         </div>
 
