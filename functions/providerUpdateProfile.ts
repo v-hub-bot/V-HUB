@@ -1,5 +1,5 @@
 // providerUpdateProfile — secure self-service update for provider hub sessions
-// v2 - wildcard CORS to support v-hub.us custom domain
+// v3 - added ID validation to prevent legacy codes from being saved
 import { createClient } from "npm:@base44/sdk@0.8.25";
 
 const CORS_HEADERS = {
@@ -8,6 +8,21 @@ const CORS_HEADERS = {
   "Access-Control-Allow-Headers": "Content-Type",
   "Content-Type": "application/json",
 };
+
+// ── ID Validation ─────────────────────────────────────────────────────────────
+function isValidDbId(id: string): boolean {
+  return typeof id === 'string' && /^[0-9a-f]{24}$/.test(id);
+}
+
+function filterValidIds(ids: unknown): string[] {
+  if (!Array.isArray(ids)) return [];
+  return ids.filter((id: unknown) => isValidDbId(String(id))) as string[];
+}
+
+function getInvalidIds(ids: unknown): string[] {
+  if (!Array.isArray(ids)) return [];
+  return ids.filter((id: unknown) => !isValidDbId(String(id))).map(String);
+}
 
 const base44 = createClient({ appId: "69d062aca815ce8e697894b1" });
 const sr = base44.asServiceRole;
@@ -49,6 +64,30 @@ Deno.serve(async (req: Request) => {
   for (const k of ALLOWED) {
     if (k in fields) safe[k] = fields[k];
   }
+
+  // ── Validate service and area IDs ──────────────────────────────────
+  if ('services' in safe) {
+    const invalid = getInvalidIds(safe.services);
+    if (invalid.length > 0) {
+      console.error('providerUpdateProfile: invalid service IDs rejected:', invalid);
+      return new Response(JSON.stringify({
+        error: `Invalid service IDs: ${invalid.join(', ')}. Please select services from the dropdown.`
+      }), { status: 400, headers: CORS_HEADERS });
+    }
+    safe.services = filterValidIds(safe.services);
+  }
+
+  if ('service_areas' in safe) {
+    const invalid = getInvalidIds(safe.service_areas);
+    if (invalid.length > 0) {
+      console.error('providerUpdateProfile: invalid area IDs rejected:', invalid);
+      return new Response(JSON.stringify({
+        error: `Invalid village IDs: ${invalid.join(', ')}. Please select villages from the dropdown.`
+      }), { status: 400, headers: CORS_HEADERS });
+    }
+    safe.service_areas = filterValidIds(safe.service_areas);
+  }
+
   if (!Object.keys(safe).length) {
     return new Response(JSON.stringify({ error: "No updatable fields provided" }), { status: 400, headers: CORS_HEADERS });
   }

@@ -1,5 +1,5 @@
-// adminUpdateProvider v2 — admin CRUD + provider self-update mode
-// Last updated: 2026-04-13T17:20Z
+// adminUpdateProvider v3 — admin CRUD + provider self-update mode
+// Added ID validation to prevent legacy codes or text from being saved
 import { createClientFromRequest, createClient } from 'npm:@base44/sdk@0.8.25';
 
 const ALLOWED_ORIGIN = "https://v-hub-app-edf7f8e8.base44.app";
@@ -14,6 +14,56 @@ function getCorsHeaders(req: Request) {
     "Content-Type": "application/json",
     "Vary": "Origin",
   };
+}
+
+// ── ID Validation ─────────────────────────────────────────────────────────────
+function isValidDbId(id: unknown): boolean {
+  return typeof id === 'string' && /^[0-9a-f]{24}$/.test(id);
+}
+
+function filterValidIds(ids: unknown): string[] {
+  if (!Array.isArray(ids)) return [];
+  return ids.filter(isValidDbId) as string[];
+}
+
+function getInvalidIds(ids: unknown): string[] {
+  if (!Array.isArray(ids)) return [];
+  return ids.filter((id: unknown) => !isValidDbId(id)).map(String);
+}
+
+// Validate and sanitize any provider data before saving
+function sanitizeProviderFields(fields: Record<string, unknown>, cors: Record<string, string>): { safe: Record<string, unknown> | null; error: Response | null } {
+  const safe = { ...fields };
+
+  if ('services' in safe) {
+    const invalid = getInvalidIds(safe.services);
+    if (invalid.length > 0) {
+      console.error('adminUpdateProvider: invalid service IDs rejected:', invalid);
+      return {
+        safe: null,
+        error: Response.json({
+          error: `Invalid service IDs: ${invalid.join(', ')}. Use real database IDs from the Service entity.`
+        }, { status: 400, headers: cors })
+      };
+    }
+    safe.services = filterValidIds(safe.services);
+  }
+
+  if ('service_areas' in safe) {
+    const invalid = getInvalidIds(safe.service_areas);
+    if (invalid.length > 0) {
+      console.error('adminUpdateProvider: invalid area IDs rejected:', invalid);
+      return {
+        safe: null,
+        error: Response.json({
+          error: `Invalid village IDs: ${invalid.join(', ')}. Use real database IDs from the ServiceArea entity.`
+        }, { status: 400, headers: cors })
+      };
+    }
+    safe.service_areas = filterValidIds(safe.service_areas);
+  }
+
+  return { safe, error: null };
 }
 
 const srClient = createClient({ appId: "69d062aca815ce8e697894b1" }).asServiceRole;
@@ -46,9 +96,13 @@ Deno.serve(async (req: Request) => {
 
     const safe: Record<string,unknown> = {};
     for (const k of PROVIDER_SELF_FIELDS) { if (k in fields) safe[k] = fields[k]; }
-    if (!Object.keys(safe).length) return Response.json({ error: "No valid fields" }, { status: 400, headers: cors });
 
-    const updated = await srClient.entities.Provider.update(pid, safe);
+    const { safe: sanitized, error: validationError } = sanitizeProviderFields(safe, cors);
+    if (validationError) return validationError;
+
+    if (!Object.keys(sanitized!).length) return Response.json({ error: "No valid fields" }, { status: 400, headers: cors });
+
+    const updated = await srClient.entities.Provider.update(pid, sanitized!);
     return Response.json({ success: true, record: updated }, { headers: cors });
   }
 
@@ -68,10 +122,20 @@ Deno.serve(async (req: Request) => {
   const { id, fields, delete: doDelete, create: doCreate } = body as Record<string,unknown> & { delete?: boolean; create?: boolean };
 
   try {
-    if (doCreate)  { const r = await sr.entities.Provider.create(fields as Record<string,unknown>); return Response.json({ success: true, record: r }, { headers: cors }); }
-    if (!id)       return Response.json({ error: "Missing id" },       { status: 400, headers: cors });
-    if (doDelete)  { await sr.entities.Provider.delete(id as string);  return Response.json({ success: true },           { headers: cors }); }
-    if (fields)    { const r = await sr.entities.Provider.update(id as string, fields as Record<string,unknown>); return Response.json({ success: true, record: r }, { headers: cors }); }
+    if (doCreate) {
+      const { safe: sanitized, error: validationError } = sanitizeProviderFields((fields || {}) as Record<string, unknown>, cors);
+      if (validationError) return validationError;
+      const r = await sr.entities.Provider.create(sanitized!);
+      return Response.json({ success: true, record: r }, { headers: cors });
+    }
+    if (!id) return Response.json({ error: "Missing id" }, { status: 400, headers: cors });
+    if (doDelete) { await sr.entities.Provider.delete(id as string); return Response.json({ success: true }, { headers: cors }); }
+    if (fields) {
+      const { safe: sanitized, error: validationError } = sanitizeProviderFields(fields as Record<string, unknown>, cors);
+      if (validationError) return validationError;
+      const r = await sr.entities.Provider.update(id as string, sanitized!);
+      return Response.json({ success: true, record: r }, { headers: cors });
+    }
     return Response.json({ error: "No action" }, { status: 400, headers: cors });
   } catch (e: unknown) {
     const msg = e instanceof Error ? e.message : "Server error";
