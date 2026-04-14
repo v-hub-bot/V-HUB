@@ -1099,6 +1099,11 @@ export default function Home() {
         return provAreas.some(a => areaValMatchesVillage(a, plainVillageName));
       })();
 
+      if (!svcMatch || !areaMatch) {
+        console.log(`[V-HUB FILTER] EXCLUDED: ${p.business_name} | svcMatch=${svcMatch} areaMatch=${areaMatch} | services=${JSON.stringify(p.services)} | areas=${JSON.stringify((p.service_areas||[]).slice(0,5))}`);
+      } else {
+        console.log(`[V-HUB FILTER] INCLUDED: ${p.business_name}`);
+      }
       return svcMatch && areaMatch;
     });
 
