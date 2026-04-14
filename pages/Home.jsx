@@ -1028,14 +1028,51 @@ export default function Home() {
     // Macro entity ID → group name (for old test providers)
     const MACRO_AREA = {"69d06c4a4f1e1017a77a7018":"historic","69d06c4a4f1e1017a77a7019":"established","69d06c4a4f1e1017a77a701a":"newer","69d06c4a4f1e1017a77a701b":"eastport","69d06c4a4f1e1017a77a701c":"family"};
 
+    // HARDCODED entity ID → plain village name (never depends on runtime fetch)
+    // This is the source of truth — baked from the ServiceArea DB records
+    const STATIC_ENTITY_AREA_MAP = {
+      "69d06c54c9c22e67aed3c0ff":"alhambra","69d06c54c9c22e67aed3c100":"country club",
+      "69d06c54c9c22e67aed3c101":"del mar","69d06c54c9c22e67aed3c102":"el cortez",
+      "69d06c54c9c22e67aed3c103":"hacienda","69d06c54c9c22e67aed3c104":"la reynalda",
+      "69d06c54c9c22e67aed3c105":"la zamora","69d06c54c9c22e67aed3c106":"mira mesa",
+      "69d06c54c9c22e67aed3c107":"orange blossom","69d06c54c9c22e67aed3c108":"silver lake",
+      "69d06c54c9c22e67aed3c109":"spring arbor","69d06c54c9c22e67aed3c10a":"valle verde",
+      "69d06c54c9c22e67aed3c10b":"ashland","69d06c54c9c22e67aed3c10c":"belle aire",
+      "69d06c54c9c22e67aed3c10d":"belvedere","69d06c54c9c22e67aed3c10e":"bonita",
+      "69d06c54c9c22e67aed3c10f":"bonnybrook","69d06c54c9c22e67aed3c110":"calumet grove",
+      "69d06c54c9c22e67aed3c111":"caroline","69d06c54c9c22e67aed3c112":"chatham",
+      "69d06c54c9c22e67aed3c113":"duval","69d06c54c9c22e67aed3c114":"glenbrook",
+      "69d06c54c9c22e67aed3c115":"hadley","69d06c54c9c22e67aed3c116":"hemingway",
+      "69d06c54c9c22e67aed3c117":"lynnhaven","69d06c54c9c22e67aed3c118":"mallory square",
+      "69d06c54c9c22e67aed3c119":"pennecamp","69d06c54c9c22e67aed3c11a":"poinciana",
+      "69d06c54c9c22e67aed3c11b":"sabal chase","69d06c54c9c22e67aed3c11c":"santiago",
+      "69d06c54c9c22e67aed3c11d":"sunset pointe","69d06c54c9c22e67aed3c11e":"tall trees",
+      "69d06c54c9c22e67aed3c11f":"virginia trace","69d06c54c9c22e67aed3c120":"winifred",
+      "69d06c54c9c22e67aed3c121":"bradford","69d06c54c9c22e67aed3c122":"cason hammock",
+      "69d06c54c9c22e67aed3c123":"chitty chatty","69d06c54c9c22e67aed3c124":"citrus grove",
+      "69d06c54c9c22e67aed3c125":"deluna","69d06c54c9c22e67aed3c126":"desoto",
+      "69d06c54c9c22e67aed3c127":"fenney","69d06c54c9c22e67aed3c128":"hammock at fenney",
+      "69d06c54c9c22e67aed3c129":"hawkins","69d06c54c9c22e67aed3c12a":"linden",
+      "69d06c54c9c22e67aed3c12b":"marsh bend","69d06c54c9c22e67aed3c12c":"mcclure",
+      "69d06c54c9c22e67aed3c12d":"monarch grove","69d06c54c9c22e67aed3c12e":"richmond",
+      "69d06c54c9c22e67aed3c12f":"st. catherine","69d06c54c9c22e67aed3c130":"st. johns",
+      "69d06c54c9c22e67aed3c131":"moultrie creek","69d06c54c9c22e67aed3c132":"newell",
+      "69d06c54c9c22e67aed3c133":"lake denham","69d06c54c9c22e67aed3c134":"dabney",
+      "69d06c54c9c22e67aed3c135":"shady brook","69d06c54c9c22e67aed3c136":"bison valley",
+      "69d06c54c9c22e67aed3c137":"oak meadows","69d06c54c9c22e67aed3c138":"oxford oaks",
+      "69d06c54c9c22e67aed3c139":"middleton",
+    };
+
     // Resolve a provider area value to a lowercase name string
     const resolveAreaName = (a) => {
       const s = String(a).toLowerCase().trim();
       if (LEGACY_VA[s]) return LEGACY_VA[s].toLowerCase();
       if (MACRO_AREA[a]) return MACRO_AREA[a]; // "historic", "established", etc.
-      if (ENTITY_AREA_MAP[a]) return ENTITY_AREA_MAP[a]; // real ServiceArea entity ID
-      // Entity ID from new 64-village list — we check by name inclusion later
-      return s; // raw value (may be entity ID or plain text)
+      // Use hardcoded static map FIRST (always works, no runtime dependency)
+      if (STATIC_ENTITY_AREA_MAP[a]) return STATIC_ENTITY_AREA_MAP[a];
+      // Fall back to runtime-fetched map if available
+      if (ENTITY_AREA_MAP[a]) return ENTITY_AREA_MAP[a];
+      return s; // raw value fallback
     };
 
     // Check if a provider area value matches the selected village name
