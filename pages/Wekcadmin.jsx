@@ -348,16 +348,44 @@ You can resend manually from the Email button.`);
 
   const del = async (p) => { if (!window.confirm(`Delete ${p.business_name}?`)) return; await adminDelete(p.id); setProviders(prev => prev.filter(x => x.id !== p.id)); };
 
+  // Auto-expand when exactly 1 result
+  React.useEffect(() => {
+    if (filtered.length === 1) setExpanded(filtered[0].id);
+    else if (filtered.length > 1) setExpanded(null);
+  }, [filtered.length, filtered[0]?.id]);
+
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-      <input placeholder="🔍 Search name, email, phone, VH#..." value={search} onChange={e => setSearch(e.target.value)} style={S.inp} />
-      <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-        {["all", "pending", "active", "hidden", "trial", "paid", "expiring", "archived"].map(f => (
-          <button key={f} onClick={() => setFilter(f)} style={S.filterBtn(filter === f)}>
-            {f === "all" ? `All (${providers.length})` : f === "archived" ? `📁 Archived (${providers.filter(p => p.subscription_status === "archived").length})` : f.charAt(0).toUpperCase() + f.slice(1)}
-          </button>
-        ))}
+      {/* ── SEARCH BAR ── */}
+      <div style={{ position: "relative" }}>
+        <input
+          placeholder="🔍 Type a name, email, VH number, or phone..."
+          value={search}
+          onChange={e => { setSearch(e.target.value); setFilter("all"); }}
+          style={{ ...S.inp, fontSize: 15, padding: "11px 40px 11px 14px", border: `2px solid ${search ? T.teal : T.border}`, boxShadow: search ? `0 0 0 3px rgba(26,107,92,0.15)` : "none" }}
+        />
+        {search && (
+          <button onClick={() => { setSearch(""); setFilter("all"); }} style={{ position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", fontSize: 16, color: T.brownLight }}>✕</button>
+        )}
       </div>
+
+      {/* ── RESULT COUNT when searching ── */}
+      {search && (
+        <div style={{ fontSize: 13, color: filtered.length === 0 ? T.red : T.teal, fontFamily: T.sans, fontWeight: 700, padding: "2px 4px" }}>
+          {filtered.length === 0 ? "No accounts found" : filtered.length === 1 ? `✅ 1 account found — expanded below` : `${filtered.length} accounts match`}
+        </div>
+      )}
+
+      {/* ── STATUS FILTERS (only show when not in single-search mode) ── */}
+      {!search && (
+        <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+          {["all", "pending", "active", "hidden", "trial", "paid", "expiring", "archived"].map(f => (
+            <button key={f} onClick={() => setFilter(f)} style={S.filterBtn(filter === f)}>
+              {f === "all" ? `All (${providers.length})` : f === "archived" ? `📁 Archived (${providers.filter(p => p.subscription_status === "archived").length})` : f.charAt(0).toUpperCase() + f.slice(1)}
+            </button>
+          ))}
+        </div>
+      )}
 
       {filtered.length === 0 && <div style={{ textAlign: "center", color: T.brownLight, padding: 24, fontStyle: "italic" }}>No providers match.</div>}
 
@@ -424,17 +452,40 @@ You can resend manually from the Email button.`);
             {isOpen && (
               <div style={{ marginTop: 14, borderTop: `1px solid ${T.border}`, paddingTop: 14 }}>
 
+                {/* ── ACCOUNT SUMMARY BANNER ── */}
+                <div style={{ background: `linear-gradient(135deg,${T.brownDark},${T.brown})`, borderRadius: 8, padding: "12px 14px", marginBottom: 12, color: "#fff" }}>
+                  <div style={{ fontSize: 10, letterSpacing: 2, textTransform: "uppercase", opacity: 0.7, fontFamily: T.sans, marginBottom: 6 }}>Account Overview</div>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8 }}>
+                    {[
+                      ["VH Number", p.vh_number || "—"],
+                      ["Status", (p.subscription_status || "—").toUpperCase()],
+                      ["Tier", (p.subscription_tier || "basic").toUpperCase()],
+                      ["Trial Started", fmt(p.trial_start_date)],
+                      ["Trial Ends", fmt(p.trial_end_date)],
+                      ["Grace Period", p.grace_period_end_date ? fmt(p.grace_period_end_date) : "—"],
+                      ["Onboarding", p.onboarding_type || "—"],
+                      ["Stripe Sub", p.stripe_subscription_id ? "✅ Connected" : "❌ None"],
+                      ["Stripe Customer", p.stripe_customer_id ? "✅ On file" : "❌ None"],
+                    ].map(([label, val]) => (
+                      <div key={label}>
+                        <div style={{ fontSize: 9, opacity: 0.65, fontFamily: T.sans, textTransform: "uppercase", letterSpacing: 1 }}>{label}</div>
+                        <div style={{ fontSize: 12, fontWeight: 700, fontFamily: T.sans, marginTop: 1 }}>{String(val)}</div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
                 {/* Stats grid */}
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 12 }}>
                   {[
                     ["👁️ Profile Views", p.profile_views ?? 0],
                     ["🔍 Search Appearances", p.search_appearances ?? 0],
-                    ["📅 Trial Start", fmt(p.trial_start_date)],
-                    ["📅 Trial End", fmt(p.trial_end_date)],
-                    ["🚪 Onboarding", p.onboarding_type || "—"],
                     ["🏆 Years in Business", p.years_in_business || "—"],
                     ["📄 License #", p.license_number || "—"],
-                    ["⭐ Rating", p.rating ? `${p.rating}★` : "—"],
+                    ["⭐ Google Rating", p.google_rating ? `${p.google_rating}★` : "—"],
+                    ["📅 Joined", fmt(p.created_date)],
+                    ["📱 Mobile Provider", p.is_mobile ? "Yes" : "No"],
+                    ["🕐 Hours", p.hours_of_operation || "—"],
                   ].map(([label, val]) => (
                     <div key={label} style={{ background: T.parchment, borderRadius: 6, padding: "7px 10px" }}>
                       <div style={{ fontSize: 10, color: T.brownLight, fontFamily: T.sans }}>{label}</div>
