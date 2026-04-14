@@ -111,7 +111,7 @@ Deno.serve(async (req: Request) => {
       website: (website || '').trim(),
       address: (address || '').trim(),
       description: (description || '').trim(),
-      years_in_business: years_in_business ? Number(years_in_business) : null,
+      years_in_business: years_in_business ? String(years_in_business) : '',
       license_number: (license_number || '').trim(),
       google_review_url: (google_review_url || '').trim(),
       services: services || [],
