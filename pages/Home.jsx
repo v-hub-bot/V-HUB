@@ -153,8 +153,8 @@ function Burger({ currentUser }) {
 
   return (
     <>
-      <button onClick={() => setOpen(true)} style={{ background: "rgba(28,15,0,0.12)", border: `1px solid ${INK}44`, borderRadius: 4, width: 64, height: 64, cursor: "pointer", display: "flex", flexDirection: "column", gap: 6, justifyContent: "center", alignItems: "center", flexShrink: 0, padding: 0, boxSizing: "border-box" }}>
-        {[0,1,2].map(i => <span key={i} style={{ display: "block", width: 24, height: 3, background: INK, borderRadius: 2 }} />)}
+      <button onClick={() => setOpen(true)} style={{ background: "rgba(28,15,0,0.12)", border: `1px solid ${INK}44`, borderRadius: 4, width: 38, height: 38, cursor: "pointer", display: "flex", flexDirection: "column", gap: 5, justifyContent: "center", alignItems: "center", flexShrink: 0, padding: 0, boxSizing: "border-box" }}>
+        {[0,1,2].map(i => <span key={i} style={{ display: "block", width: 20, height: 2, background: INK, borderRadius: 2 }} />)}
       </button>
       {open && (
         <>
@@ -1469,7 +1469,7 @@ export default function Home() {
               <span style={{ fontSize: 44, fontWeight: 900, color: INK, fontFamily: "'Times New Roman', serif", letterSpacing: -1, lineHeight: 1 }}>Hub</span>
             </div>
             {/* Right: burger — smaller container */}
-            <div style={{ flexShrink: 0, width: 64, display: "flex", justifyContent: "flex-end", alignItems: "center" }}><Burger currentUser={currentUser} /></div>
+            <div style={{ flexShrink: 0, width: 42, display: "flex", justifyContent: "flex-end", alignItems: "center" }}><Burger currentUser={currentUser} /></div>
           </div>
           {/* Tagline */}
           <div style={{ fontSize: 13, fontStyle: "italic", color: INK_FADE, textAlign: "center", margin: "6px 0 10px" }}>
@@ -1563,6 +1563,14 @@ export default function Home() {
             <p style={hd}>{NEWSPAPER_CONTENT.growthStory.headline}</p>
             <p style={sub}>{NEWSPAPER_CONTENT.growthStory.subhead}</p>
             {NEWSPAPER_CONTENT.growthStory.body.map((p,i) => <p key={i} style={para}>{p}</p>)}
+            <div style={rule} />
+            {/* Story 3 — Community Pulse */}
+            <p style={hd}>COMMUNITY PULSE</p>
+            <p style={sub}>What neighbors are searching for this season</p>
+            <p style={para}>Spring in The Villages means busy schedules — pool openings, golf cart tune-ups, landscaping refreshes, and patio projects. Residents are turning to V-Hub in record numbers to find trusted local professionals before the summer heat sets in.</p>
+            <p style={para}>Lawn care and pest control top the search charts each April, followed closely by house cleaning and handyman services. Golf cart repair and detailing has also seen a sharp seasonal uptick as residents prep for the warmer months ahead.</p>
+            <p style={para}>New to The Villages? You're not alone — hundreds of families move in each month. V-Hub's directory is designed to help newcomers find reliable service providers fast, without relying on word-of-mouth alone.</p>
+            <p style={para}>Search by village, browse by category, or scroll the full directory. Every provider on V-Hub is local, every listing is reviewed, and every search is free.</p>
           </div>
 
           {/* ── CENTER COLUMN ── */}
