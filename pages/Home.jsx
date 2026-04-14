@@ -882,114 +882,66 @@ export default function Home() {
     User.me().then(u => setCurrentUser(u)).catch(() => setCurrentUser(null));
     setCats(CATS_STATIC);
     setSvcs(SVCS_STATIC);
-    // Hardcoded villages — no auth needed
-            const VILLAGE_DATA = [
-      { id: "v001", name: "Alhambra" },
-      { id: "v002", name: "Amelia" },
-      { id: "v003", name: "Ashland" },
-      { id: "v004", name: "Belle Aire" },
-      { id: "v005", name: "Belvedere" },
-      { id: "v006", name: "Bonita" },
-      { id: "v007", name: "Bonnybrook" },
-      { id: "v008", name: "Bradford" },
-      { id: "v009", name: "Briar Meadow" },
-      { id: "v010", name: "Bridgeport at Creekside Landing" },
-      { id: "v011", name: "Bridgeport at Lake Miona" },
-      { id: "v012", name: "Bridgeport at Lake Sumter" },
-      { id: "v013", name: "Bridgeport at Laurel Valley" },
-      { id: "v014", name: "Bridgeport at Miona Shores" },
-      { id: "v015", name: "Bridgeport at Mission Hills" },
-      { id: "v016", name: "Buttonwood" },
-      { id: "v017", name: "Calumet Grove" },
-      { id: "v018", name: "Caroline" },
-      { id: "v019", name: "Cason Hammock" },
-      { id: "v020", name: "Charlotte" },
-      { id: "v021", name: "Chatham" },
-      { id: "v022", name: "Chitty Chatty" },
-      { id: "v023", name: "Citrus Grove" },
-      { id: "v024", name: "Collier" },
-      { id: "v025", name: "Collier at Alden Bungalows" },
-      { id: "v026", name: "Collier at Antrim Dells" },
-      { id: "v027", name: "Country Club Hills" },
-      { id: "v028", name: "Dabney" },
-      { id: "v029", name: "De Allende" },
-      { id: "v030", name: "De La Vista" },
-      { id: "v031", name: "Del Mar" },
-      { id: "v032", name: "DeLuna" },
-      { id: "v033", name: "DeSoto" },
-      { id: "v034", name: "Dunedin" },
-      { id: "v035", name: "Duval" },
-      { id: "v036", name: "El Cortez" },
-      { id: "v037", name: "Fenney" },
-      { id: "v038", name: "Fernandina" },
-      { id: "v039", name: "Gilchrist" },
-      { id: "v040", name: "Glenbrook" },
-      { id: "v041", name: "Hacienda" },
-      { id: "v042", name: "Haciendas of Mission Hills" },
-      { id: "v043", name: "Hadley" },
-      { id: "v044", name: "Hammock at Fenney" },
-      { id: "v045", name: "Hawkins" },
-      { id: "v046", name: "Hemingway" },
-      { id: "v047", name: "Hillsborough" },
-      { id: "v048", name: "La Reynalda" },
-      { id: "v049", name: "La Zamora" },
-      { id: "v050", name: "LaBelle" },
-      { id: "v051", name: "Lake Deaton" },
-      { id: "v052", name: "Lake Denham" },
-      { id: "v053", name: "Lakeshore Cottages" },
-      { id: "v054", name: "Largo" },
-      { id: "v055", name: "Liberty Park" },
-      { id: "v056", name: "Linden" },
-      { id: "v057", name: "Lynnhaven" },
-      { id: "v058", name: "Mallory Square" },
-      { id: "v059", name: "Marsh Bend" },
-      { id: "v060", name: "McClure" },
-      { id: "v061", name: "Mira Mesa" },
-      { id: "v062", name: "Monarch Grove" },
-      { id: "v063", name: "Newell" },
-      { id: "v064", name: "Orange Blossom Gardens" },
-      { id: "v065", name: "Osceola Hills" },
-      { id: "v066", name: "Osceola Hills at Soaring Eagle Preserve" },
-      { id: "v067", name: "Palo Alto" },
-      { id: "v068", name: "Pennecamp" },
-      { id: "v069", name: "Piedmont" },
-      { id: "v070", name: "Pine Hills" },
-      { id: "v071", name: "Pine Ridge" },
-      { id: "v072", name: "Pinellas" },
-      { id: "v073", name: "Poinciana" },
-      { id: "v074", name: "Polo Ridge" },
-      { id: "v075", name: "Richmond" },
-      { id: "v076", name: "Rio Grande" },
-      { id: "v077", name: "Rio Ponderosa" },
-      { id: "v078", name: "Rio Ranchero" },
-      { id: "v079", name: "Sabal Chase" },
-      { id: "v080", name: "Sanibel" },
-      { id: "v081", name: "Santiago" },
-      { id: "v082", name: "Santo Domingo" },
-      { id: "v083", name: "Silver Lake" },
-      { id: "v084", name: "Springdale" },
-      { id: "v085", name: "St. Catherine" },
-      { id: "v086", name: "St. Charles" },
-      { id: "v087", name: "St. James" },
-      { id: "v088", name: "St. Johns" },
-      { id: "v089", name: "Summerhill" },
-      { id: "v090", name: "Sunset Pointe" },
-      { id: "v091", name: "Tall Trees" },
-      { id: "v092", name: "Tamarind Grove" },
-      { id: "v093", name: "Tierra Del Sol" },
-      { id: "v094", name: "Valle Verde" },
-      { id: "v095", name: "Virginia Trace" },
-      { id: "v096", name: "Winifred" },
-      { id: "v097", name: "Woodbury" },
-      { id: "v098", name: "Bison Valley" },
-      { id: "v099", name: "Country Club" },
-      { id: "v100", name: "Middleton" },
-      { id: "v101", name: "Moultrie Creek" },
-      { id: "v102", name: "Oak Meadows" },
-      { id: "v103", name: "Orange Blossom" },
-      { id: "v104", name: "Oxford Oaks" },
-      { id: "v105", name: "Shady Brook" },
-      { id: "v106", name: "Spring Arbor" },
+    // Village list using REAL entity IDs — matches provider service_areas exactly
+    const VILLAGE_DATA = [
+      { id: "69d06c54c9c22e67aed3c0ff", name: "Alhambra" },
+      { id: "69d06c54c9c22e67aed3c10b", name: "Ashland" },
+      { id: "69d06c54c9c22e67aed3c10c", name: "Belle Aire" },
+      { id: "69d06c54c9c22e67aed3c10d", name: "Belvedere" },
+      { id: "69d06c54c9c22e67aed3c136", name: "Bison Valley" },
+      { id: "69d06c54c9c22e67aed3c10e", name: "Bonita" },
+      { id: "69d06c54c9c22e67aed3c10f", name: "Bonnybrook" },
+      { id: "69d06c54c9c22e67aed3c121", name: "Bradford" },
+      { id: "69d06c54c9c22e67aed3c110", name: "Calumet Grove" },
+      { id: "69d06c54c9c22e67aed3c111", name: "Caroline" },
+      { id: "69d06c54c9c22e67aed3c122", name: "Cason Hammock" },
+      { id: "69d06c54c9c22e67aed3c112", name: "Chatham" },
+      { id: "69d06c54c9c22e67aed3c123", name: "Chitty Chatty" },
+      { id: "69d06c54c9c22e67aed3c124", name: "Citrus Grove" },
+      { id: "69d06c54c9c22e67aed3c100", name: "Country Club" },
+      { id: "69d06c54c9c22e67aed3c134", name: "Dabney" },
+      { id: "69d06c54c9c22e67aed3c101", name: "Del Mar" },
+      { id: "69d06c54c9c22e67aed3c125", name: "DeLuna" },
+      { id: "69d06c54c9c22e67aed3c126", name: "DeSoto" },
+      { id: "69d06c54c9c22e67aed3c113", name: "Duval" },
+      { id: "69d06c54c9c22e67aed3c102", name: "El Cortez" },
+      { id: "69d06c54c9c22e67aed3c127", name: "Fenney" },
+      { id: "69d06c54c9c22e67aed3c114", name: "Glenbrook" },
+      { id: "69d06c54c9c22e67aed3c103", name: "Hacienda" },
+      { id: "69d06c54c9c22e67aed3c115", name: "Hadley" },
+      { id: "69d06c54c9c22e67aed3c128", name: "Hammock at Fenney" },
+      { id: "69d06c54c9c22e67aed3c129", name: "Hawkins" },
+      { id: "69d06c54c9c22e67aed3c116", name: "Hemingway" },
+      { id: "69d06c54c9c22e67aed3c104", name: "La Reynalda" },
+      { id: "69d06c54c9c22e67aed3c105", name: "La Zamora" },
+      { id: "69d06c54c9c22e67aed3c133", name: "Lake Denham" },
+      { id: "69d06c54c9c22e67aed3c117", name: "Lynnhaven" },
+      { id: "69d06c54c9c22e67aed3c118", name: "Mallory Square" },
+      { id: "69d06c54c9c22e67aed3c12b", name: "Marsh Bend" },
+      { id: "69d06c54c9c22e67aed3c12c", name: "McClure" },
+      { id: "69d06c54c9c22e67aed3c139", name: "Middleton" },
+      { id: "69d06c54c9c22e67aed3c106", name: "Mira Mesa" },
+      { id: "69d06c54c9c22e67aed3c12d", name: "Monarch Grove" },
+      { id: "69d06c54c9c22e67aed3c131", name: "Moultrie Creek" },
+      { id: "69d06c54c9c22e67aed3c132", name: "Newell" },
+      { id: "69d06c54c9c22e67aed3c137", name: "Oak Meadows" },
+      { id: "69d06c54c9c22e67aed3c107", name: "Orange Blossom" },
+      { id: "69d06c54c9c22e67aed3c138", name: "Oxford Oaks" },
+      { id: "69d06c54c9c22e67aed3c119", name: "Pennecamp" },
+      { id: "69d06c54c9c22e67aed3c11a", name: "Poinciana" },
+      { id: "69d06c54c9c22e67aed3c12e", name: "Richmond" },
+      { id: "69d06c54c9c22e67aed3c11b", name: "Sabal Chase" },
+      { id: "69d06c54c9c22e67aed3c11c", name: "Santiago" },
+      { id: "69d06c54c9c22e67aed3c135", name: "Shady Brook" },
+      { id: "69d06c54c9c22e67aed3c108", name: "Silver Lake" },
+      { id: "69d06c54c9c22e67aed3c12f", name: "St. Catherine" },
+      { id: "69d06c54c9c22e67aed3c130", name: "St. Johns" },
+      { id: "69d06c54c9c22e67aed3c109", name: "Spring Arbor" },
+      { id: "69d06c54c9c22e67aed3c11d", name: "Sunset Pointe" },
+      { id: "69d06c54c9c22e67aed3c11e", name: "Tall Trees" },
+      { id: "69d06c54c9c22e67aed3c10a", name: "Valle Verde" },
+      { id: "69d06c54c9c22e67aed3c11f", name: "Virginia Trace" },
+      { id: "69d06c54c9c22e67aed3c120", name: "Winifred" },
     ];
     setAreas(VILLAGE_DATA);
   }, []);
@@ -1087,69 +1039,95 @@ export default function Home() {
       return false;
     };
 
+    // Build a complete s-code → category_id lookup (hardcoded, no runtime dependency)
+    const SCODE_TO_CAT = {};
+    SVCS_STATIC.forEach(s => { SCODE_TO_CAT[s.id] = s.category_id; });
+
+    // Build real entity svc ID → category_id from runtime fetch (if available)
+    const ENTITY_SVC_TO_CAT = {};
+    (svcEntities || []).forEach(s => { if (s.id && s.category_id) ENTITY_SVC_TO_CAT[s.id] = s.category_id; });
+
+    // Determine what category a provider belongs to — check category_id AND services
+    const getProviderCatId = (p) => {
+      if (p.category_id) return p.category_id;
+      const svcs = Array.isArray(p.services) ? p.services : [];
+      for (const sid of svcs) {
+        if (SCODE_TO_CAT[sid]) return SCODE_TO_CAT[sid];
+        if (ENTITY_SVC_TO_CAT[sid]) return ENTITY_SVC_TO_CAT[sid];
+      }
+      return null;
+    };
+
     const out = all.filter(p => {
       // Only show active + visible providers
       if (!p.is_active || p.is_visible === false) return false;
 
-      // ── Service match ────────────────────────────────────────────────────
+      // ── Service / Category match ─────────────────────────────────────────
       const svcMatch = !selSvc || (() => {
         const provSvcs = Array.isArray(p.services) ? p.services : [];
         const provCatId = p.category_id || "";
 
-        if (selSvc._isCat) {
-          // ── CATEGORY-LEVEL selection ──────────────────────────────────
-          // 1. Provider's category_id directly matches — always wins
-          if (provCatId === selSvc.id) return true;
+        // Figure out the target category ID regardless of how selSvc was picked
+        // _isCat=true  → selSvc.id IS the category ID
+        // _isCat=false → selSvc.category_id is the parent category
+        const targetCatId = selSvc._isCat ? selSvc.id : (selSvc.category_id || null);
+        const isCatSearch = !!selSvc._isCat;
+        const isSpecificSvc = !isCatSearch;
 
-          // 2. Provider has legacy s-code services belonging to this category
-          const catSvcIds = SVCS_STATIC.filter(s => s.category_id === selSvc.id).map(s => s.id);
-          if (provSvcs.some(sid => catSvcIds.includes(sid))) return true;
+        // ── Step 1: Category match (works for both cat and specific svc searches) ──
+        // Direct category_id match on provider record
+        if (targetCatId && provCatId === targetCatId) {
+          // For specific service: also verify the service itself matches
+          if (isSpecificSvc) {
+            // Check direct ID match
+            if (provSvcs.includes(selSvc.id)) return true;
+            // Check name match
+            const selName = selSvc.name.toLowerCase();
+            if (provSvcs.some(sv => {
+              const resolved = (ENTITY_SVC_MAP[sv] || LEGACY_SVC_MAP[sv] || String(sv)).toLowerCase();
+              return resolved.includes(selName) || selName.includes(resolved);
+            })) return true;
+            // Provider is in right category but has no services listed — show them
+            if (provSvcs.length === 0) return true;
+            return false;
+          }
+          // Category search + category matches → always show
+          return true;
+        }
 
-          // 3. Provider has real entity Service IDs — check via svcEntities category_id
-          const realCatSvcIds = (svcEntities || [])
-            .filter(s => s.category_id === selSvc.id)
-            .map(s => s.id);
-          if (provSvcs.some(sid => realCatSvcIds.includes(sid))) return true;
+        // ── Step 2: Check if any of provider's services map to the target category ──
+        if (targetCatId) {
+          for (const sid of provSvcs) {
+            const sidCat = SCODE_TO_CAT[sid] || ENTITY_SVC_TO_CAT[sid];
+            if (sidCat === targetCatId) return true;
+          }
+        }
 
-          // 4. Provider has text-based service names — check if name matches category services
-          const catSvcNames = [
-            ...SVCS_STATIC.filter(s => s.category_id === selSvc.id).map(s => s.name.toLowerCase()),
-            ...(svcEntities || []).filter(s => s.category_id === selSvc.id).map(s => s.name.toLowerCase()),
-          ];
-          if (provSvcs.some(sv => {
-            const resolved = (ENTITY_SVC_MAP[sv] || LEGACY_SVC_MAP[sv] || String(sv)).toLowerCase();
-            return catSvcNames.some(cn => resolved.includes(cn) || cn.includes(resolved));
-          })) return true;
-
-          return false;
-
-        } else {
-          // ── SPECIFIC SERVICE selection ────────────────────────────────
-          // 1. Direct ID match (entity UUID or s-code)
-          if (provSvcs.includes(selSvc.id)) return true;
-
-          // 2. Name-based match — resolve provider service IDs to names and compare
+        // ── Step 3: Text/name based service match for legacy plain-text service entries ──
+        if (isSpecificSvc && selSvc.name) {
           const selName = selSvc.name.toLowerCase();
           if (provSvcs.some(sv => {
             const resolved = (ENTITY_SVC_MAP[sv] || LEGACY_SVC_MAP[sv] || String(sv)).toLowerCase();
             return resolved.includes(selName) || selName.includes(resolved);
           })) return true;
-
-          // 3. If provider has no services but category matches the selected service's category
-          //    — still show them (better than hiding an active provider)
-          if (provSvcs.length === 0 && provCatId === selSvc.category_id) return true;
-
-          return false;
         }
+
+        return false;
       })();
 
       // ── Area match ───────────────────────────────────────────────────────
       const areaMatch = !selArea || (() => {
-        // Extract just the village name (strip group prefix like "🌴 Historic Side — ")
+        // Extract just the village name from selArea.name (strip emoji/group prefix)
         const rawName = selArea.name || "";
         const dashIdx = rawName.indexOf(" — ");
         const plainVillageName = (dashIdx >= 0 ? rawName.slice(dashIdx + 3) : rawName).toLowerCase().trim();
         const provAreas = Array.isArray(p.service_areas) ? p.service_areas : [];
+
+        // PRIMARY: direct entity ID match — provider has the exact same entity ID as the selected area
+        // This works when both the dropdown area list AND provider areas use real entity IDs
+        if (selArea.id && provAreas.includes(selArea.id)) return true;
+
+        // SECONDARY: name-based resolution for legacy va-codes and text areas
         return provAreas.some(a => areaValMatchesVillage(a, plainVillageName));
       })();
 
