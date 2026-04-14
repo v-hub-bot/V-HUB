@@ -1,13 +1,10 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.23';
 
-// Fields that must never be returned in the public provider listing
-const SENSITIVE_FIELDS = ['login_email', 'login_password', 'stripe_customer_id', 'stripe_subscription_id', 'notes'];
+const SENSITIVE_FIELDS = ['login_email', 'login_password', 'stripe_customer_id', 'stripe_subscription_id', 'notes', 'classifieds_stripe_subscription_id'];
 
 function sanitize(provider: any) {
   const p = { ...provider };
-  for (const field of SENSITIVE_FIELDS) {
-    delete p[field];
-  }
+  for (const field of SENSITIVE_FIELDS) delete p[field];
   return p;
 }
 
@@ -23,31 +20,67 @@ const CORS = {
   "Access-Control-Allow-Headers": "Content-Type, Authorization, x-base44-app-id",
 };
 
+async function sleep(ms: number) {
+  return new Promise(r => setTimeout(r, ms));
+}
+
+async function fetchAllProvidersWithRetry(db: any): Promise<any[]> {
+  const PAGE_SIZE = 100;
+  let all: any[] = [];
+  let skip = 0;
+  let pageNum = 0;
+
+  while (true) {
+    pageNum++;
+    if (pageNum > 30) break; // safety cap
+
+    let page: any[] | null = null;
+    let lastErr: any = null;
+
+    // Up to 4 retries for this page
+    for (let attempt = 1; attempt <= 4; attempt++) {
+      try {
+        page = await db.Provider.list({ limit: PAGE_SIZE, skip });
+        break; // success
+      } catch (e: any) {
+        lastErr = e;
+        const msg = String(e?.message || "");
+        if (msg.includes("429") && attempt < 4) {
+          console.log(`[getProviders] 429 on page ${pageNum} attempt ${attempt}, retrying in ${attempt * 600}ms`);
+          await sleep(attempt * 600);
+        } else {
+          throw e;
+        }
+      }
+    }
+
+    if (!page || page.length === 0) break;
+    all = all.concat(page);
+    console.log(`[getProviders] fetched page ${pageNum}: ${page.length} records (total=${all.length})`);
+    if (page.length < PAGE_SIZE) break; // last page
+    skip += PAGE_SIZE;
+  }
+  return all;
+}
+
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: CORS });
 
   try {
     const base44 = createClientFromRequest(req);
 
-    // ── LOGIN MODE ──────────────────────────────────────────────────────────────
-    // POST with { login: true, identifier, password } → authenticate a provider
+    // ── LOGIN / SESSION RESTORE MODE ──────────────────────────────────────
     if (req.method === "POST") {
-      let body: any;
-      try { body = await req.json(); } catch { 
-        return Response.json({ error: "Invalid JSON" }, { status: 400, headers: CORS });
-      }
+      let body: any = null;
+      try { body = await req.json(); } catch { /* no body or not JSON */ }
 
-      // Session restore: look up provider by ID (no password needed — ID is already trusted from sessionStorage)
       if (body?.session_restore === true) {
         const { provider_id } = body;
-        if (!provider_id) {
-          return Response.json({ error: "Missing provider_id" }, { status: 400, headers: CORS });
-        }
+        if (!provider_id) return Response.json({ error: "Missing provider_id" }, { status: 400, headers: CORS });
         try {
           const prov = await base44.asServiceRole.entities.Provider.get(provider_id);
           if (!prov) return Response.json({ success: false, error: "Not found" }, { status: 404, headers: CORS });
-          const { login_password, login_email, notes, stripe_customer_id, stripe_subscription_id, ...safe } = prov;
-          return Response.json({ success: true, provider: safe }, { status: 200, headers: CORS });
+          return Response.json({ success: true, provider: sanitize(prov) }, { status: 200, headers: CORS });
         } catch (e: any) {
           return Response.json({ success: false, error: e.message }, { status: 500, headers: CORS });
         }
@@ -96,27 +129,44 @@ Deno.serve(async (req: Request) => {
           return Response.json({ error: "Incorrect password. Please try again." }, { status: 401, headers: CORS });
         }
 
-        // Strip sensitive fields from the response
-        const { login_password, login_email, notes, stripe_customer_id, stripe_subscription_id, ...safe } = prov;
-        return Response.json({ success: true, provider: safe }, { status: 200, headers: CORS });
+        return Response.json({ success: true, provider: sanitize(prov) }, { status: 200, headers: CORS });
+      }
+      // Empty/non-special POST → fall through to listing
+    }
+
+    // ── LISTING MODE ──────────────────────────────────────────────────────
+    console.log("[getProviders] Starting provider listing...");
+    let providers: any[] = [];
+    let usedFallback = false;
+
+    try {
+      providers = await fetchAllProvidersWithRetry(base44.asServiceRole.entities);
+      console.log(`[getProviders] asServiceRole: got ${providers.length} providers`);
+    } catch (e1: any) {
+      console.log(`[getProviders] asServiceRole failed: ${e1.message}, trying user-scoped`);
+      usedFallback = true;
+      try {
+        providers = await fetchAllProvidersWithRetry(base44.entities);
+        console.log(`[getProviders] user-scoped fallback: got ${providers.length} providers`);
+      } catch (e2: any) {
+        console.log(`[getProviders] BOTH FAILED: ${e1.message} | ${e2.message}`);
+        return Response.json({ 
+          error: `Both fetch methods failed: ${e1.message} | ${e2.message}`,
+          providers: [],
+          count: 0
+        }, { status: 500, headers: CORS });
       }
     }
 
-    // ── LISTING MODE (original behaviour) ──────────────────────────────────────
-    let providers: any[] = [];
-    try {
-      providers = await base44.asServiceRole.entities.Provider.list();
-    } catch(e1: any) {
-      try {
-        providers = await base44.entities.Provider.list();
-      } catch(e2: any) {
-        return Response.json({ error: `Both failed: ${e1.message} | ${e2.message}` }, { status: 500, headers: CORS });
-      }
-    }
-    const sanitized = (providers || []).map(sanitize);
-    return Response.json({ providers: sanitized, count: sanitized.length }, { headers: CORS });
+    const sanitized = providers.map(sanitize);
+    return Response.json({ 
+      providers: sanitized, 
+      count: sanitized.length,
+      usedFallback
+    }, { headers: CORS });
 
   } catch (error: any) {
-    return Response.json({ error: error.message }, { status: 500, headers: CORS });
+    console.log(`[getProviders] Unhandled error: ${error.message}`);
+    return Response.json({ error: error.message, providers: [], count: 0 }, { status: 500, headers: CORS });
   }
 });

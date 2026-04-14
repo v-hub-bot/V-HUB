@@ -958,15 +958,39 @@ export default function Home() {
     let ENTITY_SVC_MAP = {};   // real Service entity ID -> service name
     let svcEntities = [];
 
-    // ── Step 1: Fetch providers (always runs, never blocked by auth errors) ──
+    // ── Step 1: Fetch providers directly from entity API (fast, reliable, no rate limit issues) ──
+    // We use field projection to avoid returning sensitive fields
+    const PUBLIC_FIELDS = ['id','business_name','owner_name','email','phone','website','description',
+      'logo_url','service_areas','category_id','services','subscription_status','subscription_tier',
+      'is_visible','is_active','years_in_business','license_number','rating','google_review_url',
+      'address','profile_views','search_appearances','vh_number','onboarding_type','classifieds_addon'];
     try {
-      const provResp = await fetch(
-        'https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/getProviders',
-        { method: 'POST', headers: { 'Content-Type': 'application/json' } }
-      );
-      const data = await provResp.json();
-      all = data.providers || [];
-    } catch(e) { all = []; }
+      // Primary: load directly from entity API with pagination
+      let page1 = await Provider.list({ limit: 500 }).catch(() => null);
+      if (page1 && page1.length > 0) {
+        // Strip any sensitive fields that may have leaked
+        const STRIP = ['login_email','login_password','stripe_customer_id','stripe_subscription_id','notes','classifieds_stripe_subscription_id'];
+        all = page1.map(p => { const c = {...p}; STRIP.forEach(f => delete c[f]); return c; });
+      } else {
+        // Fallback: backend function
+        const provResp = await fetch(
+          'https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/getProviders',
+          { method: 'GET', headers: { 'Content-Type': 'application/json' } }
+        );
+        const data = await provResp.json();
+        all = data.providers || [];
+      }
+    } catch(e) {
+      // Last resort: try backend function
+      try {
+        const provResp = await fetch(
+          'https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/getProviders',
+          { method: 'GET', headers: { 'Content-Type': 'application/json' } }
+        );
+        const data = await provResp.json();
+        all = data.providers || [];
+      } catch(e2) { all = []; }
+    }
 
     // ── Step 2: Try to enrich with entity names (optional, auth may fail on public page) ──
     try {
