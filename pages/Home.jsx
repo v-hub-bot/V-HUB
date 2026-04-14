@@ -1,4 +1,4 @@
-// V-Hub Home — v2026-04-14a
+// V-Hub Home — v2026-04-14b
 import React, { useState, useEffect, useRef } from "react"; // v3 - expanded content
 import { createPortal } from "react-dom";
 import { ServiceArea, Category, Service, Provider, ProviderReview, User } from "@/api/entities";
@@ -1089,21 +1089,21 @@ export default function Home() {
         // ── Step 1: Category match (works for both cat and specific svc searches) ──
         // Direct category_id match on provider record
         if (targetCatId && provCatId === targetCatId) {
-          // For specific service: also verify the service itself matches
-          if (isSpecificSvc) {
-            // Check direct ID match
-            if (provSvcs.includes(selSvc.id)) return true;
-            // Check name match
-            const selName = selSvc.name.toLowerCase();
-            if (provSvcs.some(sv => {
-              const resolved = (ENTITY_SVC_MAP[sv] || LEGACY_SVC_MAP[sv] || String(sv)).toLowerCase();
-              return resolved.includes(selName) || selName.includes(resolved);
-            })) return true;
-            // Provider is in right category but has no services listed — show them
-            if (provSvcs.length === 0) return true;
-            return false;
-          }
-          // Category search + category matches → always show
+          // Category search → always show
+          if (!isSpecificSvc) return true;
+          // Specific service search: check if provider offers it
+          // Check direct ID match (e.g. s41 === s41)
+          if (provSvcs.includes(selSvc.id)) return true;
+          // Check name match (resolve code → name, compare)
+          const selName = selSvc.name.toLowerCase();
+          if (provSvcs.some(sv => {
+            const resolved = (ENTITY_SVC_MAP[sv] || LEGACY_SVC_MAP[sv] || String(sv)).toLowerCase();
+            return resolved.includes(selName) || selName.includes(resolved);
+          })) return true;
+          // Provider is in right category but has no services listed — show them
+          if (provSvcs.length === 0) return true;
+          // Provider is in the right category — show them even if specific service not listed
+          // (better to show a relevant provider than hide them)
           return true;
         }
 
