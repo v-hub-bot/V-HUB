@@ -1466,18 +1466,9 @@ export default function Home() {
 
         <Rule thick />
 
-        {/* NAV */}
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", background: PAPER }}>
-          <div style={{ padding: "8px", textAlign: "center", borderRight: `1px solid ${INK}`, fontSize: 11, fontWeight: 700, letterSpacing: 2, color: INK, textTransform: "uppercase" }}>Local Services</div>
-          <a href="/Classifieds" style={{ textDecoration: "none" }}>
-            <div style={{
-              padding: "8px", textAlign: "center", fontSize: 11, fontWeight: 700,
-              letterSpacing: 2, color: "#1A6B3C", textTransform: "uppercase",
-              border: "3px solid #1A6B3C", borderRadius: 3, margin: "2px",
-              boxShadow: "0 0 8px rgba(26,107,60,0.35)",
-              cursor: "pointer",
-            }}>📰 Classifieds</div>
-          </a>
+        {/* NAV — Local Services only */}
+        <div style={{ background: PAPER, padding: "8px", textAlign: "center", borderTop: `1px solid ${INK}44`, borderBottom: `1px solid ${INK}44` }}>
+          <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2, color: INK, textTransform: "uppercase" }}>Local Services</div>
         </div>
 
         <Rule />
@@ -1488,6 +1479,19 @@ export default function Home() {
           alt="Lake Sumter Landing"
           style={{ width: "100%", height: 200, objectFit: "cover", objectPosition: "center 60%", display: "block" }}
         />
+
+        {/* CLASSIFIEDS BUTTON — full width under image */}
+        <a href="/Classifieds" style={{ textDecoration: "none", display: "block" }}>
+          <div style={{
+            padding: "10px 16px", textAlign: "center", fontSize: 12, fontWeight: 700,
+            letterSpacing: 2, color: "#1A6B3C", textTransform: "uppercase",
+            border: "3px solid #1A6B3C", borderRadius: 0,
+            boxShadow: "inset 0 0 0 2px #1A6B3C22, 0 2px 8px rgba(26,107,60,0.2)",
+            background: PAPER,
+            cursor: "pointer",
+            width: "100%", boxSizing: "border-box",
+          }}>📰 &nbsp;Classifieds</div>
+        </a>
 
         <Rule />
 
