@@ -1312,10 +1312,10 @@ export default function Home() {
   });
 
   // Newspaper typography
-  const hd  = { margin: "0 0 2px 0", fontWeight: 900, fontSize: 9, textTransform: "uppercase", letterSpacing: 1, color: INK, fontFamily: "'Times New Roman', serif" };
-  const sub = { margin: "0 0 5px 0", fontStyle: "italic", fontSize: 8, color: BROWN_BTN, fontFamily: "'Times New Roman', serif", lineHeight: 1.4 };
-  const para = { margin: "0 0 7px 0", fontSize: 8.5, color: INK_FADE, fontFamily: "'Times New Roman', serif", lineHeight: 1.9, textAlign: "justify" };
-  const rule = { height: 1, background: INK_FADE, margin: "8px 0", opacity: 0.4 };
+  const hd  = { margin: "0 0 3px 0", fontWeight: 900, fontSize: 12, textTransform: "uppercase", letterSpacing: 0.5, color: INK, fontFamily: "'Times New Roman', serif", lineHeight: 1.2, borderBottom: `1px solid ${INK}`, paddingBottom: 3 };
+  const sub = { margin: "0 0 6px 0", fontStyle: "italic", fontSize: 10.5, color: BROWN_BTN, fontFamily: "'Times New Roman', serif", lineHeight: 1.4 };
+  const para = { margin: "0 0 8px 0", fontSize: 11, color: INK, fontFamily: "'Times New Roman', serif", lineHeight: 1.75, textAlign: "justify" };
+  const rule = { height: 2, background: INK, margin: "10px 0", opacity: 0.15 };
 
   if (selProv)  return <ProvDetail prov={selProv} areas={areas} cats={cats} svcs={svcs} onBack={() => setSelProv(null)} />;
   if (isLoading) return (
@@ -1334,38 +1334,45 @@ export default function Home() {
         * { box-sizing: border-box; }
         body, html { margin: 0; padding: 0; overflow-x: hidden; }
 
-        .np-col { font-family: 'Times New Roman', Georgia, serif; font-size: 8.5px; color: ${INK_FADE}; line-height: 1.9; text-align: justify; }
+        /* Newspaper column base */
+        .np-col { font-family: 'Times New Roman', Georgia, serif; font-size: 12px; color: ${INK}; line-height: 1.7; text-align: justify; }
 
-        /* Mobile: single column, all news text stacked */
+        /* Mobile: 2-column newspaper grid */
         .np-grid {
-          display: flex;
-          flex-direction: column;
-          padding: 10px 12px;
-          gap: 10px;
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 0;
+          padding: 0;
+          border-top: 2px solid ${INK};
         }
-        .np-side-left, .np-side-right { display: none; }
-        .np-center { width: 100%; }
+        .np-side-left {
+          display: block;
+          padding: 10px 8px 10px 10px;
+          border-right: 1px solid ${INK};
+        }
+        .np-center {
+          display: none;
+        }
+        .np-side-right {
+          display: block;
+          padding: 10px 10px 10px 8px;
+        }
 
         /* Tablet / Desktop: 3-column newspaper */
         @media (min-width: 580px) {
           .np-grid {
-            display: grid;
             grid-template-columns: 1fr 2fr 1fr;
-            grid-template-rows: auto auto auto;
-            gap: 0;
-            padding: 0;
           }
           .np-side-left {
-            display: block;
             padding: 10px 9px 10px 12px;
             border-right: 1px solid ${INK};
           }
           .np-center {
+            display: block;
             padding: 10px 12px;
             border-right: 1px solid ${INK};
           }
           .np-side-right {
-            display: block;
             padding: 10px 12px 10px 9px;
           }
         }
