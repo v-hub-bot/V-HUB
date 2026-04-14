@@ -120,7 +120,7 @@ Deno.serve(async (req) => {
     try { const me = await base44.auth.me(); if (me?.email && ADMIN_EMAILS.includes(me.email.toLowerCase())) userIsAdmin = true; } catch (_) {}
     if (!pinProvided && !userIsAdmin) return Response.json({ error: "Unauthorized" }, { status: 401, headers: CORS_HEADERS });
 
-    const { provider_record_id, business_name, owner_name, email, phone, services, service_areas, vh_number, login_email, email_only } = body;
+    const { provider_record_id, business_name, owner_name, email, phone, services, service_areas, vh_number, login_email, email_only, temp_password } = body;
 
     if (!provider_record_id) {
       return new Response(JSON.stringify({ error: 'Missing provider_record_id' }), { status: 400, headers: { ...CORS_HEADERS, "Content-Type": "application/json" } });
@@ -202,7 +202,7 @@ Deno.serve(async (req) => {
                 <div style="font-weight:800;color:#1A237E;font-size:14px;margin-bottom:12px;text-transform:uppercase;letter-spacing:1px;">🔐 Your Login Credentials</div>
                 <div style="font-size:13px;color:#1A237E;line-height:1.9;">
                   <strong>Login Email:</strong> ${displayLoginEmail}<br/>
-                  <strong>Password:</strong> The password you created when you signed up<br/>
+                  <strong>Password:</strong> <span style="font-family:'Courier New',monospace;font-weight:900;font-size:15px;color:#1A237E;">${temp_password || "The password you set during signup"}</span>${temp_password ? ' &nbsp;<span style="font-size:11px;color:#e53935;">(Please change this after your first login)</span>' : ""}<br/>
                   ${vhDisplay}
                 </div>
                 <div style="text-align:center;margin-top:14px;">
