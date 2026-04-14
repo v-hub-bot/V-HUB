@@ -153,7 +153,7 @@ function Burger({ currentUser }) {
 
   return (
     <>
-      <button onClick={() => setOpen(true)} style={{ background: "rgba(28,15,0,0.12)", border: `1px solid ${INK}44`, borderRadius: 4, width: 72, height: 72, cursor: "pointer", display: "flex", flexDirection: "column", gap: 6, justifyContent: "center", alignItems: "center", flexShrink: 0, padding: 0, boxSizing: "border-box" }}>
+      <button onClick={() => setOpen(true)} style={{ background: "rgba(28,15,0,0.12)", border: `1px solid ${INK}44`, borderRadius: 4, width: 64, height: 64, cursor: "pointer", display: "flex", flexDirection: "column", gap: 6, justifyContent: "center", alignItems: "center", flexShrink: 0, padding: 0, boxSizing: "border-box" }}>
         {[0,1,2].map(i => <span key={i} style={{ display: "block", width: 24, height: 3, background: INK, borderRadius: 2 }} />)}
       </button>
       {open && (
