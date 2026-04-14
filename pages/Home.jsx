@@ -725,47 +725,80 @@ function DropBtn({ label, isOpen, onClick }) {
   );
 }
 
-// ── Service Dropdown (opens ABOVE, scrolls to top on open) ──────────────────
+// ── Service Dropdown ─────────────────────────────────────────────────────────
 function SvcDropdown({ open, cats, svcs, openCat, selSvc, setOpenCat, setSelSvc, setSOpen }) {
   const scrollRef = React.useRef(null);
   React.useEffect(() => {
-    if (open && scrollRef.current) {
-      scrollRef.current.scrollTop = 0;
-    }
+    if (open && scrollRef.current) scrollRef.current.scrollTop = 0;
   }, [open]);
   if (!open) return null;
+
+  // Sort categories A-Z
+  const sortedCats = [...cats].sort((a, b) => a.name.localeCompare(b.name));
+
   return (
-    <div ref={scrollRef} onClick={e => e.stopPropagation()} style={{
-      position: "absolute", top: "calc(100% + 2px)", left: 0, right: 0,
-      background: PAPER, border: `2px solid ${INK}`, borderRadius: 4,
-      zIndex: 9999, boxShadow: "0 8px 28px rgba(0,0,0,0.4)",
-      maxHeight: 380, overflowY: "auto",
-    }}>
-      {cats.length === 0 && <div style={{ padding: 12, fontSize: 12, color: INK_FADE }}>Loading...</div>}
-      {cats.map(c => {
-        const catSvcs = svcs.filter(s => s.category_id === c.id);
+    <div
+      ref={scrollRef}
+      onClick={e => e.stopPropagation()}
+      style={{
+        position: "absolute", top: "calc(100% + 2px)", left: 0, right: 0,
+        background: PAPER, border: `2px solid ${INK}`, borderRadius: 4,
+        zIndex: 9999, boxShadow: "0 8px 28px rgba(0,0,0,0.4)",
+        maxHeight: 340, overflowY: "auto", overflowX: "hidden",
+        WebkitOverflowScrolling: "touch",
+      }}
+    >
+      {cats.length === 0 && (
+        <div style={{ padding: 12, fontSize: 13, color: INK_FADE, fontFamily: "'Times New Roman', serif" }}>Loading...</div>
+      )}
+      {sortedCats.map(c => {
+        const catSvcs = [...svcs.filter(s => s.category_id === c.id)].sort((a, b) => a.name.localeCompare(b.name));
         const isExpanded = openCat === c.id;
-        const parentSelected = selSvc?.category_id === c.id;
+        const isSelected = selSvc?.category_id === c.id || selSvc?.id === c.id;
         return (
-          <div key={c.id}>
-            <div style={{ display: "flex", borderBottom: `1px solid ${PAPER_DK}`, background: parentSelected ? BROWN_HL : PAPER }}>
-              <div
-                onClick={e => { e.stopPropagation(); setSelSvc({ id: c.id, name: c.name, category_id: c.id, icon: c.icon, _isCat: true }); setSOpen(false); setOpenCat(null); }}
-                style={{ flex: 1, padding: "12px 16px", fontSize: 16, fontWeight: 700, color: parentSelected ? "#fff" : INK, cursor: "pointer" }}>
+          <div key={c.id} style={{ overflowX: "hidden" }}>
+            {/* Macro row — tap to expand/collapse micros */}
+            <div
+              onClick={e => { e.stopPropagation(); setOpenCat(isExpanded ? null : c.id); }}
+              style={{
+                display: "flex", alignItems: "center", justifyContent: "space-between",
+                padding: "11px 14px",
+                borderBottom: `1px solid ${PAPER_DK}`,
+                background: isSelected ? "#e8f5ee" : PAPER,
+                cursor: "pointer",
+                userSelect: "none",
+              }}
+            >
+              <span style={{
+                fontSize: 13, fontWeight: 700, color: INK,
+                fontFamily: "'Times New Roman', serif",
+                whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", maxWidth: "88%",
+              }}>
                 {c.icon} {c.name}
-              </div>
-              <div
-                onClick={e => { e.stopPropagation(); setOpenCat(isExpanded ? null : c.id); if (!isExpanded && scrollRef.current) scrollRef.current.scrollTop = 0; }}
-                style={{ padding: "10px 14px", fontSize: 10, color: parentSelected ? "#fff" : INK, cursor: "pointer", borderLeft: `1px solid ${PAPER_DK}`, display: "flex", alignItems: "center" }}>
+              </span>
+              <span style={{ fontSize: 10, color: INK_FADE, flexShrink: 0 }}>
                 {isExpanded ? "▲" : "▼"}
-              </div>
+              </span>
             </div>
+            {/* Micro rows — only shown when expanded */}
             {isExpanded && catSvcs.map(s => {
               const isSvcSelected = selSvc?.id === s.id;
               return (
-                <div key={s.id}
+                <div
+                  key={s.id}
                   onClick={e => { e.stopPropagation(); setSelSvc(s); setSOpen(false); setOpenCat(null); }}
-                  style={{ padding: "10px 16px 10px 32px", fontSize: 15, color: isSvcSelected ? "#fff" : INK, background: isSvcSelected ? BROWN_HL : PAPER_MID, borderBottom: `1px solid ${PAPER_DK}`, cursor: "pointer", fontWeight: isSvcSelected ? 700 : 400 }}>
+                  style={{
+                    padding: "10px 14px 10px 28px",
+                    fontSize: 13,
+                    fontFamily: "'Times New Roman', serif",
+                    color: isSvcSelected ? "#fff" : INK,
+                    background: isSvcSelected ? BROWN_HL : PAPER_MID,
+                    borderBottom: `1px solid ${PAPER_DK}`,
+                    cursor: "pointer",
+                    fontWeight: isSvcSelected ? 700 : 400,
+                    whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
+                  }}
+                >
                   {isSvcSelected ? "✓ " : "– "}{s.name}
                 </div>
               );
