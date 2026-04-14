@@ -1,4 +1,4 @@
-// V-Hub Home — v2026-04-14b
+// V-Hub Home — v2026-04-14c
 import React, { useState, useEffect, useRef } from "react"; // v3 - expanded content
 import { createPortal } from "react-dom";
 import { ServiceArea, Category, Service, Provider, ProviderReview, User } from "@/api/entities";
@@ -1129,17 +1129,41 @@ export default function Home() {
 
       // ── Area match ───────────────────────────────────────────────────────
       const areaMatch = !selArea || (() => {
-        // Extract just the village name from selArea.name (strip emoji/group prefix)
+        const provAreas = Array.isArray(p.service_areas) ? p.service_areas : [];
+
+        // PRIMARY: direct entity ID match
+        if (selArea.id && provAreas.includes(selArea.id)) return true;
+
+        // SECONDARY: Macro group IDs — providers with ALL individual village IDs
+        // should match when user selects a macro group like "Established Villages"
+        const MACRO_VILLAGES = {
+          "69d06c4a4f1e1017a77a7018": ["69d06c54c9c22e67aed3c0ff","69d06c54c9c22e67aed3c100","69d06c54c9c22e67aed3c101","69d06c54c9c22e67aed3c102","69d06c54c9c22e67aed3c103","69d06c54c9c22e67aed3c104","69d06c54c9c22e67aed3c105","69d06c54c9c22e67aed3c106","69d06c54c9c22e67aed3c107","69d06c54c9c22e67aed3c108","69d06c54c9c22e67aed3c109","69d06c54c9c22e67aed3c10a"],
+          "69d06c4a4f1e1017a77a7019": ["69d06c54c9c22e67aed3c10b","69d06c54c9c22e67aed3c10c","69d06c54c9c22e67aed3c10d","69d06c54c9c22e67aed3c10e","69d06c54c9c22e67aed3c10f","69d06c54c9c22e67aed3c110","69d06c54c9c22e67aed3c111","69d06c54c9c22e67aed3c112","69d06c54c9c22e67aed3c113","69d06c54c9c22e67aed3c114","69d06c54c9c22e67aed3c115","69d06c54c9c22e67aed3c116","69d06c54c9c22e67aed3c117","69d06c54c9c22e67aed3c118","69d06c54c9c22e67aed3c119","69d06c54c9c22e67aed3c11a","69d06c54c9c22e67aed3c11b","69d06c54c9c22e67aed3c11c","69d06c54c9c22e67aed3c11d","69d06c54c9c22e67aed3c11e","69d06c54c9c22e67aed3c11f","69d06c54c9c22e67aed3c120"],
+          "69d06c4a4f1e1017a77a701a": ["69d06c54c9c22e67aed3c121","69d06c54c9c22e67aed3c122","69d06c54c9c22e67aed3c123","69d06c54c9c22e67aed3c124","69d06c54c9c22e67aed3c125","69d06c54c9c22e67aed3c126","69d06c54c9c22e67aed3c127","69d06c54c9c22e67aed3c128","69d06c54c9c22e67aed3c129","69d06c54c9c22e67aed3c12a","69d06c54c9c22e67aed3c12b","69d06c54c9c22e67aed3c12c","69d06c54c9c22e67aed3c12d","69d06c54c9c22e67aed3c12e","69d06c54c9c22e67aed3c12f","69d06c54c9c22e67aed3c130"],
+          "69d06c4a4f1e1017a77a701b": ["69d06c54c9c22e67aed3c131","69d06c54c9c22e67aed3c132","69d06c54c9c22e67aed3c133","69d06c54c9c22e67aed3c134","69d06c54c9c22e67aed3c135"],
+          "69d06c4a4f1e1017a77a701c": ["69d06c54c9c22e67aed3c136","69d06c54c9c22e67aed3c137","69d06c54c9c22e67aed3c138","69d06c54c9c22e67aed3c139"],
+        };
+        // If user selected a macro group, check if provider covers ANY village in that group
+        if (MACRO_VILLAGES[selArea.id]) {
+          const groupVillages = MACRO_VILLAGES[selArea.id];
+          if (provAreas.some(a => groupVillages.includes(a))) return true;
+          // Also check if provider has the macro group text ("historic","established",etc.) or macro ID
+          if (provAreas.includes(selArea.id)) return true;
+        }
+        // If provider has a macro ID, check if selected village belongs to that macro group
+        const VILLAGE_TO_MACRO = {};
+        Object.entries(MACRO_VILLAGES).forEach(([macroId, villages]) => {
+          villages.forEach(vid => { VILLAGE_TO_MACRO[vid] = macroId; });
+        });
+        if (selArea.id && VILLAGE_TO_MACRO[selArea.id]) {
+          const selMacroId = VILLAGE_TO_MACRO[selArea.id];
+          if (provAreas.includes(selMacroId)) return true;
+        }
+
+        // TERTIARY: name-based resolution for legacy va-codes and plain text areas
         const rawName = selArea.name || "";
         const dashIdx = rawName.indexOf(" — ");
         const plainVillageName = (dashIdx >= 0 ? rawName.slice(dashIdx + 3) : rawName).toLowerCase().trim();
-        const provAreas = Array.isArray(p.service_areas) ? p.service_areas : [];
-
-        // PRIMARY: direct entity ID match — provider has the exact same entity ID as the selected area
-        // This works when both the dropdown area list AND provider areas use real entity IDs
-        if (selArea.id && provAreas.includes(selArea.id)) return true;
-
-        // SECONDARY: name-based resolution for legacy va-codes and text areas
         return provAreas.some(a => areaValMatchesVillage(a, plainVillageName));
       })();
 
