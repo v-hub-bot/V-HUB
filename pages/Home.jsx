@@ -825,33 +825,6 @@ function SearchBox({ cats, svcs, areas, onSearch, selSvc, setSelSvc, selArea, se
 
   return (
     <div style={{ background: PAPER_MID, border: `2px solid ${PAPER_DK}`, borderRadius: 6, padding: "14px 12px", width: "100%", boxSizing: "border-box" }}>
-      {/* Split provider buttons */}
-      <div style={{ display: "flex", gap: 6, marginBottom: 8 }}>
-        <a href="/ListService" style={{ textDecoration: "none", flex: 1 }}>
-          <button style={{
-            width: "100%", background: `linear-gradient(180deg,#9A6030,${BROWN_BTN} 60%,#5A3010)`,
-            border: `3px solid ${NAVY}`,
-            boxShadow: `0 0 0 1.5px ${NAVY}, 0 0 10px 2px rgba(27,61,111,0.3)`,
-            borderRadius: 5, color: "#F5E8CC", fontFamily: "'Times New Roman', serif",
-            fontWeight: 700, fontSize: 11, letterSpacing: 1.5, padding: "12px 6px", cursor: "pointer", boxSizing: "border-box",
-            textTransform: "uppercase", lineHeight: 1.3,
-          }}>
-            📋 List Your<br/>Service
-          </button>
-        </a>
-        <a href="/ProviderDashboard" style={{ textDecoration: "none", flex: 1 }}>
-          <button style={{
-            width: "100%", background: `linear-gradient(180deg,#9A6030,${BROWN_BTN} 60%,#5A3010)`,
-            border: `3px solid ${NAVY}`,
-            boxShadow: `0 0 0 1.5px ${NAVY}, 0 0 10px 2px rgba(27,61,111,0.3)`,
-            borderRadius: 5, color: "#F5E8CC", fontFamily: "'Times New Roman', serif",
-            fontWeight: 700, fontSize: 11, letterSpacing: 1.5, padding: "12px 6px", cursor: "pointer", boxSizing: "border-box",
-            textTransform: "uppercase", lineHeight: 1.3,
-          }}>
-            🔐 Provider<br/>Hub Sign In
-          </button>
-        </a>
-      </div>
       <div style={{ display: "flex", gap: 8, marginBottom: 5 }}>
         <div style={{ flex: 1, fontSize: 11, fontWeight: 700, color: INK, fontFamily: "'Times New Roman', serif" }}>What service do you need?</div>
         <div style={{ flex: 1, fontSize: 11, fontWeight: 700, color: INK, fontFamily: "'Times New Roman', serif" }}>Where do you need it?</div>
@@ -1504,6 +1477,30 @@ export default function Home() {
             width: "100%", boxSizing: "border-box",
           }}>📰 &nbsp;Classifieds</div>
         </a>
+
+        {/* LIST YOUR SERVICE + PROVIDER HUB — half width each, navy border */}
+        <div style={{ display: "flex", width: "100%" }}>
+          <a href="/ListService" style={{ textDecoration: "none", flex: 1 }}>
+            <div style={{
+              padding: "11px 8px", textAlign: "center", fontSize: 11, fontWeight: 700,
+              letterSpacing: 1.5, color: "#F5E8CC", textTransform: "uppercase",
+              background: `linear-gradient(180deg,#9A6030,${BROWN_BTN} 60%,#5A3010)`,
+              border: `3px solid ${NAVY}`,
+              boxShadow: `0 0 0 1.5px ${NAVY}88, 0 2px 8px rgba(27,61,111,0.25)`,
+              boxSizing: "border-box", cursor: "pointer", lineHeight: 1.3,
+            }}>📋 List My<br/>Service</div>
+          </a>
+          <a href="/ProviderDashboard" style={{ textDecoration: "none", flex: 1 }}>
+            <div style={{
+              padding: "11px 8px", textAlign: "center", fontSize: 11, fontWeight: 700,
+              letterSpacing: 1.5, color: "#F5E8CC", textTransform: "uppercase",
+              background: `linear-gradient(180deg,#9A6030,${BROWN_BTN} 60%,#5A3010)`,
+              border: `3px solid ${NAVY}`,
+              boxShadow: `0 0 0 1.5px ${NAVY}88, 0 2px 8px rgba(27,61,111,0.25)`,
+              boxSizing: "border-box", cursor: "pointer", lineHeight: 1.3,
+            }}>🔐 Provider<br/>Hub</div>
+          </a>
+        </div>
 
         <Rule />
 
