@@ -1070,110 +1070,128 @@ export default function Home() {
       return null;
     };
 
+    // ── PROVIDER_MATCH_DEBUG INSTRUMENTATION ────────────────────────────────
+    const debugLog = {
+      selectedVillage: selArea ? { id: selArea.id, name: selArea.name } : null,
+      selectedService: selSvc  ? { id: selSvc.id,  name: selSvc.name, _isCat: selSvc._isCat } : null,
+      candidateCount: all.length,
+      matchedProviders: [],
+      excludedProviders: [],
+    };
+
+    // Build macro-group lookup once (reused in area matching)
+    const MACRO_VILLAGES_MAP = {
+      "69d06c4a4f1e1017a77a7018": ["69d06c54c9c22e67aed3c0ff","69d06c54c9c22e67aed3c100","69d06c54c9c22e67aed3c101","69d06c54c9c22e67aed3c102","69d06c54c9c22e67aed3c103","69d06c54c9c22e67aed3c104","69d06c54c9c22e67aed3c105","69d06c54c9c22e67aed3c106","69d06c54c9c22e67aed3c107","69d06c54c9c22e67aed3c108","69d06c54c9c22e67aed3c109","69d06c54c9c22e67aed3c10a"],
+      "69d06c4a4f1e1017a77a7019": ["69d06c54c9c22e67aed3c10b","69d06c54c9c22e67aed3c10c","69d06c54c9c22e67aed3c10d","69d06c54c9c22e67aed3c10e","69d06c54c9c22e67aed3c10f","69d06c54c9c22e67aed3c110","69d06c54c9c22e67aed3c111","69d06c54c9c22e67aed3c112","69d06c54c9c22e67aed3c113","69d06c54c9c22e67aed3c114","69d06c54c9c22e67aed3c115","69d06c54c9c22e67aed3c116","69d06c54c9c22e67aed3c117","69d06c54c9c22e67aed3c118","69d06c54c9c22e67aed3c119","69d06c54c9c22e67aed3c11a","69d06c54c9c22e67aed3c11b","69d06c54c9c22e67aed3c11c","69d06c54c9c22e67aed3c11d","69d06c54c9c22e67aed3c11e","69d06c54c9c22e67aed3c11f","69d06c54c9c22e67aed3c120"],
+      "69d06c4a4f1e1017a77a701a": ["69d06c54c9c22e67aed3c121","69d06c54c9c22e67aed3c122","69d06c54c9c22e67aed3c123","69d06c54c9c22e67aed3c124","69d06c54c9c22e67aed3c125","69d06c54c9c22e67aed3c126","69d06c54c9c22e67aed3c127","69d06c54c9c22e67aed3c128","69d06c54c9c22e67aed3c129","69d06c54c9c22e67aed3c12a","69d06c54c9c22e67aed3c12b","69d06c54c9c22e67aed3c12c","69d06c54c9c22e67aed3c12d","69d06c54c9c22e67aed3c12e","69d06c54c9c22e67aed3c12f","69d06c54c9c22e67aed3c130"],
+      "69d06c4a4f1e1017a77a701b": ["69d06c54c9c22e67aed3c131","69d06c54c9c22e67aed3c132","69d06c54c9c22e67aed3c133","69d06c54c9c22e67aed3c134","69d06c54c9c22e67aed3c135"],
+      "69d06c4a4f1e1017a77a701c": ["69d06c54c9c22e67aed3c136","69d06c54c9c22e67aed3c137","69d06c54c9c22e67aed3c138","69d06c54c9c22e67aed3c139"],
+    };
+    const VILLAGE_TO_MACRO_MAP = {};
+    Object.entries(MACRO_VILLAGES_MAP).forEach(([macroId, vids]) => { vids.forEach(vid => { VILLAGE_TO_MACRO_MAP[vid] = macroId; }); });
+
     const out = all.filter(p => {
-      // Only show active + visible providers
-      if (!p.is_active || p.is_visible === false) return false;
+      const provSvcs  = Array.isArray(p.services)      ? p.services      : [];
+      const provAreas = Array.isArray(p.service_areas)  ? p.service_areas : [];
+      const provCatId = p.category_id || "";
+      const exclusionReasons = [];
 
-      // ── Service / Category match ─────────────────────────────────────────
-      const svcMatch = !selSvc || (() => {
-        const provSvcs = Array.isArray(p.services) ? p.services : [];
-        const provCatId = p.category_id || "";
+      // ── STATUS GATES ────────────────────────────────────────────────────
+      if (!p.is_active)           exclusionReasons.push("inactive");
+      if (p.is_visible === false)  exclusionReasons.push("not_visible");
 
-        // Figure out the target category ID regardless of how selSvc was picked
-        // _isCat=true  → selSvc.id IS the category ID
-        // _isCat=false → selSvc.category_id is the parent category
-        const targetCatId = selSvc._isCat ? selSvc.id : (selSvc.category_id || null);
-        const isCatSearch = !!selSvc._isCat;
-        const isSpecificSvc = !isCatSearch;
+      if (exclusionReasons.length === 0) {
 
-        // ── Step 1: Category match (works for both cat and specific svc searches) ──
-        // Direct category_id match on provider record
-        if (targetCatId && provCatId === targetCatId) {
-          // Category search → always show
-          if (!isSpecificSvc) return true;
-          // Specific service search: check if provider offers it
-          // Check direct ID match (e.g. s41 === s41)
-          if (provSvcs.includes(selSvc.id)) return true;
-          // Check name match (resolve code → name, compare)
-          const selName = selSvc.name.toLowerCase();
-          if (provSvcs.some(sv => {
-            const resolved = (ENTITY_SVC_MAP[sv] || LEGACY_SVC_MAP[sv] || String(sv)).toLowerCase();
-            return resolved.includes(selName) || selName.includes(resolved);
-          })) return true;
-          // Provider is in right category but has no services listed — show them
-          if (provSvcs.length === 0) return true;
-          // Provider is in the right category — show them even if specific service not listed
-          // (better to show a relevant provider than hide them)
-          return true;
-        }
+        // ── SERVICE MATCH ──────────────────────────────────────────────────
+        if (selSvc) {
+          const isCatSearch   = !!selSvc._isCat;
+          const targetCatId   = isCatSearch ? selSvc.id : (selSvc.category_id || null);
 
-        // ── Step 2: Check if any of provider's services map to the target category ──
-        if (targetCatId) {
-          for (const sid of provSvcs) {
-            const sidCat = SCODE_TO_CAT[sid] || ENTITY_SVC_TO_CAT[sid];
-            if (sidCat === targetCatId) return true;
+          if (isCatSearch) {
+            // Category-level search: match if provider's category_id OR any service's category matches
+            const catMatch = (provCatId === targetCatId) ||
+              provSvcs.some(sid => (ENTITY_SVC_TO_CAT[sid] || SCODE_TO_CAT[sid]) === targetCatId);
+            if (!catMatch) exclusionReasons.push(`no_matching_service_category (wanted cat=${targetCatId}, provider cat=${provCatId}, provider services=[${provSvcs.slice(0,3).join(",")}])`);
+          } else {
+            // Specific service search:
+            // PRIMARY: direct DB ID match (the only reliable method)
+            const directMatch = provSvcs.includes(selSvc.id);
+            if (!directMatch) {
+              // FALLBACK: name-based match for any remaining text-based legacy entries
+              const selName = (selSvc.name || "").toLowerCase().trim();
+              const nameMatch = provSvcs.some(sv => {
+                const resolved = (ENTITY_SVC_MAP[sv] || LEGACY_SVC_MAP[sv] || "").toLowerCase().trim();
+                return resolved === selName;
+              });
+              if (!nameMatch) {
+                exclusionReasons.push(`no_matching_service (wanted id=${selSvc.id} name="${selSvc.name}", provider services=[${provSvcs.join(",")}])`);
+              }
+            }
           }
         }
 
-        // ── Step 3: Text/name based service match for legacy plain-text service entries ──
-        if (isSpecificSvc && selSvc.name) {
-          const selName = selSvc.name.toLowerCase();
-          if (provSvcs.some(sv => {
-            const resolved = (ENTITY_SVC_MAP[sv] || LEGACY_SVC_MAP[sv] || String(sv)).toLowerCase();
-            return resolved.includes(selName) || selName.includes(resolved);
-          })) return true;
+        // ── AREA MATCH ────────────────────────────────────────────────────
+        if (selArea) {
+          // PRIMARY: direct DB ID match
+          const directAreaMatch = provAreas.includes(selArea.id);
+
+          if (!directAreaMatch) {
+            // SECONDARY: macro group — if user picked a group, check if any provider area is in it
+            const macroGroupVillages = MACRO_VILLAGES_MAP[selArea.id];
+            const macroMatch = macroGroupVillages
+              ? provAreas.some(a => macroGroupVillages.includes(a)) || provAreas.includes(selArea.id)
+              : false;
+
+            // TERTIARY: if user picked a village, check if provider has the parent macro group
+            const selMacroId = VILLAGE_TO_MACRO_MAP[selArea.id];
+            const reverseMacroMatch = selMacroId ? provAreas.includes(selMacroId) : false;
+
+            // QUATERNARY: name-based for legacy text entries only
+            const rawName = selArea.name || "";
+            const dashIdx = rawName.indexOf(" — ");
+            const plainVillageName = (dashIdx >= 0 ? rawName.slice(dashIdx + 3) : rawName).toLowerCase().trim();
+            const nameAreaMatch = provAreas.some(a => areaValMatchesVillage(a, plainVillageName));
+
+            if (!macroMatch && !reverseMacroMatch && !nameAreaMatch) {
+              exclusionReasons.push(`no_matching_village (wanted id=${selArea.id} name="${selArea.name}", provider has ${provAreas.length} areas)`);
+            }
+          }
         }
-
-        return false;
-      })();
-
-      // ── Area match ───────────────────────────────────────────────────────
-      const areaMatch = !selArea || (() => {
-        const provAreas = Array.isArray(p.service_areas) ? p.service_areas : [];
-
-        // PRIMARY: direct entity ID match
-        if (selArea.id && provAreas.includes(selArea.id)) return true;
-
-        // SECONDARY: Macro group IDs — providers with ALL individual village IDs
-        // should match when user selects a macro group like "Established Villages"
-        const MACRO_VILLAGES = {
-          "69d06c4a4f1e1017a77a7018": ["69d06c54c9c22e67aed3c0ff","69d06c54c9c22e67aed3c100","69d06c54c9c22e67aed3c101","69d06c54c9c22e67aed3c102","69d06c54c9c22e67aed3c103","69d06c54c9c22e67aed3c104","69d06c54c9c22e67aed3c105","69d06c54c9c22e67aed3c106","69d06c54c9c22e67aed3c107","69d06c54c9c22e67aed3c108","69d06c54c9c22e67aed3c109","69d06c54c9c22e67aed3c10a"],
-          "69d06c4a4f1e1017a77a7019": ["69d06c54c9c22e67aed3c10b","69d06c54c9c22e67aed3c10c","69d06c54c9c22e67aed3c10d","69d06c54c9c22e67aed3c10e","69d06c54c9c22e67aed3c10f","69d06c54c9c22e67aed3c110","69d06c54c9c22e67aed3c111","69d06c54c9c22e67aed3c112","69d06c54c9c22e67aed3c113","69d06c54c9c22e67aed3c114","69d06c54c9c22e67aed3c115","69d06c54c9c22e67aed3c116","69d06c54c9c22e67aed3c117","69d06c54c9c22e67aed3c118","69d06c54c9c22e67aed3c119","69d06c54c9c22e67aed3c11a","69d06c54c9c22e67aed3c11b","69d06c54c9c22e67aed3c11c","69d06c54c9c22e67aed3c11d","69d06c54c9c22e67aed3c11e","69d06c54c9c22e67aed3c11f","69d06c54c9c22e67aed3c120"],
-          "69d06c4a4f1e1017a77a701a": ["69d06c54c9c22e67aed3c121","69d06c54c9c22e67aed3c122","69d06c54c9c22e67aed3c123","69d06c54c9c22e67aed3c124","69d06c54c9c22e67aed3c125","69d06c54c9c22e67aed3c126","69d06c54c9c22e67aed3c127","69d06c54c9c22e67aed3c128","69d06c54c9c22e67aed3c129","69d06c54c9c22e67aed3c12a","69d06c54c9c22e67aed3c12b","69d06c54c9c22e67aed3c12c","69d06c54c9c22e67aed3c12d","69d06c54c9c22e67aed3c12e","69d06c54c9c22e67aed3c12f","69d06c54c9c22e67aed3c130"],
-          "69d06c4a4f1e1017a77a701b": ["69d06c54c9c22e67aed3c131","69d06c54c9c22e67aed3c132","69d06c54c9c22e67aed3c133","69d06c54c9c22e67aed3c134","69d06c54c9c22e67aed3c135"],
-          "69d06c4a4f1e1017a77a701c": ["69d06c54c9c22e67aed3c136","69d06c54c9c22e67aed3c137","69d06c54c9c22e67aed3c138","69d06c54c9c22e67aed3c139"],
-        };
-        // If user selected a macro group, check if provider covers ANY village in that group
-        if (MACRO_VILLAGES[selArea.id]) {
-          const groupVillages = MACRO_VILLAGES[selArea.id];
-          if (provAreas.some(a => groupVillages.includes(a))) return true;
-          // Also check if provider has the macro group text ("historic","established",etc.) or macro ID
-          if (provAreas.includes(selArea.id)) return true;
-        }
-        // If provider has a macro ID, check if selected village belongs to that macro group
-        const VILLAGE_TO_MACRO = {};
-        Object.entries(MACRO_VILLAGES).forEach(([macroId, villages]) => {
-          villages.forEach(vid => { VILLAGE_TO_MACRO[vid] = macroId; });
-        });
-        if (selArea.id && VILLAGE_TO_MACRO[selArea.id]) {
-          const selMacroId = VILLAGE_TO_MACRO[selArea.id];
-          if (provAreas.includes(selMacroId)) return true;
-        }
-
-        // TERTIARY: name-based resolution for legacy va-codes and plain text areas
-        const rawName = selArea.name || "";
-        const dashIdx = rawName.indexOf(" — ");
-        const plainVillageName = (dashIdx >= 0 ? rawName.slice(dashIdx + 3) : rawName).toLowerCase().trim();
-        return provAreas.some(a => areaValMatchesVillage(a, plainVillageName));
-      })();
-
-      if (!svcMatch || !areaMatch) {
-        console.log(`[V-HUB FILTER] EXCLUDED: ${p.business_name} | svcMatch=${svcMatch} areaMatch=${areaMatch} | services=${JSON.stringify(p.services)} | areas=${JSON.stringify((p.service_areas||[]).slice(0,5))}`);
-      } else {
-        console.log(`[V-HUB FILTER] INCLUDED: ${p.business_name}`);
       }
-      return svcMatch && areaMatch;
+
+      // ── LOG AND RETURN ─────────────────────────────────────────────────
+      const pass = exclusionReasons.length === 0;
+      const debugEntry = {
+        provider_id:        p.id,
+        business_name:      p.business_name,
+        is_active:          p.is_active,
+        is_visible:         p.is_visible,
+        subscription_status: p.subscription_status,
+        category_id:        p.category_id,
+        services:           provSvcs,
+        service_areas_count: provAreas.length,
+        result:             pass ? "MATCHED" : "EXCLUDED",
+        exclusion_reasons:  exclusionReasons,
+      };
+      if (pass) {
+        debugLog.matchedProviders.push(debugEntry);
+        console.log(`[PROVIDER_MATCH_DEBUG] ✅ MATCHED: ${p.business_name} (${p.id})`);
+      } else {
+        debugLog.excludedProviders.push(debugEntry);
+        console.log(`[PROVIDER_MATCH_DEBUG] ❌ EXCLUDED: ${p.business_name} (${p.id}) | reasons: ${exclusionReasons.join("; ")}`);
+      }
+      return pass;
     });
+
+    console.log("[PROVIDER_MATCH_DEBUG]", JSON.stringify({
+      selectedVillage: debugLog.selectedVillage,
+      selectedService: debugLog.selectedService,
+      candidateProviders: debugLog.candidateCount,
+      matchedCount: debugLog.matchedProviders.length,
+      excludedCount: debugLog.excludedProviders.length,
+      matchedProviders: debugLog.matchedProviders.map(p => p.business_name),
+      excludedProvidersWithReasons: debugLog.excludedProviders.map(p => ({ name: p.business_name, reasons: p.exclusion_reasons })),
+    }, null, 2));
 
     // Sort by rating field (no auth-gated calls on public page)
     const getScore = (p) => typeof p.rating === "number" ? p.rating : 0;
