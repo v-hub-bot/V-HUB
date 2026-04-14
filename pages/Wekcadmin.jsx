@@ -179,10 +179,36 @@ function ProvidersTab({ providers, setProviders, catMap, svcMap, areaMap, fullSv
     if (filter === "paid") return ["active", "paid"].includes(p.subscription_status);
     if (filter === "pending") return p.subscription_status === "pending";
     if (filter === "expiring") { const d = daysLeft(p.trial_end_date); return d !== null && d >= 0 && d <= 7; }
+    if (filter === "archived") return p.subscription_status === "archived";
     return true;
   });
 
   const [approving, setApproving] = useState(null);
+  const [reactivating, setReactivating] = useState(null);
+
+  const reactivateArchived = async (p) => {
+    if (!window.confirm(`Reactivate ${p.business_name}? This will restore their listing and start a new 45-day trial.`)) return;
+    setReactivating(p.id);
+    try {
+      const now = new Date();
+      const trialEnd = new Date(now);
+      trialEnd.setDate(trialEnd.getDate() + 45);
+      await Provider.update(p.id, {
+        subscription_status: "trial",
+        is_active: true,
+        is_visible: true,
+        trial_start_date: now.toISOString().split('T')[0],
+        trial_end_date: trialEnd.toISOString().split('T')[0],
+        grace_period_end_date: null,
+        reminder_sent: false,
+      });
+      setProviders(prev => prev.map(x => x.id === p.id ? { ...x, subscription_status: "trial", is_active: true, is_visible: true, trial_start_date: now.toISOString().split('T')[0], trial_end_date: trialEnd.toISOString().split('T')[0], grace_period_end_date: null, reminder_sent: false } : x));
+      alert(`✅ ${p.business_name} has been reactivated with a new 45-day trial!`);
+    } catch(e) {
+      alert("Error reactivating: " + e.message);
+    }
+    setReactivating(null);
+  };
 
   const approveAndNotify = async (p) => {
     if (!window.confirm(`Approve ${p.business_name} and send them a confirmation email?`)) return;
@@ -326,9 +352,9 @@ You can resend manually from the Email button.`);
     <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
       <input placeholder="🔍 Search name, email, phone, VH#..." value={search} onChange={e => setSearch(e.target.value)} style={S.inp} />
       <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-        {["all", "pending", "active", "hidden", "trial", "paid", "expiring"].map(f => (
+        {["all", "pending", "active", "hidden", "trial", "paid", "expiring", "archived"].map(f => (
           <button key={f} onClick={() => setFilter(f)} style={S.filterBtn(filter === f)}>
-            {f === "all" ? `All (${providers.length})` : f.charAt(0).toUpperCase() + f.slice(1)}
+            {f === "all" ? `All (${providers.length})` : f === "archived" ? `📁 Archived (${providers.filter(p => p.subscription_status === "archived").length})` : f.charAt(0).toUpperCase() + f.slice(1)}
           </button>
         ))}
       </div>
@@ -388,7 +414,7 @@ You can resend manually from the Email button.`);
             <div style={{ display: "flex", gap: 5, flexWrap: "wrap", marginTop: 8 }}>
               <span style={S.badge(p.is_active ? T.green : T.red, p.is_active ? "#e8f5e9" : "#fce8e8")}>{p.is_active ? "Active" : "Inactive"}</span>
               <span style={S.badge(p.is_visible !== false ? T.teal : "#888", p.is_visible !== false ? "#e0f4f1" : "#f0f0f0")}>{p.is_visible !== false ? "Visible" : "Hidden"}</span>
-              {p.subscription_status && <span style={S.badge(T.brown, T.parchmentDark)}>{p.subscription_status}</span>}
+              {p.subscription_status && <span style={S.badge(p.subscription_status === "archived" ? "#1A237E" : T.brown, p.subscription_status === "archived" ? "#e8eaf6" : T.parchmentDark)}>{p.subscription_status === "archived" ? "📁 Archived" : p.subscription_status}</span>}
               {p.subscription_tier && <span style={S.badge(T.teal, "#e0f4f1")}>{p.subscription_tier}</span>}
               {dl !== null && dl >= 0 && <span style={S.badge(dl <= 3 ? T.red : T.gold, dl <= 3 ? "#fce8e8" : "#fff8e1")}>{dl === 0 ? "Expires today!" : `${dl}d left`}</span>}
               {dl !== null && dl < 0 && <span style={S.badge(T.red, "#fce8e8")}>Trial expired</span>}
@@ -505,15 +531,32 @@ You can resend manually from the Email button.`);
                   </div>
                 )}
 
+                {/* Grace period notice for trial_expired */}
+                {p.subscription_status === "trial_expired" && p.grace_period_end_date && (
+                  <div style={{ background: "#fff3cd", border: "1px solid #E8431A", borderRadius: 6, padding: "8px 12px", marginBottom: 8, fontSize: 12, color: "#8B0000", fontFamily: T.sans }}>
+                    ⏳ Grace period ends: <strong>{fmt(p.grace_period_end_date)}</strong> — Provider can still reactivate via Stripe
+                  </div>
+                )}
+                {/* Archived notice */}
+                {p.subscription_status === "archived" && (
+                  <div style={{ background: "#e8eaf6", border: "1px solid #3949AB", borderRadius: 6, padding: "8px 12px", marginBottom: 8, fontSize: 12, color: "#1A237E", fontFamily: T.sans }}>
+                    📁 Archived — Provider emailed admin@v-hub.us to request reactivation. Use "Reactivate" below to restore their listing.
+                  </div>
+                )}
                 {/* Action buttons */}
                 <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                  {(!p.is_active || p.subscription_status === "pending") && (
+                  {(!p.is_active || p.subscription_status === "pending") && p.subscription_status !== "archived" && (
                     <button
                       onClick={() => approveAndNotify(p)}
                       disabled={approving === p.id}
                       style={S.btn("#2e7d32")}
                     >
                       {approving === p.id ? "Approving..." : "✅ Approve & Notify"}
+                    </button>
+                  )}
+                  {p.subscription_status === "archived" && (
+                    <button onClick={() => reactivateArchived(p)} style={{ ...S.btn("#1A237E"), fontWeight: 900 }}>
+                      🔓 Reactivate Account
                     </button>
                   )}
                   <button onClick={() => toggleActive(p)} style={S.btn(p.is_active ? "#8B4513" : "#555")}>{p.is_active ? "Deactivate" : "Activate Only"}</button>

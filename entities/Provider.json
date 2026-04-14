@@ -26,16 +26,31 @@
       "type": "string"
     },
     "service_areas": {
-      "type": "array"
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
     },
     "category_id": {
       "type": "string"
     },
     "services": {
-      "type": "array"
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
     },
     "subscription_status": {
-      "type": "string"
+      "type": "string",
+      "enum": [
+        "pending",
+        "trial",
+        "active",
+        "trial_expired",
+        "cancelled",
+        "archived",
+        "past_due"
+      ]
     },
     "subscription_tier": {
       "type": "string"
@@ -92,6 +107,9 @@
       "type": "string"
     },
     "trial_end_date": {
+      "type": "string"
+    },
+    "grace_period_end_date": {
       "type": "string"
     },
     "onboarding_type": {
