@@ -1,9 +1,9 @@
 // providerUpdateProfile — secure self-service update for provider hub sessions
-// Deployed: 2026-04-13
+// v2 - wildcard CORS to support v-hub.us custom domain
 import { createClient } from "npm:@base44/sdk@0.8.25";
 
 const CORS_HEADERS = {
-  "Access-Control-Allow-Origin": "https://v-hub-app-edf7f8e8.base44.app",
+  "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
   "Access-Control-Allow-Headers": "Content-Type",
   "Content-Type": "application/json",

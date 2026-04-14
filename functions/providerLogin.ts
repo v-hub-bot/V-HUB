@@ -1,8 +1,8 @@
-// providerLogin v4 - uses createClientFromRequest for service role
+// providerLogin v5 - wildcard CORS to support v-hub.us custom domain
 import { createClientFromRequest } from "npm:@base44/sdk@0.8.25";
 
 const CORS = {
-  "Access-Control-Allow-Origin": "https://v-hub-app-edf7f8e8.base44.app",
+  "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
   "Access-Control-Allow-Headers": "Content-Type",
   "Content-Type": "application/json",
