@@ -65,6 +65,9 @@ const NEWSPAPER_CONTENT = {
     body: [
       "Many of The Villages' most beloved service providers have called this community home for over a decade. From family-owned landscaping operations to skilled tradespeople who know every neighborhood street by name, local expertise makes all the difference.",
       "V-Hub reviews every listing before it goes live. Browse by home repair, landscaping, pet care, tech help, cleaning, transportation, and more — contact providers directly, no fees, no middlemen.",
+      "What sets Villages providers apart is their deep familiarity with the community. They know the local codes, the seasonal patterns, and the specific needs of active adult households. That knowledge translates directly into better service.",
+      "Many providers on V-Hub have been serving The Villages for five, ten, even fifteen years. Their reputation is built neighborhood by neighborhood — and V-Hub gives them the platform to keep growing it.",
+      "Whether you need someone for a one-time project or a recurring weekly service, V-Hub lets you browse, compare, and reach out — all in one place, all for free.",
     ]
   },
   howItWorks: {
@@ -1449,27 +1452,27 @@ export default function Home() {
 
         {/* ── MASTHEAD ── */}
         <div style={{ background: PAPER, padding: "12px 10px 8px" }}>
-          {/* Single row: logo | V-Hub title inline | burger */}
-          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-            {/* Left: V-Hub logo icon — smaller to leave room for title */}
-            <div style={{ flexShrink: 0, width: 64, height: 64, display: "flex", alignItems: "center", justifyContent: "center" }}>
+          {/* Single row: logo | V-Hub title inline | burger — logo and burger same width for true centering */}
+          <div style={{ display: "flex", alignItems: "center" }}>
+            {/* Left: logo — fixed width 64 */}
+            <div style={{ flexShrink: 0, width: 64, height: 64, display: "flex", alignItems: "center", justifyContent: "flex-start" }}>
               <img
                 src="https://base44.app/api/apps/69d062aca815ce8e697894b1/files/mp/public/69d062aca815ce8e697894b1/f14a7cbd0_logo_icon_small.png"
                 alt="V-Hub logo icon"
                 loading="eager"
                 fetchPriority="high"
                 decoding="sync"
-                style={{ width: 64, height: 64, objectFit: "contain", display: "block" }}
+                style={{ width: 56, height: 56, objectFit: "contain", display: "block" }}
               />
             </div>
-            {/* Center: V-Hub all on one line */}
+            {/* Center: V-Hub title — flex:1 so it takes remaining space and centers itself */}
             <div style={{ flex: 1, textAlign: "center", display: "flex", alignItems: "baseline", justifyContent: "center", gap: 0 }}>
               <span style={{ fontStyle: "italic", fontWeight: 700, fontFamily: "'Great Vibes', cursive", fontSize: 52, color: "#003366", WebkitTextStroke: "0.5px #003366", textShadow: "0.5px 0.5px 0 #001a40", lineHeight: 1 }}>V</span>
               <span style={{ fontSize: 36, fontWeight: 900, color: INK, fontFamily: "'Times New Roman', serif", lineHeight: 1, margin: "0 2px" }}>-</span>
               <span style={{ fontSize: 44, fontWeight: 900, color: INK, fontFamily: "'Times New Roman', serif", letterSpacing: -1, lineHeight: 1 }}>Hub</span>
             </div>
-            {/* Right: burger — smaller container */}
-            <div style={{ flexShrink: 0, width: 42, display: "flex", justifyContent: "flex-end", alignItems: "center" }}><Burger currentUser={currentUser} /></div>
+            {/* Right: burger — SAME fixed width 64 as logo to balance layout */}
+            <div style={{ flexShrink: 0, width: 64, display: "flex", justifyContent: "flex-end", alignItems: "center" }}><Burger currentUser={currentUser} /></div>
           </div>
           {/* Tagline */}
           <div style={{ fontSize: 13, fontStyle: "italic", color: INK_FADE, textAlign: "center", margin: "6px 0 10px" }}>
