@@ -171,10 +171,29 @@ export default function Classifieds() {
   const today = new Date().toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
 
   return (
-    <div style={{ minHeight: "100vh", background: PAPER_MID, fontFamily: SERIF, overflowX: "hidden" }}>
+    <div style={{
+      minHeight: "100vh",
+      background: PAPER,
+      backgroundImage: `repeating-linear-gradient(0deg,transparent,transparent 27px,rgba(28,15,0,0.04) 27px,rgba(28,15,0,0.04) 28px)`,
+      fontFamily: SERIF,
+      maxWidth: 860,
+      margin: "0 auto",
+      overflowX: "hidden",
+      boxShadow: "0 2px 40px rgba(0,0,0,0.28)",
+    }}>
 
       {/* Load Great Vibes font */}
       <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet" />
+
+      {/* ── NEWSPAPER STACKED PAGES TOP EDGE ── */}
+      <div style={{ position: "relative", height: 28, marginBottom: 0 }}>
+        <div style={{ position: "absolute", top: 0, left: 6, right: 6, height: 28, background: "#b8a070", borderRadius: "0 0 3px 3px", boxShadow: "0 3px 6px rgba(0,0,0,0.35)" }} />
+        <div style={{ position: "absolute", top: 0, left: 4, right: 4, height: 24, background: "#c9b484", borderRadius: "0 0 3px 3px", boxShadow: "0 3px 5px rgba(0,0,0,0.3)" }} />
+        <div style={{ position: "absolute", top: 0, left: 3, right: 3, height: 20, background: "#d8c496", borderRadius: "0 0 2px 2px", boxShadow: "0 2px 5px rgba(0,0,0,0.25)" }} />
+        <div style={{ position: "absolute", top: 0, left: 2, right: 2, height: 16, background: "#e6d4a8", borderRadius: "0 0 2px 2px", boxShadow: "0 2px 4px rgba(0,0,0,0.2)" }} />
+        <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 12, background: "#F0E6C8", borderRadius: "0 0 2px 2px", boxShadow: "0 4px 10px rgba(0,0,0,0.25), inset 0 -1px 0 rgba(0,0,0,0.1)" }} />
+        <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 4, background: "linear-gradient(180deg, #1a0a00 0%, #3d2200 100%)" }} />
+      </div>
 
       {/* ════════ MASTHEAD ════════ */}
       <div style={{ background: PAPER, borderBottom: `3px double ${INK}` }}>
@@ -402,6 +421,28 @@ export default function Classifieds() {
             </div>
           </div>
         )}
+      </div>
+
+      {/* ── NEWSPAPER BOTTOM EDGE ── */}
+      <div style={{ background: PAPER_MID, borderTop: `3px double ${INK}`, marginTop: 0 }}>
+        <div style={{ height: 2, background: INK }} />
+        <div style={{ padding: "16px 20px 10px", textAlign: "center" }}>
+          <div style={{ fontSize: 10, color: INK_FADE, fontStyle: "italic", fontFamily: SERIF, letterSpacing: 1 }}>
+            {"© "}{new Date().getFullYear()}{" V-Hub · The Villages, Florida · All Rights Reserved"}
+          </div>
+          <div style={{ fontSize: 9, color: INK_FADE, marginTop: 3, fontFamily: SERIF }}>
+            V-Hub is not affiliated with The Villages® or its affiliates.
+          </div>
+        </div>
+        <div style={{ height: 1, background: INK, margin: "0 20px" }} />
+        <div style={{ position: "relative", height: 28 }}>
+          <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 28, background: "#b8a070", boxShadow: "0 -2px 6px rgba(0,0,0,0.3)" }} />
+          <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 22, background: "#c9b484" }} />
+          <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 17, background: "#d8c496" }} />
+          <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 12, background: "#e6d4a8" }} />
+          <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 8, background: PAPER }} />
+          <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 3, background: "linear-gradient(0deg, #1a0a00 0%, #3d2200 100%)" }} />
+        </div>
       </div>
     </div>
   );
