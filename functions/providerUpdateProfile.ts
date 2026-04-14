@@ -1,5 +1,5 @@
 // providerUpdateProfile — secure self-service update for provider hub sessions
-// v3 - added ID validation to prevent legacy codes from being saved
+// v4 - added password change and password_changed flag support
 import { createClient } from "npm:@base44/sdk@0.8.25";
 
 const CORS_HEADERS = {
@@ -9,7 +9,12 @@ const CORS_HEADERS = {
   "Content-Type": "application/json",
 };
 
-// ── ID Validation ─────────────────────────────────────────────────────────────
+async function sha256hex(plain: string): Promise<string> {
+  const enc = new TextEncoder();
+  const buf = await crypto.subtle.digest("SHA-256", enc.encode(plain));
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, "0")).join("");
+}
+
 function isValidDbId(id: string): boolean {
   return typeof id === 'string' && /^[0-9a-f]{24}$/.test(id);
 }
@@ -36,43 +41,67 @@ Deno.serve(async (req: Request) => {
     return new Response(JSON.stringify({ error: "Invalid JSON" }), { status: 400, headers: CORS_HEADERS });
   }
 
-  const provider_id = body.provider_id as string | undefined;
-  const vh_number   = body.vh_number   as string | undefined;
-  const fields      = body.fields      as Record<string, unknown> | undefined;
+  const provider_id   = body.provider_id   as string | undefined;
+  const new_password  = body.new_password  as string | undefined;
+  const password_changed = body.password_changed as boolean | undefined;
+
+  // ── PASSWORD CHANGE MODE (force change on first login) ────────────────
+  if (provider_id && new_password && password_changed === true) {
+    if (new_password.length < 6) {
+      return new Response(JSON.stringify({ error: "Password must be at least 6 characters" }), { status: 400, headers: CORS_HEADERS });
+    }
+    try {
+      let existing: Record<string, unknown> | null = null;
+      try { existing = await sr.entities.Provider.get(provider_id); } catch { /* not found */ }
+      if (!existing) return new Response(JSON.stringify({ error: "Provider not found" }), { status: 404, headers: CORS_HEADERS });
+
+      const hashed = await sha256hex(new_password);
+      const updated = await sr.entities.Provider.update(provider_id, {
+        login_password: hashed,
+        password_changed: true,
+      });
+      return new Response(JSON.stringify({ success: true, provider: updated }), { headers: CORS_HEADERS });
+    } catch (e: unknown) {
+      const msg = (e instanceof Error) ? e.message : "Password update failed";
+      return new Response(JSON.stringify({ error: msg }), { status: 500, headers: CORS_HEADERS });
+    }
+  }
+
+  // ── PROFILE UPDATE MODE ───────────────────────────────────────────────
+  const vh_number = body.vh_number as string | undefined;
+  const fields    = body.fields    as Record<string, unknown> | undefined;
 
   if (!provider_id || !vh_number || !fields) {
     return new Response(JSON.stringify({ error: "Missing provider_id, vh_number, or fields" }), { status: 400, headers: CORS_HEADERS });
   }
 
-  // Auth: confirm provider_id + vh_number match before allowing any write
+  // Auth: confirm provider_id + vh_number match
   let existing: Record<string, unknown> | null = null;
   try { existing = await sr.entities.Provider.get(provider_id); } catch { /* not found */ }
-  if (!existing) {
-    return new Response(JSON.stringify({ error: "Provider not found" }), { status: 404, headers: CORS_HEADERS });
-  }
-  if (existing.vh_number !== vh_number) {
-    return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: CORS_HEADERS });
-  }
+  if (!existing) return new Response(JSON.stringify({ error: "Provider not found" }), { status: 404, headers: CORS_HEADERS });
+  if (existing.vh_number !== vh_number) return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: CORS_HEADERS });
 
-  // Whitelist: only these fields may be self-updated
   const ALLOWED = [
     "business_name", "owner_name", "phone", "email", "website",
     "description", "address", "years_in_business", "license_number",
-    "google_review_url", "services", "service_areas"
+    "google_review_url", "services", "service_areas", "is_mobile",
+    "hours_of_operation", "google_rating",
   ];
   const safe: Record<string, unknown> = {};
   for (const k of ALLOWED) {
     if (k in fields) safe[k] = fields[k];
   }
 
-  // ── Validate service and area IDs ──────────────────────────────────
+  // Handle password change via profile update too
+  if (fields.new_password && typeof fields.new_password === 'string' && (fields.new_password as string).length >= 6) {
+    safe.login_password = await sha256hex(fields.new_password as string);
+    safe.password_changed = true;
+  }
+
   if ('services' in safe) {
     const invalid = getInvalidIds(safe.services);
     if (invalid.length > 0) {
-      console.error('providerUpdateProfile: invalid service IDs rejected:', invalid);
-      return new Response(JSON.stringify({
-        error: `Invalid service IDs: ${invalid.join(', ')}. Please select services from the dropdown.`
-      }), { status: 400, headers: CORS_HEADERS });
+      return new Response(JSON.stringify({ error: `Invalid service IDs: ${invalid.join(', ')}. Please select services from the dropdown.` }), { status: 400, headers: CORS_HEADERS });
     }
     safe.services = filterValidIds(safe.services);
   }
@@ -80,10 +109,7 @@ Deno.serve(async (req: Request) => {
   if ('service_areas' in safe) {
     const invalid = getInvalidIds(safe.service_areas);
     if (invalid.length > 0) {
-      console.error('providerUpdateProfile: invalid area IDs rejected:', invalid);
-      return new Response(JSON.stringify({
-        error: `Invalid village IDs: ${invalid.join(', ')}. Please select villages from the dropdown.`
-      }), { status: 400, headers: CORS_HEADERS });
+      return new Response(JSON.stringify({ error: `Invalid village IDs: ${invalid.join(', ')}. Please select villages from the dropdown.` }), { status: 400, headers: CORS_HEADERS });
     }
     safe.service_areas = filterValidIds(safe.service_areas);
   }

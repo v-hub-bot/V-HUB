@@ -1,5 +1,5 @@
-// adminUpdateProvider v3 — admin CRUD + provider self-update mode
-// Added ID validation to prevent legacy codes or text from being saved
+// adminUpdateProvider v4 — admin CRUD + provider self-update + password change mode
+// Updated: force redeploy 2026-04-14
 import { createClientFromRequest, createClient } from 'npm:@base44/sdk@0.8.25';
 
 const ALLOWED_ORIGIN = "https://v-hub-app-edf7f8e8.base44.app";
@@ -68,10 +68,16 @@ function sanitizeProviderFields(fields: Record<string, unknown>, cors: Record<st
 
 const srClient = createClient({ appId: "69d062aca815ce8e697894b1" }).asServiceRole;
 
+async function sha256hex(plain: string): Promise<string> {
+  const enc = new TextEncoder();
+  const buf = await crypto.subtle.digest("SHA-256", enc.encode(plain));
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, "0")).join("");
+}
+
 const PROVIDER_SELF_FIELDS = [
   "business_name","owner_name","phone","email","website",
   "description","address","years_in_business","license_number",
-  "google_review_url","services","service_areas"
+  "google_review_url","services","service_areas","is_mobile","hours_of_operation","google_rating"
 ];
 
 Deno.serve(async (req: Request) => {
@@ -80,6 +86,25 @@ Deno.serve(async (req: Request) => {
 
   let body: Record<string,unknown> = {};
   try { body = await req.json(); } catch { body = {}; }
+
+  // ── Provider password change (first login force-change) ───────────────
+  if (body.provider_change_password === true) {
+    const pid = body.provider_id as string;
+    const np  = body.new_password as string;
+    if (!pid || !np || String(np).length < 6) {
+      return Response.json({ error: "Missing provider_id or password too short (min 6 chars)" }, { status: 400, headers: cors });
+    }
+    try {
+      let ex: any = null;
+      try { ex = await srClient.entities.Provider.get(pid); } catch { /**/ }
+      if (!ex) return Response.json({ error: "Provider not found" }, { status: 404, headers: cors });
+      const hashed = await sha256hex(String(np));
+      const upd = await srClient.entities.Provider.update(pid, { login_password: hashed, password_changed: true });
+      return Response.json({ success: true, provider: upd }, { headers: cors });
+    } catch (e: any) {
+      return Response.json({ error: e.message || "Password change failed" }, { status: 500, headers: cors });
+    }
+  }
 
   // ── Provider self-update ──────────────────────────────────────────────
   if (body.provider_self_update === true) {

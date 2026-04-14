@@ -500,10 +500,10 @@ function ForcePasswordChangeScreen({ provider, onComplete }) {
     if (pass !== pass2) { setError("Passwords don't match."); return; }
     setLoading(true); setError("");
     try {
-      const res = await fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/providerUpdateProfile", {
+      const res = await fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/adminUpdateProvider", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ provider_id: provider.id, new_password: pass, password_changed: true }),
+        body: JSON.stringify({ provider_change_password: true, provider_id: provider.id, new_password: pass }),
       });
       const data = await res.json();
       if (!res.ok || data.error) { setError(data.error || "Something went wrong. Please try again."); setLoading(false); return; }

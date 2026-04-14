@@ -129,6 +129,9 @@
     },
     "login_password": {
       "type": "string"
+    },
+    "password_changed": {
+      "type": "boolean"
     }
   },
   "required": [],
