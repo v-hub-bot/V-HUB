@@ -1474,21 +1474,24 @@ export default function Home() {
           style={{ width: "100%", height: 200, objectFit: "cover", objectPosition: "center 60%", display: "block" }}
         />
 
-        {/* DEAL OF THE WEEK — full width, thick red border */}
-        <div style={{
-          border: "4px solid #CC0000",
-          outline: "1.5px solid #CC0000",
-          outlineOffset: "0px",
-          boxShadow: "0 0 10px 2px rgba(204,0,0,0.3)",
-          background: PAPER,
-          width: "100%", boxSizing: "border-box",
-        }}>
+        {/* DEALS OF THE WEEK — full width, thick red border, links to Classifieds */}
+        <a href="/Classifieds" style={{ textDecoration: "none", display: "block", width: "100%" }}>
           <div style={{
-            padding: "10px 16px", textAlign: "center", fontSize: 13, fontWeight: 900,
-            letterSpacing: 2, color: "#CC0000", textTransform: "uppercase",
-            fontFamily: "'Times New Roman', serif",
-          }}>🔥 Deals of the Week!</div>
-        </div>
+            border: "4px solid #CC0000",
+            outline: "1.5px solid #CC0000",
+            outlineOffset: "0px",
+            boxShadow: "0 0 10px 2px rgba(204,0,0,0.3)",
+            background: PAPER,
+            width: "100%", boxSizing: "border-box",
+            cursor: "pointer",
+          }}>
+            <div style={{
+              padding: "10px 16px", textAlign: "center", fontSize: 13, fontWeight: 900,
+              letterSpacing: 2, color: "#CC0000", textTransform: "uppercase",
+              fontFamily: "'Times New Roman', serif",
+            }}>🔥 Deals of the Week!</div>
+          </div>
+        </a>
 
         {/* LIST YOUR SERVICE + PROVIDER HUB — half width each, navy border */}
         <div style={{ display: "flex", width: "100%" }}>
