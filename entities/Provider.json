@@ -43,6 +43,9 @@
     "classifieds_addon": {
       "type": "boolean"
     },
+    "classifieds_stripe_subscription_id": {
+      "type": "string"
+    },
     "is_visible": {
       "type": "boolean"
     },
@@ -61,7 +64,16 @@
     "google_review_url": {
       "type": "string"
     },
+    "google_rating": {
+      "type": "number"
+    },
     "address": {
+      "type": "string"
+    },
+    "is_mobile": {
+      "type": "boolean"
+    },
+    "hours_of_operation": {
       "type": "string"
     },
     "profile_views": {

@@ -1056,6 +1056,9 @@ export default function ProviderDashboard() {
       years_in_business: prov.years_in_business || "",
       license_number: prov.license_number || "",
       google_review_url: prov.google_review_url || "",
+      google_rating: prov.google_rating || "",
+      hours_of_operation: prov.hours_of_operation || "",
+      is_mobile: prov.is_mobile === true,
     });
     setSelSvcs(Array.isArray(prov.services) ? prov.services : []);
     setSelAreas(Array.isArray(prov.service_areas) ? prov.service_areas : []);
@@ -1288,6 +1291,20 @@ export default function ProviderDashboard() {
             <label style={lbS}>Google Review URL</label>
             <input value={form.google_review_url || ""} onChange={e => setForm(f => ({ ...f, google_review_url: e.target.value }))} style={inS} placeholder="https://g.page/your-business/review" />
           </div>
+          <div>
+            <label style={lbS}>Google Rating (e.g. 4.7)</label>
+            <input type="number" step="0.1" min="1" max="5" value={form.google_rating || ""} onChange={e => setForm(f => ({ ...f, google_rating: e.target.value ? parseFloat(e.target.value) : "" }))} style={inS} placeholder="4.5" />
+          </div>
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <label style={{ ...lbS, margin: 0 }}>Mobile Provider (travels to you)?</label>
+            <input type="checkbox" checked={!!form.is_mobile} onChange={e => setForm(f => ({ ...f, is_mobile: e.target.checked }))} style={{ width: 18, height: 18, cursor: "pointer" }} />
+            <span style={{ fontSize: 11, color: INK_FADE, fontFamily: SANS }}>Check if you travel to clients (no fixed location)</span>
+          </div>
+        </div>
+        <div style={{ marginBottom: 16 }}>
+          <label style={lbS}>Hours of Operation</label>
+          <textarea value={form.hours_of_operation || ""} onChange={e => setForm(f => ({ ...f, hours_of_operation: e.target.value }))} rows={3} style={{ ...inS, resize: "vertical", lineHeight: 1.8 }} placeholder={"Mon–Fri: 8am–5pm\nSat: 9am–1pm\nSun: Closed"} />
+          <div style={{ fontSize: 10, color: INK_FADE, marginTop: 3, fontFamily: SANS }}>Enter each day or range on its own line</div>
         </div>
         <div style={{ marginBottom: 24 }}>
           <label style={lbS}>About Your Business</label>
@@ -1460,8 +1477,10 @@ export default function ProviderDashboard() {
               ["✉️ Email", provider.email],
               ["🌐 Website", provider.website],
               ["📍 Address", provider.address],
+              ["🕐 Hours", provider.hours_of_operation ? provider.hours_of_operation.split("\n")[0] + (provider.hours_of_operation.includes("\n") ? "…" : "") : null],
               ["🏆 Years in Business", provider.years_in_business ? `${provider.years_in_business} yrs` : null],
               ["🏷 License #", provider.license_number],
+              ["📍 Location Type", provider.is_mobile ? "Mobile — travels to you" : (provider.address ? "Brick & Mortar" : null)],
             ].filter(([, v]) => v).map(([l, v]) => (
               <div key={l} style={{ fontSize: 13, color: INK, fontFamily: SANS, gridColumn: l.includes("Address") ? "1 / -1" : "auto" }}>
                 <span style={{ fontWeight: 700 }}>{l}: </span>

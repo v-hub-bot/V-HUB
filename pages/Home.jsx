@@ -214,7 +214,7 @@ function Stars({ rating, size = 14 }) {
   );
 }
 
-function ProvDetail({ prov, areas, cats, onBack }) {
+function ProvDetail({ prov, areas, cats, svcs, onBack }) {
   const [reviews, setReviews] = useState([]);
   const [showReviewForm, setShowReviewForm] = useState(false);
   const [reviewSaved, setReviewSaved] = useState(false);
@@ -222,7 +222,23 @@ function ProvDetail({ prov, areas, cats, onBack }) {
   const cat = cats.find(c => c.id === prov.category_id);
   const GREEN = "#1A6B3C";
   const RED_RULE = "#8B1A1A";
-  const TEAL = "#00836B";
+  const TEAL_COL = "#00836B";
+
+  // Build lookup maps from passed entities
+  const svcMap = React.useMemo(() => {
+    const m = {};
+    (svcs || []).forEach(s => { if (s.id) m[s.id] = s.name; });
+    return m;
+  }, [svcs]);
+
+  const areaMap = React.useMemo(() => {
+    const m = {};
+    (areas || []).forEach(a => { if (a.id) m[a.id] = a.name; });
+    return m;
+  }, [areas]);
+
+  const resolvedServices = (prov.services || []).map(s => svcMap[s] || s).filter(Boolean);
+  const resolvedAreas    = (prov.service_areas || []).map(a => areaMap[a] || MACRO_AREAS_MAP[a] || a).filter(Boolean);
 
   useEffect(() => {
     ProviderReview.filter({ provider_id: prov.id })
@@ -241,9 +257,10 @@ function ProvDetail({ prov, areas, cats, onBack }) {
     }).catch(() => {});
   }, [prov.id]);
 
-  const avgRating = reviews.length > 0
-    ? (reviews.reduce((s, r) => s + (r.rating || 0), 0) / reviews.length).toFixed(1)
+  const vhubAvg = reviews.length > 0
+    ? (reviews.reduce((s, r) => s + (r.rating || 0), 0) / reviews.length)
     : null;
+  const vhubAvgStr = vhubAvg !== null ? vhubAvg.toFixed(1) : null;
 
   const handleReviewSubmit = async () => {
     if (!reviewForm.customer_name || !reviewForm.review_text) return;
@@ -255,24 +272,52 @@ function ProvDetail({ prov, areas, cats, onBack }) {
   const inputS = { width: "100%", boxSizing: "border-box", background: PAPER, border: `1.5px solid ${PAPER_DK}`, borderRadius: 4, color: INK, fontFamily: "'Times New Roman', serif", fontSize: 13, padding: "8px 11px", outline: "none" };
   const lblS = { fontSize: 10, fontWeight: 700, color: INK_FADE, textTransform: "uppercase", letterSpacing: 1, marginBottom: 3, display: "block", fontFamily: "'Times New Roman', serif" };
 
+  const hasGoogleRating = typeof prov.google_rating === "number" && prov.google_rating > 0;
+
   return (
     <div style={{ minHeight: "100vh", background: PAPER, fontFamily: "'Times New Roman', serif", maxWidth: 860, margin: "0 auto", boxShadow: "0 2px 40px rgba(0,0,0,0.28)" }}>
       <div style={{ background: INK, padding: "10px 14px", display: "flex", alignItems: "center", gap: 10 }}>
         <button onClick={onBack} style={{ background: "rgba(255,255,255,0.15)", border: "none", color: PAPER, borderRadius: 3, padding: "4px 10px", fontSize: 12, cursor: "pointer" }}>← Back</button>
-        <span style={{ color: PAPER, fontWeight: 700, fontSize: 13, letterSpacing: 1 }}>Provider Detail</span>
-        {prov.provider_id && <span style={{ marginLeft: "auto", background: "rgba(255,255,255,0.12)", color: PAPER, fontSize: 11, padding: "2px 10px", borderRadius: 10, letterSpacing: 1 }}>ID: {prov.provider_id}</span>}
+        <span style={{ color: PAPER, fontWeight: 700, fontSize: 13, letterSpacing: 1 }}>V-Hub</span>
+        {prov.vh_number && <span style={{ marginLeft: "auto", background: "rgba(255,255,255,0.12)", color: PAPER, fontSize: 11, padding: "2px 10px", borderRadius: 10, letterSpacing: 1 }}>{prov.vh_number}</span>}
       </div>
       <div style={{ padding: "16px" }}>
-        {/* Header */}
-        <div style={{ display: "flex", gap: 14, alignItems: "flex-start", marginBottom: 10 }}>
-          {prov.logo_url && <img src={prov.logo_url} alt="logo" style={{ width: 64, height: 64, borderRadius: 6, objectFit: "cover", border: `1px solid ${PAPER_DK}` }} />}
-          <div style={{ flex: 1 }}>
-            <div style={{ fontSize: 22, fontWeight: 900, color: INK, lineHeight: 1.1 }}>{prov.business_name}</div>
+        {/* ── Header ── */}
+        <div style={{ display: "flex", gap: 14, alignItems: "flex-start", marginBottom: 8 }}>
+          {prov.logo_url && <img src={prov.logo_url} alt="logo" style={{ width: 72, height: 72, borderRadius: 8, objectFit: "cover", border: `1px solid ${PAPER_DK}`, flexShrink: 0 }} />}
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontSize: 22, fontWeight: 900, color: INK, lineHeight: 1.15, wordBreak: "break-word" }}>{prov.business_name}</div>
             {cat && <div style={{ fontSize: 12, color: INK_FADE, marginTop: 2 }}>{cat.icon} {cat.name}</div>}
-            {avgRating && (
-              <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 4 }}>
-                <Stars rating={parseFloat(avgRating)} size={15} />
-                <span style={{ fontSize: 12, color: INK_FADE }}>{avgRating}/5 · {reviews.length} V-Hub review{reviews.length !== 1 ? "s" : ""}</span>
+
+            {/* V-Hub rating row */}
+            {vhubAvg !== null && (
+              <div style={{ display: "flex", alignItems: "center", gap: 5, marginTop: 5 }}>
+                <Stars rating={vhubAvg} size={14} />
+                <span style={{ fontSize: 11, color: TEAL_COL, fontWeight: 700 }}>{vhubAvgStr}/5</span>
+                <span style={{ fontSize: 11, color: INK_FADE }}>· {reviews.length} V-Hub review{reviews.length !== 1 ? "s" : ""}</span>
+              </div>
+            )}
+
+            {/* Google rating row */}
+            {hasGoogleRating && (
+              <div style={{ display: "flex", alignItems: "center", gap: 5, marginTop: vhubAvg !== null ? 3 : 5 }}>
+                <span style={{ fontSize: 12, color: "#F9A825" }}>{"★".repeat(Math.round(prov.google_rating))}</span>
+                <span style={{ fontSize: 11, color: "#4285F4", fontWeight: 700 }}>{prov.google_rating}/5 Google</span>
+                {prov.google_review_url && (
+                  <a href={prov.google_review_url} target="_blank" rel="noreferrer"
+                     style={{ fontSize: 10, color: "#4285F4", textDecoration: "underline", marginLeft: 2 }}>
+                    See reviews ↗
+                  </a>
+                )}
+              </div>
+            )}
+            {/* Google reviews link even without rating */}
+            {!hasGoogleRating && prov.google_review_url && (
+              <div style={{ marginTop: 4 }}>
+                <a href={prov.google_review_url} target="_blank" rel="noreferrer"
+                   style={{ fontSize: 11, color: "#4285F4", textDecoration: "underline" }}>
+                  🔍 View Google Reviews ↗
+                </a>
               </div>
             )}
           </div>
@@ -280,39 +325,90 @@ function ProvDetail({ prov, areas, cats, onBack }) {
 
         <Rule thick style={{ marginBottom: 10 }} />
 
-        {/* Description */}
+        {/* ── Description ── */}
         {prov.description && <p style={{ fontSize: 13, color: INK, lineHeight: 1.7, marginBottom: 12 }}>{prov.description}</p>}
 
-        {/* Contact grid */}
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 12 }}>
-          {prov.phone && <div style={{ fontSize: 12, color: INK }}><b>📞 Phone:</b> <a href={"tel:" + prov.phone} style={{ color: INK }}>{prov.phone}</a></div>}
-          {prov.email && <div style={{ fontSize: 12, color: INK }}><b>✉️ Email:</b> <a href={"mailto:" + prov.email} style={{ color: BROWN_BTN }}>{prov.email}</a></div>}
-          {prov.website && <div style={{ fontSize: 12, color: INK }}><b>🌐 Website:</b> <a href={prov.website} target="_blank" rel="noreferrer" style={{ color: "#1A3F70" }}>{prov.website.replace(/^https?:\/\//, "")}</a></div>}
-          {prov.years_in_business && <div style={{ fontSize: 12, color: INK }}><b>📅 Years:</b> {prov.years_in_business}</div>}
-          {prov.address && <div style={{ fontSize: 12, color: INK, gridColumn: "1/-1" }}><b>📍 Address:</b> {prov.address}</div>}
+        {/* ── Location / Mobility Badge ── */}
+        <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
+          {prov.is_mobile === true ? (
+            <span style={{ background: "#E8F5E9", border: "1.5px solid #1A6B3C", borderRadius: 20, padding: "3px 12px", fontSize: 11, fontWeight: 700, color: "#1A6B3C", fontFamily: "'Times New Roman', serif", letterSpacing: 0.5 }}>
+              🚐 Mobile — Travels to You
+            </span>
+          ) : prov.address ? (
+            <span style={{ background: "#FFF8E1", border: "1.5px solid #B8860B", borderRadius: 20, padding: "3px 12px", fontSize: 11, fontWeight: 700, color: "#7B5E00", fontFamily: "'Times New Roman', serif", letterSpacing: 0.5 }}>
+              🏪 Brick & Mortar
+            </span>
+          ) : null}
         </div>
 
-        {/* Service areas */}
-        {(prov.service_areas || []).length > 0 && (
+        {/* ── Contact & Info Grid ── */}
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "6px 12px", marginBottom: 12 }}>
+          {prov.phone && (
+            <div style={{ fontSize: 12, color: INK, display: "flex", alignItems: "center", gap: 4 }}>
+              <b>📞</b> <a href={"tel:" + prov.phone} style={{ color: INK }}>{prov.phone}</a>
+            </div>
+          )}
+          {prov.email && (
+            <div style={{ fontSize: 12, color: INK, display: "flex", alignItems: "center", gap: 4, wordBreak: "break-all" }}>
+              <b>✉️</b> <a href={"mailto:" + prov.email} style={{ color: BROWN_BTN }}>{prov.email}</a>
+            </div>
+          )}
+          {prov.website && (
+            <div style={{ fontSize: 12, color: INK, gridColumn: "1/-1", display: "flex", alignItems: "center", gap: 4 }}>
+              <b>🌐</b>
+              <a href={prov.website.startsWith("http") ? prov.website : "https://" + prov.website}
+                 target="_blank" rel="noreferrer"
+                 style={{ color: "#1A3F70", wordBreak: "break-all" }}>
+                {prov.website.replace(/^https?:\/\//, "")}
+              </a>
+            </div>
+          )}
+          {prov.address && (
+            <div style={{ fontSize: 12, color: INK, gridColumn: "1/-1", display: "flex", alignItems: "flex-start", gap: 4 }}>
+              <b>📍</b> <span>{prov.address}</span>
+            </div>
+          )}
+          {prov.years_in_business && (
+            <div style={{ fontSize: 12, color: INK }}>
+              <b>📅</b> {prov.years_in_business} yr{parseInt(prov.years_in_business) !== 1 ? "s" : ""} in business
+            </div>
+          )}
+          {prov.license_number && (
+            <div style={{ fontSize: 12, color: INK }}>
+              <b>📋</b> Lic# {prov.license_number}
+            </div>
+          )}
+        </div>
+
+        {/* ── Hours of Operation ── */}
+        {prov.hours_of_operation && (
+          <div style={{ background: PAPER_MID, border: `1px solid ${PAPER_DK}`, borderRadius: 6, padding: "10px 14px", marginBottom: 12 }}>
+            <div style={{ fontSize: 10, fontWeight: 700, color: INK_FADE, textTransform: "uppercase", letterSpacing: 1.5, marginBottom: 5 }}>🕐 Hours of Operation</div>
+            <div style={{ fontSize: 12, color: INK, lineHeight: 1.8, whiteSpace: "pre-line" }}>{prov.hours_of_operation}</div>
+          </div>
+        )}
+
+        {/* ── Services Offered ── */}
+        {resolvedServices.length > 0 && (
           <div style={{ marginBottom: 12 }}>
-            <div style={{ fontSize: 11, fontWeight: 700, color: INK_FADE, textTransform: "uppercase", letterSpacing: 1, marginBottom: 5 }}>Areas Served</div>
+            <div style={{ fontSize: 11, fontWeight: 700, color: INK_FADE, textTransform: "uppercase", letterSpacing: 1, marginBottom: 5 }}>Services Offered</div>
             <div style={{ display: "flex", flexWrap: "wrap", gap: 5 }}>
-              {(prov.service_areas || []).map(a => (
-                <span key={a} style={{ background: PAPER_MID, border: `1px solid ${PAPER_DK}`, borderRadius: 3, padding: "2px 8px", fontSize: 11, color: INK }}>
-                  📍 {MACRO_AREAS_MAP[a] || a}
-                </span>
+              {resolvedServices.map((s, i) => (
+                <span key={i} style={{ background: BROWN_BTN, color: PAPER, borderRadius: 10, padding: "3px 10px", fontSize: 11, fontFamily: "'Times New Roman', serif" }}>{s}</span>
               ))}
             </div>
           </div>
         )}
 
-        {/* Services */}
-        {(prov.services || []).length > 0 && (
+        {/* ── Areas Served ── */}
+        {resolvedAreas.length > 0 && (
           <div style={{ marginBottom: 14 }}>
-            <div style={{ fontSize: 11, fontWeight: 700, color: INK_FADE, textTransform: "uppercase", letterSpacing: 1, marginBottom: 5 }}>Services Offered</div>
+            <div style={{ fontSize: 11, fontWeight: 700, color: INK_FADE, textTransform: "uppercase", letterSpacing: 1, marginBottom: 5 }}>Villages Served</div>
             <div style={{ display: "flex", flexWrap: "wrap", gap: 5 }}>
-              {(prov.services || []).map(s => (
-                <span key={s} style={{ background: BROWN_BTN, color: PAPER, borderRadius: 10, padding: "3px 10px", fontSize: 11, fontFamily: "'Times New Roman', serif" }}>{s}</span>
+              {resolvedAreas.map((a, i) => (
+                <span key={i} style={{ background: PAPER_MID, border: `1px solid ${PAPER_DK}`, borderRadius: 3, padding: "2px 8px", fontSize: 11, color: INK }}>
+                  📍 {a}
+                </span>
               ))}
             </div>
           </div>
@@ -1248,7 +1344,7 @@ export default function Home() {
   const para = { margin: "0 0 7px 0", fontSize: 8.5, color: INK_FADE, fontFamily: "'Times New Roman', serif", lineHeight: 1.9, textAlign: "justify" };
   const rule = { height: 1, background: INK_FADE, margin: "8px 0", opacity: 0.4 };
 
-  if (selProv)  return <ProvDetail prov={selProv} areas={areas} cats={cats} onBack={() => setSelProv(null)} />;
+  if (selProv)  return <ProvDetail prov={selProv} areas={areas} cats={cats} svcs={svcs} onBack={() => setSelProv(null)} />;
   if (isLoading) return (
     <div style={{ background: "#f5f0e8", minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", gap: 16 }}>
       <div style={{ fontSize: 40 }}>🔍</div>

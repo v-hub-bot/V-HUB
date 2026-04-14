@@ -279,6 +279,9 @@ You can resend manually from the Email button.`);
       years_in_business: p.years_in_business || "",
       license_number: p.license_number || "",
       google_review_url: p.google_review_url || "",
+      google_rating: p.google_rating || "",
+      hours_of_operation: p.hours_of_operation || "",
+      is_mobile: p.is_mobile === true,
       notes: p.notes || "",
       subscription_tier: p.subscription_tier || "basic",
       subscription_status: p.subscription_status || "trial",
@@ -301,6 +304,9 @@ You can resend manually from the Email button.`);
       years_in_business: editForm.years_in_business ? Number(editForm.years_in_business) : 0,
       license_number: editForm.license_number,
       google_review_url: editForm.google_review_url,
+      google_rating: editForm.google_rating ? parseFloat(editForm.google_rating) : null,
+      hours_of_operation: editForm.hours_of_operation,
+      is_mobile: editForm.is_mobile === true,
       notes: editForm.notes,
       subscription_tier: editForm.subscription_tier,
       subscription_status: editForm.subscription_status,
@@ -532,6 +538,7 @@ You can resend manually from the Email button.`);
                         ["Years in Business", "years_in_business"],
                         ["License #", "license_number"],
                         ["Google Review URL", "google_review_url"],
+                        ["Google Rating (1–5)", "google_rating"],
                       ].map(([label, key]) => (
                         <div key={key}>
                           <div style={{ fontSize: 10, color: T.brownLight, fontFamily: T.sans, fontWeight: 700, marginBottom: 2 }}>{label}</div>
@@ -542,6 +549,22 @@ You can resend manually from the Email button.`);
                           />
                         </div>
                       ))}
+                      {/* Hours of operation */}
+                      <div style={{ gridColumn: "1 / -1" }}>
+                        <div style={{ fontSize: 10, color: T.brownLight, fontFamily: T.sans, fontWeight: 700, marginBottom: 2 }}>Hours of Operation</div>
+                        <textarea
+                          value={editForm.hours_of_operation || ""}
+                          onChange={e => setEditForm(f => ({ ...f, hours_of_operation: e.target.value }))}
+                          rows={3}
+                          placeholder={"Mon–Fri: 8am–5pm\nSat: 9am–1pm\nSun: Closed"}
+                          style={{ width: "100%", padding: "7px 10px", fontSize: 13, fontFamily: T.sans, border: `1px solid ${T.border}`, borderRadius: 6, boxSizing: "border-box", resize: "vertical", lineHeight: 1.7 }}
+                        />
+                      </div>
+                      {/* Mobile toggle */}
+                      <div style={{ display: "flex", alignItems: "center", gap: 10, gridColumn: "1 / -1" }}>
+                        <input type="checkbox" checked={!!editForm.is_mobile} onChange={e => setEditForm(f => ({ ...f, is_mobile: e.target.checked }))} style={{ width: 16, height: 16, cursor: "pointer" }} />
+                        <span style={{ fontSize: 12, fontFamily: T.sans, color: T.brown }}>Mobile provider — travels to customers (no fixed address)</span>
+                      </div>
                       <div>
                         <div style={{ fontSize: 10, color: T.brownLight, fontFamily: T.sans, fontWeight: 700, marginBottom: 2 }}>Subscription Status</div>
                         <select value={editForm.subscription_status} onChange={e => setEditForm(f => ({ ...f, subscription_status: e.target.value }))}
