@@ -957,29 +957,34 @@ export default function Home() {
     let ENTITY_AREA_MAP = {}; // real ServiceArea entity ID -> village name
     let ENTITY_SVC_MAP = {};   // real Service entity ID -> service name
     let svcEntities = [];
+
+    // ── Step 1: Fetch providers (always runs, never blocked by auth errors) ──
     try {
-      const [provResp, areaEntities, svcEntitiesRaw] = await Promise.all([
-        fetch('https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/getProviders', { method: 'POST', headers: { 'Content-Type': 'application/json' } }).catch(() => null),
+      const provResp = await fetch(
+        'https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/getProviders',
+        { method: 'POST', headers: { 'Content-Type': 'application/json' } }
+      );
+      const data = await provResp.json();
+      all = data.providers || [];
+    } catch(e) { all = []; }
+
+    // ── Step 2: Try to enrich with entity names (optional, auth may fail on public page) ──
+    try {
+      const [areaEntities, svcEntitiesRaw] = await Promise.all([
         ServiceArea.list().catch(() => []),
         Service.list().catch(() => []),
       ]);
       svcEntities = svcEntitiesRaw || [];
-      if (provResp) {
-        const data = await provResp.json().catch(() => ({}));
-        all = data.providers || [];
-      }
-      // Build map of real ServiceArea entity ID -> plain village name (strip emoji prefix)
       (areaEntities || []).forEach(a => {
         if (a.id && a.name) {
           const plainName = a.name.split('—').pop()?.trim() || a.name;
           ENTITY_AREA_MAP[a.id] = plainName.toLowerCase();
         }
       });
-      // Build map of real Service entity ID -> service name
       svcEntities.forEach(s => {
         if (s.id && s.name) ENTITY_SVC_MAP[s.id] = s.name;
       });
-    } catch(e) { all = []; svcEntities = []; setIsLoading(false); }
+    } catch(e) { /* enrichment failed — static maps cover this */ }
 
     // ── Legacy ID lookup maps ──────────────────────────────────────────────
     const LEGACY_VA = {"va001":"Alhambra","va002":"Amelia","va003":"Ashland","va004":"Belle Aire","va005":"Belvedere","va006":"Bonita","va007":"Bonnybrook","va008":"Bradford","va009":"Briar Meadow","va010":"Bridgeport at Creekside Landing","va011":"Bridgeport at Lake Miona","va012":"Bridgeport at Lake Sumter","va013":"Bridgeport at Laurel Valley","va014":"Bridgeport at Miona Shores","va015":"Bridgeport at Mission Hills","va016":"Buttonwood","va017":"Calumet Grove","va018":"Caroline","va019":"Cason Hammock","va020":"Charlotte","va021":"Chatham","va022":"Chitty Chatty","va023":"Citrus Grove","va024":"Collier","va025":"Collier at Alden Bungalows","va026":"Collier at Antrim Dells","va027":"Country Club Hills","va028":"Dabney","va029":"De Allende","va030":"De La Vista","va031":"Del Mar","va032":"DeLuna","va033":"DeSoto","va034":"Dunedin","va035":"Duval","va036":"El Cortez","va037":"Fenney","va038":"Fernandina","va039":"Gilchrist","va040":"Glenbrook","va041":"Hacienda","va042":"Haciendas of Mission Hills","va043":"Hadley","va044":"Hammock at Fenney","va045":"Hawkins","va046":"Hemingway","va047":"Hillsborough","va048":"La Reynalda","va049":"La Zamora","va050":"LaBelle","va051":"Lake Deaton","va052":"Lake Denham","va053":"Lakeshore Cottages","va054":"Largo","va055":"Liberty Park","va056":"Linden","va057":"Lynnhaven","va058":"Mallory Square","va059":"Marsh Bend","va060":"McClure","va061":"Mira Mesa","va062":"Monarch Grove","va063":"Newell","va064":"Orange Blossom Gardens","va065":"Osceola Hills","va066":"Osceola Hills at Soaring Eagle Preserve","va067":"Palo Alto","va068":"Pennecamp","va069":"Piedmont","va070":"Pine Hills","va071":"Pine Ridge","va072":"Pinellas","va073":"Poinciana","va074":"Polo Ridge","va075":"Richmond","va076":"Rio Grande","va077":"Rio Ponderosa","va078":"Rio Ranchero","va079":"Sabal Chase","va080":"Sanibel","va081":"Santiago","va082":"Santo Domingo","va083":"Silver Lake","va084":"Springdale","va085":"St. Catherine","va086":"St. Charles","va087":"St. James","va088":"St. Johns","va089":"Summerhill","va090":"Sunset Pointe","va091":"Tall Trees","va092":"Tamarind Grove","va093":"Tierra Del Sol","va094":"Valle Verde","va095":"Virginia Trace","va096":"Winifred","va097":"Woodbury","va098":"Bison Valley","va099":"Country Club","va100":"Middleton","va101":"Moultrie Creek","va102":"Oak Meadows","va103":"Orange Blossom","va104":"Oxford Oaks","va105":"Shady Brook","va106":"Spring Arbor"};
@@ -1146,26 +1151,8 @@ export default function Home() {
       return svcMatch && areaMatch;
     });
 
-    // Fetch approved V-Hub reviews for matched providers and sort by rating
-    const ids = out.map(p => p.id);
-    let reviewMap = {};
-    try {
-      const allRevs = await ProviderReview.filter({ is_approved: true });
-      (allRevs || []).forEach(r => {
-        if (!reviewMap[r.provider_id]) reviewMap[r.provider_id] = [];
-        reviewMap[r.provider_id].push(r.rating);
-      });
-    } catch(e) { /* silently continue */ }
-
-    const getScore = (p) => {
-      const revs = reviewMap[p.id];
-      if (revs && revs.length > 0) {
-        // V-Hub villager rating — primary sort
-        return revs.reduce((s, r) => s + r, 0) / revs.length;
-      }
-      // Fall back to Google/seeded rating field
-      return typeof p.rating === "number" ? p.rating : 0;
-    };
+    // Sort by rating field (no auth-gated calls on public page)
+    const getScore = (p) => typeof p.rating === "number" ? p.rating : 0;
 
     out.sort((a, b) => {
       // Higher rating first; same rating → tier order
