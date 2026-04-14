@@ -1,4 +1,4 @@
-// Classifieds Add-On Checkout — $10/month
+// Classifieds Ad Checkout — $10 one-time payment for 1 week
 import Stripe from "npm:stripe@14";
 
 Deno.serve(async (req) => {
@@ -14,40 +14,32 @@ Deno.serve(async (req) => {
     const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY")!, { apiVersion: "2023-10-16" });
     const appUrl = "https://v-hub-app-edf7f8e8.base44.app";
 
-    // Look up or create the $10/mo classifieds add-on price
-    let priceId: string;
-    try {
-      const prices = await stripe.prices.list({ lookup_keys: ["vhub_classifieds_addon_monthly"], limit: 1 });
-      if (prices.data.length > 0) {
-        priceId = prices.data[0].id;
-      } else {
-        const product = await stripe.products.create({
-          name: "V-Hub Classifieds Add-On",
-          description: "Run a classified ad on the V-Hub Classifieds page — $10/month",
-        });
-        const price = await stripe.prices.create({
-          product: product.id,
-          unit_amount: 1000,
-          currency: "usd",
-          recurring: { interval: "month" },
-          lookup_key: "vhub_classifieds_addon_monthly",
-        });
-        priceId = price.id;
-      }
-    } catch (e) {
-      console.error("Price lookup/create error:", e);
-      throw e;
-    }
+    // Calculate 1 week from now for display purposes
+    const weekEnd = new Date();
+    weekEnd.setDate(weekEnd.getDate() + 7);
+    const weekEndStr = weekEnd.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
 
+    // One-time payment session (not subscription)
     const session = await stripe.checkout.sessions.create({
-      mode: "subscription",
+      mode: "payment",
       payment_method_types: ["card"],
       customer_email: provider_email,
-      line_items: [{ price: priceId, quantity: 1 }],
+      line_items: [{
+        price_data: {
+          currency: "usd",
+          unit_amount: 1000, // $10.00
+          product_data: {
+            name: "V-Hub Deals of the Week — 1 Week Ad",
+            description: `Your classified ad runs on V-Hub's Deals of the Week page for 7 days (through ${weekEndStr}).`,
+          },
+        },
+        quantity: 1,
+      }],
       metadata: {
         provider_record_id,
         provider_name,
-        addon_type: "classifieds",
+        addon_type: "classifieds_weekly",
+        ad_expires: weekEnd.toISOString().split("T")[0],
       },
       success_url: `${appUrl}/ProviderDashboard?classifieds_payment=success&acct=${provider_record_id}`,
       cancel_url: `${appUrl}/ProviderDashboard?classifieds_payment=cancelled`,

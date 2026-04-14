@@ -55,82 +55,60 @@ const NEWSPAPER_CONTENT = {
     headline: "LOCAL SERVICES ON THE RISE",
     subhead: "Demand surges as Villages community expands southward",
     body: [
-      "Residents across The Villages report record demand for trusted local service providers this season. From landscaping crews working the new Eastport neighborhoods to home repair specialists fielding calls from Brownwood to Spanish Springs, the marketplace has never been more active.",
-      "Community association leaders say the growth reflects the Villages' continued expansion. 'We need reliable, vetted professionals who understand our lifestyle,' said one resident near Lake Sumter Landing.",
+      "Residents across The Villages report record demand for trusted local service providers this season. From landscaping crews working Eastport to home repair specialists fielding calls from Brownwood to Spanish Springs, the marketplace has never been more active.",
+      "Community leaders say growth reflects the Villages' continued expansion. ‘We need reliable, vetted professionals who understand our lifestyle,’ said one resident near Lake Sumter Landing.",
     ]
   },
   providerSpotlight: {
     headline: "TRUSTED NAMES, LOCAL ROOTS",
     subhead: "Established providers bring decades of expertise to your door",
     body: [
-      "Many of The Villages' most beloved service providers have called this community home for over a decade. From family-owned landscaping operations to skilled tradespeople who know every neighborhood street by name, local expertise makes all the difference.",
-      "V-Hub reviews every listing before it goes live. Browse by home repair, landscaping, pet care, tech help, cleaning, transportation, and more — contact providers directly, no fees, no middlemen.",
-      "What sets Villages providers apart is their deep familiarity with the community. They know the local codes, the seasonal patterns, and the specific needs of active adult households. That knowledge translates directly into better service.",
-      "Many providers on V-Hub have been serving The Villages for five, ten, even fifteen years. Their reputation is built neighborhood by neighborhood — and V-Hub gives them the platform to keep growing it.",
-      "Whether you need someone for a one-time project or a recurring weekly service, V-Hub lets you browse, compare, and reach out — all in one place, all for free.",
+      "Many of The Villages’ most beloved service providers have called this community home for over a decade. From family-owned landscaping operations to skilled tradespeople who know every neighborhood by name, local expertise makes all the difference.",
+      "V-Hub reviews every listing before it goes live. Browse home repair, landscaping, pet care, tech help, cleaning, transportation, and more — contact providers directly, no fees, no middlemen.",
     ]
   },
   howItWorks: {
     headline: "FIND YOUR PROVIDER IN SECONDS",
     subhead: "Search by service, then by your village — results appear instantly",
     body: [
-      "Simply select the service you need from the dropdown — choose a specific subcategory like 'Window Replacement' or 'Pet Grooming' — then pick your village from the list. Hit Find Services and see every matching provider who serves your area.",
+      "Select the service you need, then pick your village. Hit Find Services and see every matching provider who serves your area — directly, with no middleman.",
     ]
   },
   growthStory: {
     headline: "VILLAGES ECONOMY THRIVES",
     subhead: "Small businesses flourish as new residents arrive weekly",
     body: [
-      "The Villages remains one of Florida's fastest-growing communities, drawing hundreds of new residents every month. With that growth comes opportunity — for local entrepreneurs, tradespeople, and service professionals eager to build their client base.",
-      "Community leaders gathered recently to discuss expanded support for small business owners. New listing tiers on V-Hub allow providers to reach exactly the neighborhoods they serve.",
-      "From plumbers and electricians to dog groomers and personal shoppers, the demand for skilled local help has surged across all 97 villages — from Alhambra to Woodbury.",
-      "V-Hub was built specifically for this community. No national spam, no out-of-area listings — just real neighbors helping real neighbors, one village at a time.",
-      "Local service businesses report meaningful new customer inquiries since listing on V-Hub. Providers say the platform delivers exactly the kind of community-focused exposure that national directories cannot match.",
-      "Residents in newer developments like Eastport and Fenney say finding reliable local help used to mean long waits and out-of-area contractors. V-Hub has changed that — connecting them with pros who already know the streets, the homes, and the community standards.",
-      "The directory currently lists providers across more than a dozen service categories, with new businesses joining every week. Whether you need a last-minute repair or a recurring weekly service, V-Hub has you covered.",
+      "The Villages remains one of Florida’s fastest-growing communities, drawing hundreds of new residents every month. V-Hub was built specifically for this community — no national spam, no out-of-area listings, just real neighbors helping real neighbors.",
+      "The directory lists providers across more than a dozen service categories, with new businesses joining every week. Whether you need a one-time repair or a recurring weekly service, V-Hub has you covered.",
     ]
   },
   classifieds: {
     headline: "COMMUNITY SPOTLIGHT",
     subhead: "Local service highlights from across The Villages",
     body: [
-      "HOME SERVICES — From handyman repairs to full renovations, V-Hub connects residents with experienced home professionals across every village.",
-      "PET CARE — Dog walkers, groomers, pet sitters, and veterinary services — V-Hub lists trusted pet care providers throughout The Villages.",
-      "TECH HELP — Smartphone setup, tablet troubleshooting, Wi-Fi support, and computer help — patient, senior-friendly tech professionals available.",
-      "LAWN & LANDSCAPING — Weekly mowing, fertilization, irrigation, tree trimming, and full landscape design — serving all 97 villages.",
-      "HOUSE CLEANING — Weekly and bi-weekly housekeeping, deep cleaning, and move-in/move-out services from trusted local providers.",
-      "TRANSPORTATION — Medical transport, airport rides, local errands, and community event shuttle services across The Villages.",
-      "PERSONAL CARE — Hair stylists, nail technicians, massage therapists, and wellness professionals who come to your home.",
-      "POOL & SPA — Pool maintenance, spa servicing, chemical balancing, and seasonal inspections from licensed local technicians.",
+      "HOME SERVICES — Handyman repairs, renovations, landscaping, pool care, and pest control from trusted local professionals.",
+      "PET CARE — Dog walkers, groomers, sitters, and vet services throughout The Villages.",
+      "TECH HELP — Senior-friendly smartphone, tablet, and Wi-Fi support — patient pros who come to you.",
+      "PERSONAL CARE — Hair, nails, massage, and wellness professionals who visit your home.",
     ]
   },
   safetyTrust: {
     headline: "YOUR SAFETY, OUR PRIORITY",
-    subhead: "Every listing is reviewed by our team before going live",
+    subhead: "Every listing is reviewed before going live",
     body: [
-      "Every business listed on V-Hub is reviewed by our team before appearing in search results. License numbers are self-reported by providers. We monitor resident feedback to ensure quality stays high.",
-      "Residents are encouraged to leave honest reviews after working with any provider. Your feedback helps your neighbors make better decisions — and keeps the directory trustworthy for the whole community.",
-      "If you ever have a concern about a listed provider, contact us directly at admin@v-hub.us — our team reviews every submission and acts quickly to protect the community's standards.",
+      "Every business on V-Hub is reviewed before appearing in results. We monitor resident feedback to keep quality high.",
+      "Have a concern? Contact admin@v-hub.us — our team reviews every submission and acts quickly.",
     ]
   },
   homeServices: {
     headline: "HOME SERVICES AT YOUR DOOR",
-    subhead: "From repairs to landscaping — trusted pros serve every village",
+    subhead: "Trusted pros serve every village",
     body: [
-      "Whether you need a leaky faucet fixed, windows replaced, or your lawn trimmed before the weekend, V-Hub connects you with local service professionals across every neighborhood.",
-      "Categories include Home Repair, Landscaping, Cleaning, Pet Care, Tech Help, Transportation, and Personal Assistance. Find the right provider for your village today.",
-      "Every provider listed on V-Hub is geo-specific to The Villages — so results are always relevant to your street, your neighborhood, your community.",
-      "Look up a handyman in Fenney, a pet groomer near Marsh Bend, or a tech helper in Brownwood Square — V-Hub surfaces exactly who serves your area, nothing more.",
-      "Every provider is reviewed by the V-Hub team before their listing goes live. Residents can leave reviews, rate their experience, and help neighbors make confident, informed choices.",
-      "Whether you are new to The Villages or have lived here for years, V-Hub is the go-to directory for finding trusted help — fast, local, and always free to search.",
-      "Home repair specialists on V-Hub include handymen and tradespeople covering everything from minor fixes to major renovations. No job is too small when the right pro is just a click away.",
-      "Landscaping professionals listed on V-Hub cover lawn maintenance, full irrigation system installations, and everything in between. Many offer seasonal packages tailored to Florida's year-round growing season.",
-      "Tech help providers specialize in working with seniors — setting up smartphones, configuring tablets, troubleshooting Wi-Fi, and teaching residents how to use video calling to stay connected with family. Patience and clarity are their hallmarks.",
-      "Cleaning services range from weekly housekeeping to deep move-in cleans. Many providers serve specific villages and can accommodate residents with special scheduling needs or health sensitivities.",
+      "Whether you need a leaky faucet fixed, windows replaced, or your lawn trimmed, V-Hub connects you with local professionals across every neighborhood.",
+      "Every provider is geo-specific to The Villages. Residents can leave reviews and help their neighbors make informed choices.",
     ]
   },
-};
-
+}
 function vName(a) { return a.name || ""; }
 
 function Rule({ thick = false, style = {} }) {
@@ -886,15 +864,22 @@ function SearchBox({ cats, svcs, areas, onSearch, selSvc, setSelSvc, selArea, se
           <VilDropdown open={vOpen} areas={areas} selArea={selArea} setSelArea={a => { setSelArea(a); setVOpen(false); }} setVOpen={setVOpen} />
         </div>
       </div>
-      <button onClick={e => { e.stopPropagation(); onSearch(selSvc, selArea); }} style={{
-        width: "100%", background: `linear-gradient(180deg,#9A6030,${BROWN_BTN} 60%,#5A3010)`,
-        border: `3px solid ${YELLOW}`, boxShadow: `0 0 0 1.5px ${YELLOW}, 0 0 10px 2px rgba(255,220,0,0.35)`,
-        borderRadius: 5, color: "#F5E8CC", fontFamily: "'Times New Roman', serif",
-        fontWeight: 700, fontSize: 14, letterSpacing: 3, padding: "13px", cursor: "pointer", boxSizing: "border-box",
-        marginTop: 10,
-      }}>
-        FIND SERVICES
-      </button>
+      {(() => {
+        const bothSelected = !!(selSvc && selArea);
+        return (
+          <button onClick={e => { e.stopPropagation(); onSearch(selSvc, selArea); }} style={{
+            width: "100%",
+            background: bothSelected ? "linear-gradient(180deg,#1A6B3C,#145530)" : `linear-gradient(180deg,#9A6030,${BROWN_BTN} 60%,#5A3010)`,
+            border: bothSelected ? "3px solid #1A6B3C" : `3px solid ${YELLOW}`,
+            boxShadow: bothSelected ? "0 0 0 1.5px #1A6B3C, 0 0 12px 3px rgba(26,107,60,0.4)" : `0 0 0 1.5px ${YELLOW}, 0 0 10px 2px rgba(255,220,0,0.35)`,
+            borderRadius: 5, color: "#F5E8CC", fontFamily: "'Times New Roman', serif",
+            fontWeight: 700, fontSize: 14, letterSpacing: 3, padding: "13px", cursor: "pointer", boxSizing: "border-box",
+            marginTop: 10, transition: "all 0.2s ease",
+          }}>
+            {bothSelected ? "✓ FIND SERVICES" : "FIND SERVICES"}
+          </button>
+        );
+      })()}
     </div>
   );
 }
@@ -1526,29 +1511,17 @@ export default function Home() {
           </div>
         </a>
 
-        {/* LIST YOUR SERVICE + PROVIDER HUB — half width each, navy border */}
-        <div style={{ display: "flex", width: "100%" }}>
-          <a href="/ListService" style={{ textDecoration: "none", flex: 1 }}>
-            <div style={{
-              padding: "11px 8px", textAlign: "center", fontSize: 11, fontWeight: 700,
-              letterSpacing: 1.5, color: "#F5E8CC", textTransform: "uppercase",
-              background: `linear-gradient(180deg,#9A6030,${BROWN_BTN} 60%,#5A3010)`,
-              border: `3px solid ${NAVY}`,
-              boxShadow: `0 0 0 1.5px ${NAVY}88, 0 2px 8px rgba(27,61,111,0.25)`,
-              boxSizing: "border-box", cursor: "pointer", lineHeight: 1.3,
-            }}>📋 List My<br/>Service</div>
-          </a>
-          <a href="/ProviderDashboard" style={{ textDecoration: "none", flex: 1 }}>
-            <div style={{
-              padding: "11px 8px", textAlign: "center", fontSize: 11, fontWeight: 700,
-              letterSpacing: 1.5, color: "#F5E8CC", textTransform: "uppercase",
-              background: `linear-gradient(180deg,#9A6030,${BROWN_BTN} 60%,#5A3010)`,
-              border: `3px solid ${NAVY}`,
-              boxShadow: `0 0 0 1.5px ${NAVY}88, 0 2px 8px rgba(27,61,111,0.25)`,
-              boxSizing: "border-box", cursor: "pointer", lineHeight: 1.3,
-            }}>🔐 Provider<br/>Hub</div>
-          </a>
-        </div>
+        {/* LIST MY SERVICE — full width, deep navy blue */}
+        <a href="/ListService" style={{ textDecoration: "none", display: "block", width: "100%" }}>
+          <div style={{
+            padding: "14px 8px", textAlign: "center", fontSize: 13, fontWeight: 900,
+            letterSpacing: 2, color: "#FFFFFF", textTransform: "uppercase",
+            background: `linear-gradient(180deg,#1B3D6F,#0d2447)`,
+            border: `3px solid #1B3D6F`,
+            boxShadow: `0 0 0 1.5px #1B3D6F, 0 2px 12px rgba(27,61,111,0.4)`,
+            boxSizing: "border-box", cursor: "pointer", lineHeight: 1.4, width: "100%",
+          }}>📋 List My Service — It's Free!</div>
+        </a>
 
         <Rule />
 

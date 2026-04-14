@@ -185,6 +185,26 @@ Deno.serve(async (req: Request): Promise<Response> => {
   if (event.type === "checkout.session.completed") {
     const session = event.data.object as Stripe.Checkout.Session;
 
+    // ── One-time classifieds weekly payment ───────────────────────────
+    if (session.mode === "payment") {
+      const providerRecordId = session.metadata?.provider_record_id;
+      const addonType = session.metadata?.addon_type || "";
+      const adExpires = session.metadata?.ad_expires || "";
+      if (addonType === "classifieds_weekly" && providerRecordId) {
+        console.log(`Classifieds weekly payment completed: ${providerRecordId}`);
+        try {
+          // Calculate expiry: 7 days from now
+          const expires = adExpires || new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split("T")[0];
+          await base44.asServiceRole.entities.Provider.update(providerRecordId, {
+            classifieds_addon: true,
+          });
+          console.log("✅ Classifieds weekly ad activated for:", providerRecordId, "expires:", expires);
+        } catch (err) {
+          console.error("Failed to activate classifieds weekly addon:", err);
+        }
+      }
+    }
+
     if (session.mode === "subscription") {
       const subscriptionId = session.subscription as string;
       const providerRecordId = session.metadata?.provider_record_id || session.metadata?.provider_id;

@@ -32,16 +32,13 @@ async function fetchAllProvidersWithRetry(db: any): Promise<any[]> {
 
   while (true) {
     pageNum++;
-    if (pageNum > 30) break; // safety cap
-
+    if (pageNum > 30) break;
     let page: any[] | null = null;
     let lastErr: any = null;
-
-    // Up to 4 retries for this page
     for (let attempt = 1; attempt <= 4; attempt++) {
       try {
         page = await db.Provider.list({ limit: PAGE_SIZE, skip });
-        break; // success
+        break;
       } catch (e: any) {
         lastErr = e;
         const msg = String(e?.message || "");
@@ -53,11 +50,10 @@ async function fetchAllProvidersWithRetry(db: any): Promise<any[]> {
         }
       }
     }
-
     if (!page || page.length === 0) break;
     all = all.concat(page);
     console.log(`[getProviders] fetched page ${pageNum}: ${page.length} records (total=${all.length})`);
-    if (page.length < PAGE_SIZE) break; // last page
+    if (page.length < PAGE_SIZE) break;
     skip += PAGE_SIZE;
   }
   return all;
@@ -69,11 +65,26 @@ Deno.serve(async (req: Request) => {
   try {
     const base44 = createClientFromRequest(req);
 
-    // ── LOGIN / SESSION RESTORE MODE ──────────────────────────────────────
     if (req.method === "POST") {
       let body: any = null;
-      try { body = await req.json(); } catch { /* no body or not JSON */ }
+      try { body = await req.json(); } catch { /* no body */ }
 
+      // ── PUBLIC LOOKUP DATA (categories, services, areas) ─────────────
+      if (body?.get_lookup_data === true) {
+        try {
+          const db = base44.asServiceRole.entities;
+          const [cats, svcs, areas] = await Promise.all([
+            db.Category.list().catch(() => []),
+            db.Service.list().catch(() => []),
+            db.ServiceArea.list().catch(() => []),
+          ]);
+          return Response.json({ ok: true, categories: cats || [], services: svcs || [], areas: areas || [] }, { headers: CORS });
+        } catch (e: any) {
+          return Response.json({ ok: false, error: e.message, categories: [], services: [], areas: [] }, { headers: CORS });
+        }
+      }
+
+      // ── SESSION RESTORE ───────────────────────────────────────────────
       if (body?.session_restore === true) {
         const { provider_id } = body;
         if (!provider_id) return Response.json({ error: "Missing provider_id" }, { status: 400, headers: CORS });
@@ -86,6 +97,7 @@ Deno.serve(async (req: Request) => {
         }
       }
 
+      // ── LOGIN ─────────────────────────────────────────────────────────
       if (body?.login === true) {
         const { identifier, password } = body;
         if (!identifier?.trim() || !password?.trim()) {
@@ -131,7 +143,6 @@ Deno.serve(async (req: Request) => {
 
         return Response.json({ success: true, provider: sanitize(prov) }, { status: 200, headers: CORS });
       }
-      // Empty/non-special POST → fall through to listing
     }
 
     // ── LISTING MODE ──────────────────────────────────────────────────────
@@ -150,20 +161,12 @@ Deno.serve(async (req: Request) => {
         console.log(`[getProviders] user-scoped fallback: got ${providers.length} providers`);
       } catch (e2: any) {
         console.log(`[getProviders] BOTH FAILED: ${e1.message} | ${e2.message}`);
-        return Response.json({ 
-          error: `Both fetch methods failed: ${e1.message} | ${e2.message}`,
-          providers: [],
-          count: 0
-        }, { status: 500, headers: CORS });
+        return Response.json({ error: `Both fetch methods failed: ${e1.message} | ${e2.message}`, providers: [], count: 0 }, { status: 500, headers: CORS });
       }
     }
 
     const sanitized = providers.map(sanitize);
-    return Response.json({ 
-      providers: sanitized, 
-      count: sanitized.length,
-      usedFallback
-    }, { headers: CORS });
+    return Response.json({ providers: sanitized, count: sanitized.length, usedFallback }, { headers: CORS });
 
   } catch (error: any) {
     console.log(`[getProviders] Unhandled error: ${error.message}`);

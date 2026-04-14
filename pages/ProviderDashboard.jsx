@@ -485,6 +485,90 @@ function ResetPasswordScreen({ token, providerId, onSuccess }) {
 }
 
 
+
+// ── FORCE PASSWORD CHANGE SCREEN (admin-added accounts, first login) ─────────
+function ForcePasswordChangeScreen({ provider, onComplete }) {
+  const [pass, setPass] = useState("");
+  const [pass2, setPass2] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [showPass, setShowPass] = useState(false);
+
+  const handleSubmit = async (e) => {
+    e && e.preventDefault();
+    if (pass.length < 6) { setError("Password must be at least 6 characters."); return; }
+    if (pass !== pass2) { setError("Passwords don't match."); return; }
+    setLoading(true); setError("");
+    try {
+      const res = await fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/providerUpdateProfile", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ provider_id: provider.id, new_password: pass, password_changed: true }),
+      });
+      const data = await res.json();
+      if (!res.ok || data.error) { setError(data.error || "Something went wrong. Please try again."); setLoading(false); return; }
+      onComplete({ ...provider, password_changed: true });
+    } catch {
+      setError("Something went wrong. Please try again.");
+    }
+    setLoading(false);
+  };
+
+  return (
+    <div style={{ minHeight: "100vh", background: PAPER, backgroundImage: "repeating-linear-gradient(0deg,transparent,transparent 27px,rgba(28,15,0,0.03) 27px,rgba(28,15,0,0.03) 28px)", fontFamily: SERIF }}>
+      <link rel="preconnect" href="https://fonts.googleapis.com" />
+      <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet" />
+      <div style={{ background: PAPER, borderBottom: `3px double ${INK}` }}>
+        <div style={{ display: "flex", alignItems: "center", padding: "10px 14px 8px", boxSizing: "border-box" }}>
+          <a href="/" style={{ textDecoration: "none", flexShrink: 0, width: 56 }}>
+            <img src="https://base44.app/api/apps/69d062aca815ce8e697894b1/files/mp/public/69d062aca815ce8e697894b1/f14a7cbd0_logo_icon_small.png" alt="V-Hub" style={{ width: 48, height: 48, objectFit: "contain", display: "block" }} />
+          </a>
+          <a href="/" style={{ textDecoration: "none", flex: 1, display: "flex", alignItems: "baseline", justifyContent: "center" }}>
+            <span style={{ fontStyle: "italic", fontWeight: 700, fontFamily: "'Great Vibes', cursive", fontSize: 48, color: "#003366", lineHeight: 1 }}>V</span>
+            <span style={{ fontSize: 32, fontWeight: 900, color: INK, fontFamily: "'Times New Roman', serif", lineHeight: 1, margin: "0 2px" }}>-</span>
+            <span style={{ fontSize: 40, fontWeight: 900, color: INK, fontFamily: "'Times New Roman', serif", letterSpacing: -1, lineHeight: 1 }}>Hub</span>
+          </a>
+          <div style={{ flexShrink: 0, width: 56 }} />
+        </div>
+      </div>
+      <div style={{ maxWidth: 460, margin: "40px auto", padding: "0 20px 60px" }}>
+        <div style={{ background: "#E8EAF6", border: "2px solid #3F51B5", borderRadius: 12, padding: "22px 24px", marginBottom: 20, textAlign: "center" }}>
+          <div style={{ fontSize: 36, marginBottom: 10 }}>🔐</div>
+          <div style={{ fontSize: 16, fontWeight: 900, color: "#1A237E", marginBottom: 8, fontFamily: SERIF }}>Welcome to V-Hub, {provider.owner_name?.split(" ")[0] || "there"}!</div>
+          <div style={{ fontSize: 13, color: "#3949AB", lineHeight: 1.7, fontFamily: SANS }}>
+            Your account was set up by our team. Before you enter your dashboard,<br/>
+            <strong>please create your own personal password.</strong><br/>
+            You'll use this every time you log in.
+          </div>
+        </div>
+        <div style={{ background: PAPER_MID, border: `2px solid ${PAPER_DK}`, borderRadius: 10, padding: "28px 24px", boxShadow: "0 4px 24px rgba(28,15,0,0.10)" }}>
+          <div style={{ fontSize: 14, fontWeight: 900, color: INK, textTransform: "uppercase", letterSpacing: 2, marginBottom: 18, fontFamily: SERIF, textAlign: "center" }}>Create Your Password</div>
+          {error && (
+            <div style={{ background: "#FEE", border: `1.5px solid ${RED_RULE}`, borderRadius: 6, padding: "10px 14px", marginBottom: 16, fontSize: 13, color: RED_RULE, fontFamily: SANS }}>⚠ {error}</div>
+          )}
+          <form onSubmit={handleSubmit}>
+            <div style={{ marginBottom: 14 }}>
+              <label style={lbS}>New Password</label>
+              <div style={{ position: "relative" }}>
+                <input type={showPass ? "text" : "password"} value={pass} onChange={e => setPass(e.target.value)} placeholder="Min 6 characters" style={{ ...inS, paddingRight: 44 }} autoFocus />
+                <button type="button" onClick={() => setShowPass(v => !v)} style={{ position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", fontSize: 16, color: INK_FADE }}>{showPass ? "🙈" : "👁️"}</button>
+              </div>
+            </div>
+            <div style={{ marginBottom: 22 }}>
+              <label style={lbS}>Confirm New Password</label>
+              <input type={showPass ? "text" : "password"} value={pass2} onChange={e => setPass2(e.target.value)} placeholder="Re-enter password" style={inS} />
+            </div>
+            <button type="submit" disabled={loading} style={{ width: "100%", background: loading ? PAPER_DK : "linear-gradient(180deg,#1B3D6F,#0d2447)", color: "#fff", border: `3px solid ${YELLOW}`, boxShadow: `0 0 0 1.5px ${YELLOW}, 0 0 12px 3px rgba(255,220,0,0.25)`, borderRadius: 8, padding: "15px 20px", fontSize: 15, fontWeight: 900, cursor: loading ? "not-allowed" : "pointer", fontFamily: SERIF, letterSpacing: 2, textTransform: "uppercase" }}>
+              {loading ? "Saving..." : "Set My Password & Enter Hub →"}
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+
 // ── FORGOT PASSWORD SCREEN ────────────────────────────────────────────────
 function ForgotPasswordScreen({ onBack }) {
   const [email, setEmail] = useState("");
@@ -1403,7 +1487,13 @@ export default function ProviderDashboard() {
     seedForm(prov);
     setNewLoginEmail(prov.login_email || prov.email || "");
     loadReviews(prov.id);
-    setAuthState("dashboard");
+    loadClassified(prov.id);
+    // If admin-added account, force password change on first login
+    if (prov.onboarding_type === "admin_added" && !prov.password_changed) {
+      setAuthState("force_change_password");
+    } else {
+      setAuthState("dashboard");
+    }
   };
 
   const handleLogout = () => {
@@ -1584,6 +1674,7 @@ export default function ProviderDashboard() {
   if (authState === "forgot") return <ForgotPasswordScreen onBack={() => setAuthState("login")} />;
   if (authState === "reset") return <ResetPasswordScreen token={resetToken} providerId={resetProviderId} onSuccess={() => setAuthState("login")} />;
   if (authState === "login") return <LoginScreen onLogin={handleLogin} onForgot={() => setAuthState("forgot")} />;
+  if (authState === "force_change_password") return <ForcePasswordChangeScreen provider={provider} onComplete={(updatedProv) => { setProvider(updatedProv); seedForm(updatedProv); setAuthState("dashboard"); }} />;
 
   // ── TOP NAV (shared across dashboard/edit/account) ────────────────────
   const TopNav = ({ rightContent }) => (
@@ -1811,13 +1902,6 @@ export default function ProviderDashboard() {
             <button onClick={() => setCancelSuccess(false)} style={{ marginLeft: "auto", background: "transparent", border: "none", color: "rgba(255,255,255,0.7)", fontSize: 20, cursor: "pointer", lineHeight: 1 }}>✕</button>
           </div>
         )}
-        <StatusBanner provider={provider} onUpgrade={handleUpgrade} onCancel={handleCancel} onManageBilling={handleManageBilling} paymentLoading={paymentLoading} cancelLoading={cancelLoading} billingLoading={billingLoading} paymentError={paymentError} cancelError={cancelError} />
-
-        {/* ── ANALYTICS DASHBOARD ─────────────────────────────── */}
-        <AnalyticsDashboard provider={provider} reviews={reviews} />
-
-
-
         {/* Business Info */}
         <div style={{ ...shS }}>📋 Business Info</div>
         <div style={{ background: PAPER_MID, border: `1.5px solid ${PAPER_DK}`, borderRadius: 8, padding: "16px 18px", marginBottom: 24 }}>
@@ -1849,6 +1933,14 @@ export default function ProviderDashboard() {
             </div>
           )}
         </div>
+
+
+        <StatusBanner provider={provider} onUpgrade={handleUpgrade} onCancel={handleCancel} onManageBilling={handleManageBilling} paymentLoading={paymentLoading} cancelLoading={cancelLoading} billingLoading={billingLoading} paymentError={paymentError} cancelError={cancelError} />
+
+        {/* ── ANALYTICS DASHBOARD ─────────────────────────────── */}
+        <AnalyticsDashboard provider={provider} reviews={reviews} />
+
+
 
         {/* Services */}
         <div style={shS}>🛠 Services Offered</div>
@@ -1885,17 +1977,17 @@ export default function ProviderDashboard() {
         {/* ── CLASSIFIED AD SECTION ─────────────────────────── */}
         <div style={{ ...shS, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <span>📰 My Classified Ad</span>
-          <span style={{ fontSize: 10, fontWeight: 400, color: INK_FADE, fontFamily: SANS, letterSpacing: 0.5 }}>$10/month add-on</span>
+          <span style={{ fontSize: 10, fontWeight: 400, color: INK_FADE, fontFamily: SANS, letterSpacing: 0.5 }}>$10/week · 7-day ad</span>
         </div>
 
         {/* ── NOT SUBSCRIBED — Stripe buy button ── */}
         {!provider.classifieds_addon && (
           <div style={{ background: "#F9F3E3", border: "2px solid #2E7D32", borderRadius: 8, padding: "16px 18px", marginBottom: 16 }}>
             <div style={{ fontSize: 14, fontWeight: 900, color: "#2E7D32", marginBottom: 6, fontFamily: SERIF, textTransform: "uppercase", letterSpacing: 1 }}>
-              📰 Run a Classified Ad — $10/Month
+              📰 Run a Deal of the Week Ad — $10/Week
             </div>
             <div style={{ fontSize: 13, color: INK, lineHeight: 1.7, fontFamily: SANS, marginBottom: 10 }}>
-              Get your deals and specials in front of every resident searching The Villages. Your ad goes live the moment you subscribe.
+              Get your deals and specials in front of every resident searching The Villages. Your ad runs for 7 days from the moment payment is complete.
             </div>
             <div style={{ fontSize: 12, color: INK_FADE, fontFamily: SANS, marginBottom: 14, lineHeight: 1.8 }}>
               ✓ A–Z listing with your deal &nbsp;·&nbsp; ✓ Address & directions &nbsp;·&nbsp; ✓ Expiration date on the deal &nbsp;·&nbsp; ✓ Queue your next ad &nbsp;·&nbsp; ✓ Photo optional
@@ -1926,7 +2018,7 @@ export default function ProviderDashboard() {
                 cursor: "pointer", letterSpacing: 1, fontFamily: SERIF,
               }}
             >
-              Subscribe — $10/mo →
+              Post My Ad — $10 for 7 Days →
             </button>
           </div>
         )}
