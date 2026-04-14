@@ -1090,9 +1090,12 @@ export default function Home() {
 
       // ── Area match ───────────────────────────────────────────────────────
       const areaMatch = !selArea || (() => {
-        const villageName = selArea.name.toLowerCase();
+        // Extract just the village name (strip group prefix like "🌴 Historic Side — ")
+        const rawName = selArea.name || "";
+        const dashIdx = rawName.indexOf(" — ");
+        const plainVillageName = (dashIdx >= 0 ? rawName.slice(dashIdx + 3) : rawName).toLowerCase().trim();
         const provAreas = Array.isArray(p.service_areas) ? p.service_areas : [];
-        return provAreas.some(a => areaValMatchesVillage(a, villageName));
+        return provAreas.some(a => areaValMatchesVillage(a, plainVillageName));
       })();
 
       return svcMatch && areaMatch;

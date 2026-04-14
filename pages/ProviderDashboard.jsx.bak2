@@ -488,8 +488,6 @@ function LoginScreen({ onLogin, onForgot }) {
   const [showPass, setShowPass]     = useState(false);
   const [loading, setLoading]       = useState(false);
   const [error, setError]           = useState("");
-  const emailRef = useRef(null);
-  const passRef  = useRef(null);
 
   const handleLogin = async (e) => {
     e && e.preventDefault();
