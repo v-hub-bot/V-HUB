@@ -10,6 +10,9 @@
     "village": {
       "type": "string"
     },
+    "address": {
+      "type": "string"
+    },
     "headline": {
       "type": "string"
     },
@@ -19,10 +22,28 @@
     "image_url": {
       "type": "string"
     },
+    "deal_expires_at": {
+      "type": "string"
+    },
     "is_active": {
       "type": "boolean"
     },
-    "expires_at": {
+    "next_headline": {
+      "type": "string"
+    },
+    "next_body": {
+      "type": "string"
+    },
+    "next_address": {
+      "type": "string"
+    },
+    "next_village": {
+      "type": "string"
+    },
+    "next_image_url": {
+      "type": "string"
+    },
+    "next_deal_expires_at": {
       "type": "string"
     }
   },

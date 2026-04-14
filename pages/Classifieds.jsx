@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { ClassifiedAd, Provider } from "@/api/entities";
 
 const PAPER     = "#F0E6C8";
 const PAPER_MID = "#E4D5A8";
@@ -10,6 +9,7 @@ const BROWN_BTN = "#7A4820";
 const NAVY      = "#1B3D6F";
 const GREEN     = "#1A6B3C";
 const TEAL      = "#00836B";
+const YELLOW    = "#FFDB00";
 const SERIF     = "'Times New Roman', Georgia, serif";
 const SANS      = "'Arial', Helvetica, sans-serif";
 
@@ -17,25 +17,29 @@ const ALL_VILLAGES = [
   "Alhambra","Amelia","Ashland","Belle Aire","Belvedere","Bonita","Bonnybrook",
   "Bradford","Briar Meadow","Bridgeport at Creekside Landing","Bridgeport at Lake Miona",
   "Bridgeport at Lake Sumter","Bridgeport at Laurel Valley","Bridgeport at Miona Shores",
-  "Bridgeport at Mission Hills","Buttonwood","Calumet Grove","Caroline","Cason Hammock",
-  "Charlotte","Chatham","Chitty Chatty","Citrus Grove","Collier","Collier at Alden Bungalows",
-  "Collier at Antrim Dells","Country Club Hills","Dabney","De Allende","De La Vista",
-  "Del Mar","DeLuna","DeSoto","Dunedin","Duval","El Cortez","Fenney","Fernandina",
-  "Gilchrist","Glenbrook","Hacienda","Haciendas of Mission Hills","Hadley","Hammock at Fenney",
-  "Hawkins","Hemingway","Hillsborough","La Reynalda","La Zamora","LaBelle","Lake Deaton",
+  "Bridgeport at Mission Hills","Brownwood","Buttonwood","Calumet Grove","Caroline",
+  "Cason Hammock","Charlotte","Chatham","Chitty Chatty","Citrus Grove","Collier",
+  "Collier at Alden Bungalows","Collier at Antrim Dells","Country Club Hills","Dabney",
+  "De Allende","De La Vista","Del Mar","DeLuna","DeSoto","Dunedin","Duval","Eastport",
+  "El Cortez","Fenney","Fernandina","Gilchrist","Glenbrook","Hacienda",
+  "Haciendas of Mission Hills","Hadley","Hammock at Fenney","Hawkins","Hemingway",
+  "Hillsborough","La Reynalda","La Zamora","LaBelle","Lady Lake","Lake Deaton",
   "Lake Denham","Lakeshore Cottages","Largo","Liberty Park","Linden","Lynnhaven",
   "Mallory Square","Marsh Bend","McClure","Mira Mesa","Monarch Grove","Newell",
   "Orange Blossom Gardens","Osceola Hills","Osceola Hills at Soaring Eagle Preserve",
   "Palo Alto","Pennecamp","Piedmont","Pine Hills","Pine Ridge","Pinellas","Poinciana",
   "Polo Ridge","Richmond","Rio Grande","Rio Ponderosa","Rio Ranchero","Sabal Chase",
-  "Sanibel","Santiago","Santo Domingo","Silver Lake","Springdale","St. Catherine",
-  "St. Charles","St. James","St. Johns","Summerhill","Sunset Pointe","Tall Trees",
-  "Tamarind Grove","Tierra Del Sol","Valle Verde","Virginia Trace","Winifred","Woodbury"
+  "Sanibel","Santiago","Santo Domingo","Silver Lake","Spanish Springs","Springdale",
+  "St. Catherine","St. Charles","St. James","St. Johns","Summerhill","Sunset Pointe",
+  "Tall Trees","Tamarind Grove","Tierra Del Sol","Valle Verde","Virginia Trace",
+  "Winifred","Woodbury"
 ];
 
 function daysUntil(d) {
   if (!d) return null;
-  return Math.ceil((new Date(d) - new Date()) / 86400000);
+  const now = new Date(); now.setHours(0,0,0,0);
+  const end = new Date(d); end.setHours(0,0,0,0);
+  return Math.ceil((end - now) / 86400000);
 }
 function fmtDate(d) {
   if (!d) return "";
@@ -45,43 +49,50 @@ function fmtDate(d) {
 function ExpiryBadge({ date }) {
   if (!date) return null;
   const days = daysUntil(date);
-  const base = { fontFamily: SANS, fontWeight: 700, fontSize: 9, borderRadius: 2, padding: "2px 8px", letterSpacing: 0.5, textTransform: "uppercase", display: "inline-block" };
+  const base = {
+    fontFamily: SANS, fontWeight: 700, fontSize: 9, borderRadius: 2,
+    padding: "2px 8px", letterSpacing: 0.5, textTransform: "uppercase",
+    display: "inline-block", marginTop: 4,
+  };
   if (days < 0)   return <span style={{ ...base, background: "#7B0000", color: "#fff" }}>Expired</span>;
-  if (days === 0) return <span style={{ ...base, background: "#C62828", color: "#fff" }}>Ends Today</span>;
-  if (days <= 3)  return <span style={{ ...base, background: "#E65100", color: "#fff" }}>Ends in {days}d</span>;
-  return <span style={{ ...base, background: GREEN, color: "#fff" }}>Thru {fmtDate(date)}</span>;
+  if (days === 0) return <span style={{ ...base, background: "#C62828", color: "#fff" }}>Ends Today!</span>;
+  if (days <= 3)  return <span style={{ ...base, background: "#E65100", color: "#fff" }}>Ends in {days} day{days !== 1 ? "s" : ""}!</span>;
+  if (days <= 7)  return <span style={{ ...base, background: "#F9A825", color: "#1C0F00" }}>Thru {fmtDate(date)}</span>;
+  return <span style={{ ...base, background: GREEN, color: "#fff" }}>Good Thru {fmtDate(date)}</span>;
 }
 
 function AdCard({ ad }) {
-  const expired = ad.deal_expires_at && daysUntil(ad.deal_expires_at) < 0;
+  const days = daysUntil(ad.deal_expires_at);
+  const expired = days !== null && days < 0;
+
   return (
     <div style={{
       background: PAPER,
       border: `2px solid ${INK}`,
+      borderRadius: 2,
       display: "flex",
       flexDirection: "column",
       boxSizing: "border-box",
       width: "100%",
-      opacity: expired ? 0.6 : 1,
+      opacity: expired ? 0.55 : 1,
       fontFamily: SERIF,
       overflow: "hidden",
+      boxShadow: "2px 2px 6px rgba(0,0,0,0.18)",
     }}>
 
       {/* ── Header strip ── */}
-      <div style={{
-        background: INK,
-        padding: "7px 10px 6px",
-        textAlign: "center",
-      }}>
-        <div style={{ fontSize: 9, color: PAPER_DK, fontFamily: SANS, letterSpacing: 2, textTransform: "uppercase", marginBottom: 4 }}>
-          ✦ Advertisement ✦
+      <div style={{ background: INK, padding: "8px 12px 7px", textAlign: "center" }}>
+        <div style={{ fontSize: 8, color: PAPER_DK, fontFamily: SANS, letterSpacing: 2, textTransform: "uppercase", marginBottom: 3 }}>
+          ✦ Deal of the Week ✦
         </div>
-        <div style={{ fontSize: 13, fontWeight: 900, color: PAPER, textTransform: "uppercase", letterSpacing: 0.5, lineHeight: 1.25, fontFamily: SERIF }}>
+        <div style={{
+          fontSize: 14, fontWeight: 900, color: YELLOW,
+          textTransform: "uppercase", letterSpacing: 0.5,
+          lineHeight: 1.2, fontFamily: SERIF,
+        }}>
           {ad.headline}
         </div>
-        <div style={{ marginTop: 5 }}>
-          <ExpiryBadge date={ad.deal_expires_at} />
-        </div>
+        <ExpiryBadge date={ad.deal_expires_at} />
       </div>
 
       {/* ── Image (optional) ── */}
@@ -89,39 +100,42 @@ function AdCard({ ad }) {
         <img
           src={ad.image_url}
           alt={ad.headline}
-          style={{ width: "100%", height: 120, objectFit: "cover", display: "block", borderBottom: `1px solid ${PAPER_DK}`, flexShrink: 0 }}
+          style={{ width: "100%", height: 110, objectFit: "cover", display: "block", borderBottom: `1px solid ${PAPER_DK}` }}
         />
       )}
 
-      {/* ── Body text ── */}
-      <div style={{ padding: "10px 12px", fontSize: 12, color: INK, lineHeight: 1.75, flex: 1, textAlign: "justify" }}>
+      {/* ── Deal body ── */}
+      <div style={{ padding: "10px 12px 6px", fontSize: 12, color: INK, lineHeight: 1.75, flex: 1, fontFamily: SERIF }}>
         {ad.body}
       </div>
 
       {/* ── Address ── */}
       {ad.address && (
-        <div style={{ padding: "0 12px 8px", fontSize: 11, color: TEAL, fontWeight: 700, fontFamily: SANS }}>
+        <div style={{ padding: "2px 12px 8px", fontSize: 11, color: TEAL, fontWeight: 700, fontFamily: SANS }}>
           📍 {ad.address}
         </div>
       )}
 
-      {/* ── Nameplate footer ── */}
+      {/* ── Footer nameplate ── */}
       <div style={{
         borderTop: `1px solid ${PAPER_DK}`,
         background: PAPER_MID,
-        padding: "6px 12px",
+        padding: "7px 12px",
         display: "flex",
         justifyContent: "space-between",
         alignItems: "center",
         gap: 8,
         flexWrap: "wrap",
       }}>
-        <div style={{ fontSize: 10, fontWeight: 700, color: INK, fontFamily: SANS, letterSpacing: 0.3 }}>
+        <div style={{ fontSize: 11, fontWeight: 900, color: NAVY, fontFamily: SANS, letterSpacing: 0.2 }}>
           {ad.provider_name}
         </div>
         {ad.village && (
-          <div style={{ fontSize: 10, color: INK_FADE, fontFamily: SERIF, fontStyle: "italic" }}>
-            {ad.village}
+          <div style={{
+            fontSize: 10, color: INK_FADE, fontFamily: SERIF, fontStyle: "italic",
+            background: PAPER_DK, borderRadius: 2, padding: "2px 6px",
+          }}>
+            📌 {ad.village}
           </div>
         )}
       </div>
@@ -130,45 +144,66 @@ function AdCard({ ad }) {
 }
 
 export default function Classifieds() {
-  const [ads, setAds] = useState([]);
-  const [providers, setProviders] = useState([]);
+  const [ads, setAds]         = useState([]);
   const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState("");
+  const [search, setSearch]   = useState("");
   const [village, setVillage] = useState("");
+  const [villageOpen, setVillageOpen] = useState(false);
 
+  // Pre-populate village from URL param (e.g. ?village=Brownwood)
   useEffect(() => {
     const p = new URLSearchParams(window.location.search);
     if (p.get("village")) setVillage(p.get("village"));
   }, []);
 
   useEffect(() => {
-    Promise.all([
-      ClassifiedAd.filter({ is_active: true }).catch(() => []),
-      Provider.filter({ classifieds_addon: true, is_active: true }).catch(() => []),
-    ]).then(([adData, provData]) => {
-      setAds([...adData].sort((a, b) => (a.provider_name || "").localeCompare(b.provider_name || "")));
-      setProviders([...provData].sort((a, b) => (a.business_name || "").localeCompare(b.business_name || "")));
-    }).finally(() => setLoading(false));
+    fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/getDeals", {
+      method: "GET",
+      headers: { "Content-Type": "application/json" },
+    })
+      .then(r => r.json())
+      .then(data => {
+        // Already sorted A-Z by the backend, but sort again as safety
+        const sorted = [...(data.ads || [])].sort((a, b) =>
+          (a.provider_name || "").localeCompare(b.provider_name || "")
+        );
+        setAds(sorted);
+      })
+      .catch(() => setAds([]))
+      .finally(() => setLoading(false));
   }, []);
 
-  const items = providers
-    .map(prov => ({ prov, ad: ads.find(a => a.provider_id === prov.id) }))
-    .filter(({ prov, ad }) => {
-      const v = village.toLowerCase();
-      const q = search.toLowerCase().trim();
-      if (v) {
-        const areas = (prov.service_areas || []).map(a => (typeof a === "string" ? a : a.name || "").toLowerCase());
-        const adVillage = (ad?.village || "").toLowerCase();
-        if (!areas.some(a => a.includes(v)) && !adVillage.includes(v) && !(prov.address || "").toLowerCase().includes(v)) return false;
-      }
-      if (q) {
-        const hay = [prov.business_name, ad?.headline, ad?.body, ad?.village, ad?.address, prov.address].join(" ").toLowerCase();
-        if (!hay.includes(q)) return false;
-      }
-      return true;
-    });
+  // Filter logic — village match OR keyword match
+  const filtered = ads.filter(ad => {
+    const q = search.toLowerCase().trim();
+    const v = village.toLowerCase().trim();
 
-  const today = new Date().toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
+    // Village filter — match ad.village or ad.address
+    if (v) {
+      const adVillage = (ad.village || "").toLowerCase();
+      const adAddress = (ad.address || "").toLowerCase();
+      if (!adVillage.includes(v) && !adAddress.includes(v)) return false;
+    }
+
+    // Keyword search — provider name, headline, body, village, address
+    if (q) {
+      const hay = [ad.provider_name, ad.headline, ad.body, ad.village, ad.address]
+        .join(" ").toLowerCase();
+      if (!hay.includes(q)) return false;
+    }
+
+    return true;
+  });
+
+  // Only show non-expired ads to the public (expired ones filtered out)
+  const live = filtered.filter(ad => {
+    const days = daysUntil(ad.deal_expires_at);
+    return days === null || days >= 0;
+  });
+
+  const today = new Date().toLocaleDateString("en-US", {
+    weekday: "long", month: "long", day: "numeric", year: "numeric",
+  });
 
   return (
     <div style={{
@@ -182,127 +217,144 @@ export default function Classifieds() {
       boxShadow: "0 2px 40px rgba(0,0,0,0.28)",
     }}>
 
-      {/* Load Great Vibes font */}
       <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet" />
 
-      {/* ── NEWSPAPER STACKED PAGES TOP EDGE ── */}
-      <div style={{ position: "relative", height: 28, marginBottom: 0 }}>
-        <div style={{ position: "absolute", top: 0, left: 6, right: 6, height: 28, background: "#b8a070", borderRadius: "0 0 3px 3px", boxShadow: "0 3px 6px rgba(0,0,0,0.35)" }} />
-        <div style={{ position: "absolute", top: 0, left: 4, right: 4, height: 24, background: "#c9b484", borderRadius: "0 0 3px 3px", boxShadow: "0 3px 5px rgba(0,0,0,0.3)" }} />
-        <div style={{ position: "absolute", top: 0, left: 3, right: 3, height: 20, background: "#d8c496", borderRadius: "0 0 2px 2px", boxShadow: "0 2px 5px rgba(0,0,0,0.25)" }} />
-        <div style={{ position: "absolute", top: 0, left: 2, right: 2, height: 16, background: "#e6d4a8", borderRadius: "0 0 2px 2px", boxShadow: "0 2px 4px rgba(0,0,0,0.2)" }} />
-        <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 12, background: "#F0E6C8", borderRadius: "0 0 2px 2px", boxShadow: "0 4px 10px rgba(0,0,0,0.25), inset 0 -1px 0 rgba(0,0,0,0.1)" }} />
-        <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 4, background: "linear-gradient(180deg, #1a0a00 0%, #3d2200 100%)" }} />
+      {/* ── Stacked newspaper edge ── */}
+      <div style={{ position: "relative", height: 28 }}>
+        {[{l:6,r:6,h:28,bg:"#b8a070"},{l:4,r:4,h:24,bg:"#c9b484"},{l:3,r:3,h:20,bg:"#d8c496"},{l:2,r:2,h:16,bg:"#e6d4a8"},{l:0,r:0,h:12,bg:"#F0E6C8"}].map((s,i)=>(
+          <div key={i} style={{ position:"absolute",top:0,left:s.l,right:s.r,height:s.h,background:s.bg,borderRadius:"0 0 3px 3px",boxShadow:"0 3px 6px rgba(0,0,0,0.2)" }} />
+        ))}
+        <div style={{ position:"absolute",top:0,left:0,right:0,height:4,background:"linear-gradient(180deg,#1a0a00,#3d2200)" }} />
       </div>
 
       {/* ════════ MASTHEAD ════════ */}
       <div style={{ background: PAPER, borderBottom: `3px double ${INK}` }}>
 
-        {/* Dateline strip */}
+        {/* Dateline */}
         <div style={{
-          borderTop: `3px double ${INK}`,
-          borderBottom: `3px double ${INK}`,
-          padding: "5px 14px",
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          boxSizing: "border-box",
-          width: "100%",
-          background: PAPER_MID,
+          borderTop: `3px double ${INK}`, borderBottom: `3px double ${INK}`,
+          padding: "5px 14px", display: "flex", justifyContent: "space-between",
+          alignItems: "center", background: PAPER_MID,
         }}>
           <span style={{ fontSize: 10, color: INK_FADE, fontFamily: SERIF, fontStyle: "italic" }}>{today}</span>
-          <span style={{ fontSize: 10, color: INK_FADE, fontFamily: SANS, fontWeight: 700, letterSpacing: 1, textTransform: "uppercase", textAlign: "center" }}>The Villages, FL</span>
+          <span style={{ fontSize: 10, color: INK_FADE, fontFamily: SANS, fontWeight: 700, letterSpacing: 1, textTransform: "uppercase" }}>The Villages, FL</span>
           <span style={{ fontSize: 10, color: INK_FADE, fontFamily: SERIF, fontStyle: "italic" }}>Deals of the Week</span>
         </div>
 
-        {/* Logo row — logo left, V-Hub centered, home button right — all balanced */}
-        <div style={{ display: "flex", alignItems: "center", padding: "10px 14px 6px", boxSizing: "border-box" }}>
-          {/* Left: logo — fixed 56px to balance right side */}
-          <a href="/" style={{ textDecoration: "none", flexShrink: 0, width: 56, display: "flex", alignItems: "center" }}>
+        {/* Logo row */}
+        <div style={{ display: "flex", alignItems: "center", padding: "10px 14px 6px" }}>
+          <a href="/" style={{ textDecoration: "none", flexShrink: 0, width: 56 }}>
             <img
-              src="https://base44.app/api/apps/69d062aca815ce8e697894b1/files/mp/public/69d062aca815ce8e697894b1/f14a7cbd0_logo_icon_small.png"
+              src="https://media.base44.com/images/public/69d062aca815ce8e697894b1/a9af95bc3_V-Hublogo.png"
               alt="V-Hub"
-              style={{ width: 48, height: 48, objectFit: "contain", display: "block" }}
+              style={{ width: 48, height: 48, objectFit: "contain" }}
             />
           </a>
-
-          {/* Center: V-Hub inline on one line — truly centered */}
-          <a href="/" style={{ textDecoration: "none", flex: 1, display: "flex", alignItems: "baseline", justifyContent: "center", gap: 0 }}>
-            <span style={{ fontStyle: "italic", fontWeight: 700, fontFamily: "'Great Vibes', cursive", fontSize: 48, color: "#003366", WebkitTextStroke: "0.5px #003366", textShadow: "0.5px 0.5px 0 #001a40", lineHeight: 1 }}>V</span>
+          <a href="/" style={{ textDecoration: "none", flex: 1, display: "flex", alignItems: "baseline", justifyContent: "center" }}>
+            <span style={{ fontStyle: "italic", fontWeight: 700, fontFamily: "'Great Vibes', cursive", fontSize: 48, color: "#003366", lineHeight: 1 }}>V</span>
             <span style={{ fontSize: 32, fontWeight: 900, color: INK, fontFamily: "'Times New Roman', serif", lineHeight: 1, margin: "0 2px" }}>-</span>
             <span style={{ fontSize: 40, fontWeight: 900, color: INK, fontFamily: "'Times New Roman', serif", letterSpacing: -1, lineHeight: 1 }}>Hub</span>
           </a>
-
-          {/* Right: Home button — fixed 56px width to balance logo */}
-          <div style={{ flexShrink: 0, width: 56, display: "flex", justifyContent: "flex-end", alignItems: "center" }}>
+          <div style={{ flexShrink: 0, width: 56, display: "flex", justifyContent: "flex-end" }}>
             <a href="/" style={{ textDecoration: "none" }}>
               <button style={{
-                background: `linear-gradient(180deg, #9A6030, ${BROWN_BTN} 60%, #5A2F10)`,
-                border: `2px solid ${NAVY}`,
-                borderRadius: 4,
-                color: "#F5E8CC",
-                fontFamily: SANS,
-                fontWeight: 700,
-                fontSize: 10,
-                letterSpacing: 0.5,
-                padding: "6px 10px",
-                cursor: "pointer",
-                whiteSpace: "nowrap",
+                background: `linear-gradient(180deg,#9A6030,${BROWN_BTN} 60%,#5A2F10)`,
+                border: `2px solid ${NAVY}`, borderRadius: 4,
+                color: "#F5E8CC", fontFamily: SANS, fontWeight: 700,
+                fontSize: 10, letterSpacing: 0.5, padding: "6px 10px", cursor: "pointer",
               }}>← Home</button>
             </a>
           </div>
         </div>
 
         {/* Section nameplate */}
-        <div style={{ textAlign: "center", padding: "6px 14px 4px", borderTop: `1px solid ${PAPER_DK}` }}>
-          <div style={{ fontSize: 20, fontWeight: 900, letterSpacing: 3, textTransform: "uppercase", color: INK, fontFamily: SERIF }}>
-            Deals of the Week
+        <div style={{ textAlign: "center", padding: "4px 14px 4px", borderTop: `1px solid ${PAPER_DK}` }}>
+          <div style={{ fontSize: 22, fontWeight: 900, letterSpacing: 3, textTransform: "uppercase", color: INK, fontFamily: SERIF }}>
+            🏷️ Deals of the Week
           </div>
-          <div style={{ fontSize: 11, fontStyle: "italic", color: INK_FADE, marginTop: 3, fontFamily: SERIF }}>
-            Exclusive deals & special offers from local service providers
+          <div style={{ fontSize: 11, fontStyle: "italic", color: INK_FADE, marginTop: 2, fontFamily: SERIF }}>
+            Exclusive deals & discounts from local service providers in The Villages
           </div>
         </div>
 
-        {/* Double rule */}
         <div style={{ margin: "6px 14px 0", borderTop: `1px solid ${INK}`, borderBottom: `3px double ${INK}`, height: 4 }} />
 
-        {/* Search + filter */}
-        <div style={{ padding: "10px 14px 14px", boxSizing: "border-box", width: "100%", display: "flex", flexDirection: "column", gap: 8 }}>
+        {/* ── Search & Village Filter ── */}
+        <div style={{ padding: "12px 14px 14px", display: "flex", flexDirection: "column", gap: 10, boxSizing: "border-box" }}>
+
+          {/* Keyword search */}
           <input
             type="text"
             value={search}
             onChange={e => setSearch(e.target.value)}
-            placeholder="Search by provider, service, or keyword…"
+            placeholder="Search by provider name, service, or keyword…"
             style={{
-              width: "100%", padding: "9px 12px", fontSize: 13,
-              fontFamily: SERIF, border: `2px solid ${GREEN}`,
+              width: "100%", padding: "10px 14px", fontSize: 13,
+              fontFamily: SERIF, border: `3px solid ${GREEN}`,
               borderRadius: 3, background: PAPER, color: INK,
               outline: "none", boxSizing: "border-box",
+              boxShadow: `0 0 0 1.5px ${GREEN}`,
             }}
           />
-          <div style={{ display: "flex", gap: 8, alignItems: "center", width: "100%", boxSizing: "border-box" }}>
-            <select
-              value={village}
-              onChange={e => setVillage(e.target.value)}
+
+          {/* Village picker */}
+          <div style={{ position: "relative" }}>
+            <button
+              onClick={() => setVillageOpen(o => !o)}
               style={{
-                flex: 1, minWidth: 0, padding: "9px 10px", fontSize: 13,
-                fontFamily: SERIF, border: `2px solid ${GREEN}`,
-                borderRadius: 3, background: PAPER, color: INK,
-                outline: "none", boxSizing: "border-box",
+                width: "100%", padding: "10px 14px", fontSize: 13,
+                fontFamily: SERIF, border: `3px solid ${GREEN}`,
+                borderRadius: 3, background: PAPER, color: village ? INK : INK_FADE,
+                outline: "none", boxSizing: "border-box", textAlign: "left",
+                cursor: "pointer", display: "flex", justifyContent: "space-between",
+                alignItems: "center", boxShadow: `0 0 0 1.5px ${GREEN}`,
               }}
             >
-              <option value="">All Villages</option>
-              {ALL_VILLAGES.map(v => <option key={v} value={v}>{v}</option>)}
-            </select>
+              <span>{village || "Filter by Village…"}</span>
+              <span style={{ fontSize: 10, color: INK_FADE }}>{villageOpen ? "▲" : "▼"}</span>
+            </button>
             {village && (
               <button
-                onClick={() => setVillage("")}
+                onClick={() => { setVillage(""); setVillageOpen(false); }}
                 style={{
-                  flexShrink: 0, background: "none",
-                  border: `1px solid ${PAPER_DK}`, borderRadius: 3,
-                  color: INK_FADE, fontSize: 11, padding: "8px 10px",
-                  cursor: "pointer", fontFamily: SANS,
-                }}>✕</button>
+                  position: "absolute", right: 36, top: "50%", transform: "translateY(-50%)",
+                  background: "none", border: "none", color: INK_FADE,
+                  fontSize: 14, cursor: "pointer", padding: "0 6px",
+                }}
+              >✕</button>
+            )}
+            {villageOpen && (
+              <div style={{
+                position: "absolute", top: "100%", left: 0, right: 0, zIndex: 999,
+                background: PAPER, border: `2px solid ${GREEN}`,
+                borderTop: "none", borderRadius: "0 0 4px 4px",
+                maxHeight: 260, overflowY: "auto",
+                boxShadow: "0 6px 20px rgba(0,0,0,0.22)",
+              }}>
+                <div
+                  onClick={() => { setVillage(""); setVillageOpen(false); }}
+                  style={{
+                    padding: "9px 14px", fontSize: 13, color: INK_FADE,
+                    fontFamily: SERIF, fontStyle: "italic", cursor: "pointer",
+                    borderBottom: `1px solid ${PAPER_DK}`,
+                  }}
+                >— All Villages —</div>
+                {ALL_VILLAGES.map(v => (
+                  <div
+                    key={v}
+                    onClick={() => { setVillage(v); setVillageOpen(false); }}
+                    style={{
+                      padding: "8px 14px", fontSize: 13, color: INK,
+                      fontFamily: SERIF, cursor: "pointer",
+                      background: village === v ? PAPER_MID : "transparent",
+                      fontWeight: village === v ? 700 : 400,
+                      borderBottom: `1px solid rgba(200,176,122,0.3)`,
+                    }}
+                    onMouseEnter={e => e.currentTarget.style.background = PAPER_MID}
+                    onMouseLeave={e => e.currentTarget.style.background = village === v ? PAPER_MID : "transparent"}
+                  >{v}</div>
+                ))}
+              </div>
             )}
           </div>
         </div>
@@ -310,154 +362,111 @@ export default function Classifieds() {
 
       {/* ── Status bar ── */}
       <div style={{
-        background: INK, color: PAPER,
-        padding: "5px 14px", fontSize: 10,
-        textAlign: "center", fontFamily: SANS,
-        fontWeight: 700, letterSpacing: 1,
-        textTransform: "uppercase",
-        boxSizing: "border-box", width: "100%",
+        background: INK, color: PAPER, padding: "5px 14px",
+        fontSize: 10, textAlign: "center", fontFamily: SANS,
+        fontWeight: 700, letterSpacing: 1, textTransform: "uppercase",
       }}>
-        {loading ? "Loading…" : `${items.length} provider${items.length !== 1 ? "s" : ""} · ${ads.length} active deal${ads.length !== 1 ? "s" : ""}${village ? ` · ${village}` : ""}`}
+        {loading
+          ? "Loading deals…"
+          : `${live.length} active deal${live.length !== 1 ? "s" : ""}${village ? ` · ${village}` : ""}${search ? ` · "${search}"` : ""}`
+        }
       </div>
 
-      {/* ════════ ADS GRID ════════ */}
-      <div style={{ padding: "16px 12px 40px", maxWidth: 960, margin: "0 auto", boxSizing: "border-box" }}>
+      {/* ════════ DEALS GRID ════════ */}
+      <div style={{ padding: "16px 14px 48px", boxSizing: "border-box" }}>
 
         {/* Section rule */}
-        <div style={{ marginBottom: 14 }}>
+        <div style={{ marginBottom: 16 }}>
           <div style={{ borderTop: `3px double ${INK}` }} />
-          <div style={{ textAlign: "center", padding: "5px 0", fontSize: 10, fontWeight: 700, letterSpacing: 2, textTransform: "uppercase", color: INK_FADE, fontFamily: SANS }}>
-            ✦ This Week's Deals — Local Service Providers ✦
+          <div style={{
+            textAlign: "center", padding: "6px 0",
+            fontSize: 10, fontWeight: 700, letterSpacing: 2,
+            textTransform: "uppercase", color: INK_FADE, fontFamily: SANS,
+          }}>
+            ✦ This Week's Deals from Local Service Providers ✦
           </div>
           <div style={{ borderBottom: `3px double ${INK}` }} />
         </div>
 
         {loading && (
-          <div style={{ textAlign: "center", padding: 48, color: INK_FADE, fontSize: 14, fontStyle: "italic" }}>
+          <div style={{ textAlign: "center", padding: 60, color: INK_FADE, fontSize: 14, fontStyle: "italic" }}>
             Loading deals…
           </div>
         )}
 
-        {!loading && items.length === 0 && (
-          <div style={{ padding: "28px 20px 36px", textAlign: "center" }}>
-            {/* Decorative rule */}
-            <div style={{ borderTop: `3px double ${INK}`, marginBottom: 20 }} />
-            <div style={{ fontSize: 28, marginBottom: 10 }}>🏘️</div>
-            <div style={{ fontSize: 15, fontWeight: 900, letterSpacing: 2, textTransform: "uppercase", color: INK, fontFamily: SERIF, marginBottom: 6 }}>
-              {search || village ? "No Matching Deals" : "Coming Soon to The Villages"}
+        {!loading && live.length === 0 && (
+          <div style={{ padding: "28px 20px 40px", textAlign: "center" }}>
+            <div style={{ fontSize: 32, marginBottom: 12 }}>🏘️</div>
+            <div style={{ fontSize: 16, fontWeight: 900, letterSpacing: 2, textTransform: "uppercase", color: INK, fontFamily: SERIF, marginBottom: 8 }}>
+              {search || village ? "No Matching Deals Found" : "New Deals Coming Soon!"}
             </div>
-            <div style={{ fontSize: 12, fontStyle: "italic", color: INK_FADE, fontFamily: SERIF, lineHeight: 1.7, maxWidth: 300, margin: "0 auto 20px" }}>
+            <div style={{ fontSize: 12, fontStyle: "italic", color: INK_FADE, fontFamily: SERIF, lineHeight: 1.8, maxWidth: 340, margin: "0 auto 20px" }}>
               {search || village
-                ? "No deals match your current filter. Try clearing the village selection or search term."
-                : "Deals of the Week showcases exclusive offers from local service providers. Check back soon — new deals are added every week."}
+                ? `No deals match ${village ? `"${village}"` : ""} ${search ? `"${search}"` : ""}. Try a different village or clear your search.`
+                : "Local providers post their deals and specials here every week. Check back soon — new deals are added regularly!"}
             </div>
-            {!search && !village && (
-              <div style={{ border: `1px solid ${PAPER_DK}`, borderRadius: 6, background: PAPER_MID, padding: "14px 18px", maxWidth: 320, margin: "0 auto", textAlign: "left" }}>
-                <div style={{ fontSize: 11, fontWeight: 900, color: INK, letterSpacing: 1, textTransform: "uppercase", fontFamily: SANS, marginBottom: 8 }}>Are you a local provider?</div>
-                <div style={{ fontSize: 12, color: INK, fontFamily: SERIF, lineHeight: 1.6, marginBottom: 10 }}>
-                  Reach thousands of Villages residents with a featured deal. Add the Deals of the Week upgrade to your V-Hub listing.
-                </div>
-                <a href="/ListService" style={{ textDecoration: "none" }}>
-                  <div style={{ background: `linear-gradient(180deg,#9A6030,#7A4820 60%,#5A3010)`, color: "#F5E8CC", fontFamily: SANS, fontWeight: 700, fontSize: 11, letterSpacing: 1, textTransform: "uppercase", padding: "9px 16px", borderRadius: 4, textAlign: "center", cursor: "pointer" }}>
-                    List Your Service →
-                  </div>
-                </a>
-              </div>
+            {(search || village) && (
+              <button
+                onClick={() => { setSearch(""); setVillage(""); }}
+                style={{
+                  background: "none", border: `2px solid ${GREEN}`, color: GREEN,
+                  borderRadius: 4, padding: "9px 20px", fontSize: 13,
+                  fontFamily: SANS, fontWeight: 700, cursor: "pointer", marginBottom: 20,
+                }}
+              >Clear Filters — Show All Deals</button>
             )}
-            <div style={{ borderBottom: `3px double ${INK}`, marginTop: 24 }} />
+            <div style={{ borderTop: `3px double ${INK}`, marginTop: 24 }} />
           </div>
         )}
 
-        {!loading && items.length > 0 && (
+        {!loading && live.length > 0 && (
           <>
             <style>{`
-              .vh-classified-grid {
+              .vh-deals-grid {
                 display: grid;
                 grid-template-columns: repeat(3, 1fr);
-                gap: 14px;
+                gap: 16px;
               }
               @media (max-width: 700px) {
-                .vh-classified-grid { grid-template-columns: repeat(2, 1fr); }
+                .vh-deals-grid { grid-template-columns: repeat(2, 1fr); }
               }
               @media (max-width: 440px) {
-                .vh-classified-grid { grid-template-columns: 1fr; }
+                .vh-deals-grid { grid-template-columns: 1fr; }
               }
             `}</style>
-            <div className="vh-classified-grid">
-              {items.map(({ prov, ad }) =>
-                ad ? (
-                  <AdCard key={prov.id} ad={ad} />
-                ) : (
-                  <div key={prov.id} style={{
-                    background: PAPER, border: `2px dashed ${PAPER_DK}`,
-                    padding: "20px 14px", textAlign: "center",
-                    fontFamily: SERIF, color: INK_FADE,
-                  }}>
-                    <div style={{ fontWeight: 700, fontSize: 13, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 8 }}>
-                      {prov.business_name}
-                    </div>
-                    <div style={{ fontSize: 11, fontStyle: "italic" }}>No active deal — check back soon!</div>
-                  </div>
-                )
-              )}
+            <div className="vh-deals-grid">
+              {live.map(ad => <AdCard key={ad.id} ad={ad} />)}
             </div>
           </>
         )}
 
-        {/* ── Footer CTA ── */}
+        {/* ── Provider CTA at bottom ── */}
         {!loading && (
           <div style={{
-            marginTop: 32, borderTop: `3px double ${INK}`,
-            paddingTop: 16,
+            marginTop: 36, borderTop: `3px double ${INK}`,
+            paddingTop: 20, textAlign: "center",
           }}>
-            <div style={{
-              background: PAPER, border: `2px solid ${INK}`,
-              padding: "16px 18px", textAlign: "center",
-            }}>
-              <div style={{ fontSize: 13, fontWeight: 700, textTransform: "uppercase", letterSpacing: 2, color: INK, fontFamily: SANS, marginBottom: 6 }}>
-                Advertise Here
-              </div>
-              <div style={{ fontSize: 12, color: INK_FADE, fontFamily: SERIF, lineHeight: 1.7, marginBottom: 12 }}>
-                Are you a V-Hub provider? Add a classified ad for just{" "}
-                <strong style={{ color: INK }}>$10/month</strong> and reach
-                thousands of Villages residents.
-              </div>
-              <a href="/ProviderDashboard" style={{ textDecoration: "none" }}>
-                <button style={{
-                  background: `linear-gradient(180deg, #9A6030, ${BROWN_BTN} 60%, #5A2F10)`,
-                  border: `2px solid ${NAVY}`, borderRadius: 3,
-                  color: "#F5E8CC", fontFamily: SANS, fontWeight: 700,
-                  fontSize: 12, letterSpacing: 0.5, padding: "9px 22px",
-                  cursor: "pointer",
-                }}>
-                  Sign In to Provider Hub →
-                </button>
-              </a>
+            <div style={{ fontSize: 13, fontWeight: 900, color: INK, fontFamily: SERIF, letterSpacing: 1, textTransform: "uppercase", marginBottom: 6 }}>
+              Are You a Local Provider?
             </div>
+            <div style={{ fontSize: 12, fontStyle: "italic", color: INK_FADE, fontFamily: SERIF, lineHeight: 1.7, maxWidth: 360, margin: "0 auto 14px" }}>
+              Reach thousands of Villages residents with your weekly deal or special offer.
+              Add the Deals of the Week feature to your V-Hub listing for just $10/month.
+            </div>
+            <a href="/ProviderHub" style={{ textDecoration: "none" }}>
+              <button style={{
+                background: `linear-gradient(180deg,#9A6030,${BROWN_BTN} 60%,#5A3010)`,
+                color: "#F5E8CC", border: `3px solid ${NAVY}`,
+                boxShadow: `0 0 0 1.5px ${NAVY}`,
+                borderRadius: 6, padding: "11px 28px",
+                fontSize: 13, fontWeight: 900, fontFamily: SERIF,
+                letterSpacing: 1, textTransform: "uppercase", cursor: "pointer",
+              }}>
+                Post Your Deal → Provider Hub
+              </button>
+            </a>
           </div>
         )}
-      </div>
-
-      {/* ── NEWSPAPER BOTTOM EDGE ── */}
-      <div style={{ background: PAPER_MID, borderTop: `3px double ${INK}`, marginTop: 0 }}>
-        <div style={{ height: 2, background: INK }} />
-        <div style={{ padding: "16px 20px 10px", textAlign: "center" }}>
-          <div style={{ fontSize: 10, color: INK_FADE, fontStyle: "italic", fontFamily: SERIF, letterSpacing: 1 }}>
-            {"© "}{new Date().getFullYear()}{" V-Hub · The Villages, Florida · All Rights Reserved"}
-          </div>
-          <div style={{ fontSize: 9, color: INK_FADE, marginTop: 3, fontFamily: SERIF }}>
-            V-Hub is not affiliated with The Villages® or its affiliates.
-          </div>
-        </div>
-        <div style={{ height: 1, background: INK, margin: "0 20px" }} />
-        <div style={{ position: "relative", height: 28 }}>
-          <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 28, background: "#b8a070", boxShadow: "0 -2px 6px rgba(0,0,0,0.3)" }} />
-          <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 22, background: "#c9b484" }} />
-          <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 17, background: "#d8c496" }} />
-          <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 12, background: "#e6d4a8" }} />
-          <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 8, background: PAPER }} />
-          <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 3, background: "linear-gradient(0deg, #1a0a00 0%, #3d2200 100%)" }} />
-        </div>
       </div>
     </div>
   );
