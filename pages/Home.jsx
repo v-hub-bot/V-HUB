@@ -1539,3 +1539,5 @@ export default function Home() {
   );
 }
 
+
+// V-HUB Search v3.0 — entity-ID based village+service matching
