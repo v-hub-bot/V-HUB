@@ -656,6 +656,189 @@ function LoginScreen({ onLogin, onForgot }) {
 }
 
 // ── MAIN COMPONENT ────────────────────────────────────────────────────────
+
+// ── Reviews Section — provider reads & responds, cannot self-review ──────────
+function ReviewsSection({ provider }) {
+  const [allReviews, setAllReviews] = useState([]);
+  const [loading, setLoading]       = useState(true);
+  const [replyText, setReplyText]   = useState({});   // { [reviewId]: string }
+  const [replySaving, setReplySaving] = useState({}); // { [reviewId]: bool }
+  const [replySaved, setReplySaved]  = useState({}); // { [reviewId]: bool }
+
+  const SERIF = "'Times New Roman', Georgia, serif";
+  const SANS  = "'Helvetica Neue', Arial, sans-serif";
+  const PAPER      = "#F5EDD6";
+  const PAPER_MID  = "#EDE0BE";
+  const PAPER_DK   = "#C8B89A";
+  const INK        = "#1C0F00";
+  const INK_FADE   = "#6B5744";
+  const TEAL       = "#00897B";
+  const BROWN_BTN  = "#7A4820";
+  const YELLOW     = "#FFDB00";
+  const GREEN      = "#2E7D32";
+
+  const load = async () => {
+    setLoading(true);
+    try {
+      const revs = await ProviderReview.filter({ provider_id: provider.id });
+      // Sort: unapproved first (needs attention), then by date desc
+      const sorted = (revs || []).sort((a, b) => {
+        if (!a.is_approved && b.is_approved) return -1;
+        if (a.is_approved && !b.is_approved) return 1;
+        return new Date(b.created_date) - new Date(a.created_date);
+      });
+      setAllReviews(sorted);
+    } catch { setAllReviews([]); }
+    setLoading(false);
+  };
+
+  useEffect(() => { if (provider?.id) load(); }, [provider?.id]);
+
+  const handleReply = async (reviewId) => {
+    const text = (replyText[reviewId] || "").trim();
+    if (!text) return;
+    setReplySaving(p => ({ ...p, [reviewId]: true }));
+    try {
+      await ProviderReview.update(reviewId, {
+        provider_reply: text,
+        provider_reply_date: new Date().toISOString(),
+      });
+      setReplySaved(p => ({ ...p, [reviewId]: true }));
+      setReplyText(p => ({ ...p, [reviewId]: "" }));
+      load();
+    } catch {}
+    setReplySaving(p => ({ ...p, [reviewId]: false }));
+  };
+
+  const approved   = allReviews.filter(r => r.is_approved);
+  const pending    = allReviews.filter(r => !r.is_approved);
+  const avgRating  = approved.length > 0
+    ? (approved.reduce((s, r) => s + (r.rating || 0), 0) / approved.length).toFixed(1)
+    : null;
+
+  const shS = { fontSize: 13, fontWeight: 900, color: INK, letterSpacing: 2, textTransform: "uppercase", fontFamily: SERIF, padding: "10px 0 6px", borderBottom: `2px solid ${INK}`, marginBottom: 14 };
+  const inS = { width: "100%", boxSizing: "border-box", background: PAPER, border: `1.5px solid ${PAPER_DK}`, borderRadius: 4, color: INK, fontFamily: SERIF, fontSize: 13, padding: "8px 10px", outline: "none", resize: "vertical" };
+
+  const ReviewCard = ({ r }) => {
+    const [showReply, setShowReply] = useState(false);
+    const hasReply = r.provider_reply && r.provider_reply.trim();
+    return (
+      <div style={{ background: r.is_approved ? PAPER_MID : "#FFF8E1", border: `1.5px solid ${r.is_approved ? PAPER_DK : "#FFD54F"}`, borderRadius: 8, padding: "14px 16px", marginBottom: 12 }}>
+        {/* Status badge */}
+        {!r.is_approved && (
+          <div style={{ fontSize: 10, fontWeight: 900, color: "#E65100", letterSpacing: 1, textTransform: "uppercase", fontFamily: SANS, marginBottom: 8, background: "#FFF3E0", border: "1px solid #FFCC80", borderRadius: 3, display: "inline-block", padding: "2px 8px" }}>
+            ⏳ Pending Admin Approval
+          </div>
+        )}
+        {/* Reviewer info + stars */}
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 4 }}>
+          <div>
+            <span style={{ fontSize: 14, fontWeight: 900, color: INK, fontFamily: SERIF }}>{r.customer_name}</span>
+            {r.customer_village && <span style={{ fontSize: 12, color: INK_FADE, fontStyle: "italic", marginLeft: 8, fontFamily: SERIF }}>📍 {r.customer_village}</span>}
+          </div>
+          <div style={{ display: "flex", gap: 1 }}>
+            {[1,2,3,4,5].map(i => <span key={i} style={{ fontSize: 14, color: i <= (r.rating||0) ? "#B8860B" : PAPER_DK }}>★</span>)}
+          </div>
+        </div>
+        {r.service_used && <div style={{ fontSize: 11, color: TEAL, fontWeight: 700, marginBottom: 5, textTransform: "uppercase", letterSpacing: 1, fontFamily: SANS }}>Service: {r.service_used}</div>}
+        <div style={{ fontSize: 13, color: INK, fontStyle: "italic", lineHeight: 1.7, fontFamily: SERIF, marginBottom: 6 }}>&ldquo;{r.review_text}&rdquo;</div>
+        <div style={{ fontSize: 10, color: INK_FADE, fontFamily: SANS, marginBottom: hasReply ? 8 : 0 }}>
+          {new Date(r.created_date).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}
+        </div>
+
+        {/* Existing reply */}
+        {hasReply && (
+          <div style={{ background: "#E8F5E9", border: `1px solid #A5D6A7`, borderRadius: 5, padding: "10px 12px", marginTop: 8 }}>
+            <div style={{ fontSize: 10, fontWeight: 900, color: GREEN, textTransform: "uppercase", letterSpacing: 1, fontFamily: SANS, marginBottom: 4 }}>Your Response</div>
+            <div style={{ fontSize: 12, color: INK, lineHeight: 1.6, fontFamily: SERIF }}>{r.provider_reply}</div>
+            {r.provider_reply_date && (
+              <div style={{ fontSize: 10, color: INK_FADE, marginTop: 4, fontFamily: SANS }}>
+                {new Date(r.provider_reply_date).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}
+              </div>
+            )}
+            <button onClick={() => { setShowReply(!showReply); setReplyText(p => ({ ...p, [r.id]: r.provider_reply })); }} style={{ fontSize: 11, color: TEAL, background: "none", border: "none", cursor: "pointer", fontFamily: SANS, padding: "4px 0 0", textDecoration: "underline" }}>
+              {showReply ? "Cancel Edit" : "Edit Response"}
+            </button>
+          </div>
+        )}
+
+        {/* Reply form */}
+        {!hasReply && !showReply && (
+          <button onClick={() => setShowReply(true)} style={{ fontSize: 11, color: TEAL, background: "none", border: `1px solid ${TEAL}`, borderRadius: 4, cursor: "pointer", fontFamily: SANS, padding: "5px 12px", marginTop: 6 }}>
+            💬 Reply to this review
+          </button>
+        )}
+        {showReply && (
+          <div style={{ marginTop: 10 }}>
+            <textarea
+              rows={3}
+              style={inS}
+              placeholder="Write a professional response to this review…"
+              value={replyText[r.id] || ""}
+              onChange={e => setReplyText(p => ({ ...p, [r.id]: e.target.value }))}
+            />
+            <div style={{ display: "flex", gap: 8, marginTop: 6 }}>
+              <button
+                onClick={() => handleReply(r.id)}
+                disabled={replySaving[r.id]}
+                style={{ background: `linear-gradient(180deg,#9A6030,${BROWN_BTN})`, color: PAPER, border: `2px solid ${YELLOW}`, borderRadius: 4, padding: "7px 18px", fontSize: 12, fontWeight: 700, cursor: "pointer", fontFamily: SANS }}>
+                {replySaving[r.id] ? "Saving…" : replySaved[r.id] ? "✓ Saved!" : "Post Response"}
+              </button>
+              <button onClick={() => setShowReply(false)} style={{ background: "none", border: `1.5px solid ${PAPER_DK}`, borderRadius: 4, padding: "7px 14px", fontSize: 12, color: INK_FADE, cursor: "pointer", fontFamily: SANS }}>
+                Cancel
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  return (
+    <div style={{ marginTop: 8 }}>
+      {/* Section header */}
+      <div style={{ ...shS, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+        <span>⭐ V-Hub Reviews</span>
+        {avgRating && (
+          <span style={{ fontSize: 12, fontWeight: 700, color: "#B8860B", fontFamily: SANS }}>
+            {avgRating} ★ · {approved.length} review{approved.length !== 1 ? "s" : ""}
+          </span>
+        )}
+      </div>
+
+      {loading && <div style={{ fontSize: 13, color: INK_FADE, fontStyle: "italic", fontFamily: SANS, padding: "12px 0" }}>Loading reviews…</div>}
+
+      {!loading && allReviews.length === 0 && (
+        <div style={{ fontSize: 13, color: INK_FADE, fontStyle: "italic", padding: "12px 0 20px", fontFamily: SANS, lineHeight: 1.7 }}>
+          No reviews yet. Reviews left by customers on your public profile will appear here — you'll be able to read and respond to each one.
+        </div>
+      )}
+
+      {/* Pending reviews — needs attention */}
+      {!loading && pending.length > 0 && (
+        <div style={{ marginBottom: 16 }}>
+          <div style={{ fontSize: 11, fontWeight: 900, color: "#E65100", letterSpacing: 1, textTransform: "uppercase", fontFamily: SANS, marginBottom: 8 }}>
+            ⏳ Awaiting Approval ({pending.length})
+          </div>
+          {pending.map(r => <ReviewCard key={r.id} r={r} />)}
+        </div>
+      )}
+
+      {/* Approved reviews */}
+      {!loading && approved.length > 0 && (
+        <div>
+          {pending.length > 0 && (
+            <div style={{ fontSize: 11, fontWeight: 900, color: GREEN, letterSpacing: 1, textTransform: "uppercase", fontFamily: SANS, marginBottom: 8 }}>
+              ✓ Live Reviews ({approved.length})
+            </div>
+          )}
+          {approved.map(r => <ReviewCard key={r.id} r={r} />)}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ── Analytics Dashboard Component ────────────────────────────────────────────
 function AnalyticsDashboard({ provider, reviews }) {
   const [analytics, setAnalytics] = useState(null);
@@ -1869,67 +2052,8 @@ export default function ProviderDashboard() {
           </div>
         )}
 
-        {/* Reviews */}
-        <div style={{ ...shS, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-          <span>⭐ V-Hub Reviews</span>
-          {!showReviewForm && !reviewSaved && (
-            <button onClick={() => setShowReviewForm(true)} style={{ background: BROWN_BTN, color: PAPER, border: "none", borderRadius: 4, padding: "4px 12px", fontSize: 11, cursor: "pointer", fontWeight: 700, fontFamily: SANS, letterSpacing: 1 }}>
-              + Leave a Review
-            </button>
-          )}
-        </div>
-
-        {showReviewForm && (
-          <div style={{ background: PAPER_MID, border: `1.5px solid ${PAPER_DK}`, borderRadius: 8, padding: "16px 18px", marginBottom: 16 }}>
-            <div style={{ fontSize: 13, fontWeight: 900, color: INK, marginBottom: 12, textTransform: "uppercase", letterSpacing: 1, fontFamily: SERIF }}>Write a Review</div>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px 16px", marginBottom: 10 }}>
-              <div><label style={lbS}>Your Name *</label><input style={inS} value={reviewForm.customer_name} onChange={e => setReviewForm(p => ({ ...p, customer_name: e.target.value }))} /></div>
-              <div><label style={lbS}>Your Village</label><input style={inS} value={reviewForm.customer_village} onChange={e => setReviewForm(p => ({ ...p, customer_village: e.target.value }))} /></div>
-              <div><label style={lbS}>Service Used</label><input style={inS} value={reviewForm.service_used} onChange={e => setReviewForm(p => ({ ...p, service_used: e.target.value }))} /></div>
-              <div><label style={lbS}>Rating</label>
-                <select style={inS} value={reviewForm.rating} onChange={e => setReviewForm(p => ({ ...p, rating: parseInt(e.target.value) }))}>
-                  {[5,4,3,2,1].map(n => <option key={n} value={n}>{n} Star{n > 1 ? "s" : ""} {"★".repeat(n)}</option>)}
-                </select>
-              </div>
-            </div>
-            <div style={{ marginBottom: 12 }}>
-              <label style={lbS}>Your Review *</label>
-              <textarea style={{ ...inS, minHeight: 80, resize: "vertical", lineHeight: 1.6 }} value={reviewForm.review_text} onChange={e => setReviewForm(p => ({ ...p, review_text: e.target.value }))} />
-            </div>
-            <div style={{ display: "flex", gap: 10 }}>
-              <button onClick={handleReviewSubmit} style={{ background: `linear-gradient(180deg,#9A6030,${BROWN_BTN})`, color: PAPER, border: `2px solid ${YELLOW}`, borderRadius: 5, padding: "10px 24px", fontSize: 13, fontWeight: 700, cursor: "pointer", letterSpacing: 1, fontFamily: SERIF }}>Submit Review</button>
-              <button onClick={() => setShowReviewForm(false)} style={{ background: PAPER, border: `1.5px solid ${PAPER_DK}`, color: INK_FADE, borderRadius: 5, padding: "10px 18px", fontSize: 13, cursor: "pointer", fontFamily: SANS }}>Cancel</button>
-            </div>
-            <div style={{ fontSize: 11, color: INK_FADE, fontStyle: "italic", marginTop: 8, fontFamily: SANS }}>Reviews appear publicly after admin approval.</div>
-          </div>
-        )}
-
-        {reviewSaved && (
-          <div style={{ background: "#E8F5E9", border: `1.5px solid ${GREEN}`, borderRadius: 6, padding: "12px 16px", marginBottom: 16, fontSize: 13, color: GREEN, fontFamily: SANS }}>
-            ✓ Thank you! Your review has been submitted and will appear after approval.
-          </div>
-        )}
-
-        {reviews.length === 0 && !showReviewForm && (
-          <div style={{ fontSize: 13, color: INK_FADE, fontStyle: "italic", padding: "12px 0", marginBottom: 20, fontFamily: SANS }}>No V-Hub reviews yet.</div>
-        )}
-
-        {reviews.map(r => (
-          <div key={r.id} style={{ background: PAPER_MID, border: `1.5px solid ${PAPER_DK}`, borderRadius: 8, padding: "14px 16px", marginBottom: 10 }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 6 }}>
-              <div>
-                <span style={{ fontSize: 14, fontWeight: 900, color: INK, fontFamily: SERIF }}>{r.customer_name}</span>
-                {r.customer_village && <span style={{ fontSize: 12, color: INK_FADE, fontStyle: "italic", marginLeft: 8, fontFamily: SERIF }}>📍 {r.customer_village}</span>}
-              </div>
-              <Stars rating={r.rating} size={15} />
-            </div>
-            {r.service_used && <div style={{ fontSize: 11, color: TEAL, fontWeight: 700, marginBottom: 5, textTransform: "uppercase", letterSpacing: 1, fontFamily: SANS }}>Service: {r.service_used}</div>}
-            <div style={{ fontSize: 13, color: INK_FADE, fontStyle: "italic", lineHeight: 1.7, fontFamily: SERIF }}>&ldquo;{r.review_text}&rdquo;</div>
-            <div style={{ fontSize: 10, color: INK_FADE, marginTop: 6, fontFamily: SANS }}>
-              {new Date(r.created_date).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })} · V-Hub Verified Review
-            </div>
-          </div>
-        ))}
+        {/* Reviews — provider reads & responds, cannot self-review */}
+        <ReviewsSection provider={provider} />
 
       </div>
 

@@ -267,9 +267,14 @@ function ProvDetail({ prov, areas, cats, svcs, onBack }) {
 
   const handleReviewSubmit = async () => {
     if (!reviewForm.customer_name || !reviewForm.review_text) return;
-    await ProviderReview.create({ ...reviewForm, provider_id: prov.id, is_approved: false, helpful_count: 0 });
-    setReviewSaved(true);
-    setShowReviewForm(false);
+    try {
+      await ProviderReview.create({ ...reviewForm, provider_id: prov.id, is_approved: false, helpful_count: 0 });
+      setReviewSaved(true);
+      setShowReviewForm(false);
+      setReviewForm({ customer_name: "", customer_village: "", rating: 5, review_text: "", service_used: "" });
+    } catch(err) {
+      alert("There was a problem submitting your review. Please try again.");
+    }
   };
 
   const inputS = { width: "100%", boxSizing: "border-box", background: PAPER, border: `1.5px solid ${PAPER_DK}`, borderRadius: 4, color: INK, fontFamily: "'Times New Roman', serif", fontSize: 13, padding: "8px 11px", outline: "none" };
@@ -468,6 +473,12 @@ function ProvDetail({ prov, areas, cats, svcs, onBack }) {
             {r.service_used && <div style={{ fontSize: 10, color: TEAL, fontWeight: 700, marginBottom: 4, textTransform: "uppercase", letterSpacing: 1 }}>Service: {r.service_used}</div>}
             <div style={{ fontSize: 12, color: INK_FADE, fontStyle: "italic", lineHeight: 1.65 }}>&ldquo;{r.review_text}&rdquo;</div>
             <div style={{ fontSize: 10, color: INK_FADE, marginTop: 5 }}>{new Date(r.created_date).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })} · V-Hub Verified Review</div>
+            {r.provider_reply && r.provider_reply.trim() && (
+              <div style={{ background: "#E8F5E9", border: "1px solid #A5D6A7", borderRadius: 4, padding: "8px 10px", marginTop: 8 }}>
+                <div style={{ fontSize: 10, fontWeight: 700, color: "#2E7D32", textTransform: "uppercase", letterSpacing: 1, marginBottom: 3 }}>Response from Owner</div>
+                <div style={{ fontSize: 11, color: INK, lineHeight: 1.6, fontStyle: "italic" }}>{r.provider_reply}</div>
+              </div>
+            )}
           </div>
         ))}
 

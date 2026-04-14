@@ -2,8 +2,7 @@
   "type": "object",
   "properties": {
     "provider_id": {
-      "type": "string",
-      "description": "Provider record ID"
+      "type": "string"
     },
     "customer_name": {
       "type": "string"
@@ -12,8 +11,7 @@
       "type": "string"
     },
     "rating": {
-      "type": "number",
-      "description": "1-5 stars"
+      "type": "number"
     },
     "review_text": {
       "type": "string"
@@ -22,11 +20,16 @@
       "type": "string"
     },
     "is_approved": {
-      "type": "boolean",
-      "description": "Admin approved before showing publicly"
+      "type": "boolean"
     },
     "helpful_count": {
       "type": "number"
+    },
+    "provider_reply": {
+      "type": "string"
+    },
+    "provider_reply_date": {
+      "type": "string"
     }
   },
   "required": [],
