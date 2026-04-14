@@ -1466,12 +1466,15 @@ export default function Home() {
 
         <Rule thick />
 
-        {/* NAV — Local Services only */}
-        <div style={{ background: PAPER, padding: "8px", textAlign: "center", borderTop: `1px solid ${INK}44`, borderBottom: `1px solid ${INK}44` }}>
-          <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2, color: INK, textTransform: "uppercase" }}>Local Services</div>
-        </div>
-
-        <Rule />
+        {/* FIND SERVICES BUTTON — full width, yellow border */}
+        <div style={{
+          padding: "10px 16px", textAlign: "center", fontSize: 12, fontWeight: 700,
+          letterSpacing: 2, color: INK, textTransform: "uppercase",
+          border: `3px solid ${YELLOW}`,
+          boxShadow: `0 0 0 1.5px ${YELLOW}44, 0 2px 8px rgba(255,220,0,0.25)`,
+          background: PAPER,
+          width: "100%", boxSizing: "border-box",
+        }}>Find Services</div>
 
         {/* PHOTO */}
         <img
@@ -1480,13 +1483,13 @@ export default function Home() {
           style={{ width: "100%", height: 200, objectFit: "cover", objectPosition: "center 60%", display: "block" }}
         />
 
-        {/* CLASSIFIEDS BUTTON — full width under image */}
+        {/* CLASSIFIEDS BUTTON — full width under image, same weight green border */}
         <a href="/Classifieds" style={{ textDecoration: "none", display: "block" }}>
           <div style={{
             padding: "10px 16px", textAlign: "center", fontSize: 12, fontWeight: 700,
             letterSpacing: 2, color: "#1A6B3C", textTransform: "uppercase",
-            border: "3px solid #1A6B3C", borderRadius: 0,
-            boxShadow: "inset 0 0 0 2px #1A6B3C22, 0 2px 8px rgba(26,107,60,0.2)",
+            border: "3px solid #1A6B3C",
+            boxShadow: "0 0 0 1.5px #1A6B3C44, 0 2px 8px rgba(26,107,60,0.25)",
             background: PAPER,
             cursor: "pointer",
             width: "100%", boxSizing: "border-box",
