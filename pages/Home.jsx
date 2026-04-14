@@ -1058,33 +1058,50 @@ export default function Home() {
       const svcMatch = !selSvc || (() => {
         const provSvcs = Array.isArray(p.services) ? p.services : [];
         const provCatId = p.category_id || "";
+
         if (selSvc._isCat) {
-          // Category-level selection: match if provider's category matches
+          // ── CATEGORY-LEVEL selection ──────────────────────────────────
+          // 1. Provider's category_id directly matches — always wins
           if (provCatId === selSvc.id) return true;
-          // Also match if any of provider's services belong to that category
+
+          // 2. Provider has legacy s-code services belonging to this category
           const catSvcIds = SVCS_STATIC.filter(s => s.category_id === selSvc.id).map(s => s.id);
           if (provSvcs.some(sid => catSvcIds.includes(sid))) return true;
-          // Also match real entity Service IDs that belong to this category
-          const realCatSvcIds = Object.keys(ENTITY_SVC_MAP).filter(id => {
-            // We need to check category_id for real service entities — use svcEntities lookup
-            return false; // handled by category_id match above
-          });
-          // Text-based services (old providers): check if service name matches category
-          const catSvcNames = SVCS_STATIC.filter(s => s.category_id === selSvc.id).map(s => s.name.toLowerCase());
+
+          // 3. Provider has real entity Service IDs — check via svcEntities category_id
+          const realCatSvcIds = (svcEntities || [])
+            .filter(s => s.category_id === selSvc.id)
+            .map(s => s.id);
+          if (provSvcs.some(sid => realCatSvcIds.includes(sid))) return true;
+
+          // 4. Provider has text-based service names — check if name matches category services
+          const catSvcNames = [
+            ...SVCS_STATIC.filter(s => s.category_id === selSvc.id).map(s => s.name.toLowerCase()),
+            ...(svcEntities || []).filter(s => s.category_id === selSvc.id).map(s => s.name.toLowerCase()),
+          ];
           if (provSvcs.some(sv => {
-            const resolved = ENTITY_SVC_MAP[sv] || LEGACY_SVC_MAP[sv] || String(sv);
-            return catSvcNames.some(cn => resolved.toLowerCase().includes(cn) || cn.includes(resolved.toLowerCase()));
+            const resolved = (ENTITY_SVC_MAP[sv] || LEGACY_SVC_MAP[sv] || String(sv)).toLowerCase();
+            return catSvcNames.some(cn => resolved.includes(cn) || cn.includes(resolved));
           })) return true;
+
           return false;
+
         } else {
-          // Specific service selected
+          // ── SPECIFIC SERVICE selection ────────────────────────────────
+          // 1. Direct ID match (entity UUID or s-code)
           if (provSvcs.includes(selSvc.id)) return true;
-          // Try resolving provider service IDs to names and compare
+
+          // 2. Name-based match — resolve provider service IDs to names and compare
           const selName = selSvc.name.toLowerCase();
           if (provSvcs.some(sv => {
-            const resolved = ENTITY_SVC_MAP[sv] || LEGACY_SVC_MAP[sv] || String(sv);
-            return resolved.toLowerCase().includes(selName) || selName.includes(resolved.toLowerCase());
+            const resolved = (ENTITY_SVC_MAP[sv] || LEGACY_SVC_MAP[sv] || String(sv)).toLowerCase();
+            return resolved.includes(selName) || selName.includes(resolved);
           })) return true;
+
+          // 3. If provider has no services but category matches the selected service's category
+          //    — still show them (better than hiding an active provider)
+          if (provSvcs.length === 0 && provCatId === selSvc.category_id) return true;
+
           return false;
         }
       })();
