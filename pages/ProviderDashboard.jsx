@@ -786,42 +786,30 @@ function LoginScreen({ onLogin, onForgot }) {
   const handleLogin = async (e) => {
     e && e.preventDefault();
     setError("");
-    const emailVal = loginEmail.trim() || (document.querySelector('input[autocomplete="email"]')?.value || "").trim();
-    const passVal  = loginPass.trim()  || (document.querySelector('input[autocomplete="current-password"]')?.value || "").trim();
-    if (!emailVal || !passVal) { setError("Please enter your email and password."); return; }
-    if (!loginEmail) setLoginEmail(emailVal);
-    if (!loginPass)  setLoginPass(passVal);
+    const emailVal = loginEmail.trim();
+    const passVal  = loginPass;
+    if (!emailVal || !passVal) { setError("Please enter your email/VH number and password."); return; }
     setLoading(true);
     try {
-      // Client-side login — hash password and compare against stored hash
-      const inputHash = await hashPassword(passVal);
-      const isVH = /^VH-\d+$/i.test(emailVal.toUpperCase());
-
-      // Try VH number match first, then email match
-      let matches = [];
-      if (isVH) {
-        matches = await Provider.filter({ vh_number: emailVal.toUpperCase() });
+      // Use backend function so entity reads work for unauthenticated visitors
+      const res = await fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/providerLogin", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ identifier: emailVal, password: passVal }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        setError(data.error || "Login failed. Please try again.");
+        setLoading(false);
+        return;
       }
-      if (!matches.length) {
-        matches = await Provider.filter({ login_email: emailVal.toLowerCase() });
-      }
-      if (!matches.length) {
-        matches = await Provider.filter({ email: emailVal.toLowerCase() });
-      }
-
-      if (!matches.length) { setError("No account found for that email or account number."); setLoading(false); return; }
-
-      // Find the one whose password hash matches
-      const prov = matches.find(p => p.login_password === inputHash);
-      if (!prov) { setError("Incorrect password. Use 'Forgot Password' to reset."); setLoading(false); return; }
-      // Allow pending providers through ONLY if they haven't set their password yet
-      // (so they can complete the password setup step before admin activates them)
+      const prov = data.provider;
+      // Allow pending providers through ONLY if they haven\'t set their password yet
       if (!prov.is_active && prov.password_changed) {
         setError("Your account is not yet active. Contact admin@v-hub.us.");
         setLoading(false);
         return;
       }
-
       sessionStorage.setItem("vhub_provider_id", prov.id);
       onLogin(prov);
     } catch (err) {
@@ -1357,6 +1345,18 @@ function AnalyticsDashboard({ provider, reviews }) {
 export default function ProviderDashboard() {
   useMeta("Provider Hub | V-Hub — The Villages, FL");
 
+
+  // Helper: fetch provider by ID via backend (works for unauthenticated visitors)
+  const fetchProviderById = async (id) => {
+    const res = await fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/providerLogin", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ restore_id: id }),
+    });
+    const data = await res.json();
+    return (data.success && data.provider) ? data.provider : null;
+  };
+
   const [provider, setProvider]     = useState(null);
   const [authState, setAuthState]   = useState("loading"); // loading | login | forgot | reset | dashboard
   const [resetToken, setResetToken] = useState("");
@@ -1421,10 +1421,16 @@ export default function ProviderDashboard() {
     }
     const savedId = sessionStorage.getItem("vhub_provider_id");
     if (savedId) {
-      // Client-side session restore via entity SDK
-      Provider.get(savedId)
-        .then(p => {
-          if (p && p.id) {
+      // Restore session via backend function (works for unauthenticated visitors)
+      fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/providerLogin", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ restore_id: savedId }),
+      })
+        .then(r => r.json())
+        .then(data => {
+          if (data.success && data.provider) {
+            const p = data.provider;
             setProvider(p);
             seedForm(p);
             setNewLoginEmail(p.login_email || p.email || "");
@@ -1459,14 +1465,14 @@ export default function ProviderDashboard() {
       // Re-fetch provider so subscription_status reflects Stripe webhook update
       const acctId = urlParams.get("acct") || sessionStorage.getItem("vhub_provider_id");
       if (acctId) {
-        Provider.get(acctId).then(p => { if (p && p.id) { setProvider(p); seedForm(p); } }).catch(() => {});
+        fetchProviderById(acctId).then(p => { if (p && p.id) { setProvider(p); seedForm(p); } }).catch(() => {});
       }
     } else if (paymentResult === "portal_return") {
       // Returned from Stripe billing portal — re-fetch provider to get updated status
       window.history.replaceState({}, "", window.location.pathname);
       const acctId = urlParams.get("acct") || sessionStorage.getItem("vhub_provider_id");
       if (acctId) {
-        Provider.get(acctId).then(p => { if (p && p.id) { setProvider(p); seedForm(p); setCancelSuccess(true); } }).catch(() => {});
+        fetchProviderById(acctId).then(p => { if (p && p.id) { setProvider(p); seedForm(p); setCancelSuccess(true); } }).catch(() => {});
       }
     } else if (paymentResult === "cancelled") {
       // User clicked "Back" on Stripe checkout — just clear the URL
@@ -1484,7 +1490,7 @@ export default function ProviderDashboard() {
           for (let i = 0; i < 5; i++) {
             await new Promise(r => setTimeout(r, 1500));
             try {
-              const p = await Provider.get(acctId);
+              const p = await fetchProviderById(acctId);
               if (p && p.id) {
                 setProvider(p);
                 seedForm(p);

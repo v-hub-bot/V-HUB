@@ -1,4 +1,4 @@
-// providerLogin v5 - wildcard CORS to support v-hub.us custom domain
+// providerLogin v6 - handles login + session restore for unauthenticated visitors
 import { createClientFromRequest } from "npm:@base44/sdk@0.8.25";
 
 const CORS = {
@@ -13,6 +13,15 @@ async function sha256(s: string): Promise<string> {
   return Array.from(new Uint8Array(b)).map((x: number) => x.toString(16).padStart(2, "0")).join("");
 }
 
+function sanitize(p: Record<string, unknown>): Record<string, unknown> {
+  const safe = { ...p };
+  delete safe.login_password;
+  delete safe.notes;
+  delete safe.stripe_customer_id;
+  delete safe.stripe_subscription_id;
+  return safe;
+}
+
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: CORS });
   if (req.method !== "POST") return new Response("Method Not Allowed", { status: 405, headers: CORS });
@@ -22,15 +31,28 @@ Deno.serve(async (req: Request) => {
     return new Response(JSON.stringify({ error: "Invalid JSON" }), { status: 400, headers: CORS });
   }
 
-  const identifier = ((body.identifier as string) || "").trim();
-  const password   = (body.password   as string) || "";
-  if (!identifier || !password) {
-    return new Response(JSON.stringify({ error: "Missing identifier or password" }), { status: 400, headers: CORS });
-  }
-
   try {
     const base44 = createClientFromRequest(req);
     const sr = base44.asServiceRole;
+
+    // ── Session restore mode ─────────────────────────────────────────────
+    const restoreId = (body.restore_id as string || "").trim();
+    if (restoreId) {
+      let p: Record<string, unknown> | null = null;
+      try { p = await sr.entities.Provider.get(restoreId); } catch { p = null; }
+      if (p && p.id) {
+        return new Response(JSON.stringify({ success: true, provider: sanitize(p) }), { headers: CORS });
+      }
+      return new Response(JSON.stringify({ error: "Session expired" }), { status: 401, headers: CORS });
+    }
+
+    // ── Normal login mode ────────────────────────────────────────────────
+    const identifier = ((body.identifier as string) || "").trim();
+    const password   = (body.password   as string) || "";
+    if (!identifier || !password) {
+      return new Response(JSON.stringify({ error: "Missing identifier or password" }), { status: 400, headers: CORS });
+    }
+
     const isVH = /^vh-?\d{3,6}$/i.test(identifier);
 
     let rows: Record<string, unknown>[] = [];
@@ -65,13 +87,7 @@ Deno.serve(async (req: Request) => {
       return new Response(JSON.stringify({ error: "Incorrect password. Please try again." }), { status: 401, headers: CORS });
     }
 
-    const safe: Record<string, unknown> = { ...match };
-    delete safe.login_password;
-    delete safe.notes;
-    delete safe.stripe_customer_id;
-    delete safe.stripe_subscription_id;
-
-    return new Response(JSON.stringify({ success: true, provider: safe }), { headers: CORS });
+    return new Response(JSON.stringify({ success: true, provider: sanitize(match) }), { headers: CORS });
 
   } catch (e: unknown) {
     console.error("providerLogin error:", e instanceof Error ? e.message : e);
