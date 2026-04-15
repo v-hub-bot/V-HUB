@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 
 const PAPER     = "#F0E6C8";
 const PAPER_MID = "#E4D5A8";
@@ -61,6 +61,7 @@ function ExpiryBadge({ date }) {
   return <span style={{ ...base, background: GREEN, color: "#fff" }}>Good Thru {fmtDate(date)}</span>;
 }
 
+// Full-size ad card — same width as page content area
 function AdCard({ ad }) {
   const days = daysUntil(ad.deal_expires_at);
   const expired = days !== null && days < 0;
@@ -73,22 +74,21 @@ function AdCard({ ad }) {
       display: "flex",
       flexDirection: "column",
       boxSizing: "border-box",
-      width: "100%",
       opacity: expired ? 0.55 : 1,
       fontFamily: SERIF,
       overflow: "hidden",
-      boxShadow: "2px 2px 6px rgba(0,0,0,0.18)",
+      boxShadow: "3px 3px 10px rgba(0,0,0,0.22)",
+      height: "100%",
     }}>
-
       {/* ── Header strip ── */}
-      <div style={{ background: INK, padding: "8px 12px 7px", textAlign: "center" }}>
-        <div style={{ fontSize: 8, color: PAPER_DK, fontFamily: SANS, letterSpacing: 2, textTransform: "uppercase", marginBottom: 3 }}>
+      <div style={{ background: INK, padding: "10px 14px 9px", textAlign: "center" }}>
+        <div style={{ fontSize: 9, color: PAPER_DK, fontFamily: SANS, letterSpacing: 2, textTransform: "uppercase", marginBottom: 4 }}>
           ✦ Deal of the Week ✦
         </div>
         <div style={{
-          fontSize: 14, fontWeight: 900, color: YELLOW,
+          fontSize: 17, fontWeight: 900, color: YELLOW,
           textTransform: "uppercase", letterSpacing: 0.5,
-          lineHeight: 1.2, fontFamily: SERIF,
+          lineHeight: 1.25, fontFamily: SERIF,
         }}>
           {ad.headline}
         </div>
@@ -100,18 +100,18 @@ function AdCard({ ad }) {
         <img
           src={ad.image_url}
           alt={ad.headline}
-          style={{ width: "100%", height: 110, objectFit: "cover", display: "block", borderBottom: `1px solid ${PAPER_DK}` }}
+          style={{ width: "100%", height: 160, objectFit: "cover", display: "block", borderBottom: `1px solid ${PAPER_DK}` }}
         />
       )}
 
       {/* ── Deal body ── */}
-      <div style={{ padding: "10px 12px 6px", fontSize: 12, color: INK, lineHeight: 1.75, flex: 1, fontFamily: SERIF }}>
+      <div style={{ padding: "14px 16px 8px", fontSize: 14, color: INK, lineHeight: 1.8, flex: 1, fontFamily: SERIF }}>
         {ad.body}
       </div>
 
       {/* ── Address ── */}
       {ad.address && (
-        <div style={{ padding: "2px 12px 8px", fontSize: 11, color: TEAL, fontWeight: 700, fontFamily: SANS }}>
+        <div style={{ padding: "4px 16px 10px", fontSize: 12, color: TEAL, fontWeight: 700, fontFamily: SANS }}>
           📍 {ad.address}
         </div>
       )}
@@ -120,25 +120,138 @@ function AdCard({ ad }) {
       <div style={{
         borderTop: `1px solid ${PAPER_DK}`,
         background: PAPER_MID,
-        padding: "7px 12px",
+        padding: "9px 14px",
         display: "flex",
         justifyContent: "space-between",
         alignItems: "center",
         gap: 8,
         flexWrap: "wrap",
       }}>
-        <div style={{ fontSize: 11, fontWeight: 900, color: NAVY, fontFamily: SANS, letterSpacing: 0.2 }}>
+        <div style={{ fontSize: 13, fontWeight: 900, color: NAVY, fontFamily: SANS, letterSpacing: 0.2 }}>
           {ad.provider_name}
         </div>
         {ad.village && (
           <div style={{
-            fontSize: 10, color: INK_FADE, fontFamily: SERIF, fontStyle: "italic",
-            background: PAPER_DK, borderRadius: 2, padding: "2px 6px",
+            fontSize: 11, color: INK_FADE, fontFamily: SERIF, fontStyle: "italic",
+            background: PAPER_DK, borderRadius: 2, padding: "2px 8px",
           }}>
             📌 {ad.village}
           </div>
         )}
       </div>
+    </div>
+  );
+}
+
+// ── Carousel component ──────────────────────────────────────────────────────
+function DealsCarousel({ ads }) {
+  const [idx, setIdx] = useState(0);
+  const total = ads.length;
+
+  const prev = () => setIdx(i => (i - 1 + total) % total);
+  const next = () => setIdx(i => (i + 1) % total);
+
+  // Touch/swipe support
+  const touchStartX = useRef(null);
+  const onTouchStart = (e) => { touchStartX.current = e.touches[0].clientX; };
+  const onTouchEnd   = (e) => {
+    if (touchStartX.current === null) return;
+    const diff = touchStartX.current - e.changedTouches[0].clientX;
+    if (Math.abs(diff) > 40) { diff > 0 ? next() : prev(); }
+    touchStartX.current = null;
+  };
+
+  if (total === 0) return null;
+
+  const arrowBtn = (dir, onClick) => (
+    <button
+      onClick={onClick}
+      aria-label={dir === "left" ? "Previous deal" : "Next deal"}
+      style={{
+        flexShrink: 0,
+        width: 44,
+        height: 44,
+        borderRadius: "50%",
+        border: `2px solid ${INK}`,
+        background: PAPER_MID,
+        color: INK,
+        fontSize: 20,
+        fontWeight: 900,
+        cursor: "pointer",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        boxShadow: "1px 1px 4px rgba(0,0,0,0.2)",
+        transition: "background 0.15s",
+        userSelect: "none",
+        WebkitUserSelect: "none",
+      }}
+      onMouseEnter={e => e.currentTarget.style.background = PAPER_DK}
+      onMouseLeave={e => e.currentTarget.style.background = PAPER_MID}
+    >
+      {dir === "left" ? "‹" : "›"}
+    </button>
+  );
+
+  return (
+    <div style={{ padding: "0 0 8px" }}>
+      {/* Counter */}
+      <div style={{
+        textAlign: "center", fontFamily: SANS, fontSize: 11,
+        color: INK_FADE, letterSpacing: 1, marginBottom: 10,
+        fontWeight: 700, textTransform: "uppercase",
+      }}>
+        Deal {idx + 1} of {total}
+      </div>
+
+      {/* Carousel row */}
+      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+        {arrowBtn("left", prev)}
+
+        {/* Card wrapper — full width */}
+        <div
+          style={{ flex: 1, minWidth: 0 }}
+          onTouchStart={onTouchStart}
+          onTouchEnd={onTouchEnd}
+        >
+          <AdCard ad={ads[idx]} />
+        </div>
+
+        {arrowBtn("right", next)}
+      </div>
+
+      {/* Dot indicators */}
+      {total > 1 && (
+        <div style={{ display: "flex", justifyContent: "center", gap: 6, marginTop: 14 }}>
+          {ads.map((_, i) => (
+            <button
+              key={i}
+              onClick={() => setIdx(i)}
+              style={{
+                width: i === idx ? 18 : 8,
+                height: 8,
+                borderRadius: 4,
+                border: "none",
+                background: i === idx ? INK : PAPER_DK,
+                cursor: "pointer",
+                padding: 0,
+                transition: "all 0.2s",
+              }}
+              aria-label={`Go to deal ${i + 1}`}
+            />
+          ))}
+        </div>
+      )}
+
+      {/* Swipe hint — shown only when >1 deal */}
+      {total > 1 && (
+        <div style={{
+          textAlign: "center", marginTop: 10, fontFamily: SERIF,
+          fontSize: 11, color: INK_FADE, fontStyle: "italic",
+        }}>
+          ← Swipe or use arrows to browse all {total} deals →
+        </div>
+      )}
     </div>
   );
 }
@@ -163,7 +276,6 @@ export default function Classifieds() {
     })
       .then(r => r.json())
       .then(data => {
-        // Already sorted A-Z by the backend, but sort again as safety
         const sorted = [...(data.ads || [])].sort((a, b) =>
           (a.provider_name || "").localeCompare(b.provider_name || "")
         );
@@ -173,29 +285,22 @@ export default function Classifieds() {
       .finally(() => setLoading(false));
   }, []);
 
-  // Filter logic — village match OR keyword match
+  // Filter logic
   const filtered = ads.filter(ad => {
     const q = search.toLowerCase().trim();
     const v = village.toLowerCase().trim();
-
-    // Village filter — match ad.village or ad.address
     if (v) {
       const adVillage = (ad.village || "").toLowerCase();
       const adAddress = (ad.address || "").toLowerCase();
       if (!adVillage.includes(v) && !adAddress.includes(v)) return false;
     }
-
-    // Keyword search — provider name, headline, body, village, address
     if (q) {
-      const hay = [ad.provider_name, ad.headline, ad.body, ad.village, ad.address]
-        .join(" ").toLowerCase();
+      const hay = [ad.provider_name, ad.headline, ad.body, ad.village, ad.address].join(" ").toLowerCase();
       if (!hay.includes(q)) return false;
     }
-
     return true;
   });
 
-  // Only show non-expired ads to the public (expired ones filtered out)
   const live = filtered.filter(ad => {
     const days = daysUntil(ad.deal_expires_at);
     return days === null || days >= 0;
@@ -229,7 +334,6 @@ export default function Classifieds() {
 
       {/* ════════ MASTHEAD ════════ */}
       <div style={{ background: PAPER, borderBottom: `3px double ${INK}` }}>
-
         {/* Dateline */}
         <div style={{
           borderTop: `3px double ${INK}`, borderBottom: `3px double ${INK}`,
@@ -281,7 +385,6 @@ export default function Classifieds() {
 
         {/* ── Search & Village Filter ── */}
         <div style={{ padding: "12px 14px 14px", display: "flex", flexDirection: "column", gap: 10, boxSizing: "border-box" }}>
-
           {/* Keyword search */}
           <input
             type="text"
@@ -372,11 +475,11 @@ export default function Classifieds() {
         }
       </div>
 
-      {/* ════════ DEALS GRID ════════ */}
+      {/* ════════ CAROUSEL SECTION ════════ */}
       <div style={{ padding: "16px 14px 48px", boxSizing: "border-box" }}>
 
         {/* Section rule */}
-        <div style={{ marginBottom: 16 }}>
+        <div style={{ marginBottom: 18 }}>
           <div style={{ borderTop: `3px double ${INK}` }} />
           <div style={{
             textAlign: "center", padding: "6px 0",
@@ -400,73 +503,66 @@ export default function Classifieds() {
             <div style={{ fontSize: 16, fontWeight: 900, letterSpacing: 2, textTransform: "uppercase", color: INK, fontFamily: SERIF, marginBottom: 8 }}>
               {search || village ? "No Matching Deals Found" : "New Deals Coming Soon!"}
             </div>
-            <div style={{ fontSize: 12, fontStyle: "italic", color: INK_FADE, fontFamily: SERIF, lineHeight: 1.8, maxWidth: 340, margin: "0 auto 20px" }}>
+            <div style={{ fontSize: 13, fontStyle: "italic", color: INK_FADE, fontFamily: SERIF, lineHeight: 1.8 }}>
               {search || village
-                ? `No deals match ${village ? `"${village}"` : ""} ${search ? `"${search}"` : ""}. Try a different village or clear your search.`
+                ? "Try a different village or search term."
                 : "Local providers post their deals and specials here every week. Check back soon — new deals are added regularly!"}
             </div>
             {(search || village) && (
               <button
                 onClick={() => { setSearch(""); setVillage(""); }}
                 style={{
-                  background: "none", border: `2px solid ${GREEN}`, color: GREEN,
-                  borderRadius: 4, padding: "9px 20px", fontSize: 13,
-                  fontFamily: SANS, fontWeight: 700, cursor: "pointer", marginBottom: 20,
+                  marginTop: 16, padding: "8px 18px", fontFamily: SANS,
+                  fontSize: 12, fontWeight: 700, cursor: "pointer",
+                  background: PAPER_MID, border: `2px solid ${INK}`,
+                  borderRadius: 3, color: INK,
                 }}
-              >Clear Filters — Show All Deals</button>
+              >Clear Filters</button>
             )}
-            <div style={{ borderTop: `3px double ${INK}`, marginTop: 24 }} />
           </div>
         )}
 
         {!loading && live.length > 0 && (
-          <>
-            <style>{`
-              .vh-deals-grid {
-                display: grid;
-                grid-template-columns: repeat(3, 1fr);
-                gap: 16px;
-              }
-              @media (max-width: 700px) {
-                .vh-deals-grid { grid-template-columns: repeat(2, 1fr); }
-              }
-              @media (max-width: 440px) {
-                .vh-deals-grid { grid-template-columns: 1fr; }
-              }
-            `}</style>
-            <div className="vh-deals-grid">
-              {live.map(ad => <AdCard key={ad.id} ad={ad} />)}
-            </div>
-          </>
+          <DealsCarousel ads={live} />
         )}
 
-        {/* ── Provider CTA at bottom ── */}
-        {!loading && (
-          <div style={{
-            marginTop: 36, borderTop: `3px double ${INK}`,
-            paddingTop: 20, textAlign: "center",
-          }}>
-            <div style={{ fontSize: 13, fontWeight: 900, color: INK, fontFamily: SERIF, letterSpacing: 1, textTransform: "uppercase", marginBottom: 6 }}>
-              Are You a Local Provider?
-            </div>
-            <div style={{ fontSize: 12, fontStyle: "italic", color: INK_FADE, fontFamily: SERIF, lineHeight: 1.7, maxWidth: 360, margin: "0 auto 14px" }}>
-              Reach thousands of Villages residents with your weekly deal or special offer.
-              Add the Deals of the Week feature to your V-Hub listing for just $10/month.
-            </div>
-            <a href="/ProviderHub" style={{ textDecoration: "none" }}>
-              <button style={{
-                background: `linear-gradient(180deg,#9A6030,${BROWN_BTN} 60%,#5A3010)`,
-                color: "#F5E8CC", border: `3px solid ${NAVY}`,
-                boxShadow: `0 0 0 1.5px ${NAVY}`,
-                borderRadius: 6, padding: "11px 28px",
-                fontSize: 13, fontWeight: 900, fontFamily: SERIF,
-                letterSpacing: 1, textTransform: "uppercase", cursor: "pointer",
-              }}>
-                Post Your Deal → Provider Hub
-              </button>
-            </a>
+        {/* ── Divider ── */}
+        <div style={{ margin: "32px 0 24px" }}>
+          <div style={{ borderTop: `3px double ${INK}` }} />
+        </div>
+
+        {/* ── CTA box ── */}
+        <div style={{
+          border: `2px solid ${INK}`, borderRadius: 2, padding: "20px 18px",
+          background: PAPER_MID, textAlign: "center",
+          boxShadow: "2px 2px 6px rgba(0,0,0,0.15)",
+        }}>
+          <div style={{ fontSize: 14, fontWeight: 900, letterSpacing: 2, textTransform: "uppercase", color: INK, fontFamily: SERIF, marginBottom: 8 }}>
+            Are You a Local Provider?
           </div>
-        )}
+          <div style={{ fontSize: 12, fontStyle: "italic", color: INK_FADE, fontFamily: SERIF, lineHeight: 1.8, marginBottom: 14 }}>
+            Reach thousands of Villages residents with your weekly deal or special offer.
+            Add the Deals of the Week feature to your V-Hub listing for just $10/week.
+          </div>
+          <a href="/ProviderDashboard" style={{ textDecoration: "none" }}>
+            <button style={{
+              background: `linear-gradient(180deg,#9A6030,${BROWN_BTN} 60%,#5A2F10)`,
+              border: `3px solid ${NAVY}`,
+              borderRadius: 4,
+              color: "#F5E8CC",
+              fontFamily: SANS,
+              fontWeight: 700,
+              fontSize: 13,
+              letterSpacing: 1,
+              textTransform: "uppercase",
+              padding: "12px 24px",
+              cursor: "pointer",
+              boxShadow: `0 0 0 1.5px ${NAVY}`,
+            }}>
+              Post Your Deal → Provider Hub
+            </button>
+          </a>
+        </div>
       </div>
     </div>
   );
