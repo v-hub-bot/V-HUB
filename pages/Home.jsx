@@ -1227,6 +1227,8 @@ export default function Home() {
       // ── STATUS GATES ────────────────────────────────────────────────────
       if (!p.is_active)           exclusionReasons.push("inactive");
       if (p.is_visible === false)  exclusionReasons.push("not_visible");
+      const subStatus = (p.subscription_status || "").toLowerCase();
+      if (subStatus === "cancelled" || subStatus === "expired") exclusionReasons.push("subscription_" + subStatus);
 
       if (exclusionReasons.length === 0) {
 

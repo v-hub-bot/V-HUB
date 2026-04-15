@@ -65,7 +65,7 @@ Deno.serve(async (req: Request) => {
       if (!provider_id || !new_password) return new Response(JSON.stringify({ error: "Missing provider_id or new_password" }), { status: 400, headers: CORS });
       if (new_password.length < 6) return new Response(JSON.stringify({ error: "Password must be at least 6 characters" }), { status: 400, headers: CORS });
       const hashed = await sha256(new_password);
-      const updated = await sr.entities.Provider.update(provider_id, { login_password: hashed, password_changed: true });
+      const updated = await sr.entities.Provider.update(provider_id, { login_password: hashed, password_changed: true, managed_by: "Self-Managed" });
       return new Response(JSON.stringify({ success: true, provider: sanitize(updated) }), { headers: CORS });
     }
 
