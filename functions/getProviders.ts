@@ -72,7 +72,7 @@ Deno.serve(async (req: Request) => {
       // ── PUBLIC LOOKUP DATA (categories, services, areas) ─────────────
       if (body?.get_lookup_data === true) {
         try {
-          const db = createClient({ appId: "69d062aca815ce8e697894b1" }).asServiceRole.entities;
+          const db = base44.asServiceRole.entities;
           const [cats, svcs, areas] = await Promise.all([
             db.Category.list().catch(() => []),
             db.Service.list().catch(() => []),

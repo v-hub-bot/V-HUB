@@ -1514,19 +1514,44 @@ export default function ProviderDashboard() {
       }
     }
 
-    // Load entity data for name resolution and edit pickers
-    Promise.all([
-      Category.list().catch(() => []),
-      Service.list().catch(() => []),
-      ServiceArea.list().catch(() => []),
-    ]).then(([cats, svcs, areas]) => {
-      setDbCategories(cats || []);
-      setDbServices(svcs || []);
+    // Load entity data via backend (works without auth)
+    fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/getProviders", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ get_lookup_data: true }),
+    })
+    .then(r => r.json())
+    .then(({ categories, services, areas }) => {
+      setDbCategories(categories || []);
+      setDbServices(services || []);
       setDbAreas(areas || []);
-      const sm = {}; (svcs || []).forEach(s => { sm[s.id] = s.name; });
+      const sm = {};
+      (services || []).forEach(s => { sm[s.id] = s.name; });
       setSvcMap(sm);
-      const am = {}; (areas || []).forEach(a => { am[a.id] = a.name; });
+      const am = {};
+      (areas || []).forEach(a => {
+        am[a.id] = a.name.includes(" — ") ? a.name.split(" — ").pop().trim() : a.name;
+      });
       setAreaMap(am);
+    })
+    .catch(() => {
+      // Fallback: try direct entity fetch (may fail if unauthenticated)
+      Promise.all([
+        Category.list().catch(() => []),
+        Service.list().catch(() => []),
+        ServiceArea.list().catch(() => []),
+      ]).then(([cats, svcs, areas]) => {
+        setDbCategories(cats || []);
+        setDbServices(svcs || []);
+        setDbAreas(areas || []);
+        const sm = {}; (svcs || []).forEach(s => { sm[s.id] = s.name; });
+        setSvcMap(sm);
+        const am = {};
+        (areas || []).forEach(a => {
+          am[a.id] = a.name.includes(" — ") ? a.name.split(" — ").pop().trim() : a.name;
+        });
+        setAreaMap(am);
+      });
     });
   }, []);
 
