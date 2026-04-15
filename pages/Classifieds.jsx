@@ -342,7 +342,7 @@ export default function Classifieds() {
         }}>
           <span style={{ fontSize: 10, color: INK_FADE, fontFamily: SERIF, fontStyle: "italic" }}>{today}</span>
           <span style={{ fontSize: 10, color: INK_FADE, fontFamily: SANS, fontWeight: 700, letterSpacing: 1, textTransform: "uppercase" }}>The Villages, FL</span>
-          <span style={{ fontSize: 10, color: INK_FADE, fontFamily: SERIF, fontStyle: "italic" }}>Deals of the Week</span>
+          <span style={{ fontSize: 10, color: INK_FADE, fontFamily: SERIF, fontStyle: "italic" }}>Classifieds</span>
         </div>
 
         {/* Logo row */}
@@ -374,7 +374,7 @@ export default function Classifieds() {
         {/* Section nameplate */}
         <div style={{ textAlign: "center", padding: "4px 14px 4px", borderTop: `1px solid ${PAPER_DK}` }}>
           <div style={{ fontSize: 22, fontWeight: 900, letterSpacing: 3, textTransform: "uppercase", color: INK, fontFamily: SERIF }}>
-            🏷️ Deals of the Week
+            📰 Classifieds
           </div>
           <div style={{ fontSize: 11, fontStyle: "italic", color: INK_FADE, marginTop: 2, fontFamily: SERIF }}>
             Exclusive deals & discounts from local service providers in The Villages
@@ -542,7 +542,7 @@ export default function Classifieds() {
           </div>
           <div style={{ fontSize: 12, fontStyle: "italic", color: INK_FADE, fontFamily: SERIF, lineHeight: 1.8, marginBottom: 14 }}>
             Reach thousands of Villages residents with your weekly deal or special offer.
-            Add the Deals of the Week feature to your V-Hub listing for just $10/week.
+            Add your Classifieds ad to your V-Hub listing for just $10/week.
           </div>
           <a href="/ProviderDashboard" style={{ textDecoration: "none" }}>
             <button style={{
