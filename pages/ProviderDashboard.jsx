@@ -40,8 +40,8 @@ function fmt(d) {
   if (!d) return "—";
   return new Date(d).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
 }
-function resolveSvc(id, svcMap) { return svcMap[id] || LEGACY_SVC[id] || id; }
-function resolveArea(id, areaMap) { return areaMap[id] || LEGACY_AREA[id] || id; }
+function resolveSvc(id, svcMap) { return svcMap[id] || LEGACY_SVC[id] || ""; }
+function resolveArea(id, areaMap) { return areaMap[id] || LEGACY_AREA[id] || ""; }
 
 const inS = {
   width: "100%", boxSizing: "border-box", background: PAPER,
@@ -359,7 +359,8 @@ function VillageSelect({ selAreas, setSelAreas, dbAreas }) {
         <div style={{ display: "flex", flexWrap: "wrap", gap: 5, marginBottom: 10 }}>
           {selAreas.map(id => {
             const area = (dbAreas || []).find(a => a.id === id);
-            const name = area ? (area.name.includes(' — ') ? area.name.split(' — ').pop().trim() : area.name) : (isLegacyName(id) ? id : id);
+            const legAreaName = LEGACY_AREA[id] || null;
+            const name = area ? (area.name.includes(' — ') ? area.name.split(' — ').pop().trim() : area.name) : (legAreaName || "Unknown Village");
             return (
               <span key={id} onClick={() => setSelAreas(prev => prev.filter(a => a !== id))}
                 style={{ fontSize: 12, background: TEAL, color: "#fff", borderRadius: 20, padding: "4px 11px", cursor: "pointer", fontFamily: SANS }}>

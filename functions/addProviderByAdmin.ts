@@ -52,11 +52,12 @@ async function resolveNames(base44: any, ids: string[], entityName: string, lega
     const all = await base44.asServiceRole.entities[entityName].list();
     const map = new Map(all.map((r: any) => [r.id, r.name]));
     return (ids || []).map((id: string) => {
-      const raw = (map.get(id) || legacyMap[id] || id) as string;
+      const raw = (map.get(id) || legacyMap[id] || null) as string | null;
+      if (!raw) return null;
       return raw.includes(' — ') ? raw.split(' — ').pop()!.trim() : raw;
-    }).filter(Boolean);
+    }).filter(Boolean) as string[];
   } catch {
-    return (ids || []).map((id: string) => legacyMap[id] || id).filter(Boolean);
+    return (ids || []).map((id: string) => legacyMap[id] || null).filter(Boolean) as string[];
   }
 }
 

@@ -167,7 +167,7 @@ function ProvidersTab({ providers, setProviders, catMap, svcMap, areaMap, fullSv
   const [setPassMsg, setSetPassMsg] = useState("");
 
   // Resolve a value that might be an ID or text
-  const resolveName = (val, map) => (fullSvcMap[val] || fullAreaMap[val] || map[val] || val);
+  const resolveName = (val, map) => (fullSvcMap[val] || fullAreaMap[val] || map[val] || "");
 
   const filtered = providers.filter(p => {
     const q = search.toLowerCase();
@@ -938,7 +938,7 @@ function AnalyticsTab({ providers, reviews, leads, stats, catMap, svcMap, fullSv
   const months = Object.entries(byMonth).sort((a, b) => a[0].localeCompare(b[0]));
   const maxM = Math.max(...months.map(m => m[1]), 1);
   const subMap2 = {}; providers.forEach(p => { const s = p.subscription_status || "unknown"; subMap2[s] = (subMap2[s] || 0) + 1; });
-  const svcCount = {}; providers.forEach(p => (Array.isArray(p.services) ? p.services : []).forEach(s => { const n = fullSvcMap[s] || svcMap[s] || s; svcCount[n] = (svcCount[n] || 0) + 1; }));
+  const svcCount = {}; providers.forEach(p => (Array.isArray(p.services) ? p.services : []).forEach(s => { const n = fullSvcMap[s] || svcMap[s] || ""; svcCount[n] = (svcCount[n] || 0) + 1; }));
   const topSvcs = Object.entries(svcCount).sort((a, b) => b[1] - a[1]).slice(0, 10);
   const maxS = Math.max(...topSvcs.map(s => s[1]), 1);
   const avgRating = reviews.length > 0 ? (reviews.reduce((s, r) => s + (r.rating || 0), 0) / reviews.length).toFixed(1) : "—";
