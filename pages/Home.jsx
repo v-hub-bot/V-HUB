@@ -53,59 +53,59 @@ const NAVY      = "#1B3D6F";
 const NEWSPAPER_CONTENT = {
   neighborhoodWatch: {
     headline: "LOCAL SERVICES ON THE RISE",
-    subhead: "Demand surges as Villages community expands southward",
+    subhead: "Demand surges as the community expands southward",
     body: [
-      "Residents across The Villages report record demand for trusted local service providers this season. From landscaping crews working Eastport to home repair specialists fielding calls from Brownwood to Spanish Springs, the marketplace has never been more active.",
-      "Community leaders say growth reflects the Villages' continued expansion. ‘We need reliable, vetted professionals who understand our lifestyle,’ said one resident near Lake Sumter Landing.",
+      "Residents report record demand for trusted local service providers. From landscaping crews in Eastport to home repair specialists in Spanish Springs, the marketplace has never been more active.",
+      "Lawn care, pest control, and handyman services top the search charts each spring, with new providers joining V-Hub every week.",
     ]
   },
-  providerSpotlight: {
-    headline: "TRUSTED NAMES, LOCAL ROOTS",
-    subhead: "Established providers bring decades of expertise to your door",
+  growthStory: {
+    headline: "COMMUNITY PULSE",
+    subhead: "What neighbors are searching for this season",
     body: [
-      "Many of The Villages’ most beloved service providers have called this community home for over a decade. From family-owned landscaping operations to skilled tradespeople who know every neighborhood by name, local expertise makes all the difference.",
-      "V-Hub reviews every listing before it goes live. Browse home repair, landscaping, pet care, tech help, cleaning, transportation, and more — contact providers directly, no fees, no middlemen.",
+      "Spring means pool openings, golf cart tune-ups, and patio projects. Residents turn to V-Hub to find trusted local professionals before the summer heat sets in.",
+      "New to The Villages? Hundreds of families arrive each month. V-Hub helps newcomers find reliable providers fast — no word-of-mouth required.",
     ]
   },
   howItWorks: {
     headline: "FIND YOUR PROVIDER IN SECONDS",
-    subhead: "Search by service, then by your village — results appear instantly",
+    subhead: "Search by service and village — results appear instantly",
     body: [
-      "Select the service you need, then pick your village. Hit Find Services and see every matching provider who serves your area — directly, with no middleman.",
+      "Select the service you need, pick your village, and hit Find Services. Every matching provider who serves your area appears — no middleman, no fees.",
     ]
   },
-  growthStory: {
-    headline: "VILLAGES ECONOMY THRIVES",
-    subhead: "Small businesses flourish as new residents arrive weekly",
+  homeServices: {
+    headline: "SERVICES FOR EVERY HOME",
+    subhead: "Trusted pros serve every neighborhood",
     body: [
-      "The Villages remains one of Florida’s fastest-growing communities, drawing hundreds of new residents every month. V-Hub was built specifically for this community — no national spam, no out-of-area listings, just real neighbors helping real neighbors.",
-      "The directory lists providers across more than a dozen service categories, with new businesses joining every week. Whether you need a one-time repair or a recurring weekly service, V-Hub has you covered.",
+      "Whether you need a faucet fixed, windows replaced, or your lawn trimmed, V-Hub connects you with vetted local professionals across every village.",
+      "Residents can leave reviews and help their neighbors make informed choices.",
+    ]
+  },
+  providerSpotlight: {
+    headline: "TRUSTED NAMES, LOCAL ROOTS",
+    subhead: "Established providers bring years of local expertise",
+    body: [
+      "Many of The Villages' most beloved providers have served this community for over a decade — from family-owned landscaping businesses to tradespeople who know every neighborhood by name.",
+      "V-Hub reviews every listing before it goes live. Browse categories, read reviews, and contact providers directly.",
     ]
   },
   classifieds: {
     headline: "COMMUNITY SPOTLIGHT",
-    subhead: "Local service highlights from across The Villages",
+    subhead: "Service highlights from across The Villages",
     body: [
-      "HOME SERVICES — Handyman repairs, renovations, landscaping, pool care, and pest control from trusted local professionals.",
-      "PET CARE — Dog walkers, groomers, sitters, and vet services throughout The Villages.",
-      "TECH HELP — Senior-friendly smartphone, tablet, and Wi-Fi support — patient pros who come to you.",
-      "PERSONAL CARE — Hair, nails, massage, and wellness professionals who visit your home.",
+      "HOME SERVICES — Handyman, landscaping, pool care, and pest control.",
+      "PET CARE — Dog walkers, groomers, sitters, and vet services.",
+      "TECH HELP — Senior-friendly phone, tablet, and Wi-Fi support.",
+      "PERSONAL CARE — Hair, nails, massage, and wellness at your door.",
     ]
   },
   safetyTrust: {
     headline: "YOUR SAFETY, OUR PRIORITY",
     subhead: "Every listing is reviewed before going live",
     body: [
-      "Every business on V-Hub is reviewed before appearing in results. We monitor resident feedback to keep quality high.",
-      "Have a concern? Contact admin@v-hub.us — our team reviews every submission and acts quickly.",
-    ]
-  },
-  homeServices: {
-    headline: "HOME SERVICES AT YOUR DOOR",
-    subhead: "Trusted pros serve every village",
-    body: [
-      "Whether you need a leaky faucet fixed, windows replaced, or your lawn trimmed, V-Hub connects you with local professionals across every neighborhood.",
-      "Every provider is geo-specific to The Villages. Residents can leave reviews and help their neighbors make informed choices.",
+      "Every business on V-Hub is reviewed before appearing in results. Resident feedback keeps quality high.",
+      "Questions? Contact admin@v-hub.us — our team responds quickly.",
     ]
   },
 }
@@ -1530,33 +1530,20 @@ export default function Home() {
 
           {/* ── LEFT COLUMN ── */}
           <div className="np-side-left np-col">
-            {/* Story 1 */}
             <p style={hd}>{NEWSPAPER_CONTENT.neighborhoodWatch.headline}</p>
             <p style={sub}>{NEWSPAPER_CONTENT.neighborhoodWatch.subhead}</p>
             {NEWSPAPER_CONTENT.neighborhoodWatch.body.map((p,i) => <p key={i} style={para}>{p}</p>)}
             <div style={rule} />
-            {/* Story 2 */}
             <p style={hd}>{NEWSPAPER_CONTENT.growthStory.headline}</p>
             <p style={sub}>{NEWSPAPER_CONTENT.growthStory.subhead}</p>
             {NEWSPAPER_CONTENT.growthStory.body.map((p,i) => <p key={i} style={para}>{p}</p>)}
-            <div style={rule} />
-            {/* Story 3 — Community Pulse */}
-            <p style={hd}>COMMUNITY PULSE</p>
-            <p style={sub}>What neighbors are searching for this season</p>
-            <p style={para}>Spring in The Villages means busy schedules — pool openings, golf cart tune-ups, landscaping refreshes, and patio projects. Residents are turning to V-Hub in record numbers to find trusted local professionals before the summer heat sets in.</p>
-            <p style={para}>Lawn care and pest control top the search charts each April, followed closely by house cleaning and handyman services. Golf cart repair and detailing has also seen a sharp seasonal uptick as residents prep for the warmer months ahead.</p>
-            <p style={para}>New to The Villages? You're not alone — hundreds of families move in each month. V-Hub's directory is designed to help newcomers find reliable service providers fast, without relying on word-of-mouth alone.</p>
-            <p style={para}>Search by village, browse by category, or scroll the full directory. Every provider on V-Hub is local, every listing is reviewed, and searching is always free for residents.</p>
           </div>
 
           {/* ── CENTER COLUMN ── */}
           <div className="np-center">
-            {/* Story above search — visible on mobile too */}
             <p style={hd}>{NEWSPAPER_CONTENT.howItWorks.headline}</p>
             <p style={sub}>{NEWSPAPER_CONTENT.howItWorks.subhead}</p>
             {NEWSPAPER_CONTENT.howItWorks.body.map((p,i) => <p key={i} style={{...para, marginBottom: 10}}>{p}</p>)}
-
-            {/* Story below search */}
             <div style={{ marginTop: 12 }}>
               <p style={hd}>{NEWSPAPER_CONTENT.homeServices.headline}</p>
               <p style={sub}>{NEWSPAPER_CONTENT.homeServices.subhead}</p>
@@ -1566,17 +1553,14 @@ export default function Home() {
 
           {/* ── RIGHT COLUMN ── */}
           <div className="np-side-right np-col">
-            {/* Story 1 */}
             <p style={hd}>{NEWSPAPER_CONTENT.providerSpotlight.headline}</p>
             <p style={sub}>{NEWSPAPER_CONTENT.providerSpotlight.subhead}</p>
             {NEWSPAPER_CONTENT.providerSpotlight.body.map((p,i) => <p key={i} style={para}>{p}</p>)}
             <div style={rule} />
-            {/* Classifieds */}
             <p style={hd}>{NEWSPAPER_CONTENT.classifieds.headline}</p>
             <p style={sub}>{NEWSPAPER_CONTENT.classifieds.subhead}</p>
             {NEWSPAPER_CONTENT.classifieds.body.map((p,i) => <p key={i} style={{...para, borderBottom: `1px dotted ${PAPER_DK}`, paddingBottom: 5}}>{p}</p>)}
             <div style={rule} />
-            {/* Safety & Trust */}
             <p style={hd}>{NEWSPAPER_CONTENT.safetyTrust.headline}</p>
             <p style={sub}>{NEWSPAPER_CONTENT.safetyTrust.subhead}</p>
             {NEWSPAPER_CONTENT.safetyTrust.body.map((p,i) => <p key={i} style={para}>{p}</p>)}
@@ -1591,16 +1575,14 @@ export default function Home() {
           <div>
             <p style={hd}>ABOUT THE VILLAGES</p>
             <p style={sub}>Florida's premier active adult community</p>
-            <p style={para}>The Villages is home to more than 80,000 residents and spans three counties — Sumter, Lake, and Marion. With 97 distinct villages, three vibrant town squares, and hundreds of clubs and activities, it is one of the most dynamic communities in the United States.</p>
-            <p style={para}>From the historic charm of Spanish Springs to the waterfront energy of Brownwood Paddock Square and the family-friendly streets of the newer Eastport district, every corner of The Villages has its own character — and its own service needs.</p>
-            <p style={para}>V-Hub was designed to serve all of them equally. Whether you live in a cottage near Lake Sumter Landing or a newer home in Fenney, you deserve fast, reliable access to trusted local professionals.</p>
+            <p style={para}>The Villages spans three counties — Sumter, Lake, and Marion — with more than 80,000 residents, 97 distinct villages, and three vibrant town squares. It is one of the most dynamic communities in the United States.</p>
+            <p style={para}>From Spanish Springs to Brownwood to the newest streets of Eastport, every corner of The Villages has its own character — and its own service needs. V-Hub serves all of them.</p>
           </div>
           <div>
-            <p style={hd}>HOW V-HUB WORKS FOR PROVIDERS</p>
-            <p style={sub}>Reach the exact neighborhoods you serve</p>
-            <p style={para}>Listing your business on V-Hub puts you directly in front of Villages residents searching for the services you offer. No cold calls, no wasted advertising — just direct connections with neighbors who need exactly what you do.</p>
-            <p style={para}>Providers choose which villages they serve, which categories they appear under, and what their profile says. Your listing is always in your control — you choose the services and villages you serve, and your profile is editable anytime.</p>
-            <p style={para}>Providers across The Villages are already listed and being found by residents every day. Click List Your Service above to get started — it only takes a few minutes to create your profile.</p>
+            <p style={hd}>LIST YOUR SERVICE</p>
+            <p style={sub}>Reach residents searching for exactly what you offer</p>
+            <p style={para}>Listing on V-Hub puts your business directly in front of Villages residents. Choose which villages and categories you appear under — your profile is always in your control and editable anytime.</p>
+            <p style={para}>Providers across The Villages are already being found every day. Start your 45-day trial above — takes just a few minutes.</p>
           </div>
         </div>
 
