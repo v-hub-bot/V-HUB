@@ -1,7 +1,7 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
 
 const SENDGRID_API_KEY = Deno.env.get('SENDGRID_API_KEY') || '';
-const APP_URL = "https://v-hub-app-edf7f8e8.base44.app";
+const APP_URL = "https://www.v-hub.us";
 const LOGO_URL = "https://media.base44.com/images/public/69d062aca815ce8e697894b1/a9af95bc3_V-Hublogo.png";
 
 const CORS = {

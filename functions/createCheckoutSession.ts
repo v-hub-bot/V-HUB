@@ -21,7 +21,7 @@ Deno.serve(async (req) => {
 
     const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY")!, { apiVersion: "2023-10-16" });
     const base44 = createClientFromRequest(req);
-    const appUrl = "https://v-hub-app-edf7f8e8.base44.app";
+    const appUrl = "https://www.v-hub.us";
 
     // ── Look up the provider's existing trial_end_date from the DB ──────
     // We want Stripe's trial to end exactly when V-Hub's trial ends.

@@ -116,7 +116,7 @@ Deno.serve(async (req) => {
             <div style="font-size: 14px; color: #333; margin-top: 6px;">💰 After trial: <strong>$12/month</strong> to stay listed</div>
           </div>
           <div style="text-align: center; margin: 24px 0;">
-            <a href="https://v-hub-app-edf7f8e8.base44.app/ProviderDashboard" style="display: inline-block; background: #E8431A; color: #fff; text-decoration: none; padding: 14px 28px; border-radius: 8px; font-weight: 700; font-size: 15px; letter-spacing: 1px;">
+            <a href="https://www.v-hub.us/ProviderDashboard" style="display: inline-block; background: #E8431A; color: #fff; text-decoration: none; padding: 14px 28px; border-radius: 8px; font-weight: 700; font-size: 15px; letter-spacing: 1px;">
               Go to Your Provider Dashboard →
             </a>
           </div>
@@ -138,7 +138,7 @@ Deno.serve(async (req) => {
       <b>Email:</b> ${me.email}<br/>
       <b>VH #:</b> ${vh_number}<br/>
       <br/>
-      <a href="https://v-hub-app-edf7f8e8.base44.app/Admin" style="background:#E8431A;color:#fff;padding:10px 20px;border-radius:6px;text-decoration:none;font-weight:700;">Review in Admin Dashboard</a>
+      <a href="https://www.v-hub.us/Admin" style="background:#E8431A;color:#fff;padding:10px 20px;border-radius:6px;text-decoration:none;font-weight:700;">Review in Admin Dashboard</a>
     </div>`;
     await sendEmail('admin@v-hub.us', `📋 New Self-Signup: ${business_name}`, adminHtml);
 

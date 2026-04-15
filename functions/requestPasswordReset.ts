@@ -1,7 +1,7 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.23';
 
 const SENDGRID_API_KEY = Deno.env.get('SENDGRID_API_KEY') || '';
-const APP_URL = 'https://v-hub-app-edf7f8e8.base44.app';
+const APP_URL = 'https://www.v-hub.us';
 
 async function sha256(plain: string): Promise<string> {
   const enc = new TextEncoder();

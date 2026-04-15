@@ -12,7 +12,7 @@ Deno.serve(async (req) => {
   try {
     const { provider_record_id, provider_email, provider_name } = await req.json();
     const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY")!, { apiVersion: "2023-10-16" });
-    const appUrl = "https://v-hub-app-edf7f8e8.base44.app";
+    const appUrl = "https://www.v-hub.us";
 
     // Calculate 1 week from now for display purposes
     const weekEnd = new Date();

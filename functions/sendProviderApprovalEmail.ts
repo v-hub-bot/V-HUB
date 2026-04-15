@@ -30,7 +30,7 @@ Deno.serve(async (req) => {
       vh_number,
     } = body;
 
-    const dashboardUrl = "https://v-hub-app-edf7f8e8.base44.app/ProviderDashboard";
+    const dashboardUrl = "https://www.v-hub.us/ProviderDashboard";
 
     const htmlContent = `
       <div style="font-family: Georgia, serif; max-width: 600px; margin: 0 auto; background: #F5E8CC; border: 2px solid #8B4513; border-radius: 12px; overflow: hidden;">

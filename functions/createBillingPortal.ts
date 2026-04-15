@@ -32,7 +32,7 @@ Deno.serve(async (req: Request) => {
 
     const session = await stripe.billingPortal.sessions.create({
       customer: provider.stripe_customer_id,
-      return_url: `https://v-hub-app-edf7f8e8.base44.app/ProviderDashboard?payment=portal_return&acct=${provider_id}`,
+      return_url: `https://www.v-hub.us/ProviderDashboard?payment=portal_return&acct=${provider_id}`,
     });
 
     return Response.json({ url: session.url }, { headers: CORS });

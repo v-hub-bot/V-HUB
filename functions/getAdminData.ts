@@ -1,12 +1,12 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.23';
 
-const ALLOWED_ORIGIN = "https://v-hub-app-edf7f8e8.base44.app";
+const ALLOWED_ORIGINS = ["https://www.v-hub.us", "https://v-hub-app-edf7f8e8.base44.app"];
 
 function getCorsHeaders(req: Request) {
   const origin = req.headers.get("origin") || "";
-  const allowed = origin === ALLOWED_ORIGIN || origin === "";
+  const allowed = ALLOWED_ORIGINS.includes(origin) || origin === "";
   return {
-    "Access-Control-Allow-Origin": allowed ? origin || ALLOWED_ORIGIN : "null",
+    "Access-Control-Allow-Origin": allowed ? origin || ALLOWED_ORIGINS[0] : "null",
     "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type, Authorization",
     "Vary": "Origin",
