@@ -536,12 +536,19 @@ function ForcePasswordChangeScreen({ provider, onComplete }) {
     if (newPass !== newPass2) { setError("Passwords do not match — please try again."); return; }
     setSaving(true);
     try {
-      const hashed = await hashPassword(newPass);
-      await Provider.update(provider.id, {
-        login_password: hashed,
-        password_changed: true,
+      // Use backend function — works for unauthenticated visitors
+      const res = await fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/providerLogin", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "save_password", provider_id: provider.id, new_password: newPass }),
       });
-      const fresh = { ...provider, login_password: hashed, password_changed: true };
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        setError(data.error || "Something went wrong. Please try again.");
+        setSaving(false);
+        return;
+      }
+      const fresh = { ...provider, ...data.provider, login_password: undefined };
       onComplete(fresh);
     } catch (err) {
       console.error(err);
@@ -1596,13 +1603,19 @@ export default function ProviderDashboard() {
     try {
       const ALLOWED = ["business_name","owner_name","phone","email","website","description","address",
         "years_in_business","license_number","google_review_url","is_mobile","hours_of_operation","google_rating"];
-      const updates = {};
-      for (const k of ALLOWED) { if (k in form) updates[k] = form[k]; }
-      updates.services = selSvcs;
-      updates.service_areas = selAreas;
-      const updated = await Provider.update(provider.id, updates);
-      setProvider(updated);
-      seedForm(updated);
+      const fields = {};
+      for (const k of ALLOWED) { if (k in form) fields[k] = form[k]; }
+      fields.services = selSvcs;
+      fields.service_areas = selAreas;
+      const res = await fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/providerLogin", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "save_profile", provider_id: provider.id, vh_number: provider.vh_number, fields }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) { setSaveMsg("⚠ " + (data.error || "Error saving.")); setSaving(false); return; }
+      setProvider(data.provider);
+      seedForm(data.provider);
       setSaveMsg("✓ Profile updated successfully!");
       setTimeout(() => { setSaveMsg(""); setView("dashboard"); }, 2000);
     } catch (err) { setSaveMsg("⚠ Error saving. Please try again."); console.error(err); }
@@ -1619,13 +1632,24 @@ export default function ProviderDashboard() {
     const newEmail = newLoginEmail.trim().toLowerCase();
     const emailChanged = oldEmail && newEmail && oldEmail !== newEmail;
 
-    const updates = { login_email: newEmail };
-    if (newPass) {
-      updates.login_password = await hashPassword(newPass);
-      updates.password_changed = true;
-    }
     try {
-      const fresh = await Provider.update(provider.id, updates);
+      // Use backend function for account-level updates (password/email)
+      const payload = {
+        provider_id: provider.id,
+        new_login_email: newEmail,
+      };
+      if (newPass) {
+        payload.new_password = newPass;
+        payload.password_changed = true;
+      }
+      const res = await fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/providerLogin", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "save_account", ...payload }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) { setAccMsg("⚠ " + (data.error || "Error updating.")); return; }
+      const fresh = data.provider || provider;
       setProvider(fresh);
       sessionStorage.setItem("vhub_provider_id", fresh.id);
       setNewPass(""); setNewPass2("");

@@ -1,5 +1,5 @@
 // providerUpdateProfile — secure self-service update for provider hub sessions
-// v4 - added password change and password_changed flag support
+// v5 - all modes work without Base44 user auth (service role throughout) [1776267137]
 import { createClient } from "npm:@base44/sdk@0.8.25";
 
 const CORS_HEADERS = {
@@ -29,6 +29,15 @@ function getInvalidIds(ids: unknown): string[] {
   return ids.filter((id: unknown) => !isValidDbId(String(id))).map(String);
 }
 
+function sanitize(p: Record<string, unknown>): Record<string, unknown> {
+  const safe = { ...p };
+  delete safe.login_password;
+  delete safe.notes;
+  delete safe.stripe_customer_id;
+  delete safe.stripe_subscription_id;
+  return safe;
+}
+
 const base44 = createClient({ appId: "69d062aca815ce8e697894b1" });
 const sr = base44.asServiceRole;
 
@@ -41,45 +50,67 @@ Deno.serve(async (req: Request) => {
     return new Response(JSON.stringify({ error: "Invalid JSON" }), { status: 400, headers: CORS_HEADERS });
   }
 
-  const provider_id   = body.provider_id   as string | undefined;
-  const new_password  = body.new_password  as string | undefined;
+  const provider_id      = (body.provider_id      as string || "").trim();
+  const new_password     = (body.new_password     as string || "").trim();
+  const new_login_email  = (body.new_login_email  as string || "").trim().toLowerCase();
   const password_changed = body.password_changed as boolean | undefined;
+  const vh_number        = (body.vh_number        as string || "").trim();
+  const fields           = body.fields as Record<string, unknown> | undefined;
 
-  // ── PASSWORD CHANGE MODE (force change on first login) ────────────────
-  if (provider_id && new_password && password_changed === true) {
+  if (!provider_id) {
+    return new Response(JSON.stringify({ error: "Missing provider_id" }), { status: 400, headers: CORS_HEADERS });
+  }
+
+  // Fetch existing provider (needed for all modes)
+  let existing: Record<string, unknown> | null = null;
+  try { existing = await sr.entities.Provider.get(provider_id); } catch { /* not found */ }
+  if (!existing) {
+    return new Response(JSON.stringify({ error: "Provider not found" }), { status: 404, headers: CORS_HEADERS });
+  }
+
+  // ── MODE 1: FORCE PASSWORD CHANGE (first login for admin-added accounts) ──
+  if (new_password && password_changed === true && !new_login_email && !fields) {
     if (new_password.length < 6) {
       return new Response(JSON.stringify({ error: "Password must be at least 6 characters" }), { status: 400, headers: CORS_HEADERS });
     }
     try {
-      let existing: Record<string, unknown> | null = null;
-      try { existing = await sr.entities.Provider.get(provider_id); } catch { /* not found */ }
-      if (!existing) return new Response(JSON.stringify({ error: "Provider not found" }), { status: 404, headers: CORS_HEADERS });
-
       const hashed = await sha256hex(new_password);
       const updated = await sr.entities.Provider.update(provider_id, {
         login_password: hashed,
         password_changed: true,
       });
-      return new Response(JSON.stringify({ success: true, provider: updated }), { headers: CORS_HEADERS });
+      return new Response(JSON.stringify({ success: true, provider: sanitize(updated) }), { headers: CORS_HEADERS });
     } catch (e: unknown) {
       const msg = (e instanceof Error) ? e.message : "Password update failed";
       return new Response(JSON.stringify({ error: msg }), { status: 500, headers: CORS_HEADERS });
     }
   }
 
-  // ── PROFILE UPDATE MODE ───────────────────────────────────────────────
-  const vh_number = body.vh_number as string | undefined;
-  const fields    = body.fields    as Record<string, unknown> | undefined;
+  // ── MODE 2: ACCOUNT SETTINGS UPDATE (email + optional password change) ──
+  if (new_login_email && !fields) {
+    const updates: Record<string, unknown> = { login_email: new_login_email };
+    if (new_password && new_password.length >= 6) {
+      updates.login_password = await sha256hex(new_password);
+      updates.password_changed = true;
+    }
+    try {
+      const updated = await sr.entities.Provider.update(provider_id, updates);
+      return new Response(JSON.stringify({ success: true, provider: sanitize(updated) }), { headers: CORS_HEADERS });
+    } catch (e: unknown) {
+      const msg = (e instanceof Error) ? e.message : "Account update failed";
+      return new Response(JSON.stringify({ error: msg }), { status: 500, headers: CORS_HEADERS });
+    }
+  }
 
-  if (!provider_id || !vh_number || !fields) {
-    return new Response(JSON.stringify({ error: "Missing provider_id, vh_number, or fields" }), { status: 400, headers: CORS_HEADERS });
+  // ── MODE 3: PROFILE UPDATE (business info, services, villages) ──────────
+  if (!vh_number || !fields) {
+    return new Response(JSON.stringify({ error: "Missing vh_number or fields" }), { status: 400, headers: CORS_HEADERS });
   }
 
   // Auth: confirm provider_id + vh_number match
-  let existing: Record<string, unknown> | null = null;
-  try { existing = await sr.entities.Provider.get(provider_id); } catch { /* not found */ }
-  if (!existing) return new Response(JSON.stringify({ error: "Provider not found" }), { status: 404, headers: CORS_HEADERS });
-  if (existing.vh_number !== vh_number) return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: CORS_HEADERS });
+  if (existing.vh_number !== vh_number) {
+    return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: CORS_HEADERS });
+  }
 
   const ALLOWED = [
     "business_name", "owner_name", "phone", "email", "website",
@@ -90,12 +121,6 @@ Deno.serve(async (req: Request) => {
   const safe: Record<string, unknown> = {};
   for (const k of ALLOWED) {
     if (k in fields) safe[k] = fields[k];
-  }
-
-  // Handle password change via profile update too
-  if (fields.new_password && typeof fields.new_password === 'string' && (fields.new_password as string).length >= 6) {
-    safe.login_password = await sha256hex(fields.new_password as string);
-    safe.password_changed = true;
   }
 
   if ('services' in safe) {
@@ -120,7 +145,7 @@ Deno.serve(async (req: Request) => {
 
   try {
     const updated = await sr.entities.Provider.update(provider_id, safe);
-    return new Response(JSON.stringify({ success: true, provider: updated }), { headers: CORS_HEADERS });
+    return new Response(JSON.stringify({ success: true, provider: sanitize(updated) }), { headers: CORS_HEADERS });
   } catch (e: unknown) {
     const msg = (e instanceof Error) ? e.message : "Update failed";
     console.error("providerUpdateProfile error:", msg);

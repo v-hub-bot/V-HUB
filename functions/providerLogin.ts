@@ -1,4 +1,4 @@
-// providerLogin v6 - handles login + session restore for unauthenticated visitors
+// providerLogin v7 - handles login, session restore, AND password/profile saves
 import { createClientFromRequest } from "npm:@base44/sdk@0.8.25";
 
 const CORS = {
@@ -22,6 +22,18 @@ function sanitize(p: Record<string, unknown>): Record<string, unknown> {
   return safe;
 }
 
+function isValidDbId(id: string): boolean {
+  return typeof id === 'string' && /^[0-9a-f]{24}$/.test(id);
+}
+function filterValidIds(ids: unknown): string[] {
+  if (!Array.isArray(ids)) return [];
+  return ids.filter((id: unknown) => isValidDbId(String(id))) as string[];
+}
+function getInvalidIds(ids: unknown): string[] {
+  if (!Array.isArray(ids)) return [];
+  return ids.filter((id: unknown) => !isValidDbId(String(id))).map(String);
+}
+
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: CORS });
   if (req.method !== "POST") return new Response("Method Not Allowed", { status: 405, headers: CORS });
@@ -35,18 +47,75 @@ Deno.serve(async (req: Request) => {
     const base44 = createClientFromRequest(req);
     const sr = base44.asServiceRole;
 
-    // ── Session restore mode ─────────────────────────────────────────────
-    const restoreId = (body.restore_id as string || "").trim();
-    if (restoreId) {
+    const action = (body.action as string || "").trim();
+
+    // ── SESSION RESTORE ──────────────────────────────────────────────────
+    if (action === "restore" || body.restore_id) {
+      const id = (body.restore_id as string || "").trim();
       let p: Record<string, unknown> | null = null;
-      try { p = await sr.entities.Provider.get(restoreId); } catch { p = null; }
-      if (p && p.id) {
-        return new Response(JSON.stringify({ success: true, provider: sanitize(p) }), { headers: CORS });
-      }
+      try { p = await sr.entities.Provider.get(id); } catch { p = null; }
+      if (p && p.id) return new Response(JSON.stringify({ success: true, provider: sanitize(p) }), { headers: CORS });
       return new Response(JSON.stringify({ error: "Session expired" }), { status: 401, headers: CORS });
     }
 
-    // ── Normal login mode ────────────────────────────────────────────────
+    // ── SAVE PASSWORD (force change or voluntary) ─────────────────────────
+    if (action === "save_password") {
+      const provider_id = (body.provider_id as string || "").trim();
+      const new_password = (body.new_password as string || "").trim();
+      if (!provider_id || !new_password) return new Response(JSON.stringify({ error: "Missing provider_id or new_password" }), { status: 400, headers: CORS });
+      if (new_password.length < 6) return new Response(JSON.stringify({ error: "Password must be at least 6 characters" }), { status: 400, headers: CORS });
+      const hashed = await sha256(new_password);
+      const updated = await sr.entities.Provider.update(provider_id, { login_password: hashed, password_changed: true });
+      return new Response(JSON.stringify({ success: true, provider: sanitize(updated) }), { headers: CORS });
+    }
+
+    // ── SAVE LOGIN EMAIL ──────────────────────────────────────────────────
+    if (action === "save_account") {
+      const provider_id     = (body.provider_id     as string || "").trim();
+      const new_login_email = (body.new_login_email as string || "").trim().toLowerCase();
+      const new_password    = (body.new_password    as string || "").trim();
+      if (!provider_id || !new_login_email) return new Response(JSON.stringify({ error: "Missing provider_id or new_login_email" }), { status: 400, headers: CORS });
+      const updates: Record<string, unknown> = { login_email: new_login_email };
+      if (new_password && new_password.length >= 6) {
+        updates.login_password = await sha256(new_password);
+        updates.password_changed = true;
+      }
+      const updated = await sr.entities.Provider.update(provider_id, updates);
+      return new Response(JSON.stringify({ success: true, provider: sanitize(updated) }), { headers: CORS });
+    }
+
+    // ── SAVE PROFILE ──────────────────────────────────────────────────────
+    if (action === "save_profile") {
+      const provider_id = (body.provider_id as string || "").trim();
+      const vh_number   = (body.vh_number   as string || "").trim();
+      const fields      = body.fields as Record<string, unknown> | undefined;
+      if (!provider_id || !vh_number || !fields) return new Response(JSON.stringify({ error: "Missing provider_id, vh_number, or fields" }), { status: 400, headers: CORS });
+
+      const existing = await sr.entities.Provider.get(provider_id);
+      if (!existing) return new Response(JSON.stringify({ error: "Provider not found" }), { status: 404, headers: CORS });
+      if (existing.vh_number !== vh_number) return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: CORS });
+
+      const ALLOWED = ["business_name","owner_name","phone","email","website","description","address","years_in_business","license_number","google_review_url","services","service_areas","is_mobile","hours_of_operation","google_rating"];
+      const safe: Record<string, unknown> = {};
+      for (const k of ALLOWED) { if (k in fields) safe[k] = fields[k]; }
+
+      if ('services' in safe) {
+        const inv = getInvalidIds(safe.services);
+        if (inv.length) return new Response(JSON.stringify({ error: `Invalid service IDs: ${inv.join(', ')}` }), { status: 400, headers: CORS });
+        safe.services = filterValidIds(safe.services);
+      }
+      if ('service_areas' in safe) {
+        const inv = getInvalidIds(safe.service_areas);
+        if (inv.length) return new Response(JSON.stringify({ error: `Invalid village IDs: ${inv.join(', ')}` }), { status: 400, headers: CORS });
+        safe.service_areas = filterValidIds(safe.service_areas);
+      }
+      if (!Object.keys(safe).length) return new Response(JSON.stringify({ error: "No updatable fields" }), { status: 400, headers: CORS });
+
+      const updated = await sr.entities.Provider.update(provider_id, safe);
+      return new Response(JSON.stringify({ success: true, provider: sanitize(updated) }), { headers: CORS });
+    }
+
+    // ── NORMAL LOGIN ──────────────────────────────────────────────────────
     const identifier = ((body.identifier as string) || "").trim();
     const password   = (body.password   as string) || "";
     if (!identifier || !password) {
@@ -54,7 +123,6 @@ Deno.serve(async (req: Request) => {
     }
 
     const isVH = /^vh-?\d{3,6}$/i.test(identifier);
-
     let rows: Record<string, unknown>[] = [];
     if (isVH) {
       const vhNorm = identifier.toUpperCase().replace(/^VH(\d)/, "VH-$1");
@@ -70,9 +138,7 @@ Deno.serve(async (req: Request) => {
       }
     }
 
-    if (!rows.length) {
-      return new Response(JSON.stringify({ error: "No account found. Try your email or VH number, or contact admin@v-hub.us" }), { status: 401, headers: CORS });
-    }
+    if (!rows.length) return new Response(JSON.stringify({ error: "No account found. Try your email or VH number, or contact admin@v-hub.us" }), { status: 401, headers: CORS });
 
     const hashed = await sha256(password);
     const match = rows.find(p => {
