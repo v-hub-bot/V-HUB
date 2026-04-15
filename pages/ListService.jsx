@@ -19,6 +19,7 @@ function useMeta({ title, description, keywords, ogTitle, ogDescription, ogImage
     // Open Graph
     setMeta("og:type", "website", true);
     setMeta("og:site_name", "V-Hub", true);
+    setMeta("og:url", canonical || "https://www.v-hub.us/", true);
     setMeta("og:title", ogTitle || title || "V-Hub | The Villages, FL Local Services", true);
     setMeta("og:description", ogDescription || description || "Find trusted local service providers in The Villages, Florida.", true);
     setMeta("og:image", ogImage || "https://media.base44.com/images/public/69d062aca815ce8e697894b1/a9af95bc3_V-Hublogo.png", true);
@@ -289,7 +290,7 @@ export default function ListService() {
     title: "List Your Business | V-Hub — The Villages, FL",
     description: "List your local service business on V-Hub and get discovered by Villages residents. Free listing review. No commissions — contact directly.",
     keywords: "list local business The Villages FL, V-Hub provider listing, Villages Florida directory, advertise services Villages",
-    canonical: "https://v-hub-app-edf7f8e8.base44.app/ListService",
+    canonical: "https://www.v-hub.us/ListService",
   });
 
   // Form state

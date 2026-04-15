@@ -17,10 +17,32 @@ function useMeta({ title, description, keywords, ogTitle, ogDescription, ogImage
     setMeta("description", description || "V-Hub connects The Villages, Florida residents with trusted local service providers. Search landscaping, home repair, pet care, transportation, and more.");
     setMeta("keywords", keywords || "The Villages Florida services, local service directory, home repair Villages FL, landscaping Villages Florida, V-Hub");
     setMeta("robots", "index, follow");
+
+    // Inject JSON-LD structured data for Google
+    let jsonLd = document.getElementById("vhub-jsonld");
+    if (!jsonLd) {
+      jsonLd = document.createElement("script");
+      jsonLd.id = "vhub-jsonld";
+      jsonLd.type = "application/ld+json";
+      document.head.appendChild(jsonLd);
+    }
+    jsonLd.textContent = JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "V-Hub",
+      "url": "https://www.v-hub.us/",
+      "description": "V-Hub connects The Villages, Florida residents with trusted local service providers.",
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": "https://www.v-hub.us/?q={search_term_string}",
+        "query-input": "required name=search_term_string"
+      }
+    });
     setMeta("viewport", "width=device-width, initial-scale=1.0, maximum-scale=1.0");
     // Open Graph
     setMeta("og:type", "website", true);
     setMeta("og:site_name", "V-Hub", true);
+    setMeta("og:url", canonical || "https://www.v-hub.us/", true);
     setMeta("og:title", ogTitle || title || "V-Hub | The Villages, FL Local Services", true);
     setMeta("og:description", ogDescription || description || "Find trusted local service providers in The Villages, Florida.", true);
     setMeta("og:image", ogImage || "https://media.base44.com/images/public/69d062aca815ce8e697894b1/a9af95bc3_V-Hublogo.png", true);
@@ -1329,7 +1351,7 @@ export default function Home() {
     ogTitle: "V-Hub — The Villages Local Services Directory",
     ogDescription: "Find local service providers across all 97 villages in The Villages, FL. No fees. No middlemen. Just neighbors serving neighbors.",
     ogImage: "https://media.base44.com/images/public/69d062aca815ce8e697894b1/f19aa517d_generated_image.png",
-    canonical: "https://v-hub-app-edf7f8e8.base44.app/",
+    canonical: "https://www.v-hub.us/",
   });
 
   // Newspaper typography

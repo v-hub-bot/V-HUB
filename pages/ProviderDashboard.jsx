@@ -3,7 +3,12 @@ import { Provider, ProviderReview, Service, ServiceArea, Category, ClassifiedAd,
 
 // ── SEO ───────────────────────────────────────────────────────────────────
 function useMeta(title) {
-  useEffect(() => { document.title = title || "Provider Hub | V-Hub"; }, [title]);
+  useEffect(() => {
+    document.title = title || "Provider Hub | V-Hub";
+    let el = document.querySelector('meta[name="robots"]');
+    if (!el) { el = document.createElement("meta"); el.name = "robots"; document.head.appendChild(el); }
+    el.content = "noindex, nofollow";
+  }, [title]);
 }
 
 // ── Design tokens ─────────────────────────────────────────────────────────
