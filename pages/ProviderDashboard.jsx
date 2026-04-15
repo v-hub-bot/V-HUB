@@ -495,28 +495,66 @@ function ResetPasswordScreen({ token, providerId, onSuccess }) {
 // ── FORCE PASSWORD CHANGE SCREEN (admin-added accounts, first login) ─────────
 // Uses requestPasswordReset (email-based) since it's the most reliable flow
 function ForcePasswordChangeScreen({ provider, onComplete }) {
-  const [sent, setSent]       = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [error, setError]     = useState("");
+  const [newPass, setNewPass]   = useState("");
+  const [newPass2, setNewPass2] = useState("");
+  const [showP1, setShowP1]     = useState(false);
+  const [showP2, setShowP2]     = useState(false);
+  const [saving, setSaving]     = useState(false);
+  const [error, setError]       = useState("");
+  const [copied, setCopied]     = useState(false);
 
-  // Auto-send the reset email as soon as this screen mounts
-  useEffect(() => {
-    const email = (provider.login_email || provider.email || "").trim().toLowerCase();
-    if (!email) { setError("No email on file. Contact admin@v-hub.us."); return; }
-    setLoading(true);
-    fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/requestPasswordReset", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email }),
-    })
-      .then(r => r.json())
-      .then(data => { if (data.error) setError(data.error); else setSent(true); })
-      .catch(() => setError("Could not send email. Contact admin@v-hub.us."))
-      .finally(() => setLoading(false));
-  }, []);
-
-  const provEmail = (provider.login_email || provider.email || "").toLowerCase();
   const firstName = (provider.owner_name || "").split(" ")[0] || "there";
+
+  // Determine what the temp password is to show it for reference
+  // We show it from context — the user just logged in with it
+  const tempPass = provider._tempPassDisplay || "";
+
+  const handleCopy = (text) => {
+    // Use a textarea to copy — most reliable cross-browser, preserves special chars
+    const el = document.createElement("textarea");
+    el.value = text;
+    el.setAttribute("readonly", "");
+    el.style.position = "absolute";
+    el.style.left = "-9999px";
+    document.body.appendChild(el);
+    el.select();
+    el.setSelectionRange(0, el.value.length);
+    try { document.execCommand("copy"); } catch (_) {}
+    document.body.removeChild(el);
+    // Also try navigator.clipboard
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(text).catch(() => {});
+    }
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleSubmit = async (e) => {
+    e && e.preventDefault();
+    setError("");
+    if (!newPass || newPass.length < 6) { setError("Password must be at least 6 characters."); return; }
+    if (newPass !== newPass2) { setError("Passwords do not match — please try again."); return; }
+    setSaving(true);
+    try {
+      const hashed = await hashPassword(newPass);
+      await Provider.update(provider.id, {
+        login_password: hashed,
+        password_changed: true,
+      });
+      const fresh = { ...provider, login_password: hashed, password_changed: true };
+      onComplete(fresh);
+    } catch (err) {
+      console.error(err);
+      setError("Something went wrong saving your password. Please try again.");
+    }
+    setSaving(false);
+  };
+
+  const inputStyle = {
+    width: "100%", padding: "10px 12px", fontSize: 15, borderRadius: 6,
+    border: `1.5px solid ${PAPER_DK}`, background: "#FFFDF5", color: INK,
+    fontFamily: SANS, boxSizing: "border-box", outline: "none",
+  };
 
   return (
     <div style={{ minHeight: "100vh", background: PAPER, backgroundImage: "repeating-linear-gradient(0deg,transparent,transparent 27px,rgba(28,15,0,0.03) 27px,rgba(28,15,0,0.03) 28px)", fontFamily: SERIF }}>
@@ -524,7 +562,7 @@ function ForcePasswordChangeScreen({ provider, onComplete }) {
       <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet" />
       <div style={{ background: PAPER, borderBottom: `3px double ${INK}` }}>
         <div style={{ display: "flex", alignItems: "center", padding: "10px 14px 8px", boxSizing: "border-box" }}>
-          <a href="/" style={{ textDecoration: "none", flexShrink: 0, width: 56 }}>
+          <a href="/" style={{ textDecoration: "none", flexShrink: 0, width: 56, display: "flex", alignItems: "center" }}>
             <img src="https://media.base44.com/images/public/69d062aca815ce8e697894b1/a9af95bc3_V-Hublogo.png" alt="V-Hub" style={{ width: 48, height: 48, objectFit: "contain", display: "block" }} />
           </a>
           <a href="/" style={{ textDecoration: "none", flex: 1, display: "flex", alignItems: "baseline", justifyContent: "center" }}>
@@ -536,63 +574,80 @@ function ForcePasswordChangeScreen({ provider, onComplete }) {
         </div>
       </div>
 
-      <div style={{ maxWidth: 460, margin: "40px auto", padding: "0 20px 60px" }}>
-        {loading && (
-          <div style={{ textAlign: "center", padding: 60, color: INK_FADE, fontSize: 14, fontStyle: "italic" }}>
-            Setting up your account…
-          </div>
-        )}
+      <div style={{ textAlign: "center", padding: "28px 20px 20px", borderBottom: `3px double ${INK}` }}>
+        <div style={{ fontSize: 28, fontWeight: 900, color: INK, letterSpacing: 3, textTransform: "uppercase", fontFamily: SERIF }}>Provider Hub</div>
+        <div style={{ height: 2, background: RED_RULE, margin: "10px auto", width: 180 }} />
+        <div style={{ fontSize: 13, color: INK_FADE, fontStyle: "italic", fontFamily: SERIF }}>Create your permanent password</div>
+      </div>
 
-        {!loading && error && (
-          <div style={{ background: "#FEE", border: `1.5px solid ${RED_RULE}`, borderRadius: 8, padding: "20px 18px", textAlign: "center" }}>
-            <div style={{ fontSize: 32, marginBottom: 10 }}>⚠️</div>
-            <div style={{ fontSize: 14, color: RED_RULE, fontFamily: SANS }}>{error}</div>
+      <div style={{ maxWidth: 460, margin: "36px auto", padding: "0 20px 60px" }}>
+        <div style={{ background: PAPER_MID, border: `2px solid ${PAPER_DK}`, borderRadius: 10, padding: "32px 28px", boxShadow: "0 4px 24px rgba(28,15,0,0.10)" }}>
+          <div style={{ textAlign: "center", marginBottom: 24 }}>
+            <div style={{ fontSize: 36, marginBottom: 8 }}>🔑</div>
+            <div style={{ fontSize: 17, fontWeight: 900, color: INK, textTransform: "uppercase", letterSpacing: 2, fontFamily: SERIF }}>
+              Welcome, {firstName}!
+            </div>
+            <div style={{ fontSize: 13, color: INK_FADE, fontStyle: "italic", marginTop: 8, lineHeight: 1.7, fontFamily: SERIF }}>
+              You're signed in with your temporary password.<br/>Please create a permanent one to continue.
+            </div>
           </div>
-        )}
 
-        {!loading && sent && (
-          <>
-            <div style={{ background: "#E8EAF6", border: "2px solid #3F51B5", borderRadius: 12, padding: "22px 24px", marginBottom: 20, textAlign: "center" }}>
-              <div style={{ fontSize: 36, marginBottom: 10 }}>📬</div>
-              <div style={{ fontSize: 16, fontWeight: 900, color: "#1A237E", marginBottom: 8, fontFamily: SERIF }}>
-                Welcome, {firstName}! One more step…
-              </div>
-              <div style={{ fontSize: 13, color: "#3949AB", lineHeight: 1.7, fontFamily: SANS }}>
-                We've sent a <strong>password setup link</strong> to:<br/>
-                <strong>{provEmail}</strong><br/><br/>
-                Click the link in that email to create your personal password, then come back and sign in.
+          <form onSubmit={handleSubmit}>
+            <div style={{ marginBottom: 18 }}>
+              <label style={{ display: "block", fontSize: 11, fontWeight: 700, color: INK_FADE, textTransform: "uppercase", letterSpacing: 1.5, marginBottom: 6, fontFamily: SANS }}>New Password</label>
+              <div style={{ position: "relative" }}>
+                <input
+                  type={showP1 ? "text" : "password"}
+                  value={newPass}
+                  onChange={e => setNewPass(e.target.value)}
+                  placeholder="At least 6 characters"
+                  style={inputStyle}
+                  autoComplete="new-password"
+                />
+                <button type="button" onClick={() => setShowP1(v => !v)}
+                  style={{ position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", fontSize: 16, color: INK_FADE }}>
+                  {showP1 ? "🙈" : "👁"}
+                </button>
               </div>
             </div>
-            <div style={{ background: PAPER_MID, border: `2px solid ${PAPER_DK}`, borderRadius: 10, padding: "20px 24px", textAlign: "center" }}>
-              <div style={{ fontSize: 12, color: INK_FADE, fontFamily: SANS, lineHeight: 1.7, marginBottom: 16 }}>
-                Don't see it? Check your spam folder.<br/>
-                The link expires in <strong>1 hour</strong>.
+
+            <div style={{ marginBottom: 24 }}>
+              <label style={{ display: "block", fontSize: 11, fontWeight: 700, color: INK_FADE, textTransform: "uppercase", letterSpacing: 1.5, marginBottom: 6, fontFamily: SANS }}>Confirm New Password</label>
+              <div style={{ position: "relative" }}>
+                <input
+                  type={showP2 ? "text" : "password"}
+                  value={newPass2}
+                  onChange={e => setNewPass2(e.target.value)}
+                  placeholder="Re-enter password"
+                  style={inputStyle}
+                  autoComplete="new-password"
+                />
+                <button type="button" onClick={() => setShowP2(v => !v)}
+                  style={{ position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", fontSize: 16, color: INK_FADE }}>
+                  {showP2 ? "🙈" : "👁"}
+                </button>
               </div>
-              <button
-                onClick={() => {
-                  setLoading(true); setSent(false);
-                  const email = (provider.login_email || provider.email || "").trim().toLowerCase();
-                  fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/requestPasswordReset", {
-                    method: "POST", headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ email }),
-                  })
-                    .then(r => r.json())
-                    .then(data => { if (data.error) setError(data.error); else setSent(true); })
-                    .catch(() => setError("Could not resend. Contact admin@v-hub.us."))
-                    .finally(() => setLoading(false));
-                }}
-                style={{ background: "none", border: `1.5px solid ${NAVY}`, color: NAVY, borderRadius: 6, padding: "8px 20px", fontSize: 12, fontWeight: 700, cursor: "pointer", fontFamily: SANS }}
-              >
-                Resend Email
-              </button>
             </div>
-          </>
-        )}
+
+            {error && (
+              <div style={{ background: "#FEE", border: `1.5px solid ${RED_RULE}`, borderRadius: 6, padding: "10px 14px", marginBottom: 16, fontSize: 13, color: RED_RULE, fontFamily: SANS }}>
+                {error}
+              </div>
+            )}
+
+            <button
+              type="submit"
+              disabled={saving}
+              style={{ width: "100%", padding: "13px", background: saving ? "#aaa" : `linear-gradient(180deg,#9A6030,${BROWN_BTN} 60%,#5A3010)`, border: `2px solid #1B3D6F`, borderRadius: 7, color: "#F5E8CC", fontFamily: SERIF, fontWeight: 900, fontSize: 15, letterSpacing: 1, cursor: saving ? "not-allowed" : "pointer" }}
+            >
+              {saving ? "Saving…" : "Set My Password & Enter Hub →"}
+            </button>
+          </form>
+        </div>
       </div>
     </div>
   );
 }
-
 
 
 // ── FORGOT PASSWORD SCREEN ────────────────────────────────────────────────
@@ -759,7 +814,13 @@ function LoginScreen({ onLogin, onForgot }) {
       // Find the one whose password hash matches
       const prov = matches.find(p => p.login_password === inputHash);
       if (!prov) { setError("Incorrect password. Use 'Forgot Password' to reset."); setLoading(false); return; }
-      if (!prov.is_active) { setError("Your account is not active. Contact admin@v-hub.us."); setLoading(false); return; }
+      // Allow pending providers through ONLY if they haven't set their password yet
+      // (so they can complete the password setup step before admin activates them)
+      if (!prov.is_active && prov.password_changed) {
+        setError("Your account is not yet active. Contact admin@v-hub.us.");
+        setLoading(false);
+        return;
+      }
 
       sessionStorage.setItem("vhub_provider_id", prov.id);
       onLogin(prov);

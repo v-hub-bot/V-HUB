@@ -1109,7 +1109,29 @@ function AddProviderTab({ onAdded, categories, services: allServices, serviceAre
           <div style={{ fontSize: 15, fontWeight: 900, color: T.green, marginBottom: 8 }}>✅ {done.name} — Added Successfully!</div>
           <div style={{ fontSize: 13, color: T.brownDark, lineHeight: 1.9 }}>
             <strong>Account #:</strong> {done.vh}<br />
-            {done.tempPass && <><strong>Temp password:</strong> <span style={{ fontFamily: "monospace", background: "#f0f0f0", padding: "2px 8px", borderRadius: 4, fontWeight: 700 }}>{done.tempPass}</span><br /></>}
+            {done.tempPass && (
+              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4, flexWrap: "wrap" }}>
+                <strong>Temp password:</strong>
+                <span style={{ fontFamily: "monospace", background: "#f0f0f0", padding: "2px 10px", borderRadius: 4, fontWeight: 700, fontSize: 14, letterSpacing: 1 }}>{done.tempPass}</span>
+                <button
+                  onClick={() => {
+                    const el = document.createElement("textarea");
+                    el.value = done.tempPass;
+                    el.setAttribute("readonly", "");
+                    el.style.position = "absolute";
+                    el.style.left = "-9999px";
+                    document.body.appendChild(el);
+                    el.select();
+                    el.setSelectionRange(0, el.value.length);
+                    try { document.execCommand("copy"); } catch(_) {}
+                    document.body.removeChild(el);
+                    if (navigator.clipboard) navigator.clipboard.writeText(done.tempPass).catch(() => {});
+                    alert("Copied: " + done.tempPass);
+                  }}
+                  style={{ background: "#1B3D6F", color: "#fff", border: "none", borderRadius: 4, padding: "3px 10px", fontSize: 11, fontWeight: 700, cursor: "pointer", fontFamily: "Arial, sans-serif" }}
+                >📋 Copy</button>
+              </div>
+            )}
             {done.emailSent && <div style={{ color: "#2E7D32", fontWeight: 700, marginTop: 6 }}>✅ Welcome email sent to {done.email}</div>}
             {done.emailSkipped && (
               <div style={{ background: "#fff3cd", border: "1px solid #E8431A", borderRadius: 6, padding: "8px 10px", marginTop: 8, fontSize: 12 }}>
