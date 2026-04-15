@@ -78,6 +78,7 @@ Deno.serve(async (req: Request) => {
       const updated = await sr.entities.Provider.update(provider_id, {
         login_password: hashed,
         password_changed: true,
+        managed_by: "provider",
       });
       return new Response(JSON.stringify({ success: true, provider: sanitize(updated) }), { headers: CORS_HEADERS });
     } catch (e: unknown) {

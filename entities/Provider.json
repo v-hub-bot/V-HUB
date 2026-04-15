@@ -41,16 +41,7 @@
       }
     },
     "subscription_status": {
-      "type": "string",
-      "enum": [
-        "pending",
-        "trial",
-        "active",
-        "trial_expired",
-        "cancelled",
-        "archived",
-        "past_due"
-      ]
+      "type": "string"
     },
     "subscription_tier": {
       "type": "string"
@@ -132,6 +123,14 @@
     },
     "password_changed": {
       "type": "boolean"
+    },
+    "managed_by": {
+      "type": "string",
+      "enum": [
+        "vhub",
+        "provider"
+      ],
+      "description": "Who is currently managing this listing \u2014 vhub (us) or provider (self-managed)"
     }
   },
   "required": [],

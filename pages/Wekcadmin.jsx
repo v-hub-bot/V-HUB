@@ -181,6 +181,8 @@ function ProvidersTab({ providers, setProviders, catMap, svcMap, areaMap, fullSv
     if (filter === "expiring") { const d = daysLeft(p.trial_end_date); return d !== null && d >= 0 && d <= 7; }
     if (filter === "archived") return p.subscription_status === "archived";
     if (filter === "incomplete") return !p.email || !p.services || p.services.length === 0 || !p.service_areas || p.service_areas.length === 0;
+    if (filter === "managed_by_us") return p.managed_by !== "provider";
+    if (filter === "self_managed") return p.managed_by === "provider";
     return true;
   });
 
@@ -325,6 +327,11 @@ You can resend manually from the Email button.`);
   };
   const toggleActive = async (p) => { await adminUpdate(p.id, { is_active: !p.is_active }); setProviders(prev => prev.map(x => x.id === p.id ? { ...x, is_active: !p.is_active } : x)); };
   const toggleVisible = async (p) => { await adminUpdate(p.id, { is_visible: !p.is_visible }); setProviders(prev => prev.map(x => x.id === p.id ? { ...x, is_visible: !p.is_visible } : x)); };
+  const toggleManaged = async (p) => {
+    const newVal = (p.managed_by === "provider") ? "vhub" : "provider";
+    await adminUpdate(p.id, { managed_by: newVal });
+    setProviders(prev => prev.map(x => x.id === p.id ? { ...x, managed_by: newVal } : x));
+  };
   const startEdit = (p) => {
     setEditId(p.id);
     setEditForm({
@@ -412,9 +419,14 @@ You can resend manually from the Email button.`);
       {/* ── STATUS FILTERS (only show when not in single-search mode) ── */}
       {!search && (
         <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-          {["all", "incomplete", "pending", "active", "hidden", "trial", "paid", "expiring", "archived"].map(f => (
+          {["all", "incomplete", "pending", "active", "hidden", "trial", "paid", "expiring", "archived", "managed_by_us", "self_managed"].map(f => (
             <button key={f} onClick={() => setFilter(f)} style={S.filterBtn(filter === f)}>
-              {f === "all" ? `All (${providers.length})` : f === "archived" ? `📁 Archived (${providers.filter(p => p.subscription_status === "archived").length})` : f === "incomplete" ? `⚠ Incomplete (${providers.filter(p => !p.email || !p.services || p.services.length === 0 || !p.service_areas || p.service_areas.length === 0).length})` : f.charAt(0).toUpperCase() + f.slice(1)}
+              {f === "all" ? `All (${providers.length})`
+                : f === "archived" ? `📁 Archived (${providers.filter(p => p.subscription_status === "archived").length})`
+                : f === "incomplete" ? `⚠ Incomplete (${providers.filter(p => !p.email || !p.services || p.services.length === 0 || !p.service_areas || p.service_areas.length === 0).length})`
+                : f === "managed_by_us" ? `🛠 We Manage (${providers.filter(p => p.managed_by !== "provider").length})`
+                : f === "self_managed" ? `✅ Self-Managed (${providers.filter(p => p.managed_by === "provider").length})`
+                : f.charAt(0).toUpperCase() + f.slice(1)}
             </button>
           ))}
         </div>
@@ -482,6 +494,22 @@ You can resend manually from the Email button.`);
               {!p.email && <span style={S.badge("#B71C1C", "#ffebee")}>⚠ No Email</span>}
               {(!p.services || p.services.length === 0) && <span style={S.badge("#E65100", "#fff3e0")}>⚠ No Services</span>}
               {(!p.service_areas || p.service_areas.length === 0) && <span style={S.badge("#4A148C", "#f3e5f5")}>⚠ No Areas</span>}
+              {/* Management ownership badge */}
+              {p.managed_by === "provider"
+                ? <span style={S.badge("#1B5E20", "#E8F5E9")}>✅ Self-Managed</span>
+                : p.onboarding_type === "self_signup"
+                  ? <span style={S.badge("#1565C0", "#E3F2FD")}>🖥 Self Sign-Up</span>
+                  : <span style={S.badge("#5D4037", "#EFEBE9")}>🛠 Managed by V-Hub</span>
+              }
+            </div>
+            {/* Management toggle button */}
+            <div style={{ marginTop: 6 }}>
+              <button
+                onClick={e => { e.stopPropagation(); toggleManaged(p); }}
+                style={{ fontSize: 11, fontFamily: T.sans, fontWeight: 700, cursor: "pointer", padding: "4px 12px", borderRadius: 20, border: "1.5px solid", borderColor: p.managed_by === "provider" ? "#5D4037" : "#1B5E20", background: p.managed_by === "provider" ? "#EFEBE9" : "#E8F5E9", color: p.managed_by === "provider" ? "#5D4037" : "#1B5E20" }}
+              >
+                {p.managed_by === "provider" ? "↩ Mark as Managed by Us" : "✋ Mark as Self-Managed"}
+              </button>
             </div>
 
             {/* EXPANDED DETAIL */}
