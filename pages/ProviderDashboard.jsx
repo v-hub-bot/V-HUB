@@ -535,6 +535,7 @@ function ForcePasswordChangeScreen({ provider, onComplete }) {
     if (!newPass || newPass.length < 6) { setError("Password must be at least 6 characters."); return; }
     if (newPass !== newPass2) { setError("Passwords do not match — please try again."); return; }
     setSaving(true);
+    let fresh = null;
     try {
       // Use backend function — works for unauthenticated visitors
       const res = await fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/providerLogin", {
@@ -548,13 +549,15 @@ function ForcePasswordChangeScreen({ provider, onComplete }) {
         setSaving(false);
         return;
       }
-      const fresh = { ...provider, ...data.provider, login_password: undefined };
-      onComplete(fresh);
+      fresh = { ...provider, ...data.provider, login_password: undefined };
     } catch (err) {
       console.error(err);
       setError("Something went wrong saving your password. Please try again.");
+      setSaving(false);
+      return;
     }
-    setSaving(false);
+    // Call onComplete OUTSIDE the try/catch so any React state errors don't falsely show an error
+    if (fresh) onComplete(fresh);
   };
 
   const inputStyle = {
@@ -811,8 +814,8 @@ function LoginScreen({ onLogin, onForgot }) {
         return;
       }
       const prov = data.provider;
-      // Allow pending providers through ONLY if they haven\'t set their password yet
-      if (!prov.is_active && prov.password_changed) {
+      // Block inactive accounts UNLESS they are admin-added (pending approval) — those can always log in
+      if (!prov.is_active && prov.onboarding_type !== "admin_added") {
         setError("Your account is not yet active. Contact admin@v-hub.us.");
         setLoading(false);
         return;
