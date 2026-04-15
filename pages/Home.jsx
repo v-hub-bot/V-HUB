@@ -1532,8 +1532,8 @@ export default function Home() {
             width: "100%", boxSizing: "border-box",
             cursor: "pointer",
           }}>
-            <div style={{ padding: "8px 16px 4px", textAlign: "center", fontSize: 13, fontWeight: 900, letterSpacing: 2, color: "#CC0000", textTransform: "uppercase", fontFamily: "'Times New Roman', serif" }}>📰 Classifieds</div>
-            <div style={{ padding: "0 16px 8px", textAlign: "center", fontSize: 11, fontStyle: "italic", color: "#CC0000", fontFamily: "'Times New Roman', serif", opacity: 0.8 }}>Browse this week's local deals & specials →</div>
+            <div style={{ padding: "8px 16px 4px", textAlign: "center", fontSize: 13, fontWeight: 900, letterSpacing: 2, color: "#CC0000", textTransform: "uppercase", fontFamily: "'Times New Roman', serif" }}>🔥 Deals of the Week!</div>
+            <div style={{ padding: "0 16px 8px", textAlign: "center", fontSize: 11, fontStyle: "italic", color: "#CC0000", fontFamily: "'Times New Roman', serif", opacity: 0.8 }}>Click here to see this week's deals →</div>
           </div>
         </a>
 
