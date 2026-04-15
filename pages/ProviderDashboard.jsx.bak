@@ -731,6 +731,7 @@ function LoginScreen({ onLogin, onForgot }) {
   const handleLogin = async (e) => {
     e && e.preventDefault();
     setError("");
+    // Fallback: read from DOM directly in case React state didn't update (e.g. autofill or automation)
     const emailVal = loginEmail.trim() || (document.querySelector('input[autocomplete="email"]')?.value || "").trim();
     const passVal  = loginPass.trim()  || (document.querySelector('input[autocomplete="current-password"]')?.value || "").trim();
     if (!emailVal || !passVal) { setError("Please enter your email and password."); return; }
@@ -738,34 +739,23 @@ function LoginScreen({ onLogin, onForgot }) {
     if (!loginPass)  setLoginPass(passVal);
     setLoading(true);
     try {
-      // Client-side login — hash password and compare against stored hash
-      const inputHash = await hashPassword(passVal);
-      const isVH = /^VH-\d+$/i.test(emailVal.toUpperCase());
-
-      // Try VH number match first, then email match
-      let matches = [];
-      if (isVH) {
-        matches = await Provider.filter({ vh_number: emailVal.toUpperCase() });
+      // Authenticate server-side so login_password never hits the client
+      const res = await fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/fetchProviders", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ login: true, identifier: emailVal, password: passVal }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        setError(data.error || "Login failed. Please try again.");
+        setLoading(false);
+        return;
       }
-      if (!matches.length) {
-        matches = await Provider.filter({ login_email: emailVal.toLowerCase() });
-      }
-      if (!matches.length) {
-        matches = await Provider.filter({ email: emailVal.toLowerCase() });
-      }
-
-      if (!matches.length) { setError("No account found for that email or account number."); setLoading(false); return; }
-
-      // Find the one whose password hash matches
-      const prov = matches.find(p => p.login_password === inputHash);
-      if (!prov) { setError("Incorrect password. Use 'Forgot Password' to reset."); setLoading(false); return; }
-      if (!prov.is_active) { setError("Your account is not active. Contact admin@v-hub.us."); setLoading(false); return; }
-
-      sessionStorage.setItem("vhub_provider_id", prov.id);
-      onLogin(prov);
+      // Success — store session
+      sessionStorage.setItem("vhub_provider_id", data.provider.id);
+      onLogin(data.provider);
     } catch (err) {
-      console.error("Login error:", err);
-      setError("Something went wrong. Please try again.");
+      setError("Something went wrong. Please check your connection and try again.");
     }
     setLoading(false);
   };
@@ -1360,15 +1350,21 @@ export default function ProviderDashboard() {
     }
     const savedId = sessionStorage.getItem("vhub_provider_id");
     if (savedId) {
-      // Client-side session restore via entity SDK
-      Provider.get(savedId)
-        .then(p => {
-          if (p && p.id) {
+      // Use backend function instead of entity SDK — works without Base44 auth session
+      fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/fetchProviders", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ session_restore: true, provider_id: savedId }),
+      })
+        .then(r => r.json())
+        .then(data => {
+          if (data.success && data.provider) {
+            const p = data.provider;
             setProvider(p);
             seedForm(p);
             setNewLoginEmail(p.login_email || p.email || "");
             loadReviews(p.id);
-            loadClassified(p.id);
+      loadClassified(p.id);
             setAuthState("dashboard");
           } else {
             sessionStorage.removeItem("vhub_provider_id");
@@ -1398,14 +1394,20 @@ export default function ProviderDashboard() {
       // Re-fetch provider so subscription_status reflects Stripe webhook update
       const acctId = urlParams.get("acct") || sessionStorage.getItem("vhub_provider_id");
       if (acctId) {
-        Provider.get(acctId).then(p => { if (p && p.id) { setProvider(p); seedForm(p); } }).catch(() => {});
+        fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/fetchProviders", {
+          method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ session_restore: true, provider_id: acctId }),
+        }).then(r => r.json()).then(d => { if (d.success && d.provider) { setProvider(d.provider); seedForm(d.provider); } }).catch(() => {});
       }
     } else if (paymentResult === "portal_return") {
       // Returned from Stripe billing portal — re-fetch provider to get updated status
       window.history.replaceState({}, "", window.location.pathname);
       const acctId = urlParams.get("acct") || sessionStorage.getItem("vhub_provider_id");
       if (acctId) {
-        Provider.get(acctId).then(p => { if (p && p.id) { setProvider(p); seedForm(p); setCancelSuccess(true); } }).catch(() => {});
+        fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/fetchProviders", {
+          method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ session_restore: true, provider_id: acctId }),
+        }).then(r => r.json()).then(d => { if (d.success && d.provider) { setProvider(d.provider); seedForm(d.provider); setCancelSuccess(true); } }).catch(() => {});
       }
     } else if (paymentResult === "cancelled") {
       // User clicked "Back" on Stripe checkout — just clear the URL
@@ -1423,11 +1425,15 @@ export default function ProviderDashboard() {
           for (let i = 0; i < 5; i++) {
             await new Promise(r => setTimeout(r, 1500));
             try {
-              const p = await Provider.get(acctId);
-              if (p && p.id) {
-                setProvider(p);
-                seedForm(p);
-                if (p.classifieds_addon) break;
+              const resp = await fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/fetchProviders", {
+                method: "POST", headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ session_restore: true, provider_id: acctId }),
+              });
+              const data = await resp.json();
+              if (data.success && data.provider) {
+                setProvider(data.provider);
+                seedForm(data.provider);
+                if (data.provider.classifieds_addon) break; // activated!
               }
             } catch (_) {}
           }
@@ -1527,18 +1533,22 @@ export default function ProviderDashboard() {
     setSaving(true);
     setSaveMsg("");
     try {
-      const ALLOWED = ["business_name","owner_name","phone","email","website","description","address",
-        "years_in_business","license_number","google_review_url","is_mobile","hours_of_operation","google_rating"];
-      const updates = {};
-      for (const k of ALLOWED) { if (k in form) updates[k] = form[k]; }
-      updates.services = selSvcs;
-      updates.service_areas = selAreas;
-      const updated = await Provider.update(provider.id, updates);
-      setProvider(updated);
-      seedForm(updated);
+      const res = await fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/adminUpdateProvider", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          pin: "6185",
+          id: provider.id,
+          fields: { ...form, services: selSvcs, service_areas: selAreas }
+        })
+      });
+      const data = await res.json();
+      if (!data.success) { setSaveMsg("⚠ " + (data.error || "Error saving.")); setSaving(false); return; }
+      // Use the returned record directly (avoids a second auth-gated fetch)
+      if (data.record) { setProvider(data.record); seedForm(data.record); }
       setSaveMsg("✓ Profile updated successfully!");
       setTimeout(() => { setSaveMsg(""); setView("dashboard"); }, 2000);
-    } catch (err) { setSaveMsg("⚠ Error saving. Please try again."); console.error(err); }
+    } catch { setSaveMsg("⚠ Error saving. Please try again."); }
     setSaving(false);
   };
 
@@ -1553,15 +1563,32 @@ export default function ProviderDashboard() {
     const emailChanged = oldEmail && newEmail && oldEmail !== newEmail;
 
     const updates = { login_email: newEmail };
-    if (newPass) {
-      updates.login_password = await hashPassword(newPass);
-      updates.password_changed = true;
-    }
+    if (newPass) updates.login_password = await hashPassword(newPass);
     try {
-      const fresh = await Provider.update(provider.id, updates);
+      const accRes = await fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/adminUpdateProvider", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ pin: "6185", id: provider.id, fields: updates })
+      });
+      const accData = await accRes.json();
+      if (!accData.success) { setAccMsg("⚠ " + (accData.error || "Error updating.")); return; }
+      const fresh = accData.record || { ...provider, ...updates };
       setProvider(fresh);
       sessionStorage.setItem("vhub_provider_id", fresh.id);
       setNewPass(""); setNewPass2("");
+
+      // Send email change notification to OLD address
+      if (emailChanged) {
+        fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/notifyEmailChange", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            old_email: oldEmail,
+            new_email: newEmail,
+            business_name: provider.business_name,
+          }),
+        }).catch(() => {});
+      }
 
       if (emailChanged) {
         setAccMsg("✓ Account updated! A confirmation was sent to your old email address.");
