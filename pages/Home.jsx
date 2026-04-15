@@ -238,7 +238,7 @@ function ProvDetail({ prov, areas, cats, svcs, onBack }) {
 
   const areaMap = React.useMemo(() => {
     const m = {};
-    (areas || []).forEach(a => { if (a.id) m[a.id] = a.name; });
+    (areas || []).forEach(a => { if (a.id) m[a.id] = a.name.includes(' — ') ? a.name.split(' — ').pop().trim() : a.name; });
     return m;
   }, [areas]);
 

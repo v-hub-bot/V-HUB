@@ -41,7 +41,7 @@ function fmt(d) {
   return new Date(d).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
 }
 function resolveSvc(id, svcMap) { return svcMap[id] || LEGACY_SVC[id] || ""; }
-function resolveArea(id, areaMap) { return areaMap[id] || LEGACY_AREA[id] || ""; }
+function resolveArea(id, areaMap) { const raw = areaMap[id] || LEGACY_AREA[id] || ""; return raw.includes(" — ") ? raw.split(" — ").pop().trim() : raw; }
 
 const inS = {
   width: "100%", boxSizing: "border-box", background: PAPER,
