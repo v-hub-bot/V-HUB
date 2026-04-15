@@ -1087,7 +1087,7 @@ export default function Home() {
     // ── Step 1: Fetch providers via backend function ──────────────────────
     try {
       const provResp = await fetch(
-        'https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/getProviders',
+        'https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/fetchProviders',
         { method: 'GET', headers: { 'Content-Type': 'application/json' } }
       );
       const data = await provResp.json();

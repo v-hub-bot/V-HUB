@@ -719,7 +719,7 @@ function LoginScreen({ onLogin, onForgot }) {
     setLoading(true);
     try {
       // Authenticate server-side so login_password never hits the client
-      const res = await fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/getProviders", {
+      const res = await fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/fetchProviders", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ login: true, identifier: emailVal, password: passVal }),
@@ -1330,7 +1330,7 @@ export default function ProviderDashboard() {
     const savedId = sessionStorage.getItem("vhub_provider_id");
     if (savedId) {
       // Use backend function instead of entity SDK — works without Base44 auth session
-      fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/getProviders", {
+      fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/fetchProviders", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ session_restore: true, provider_id: savedId }),
@@ -1373,7 +1373,7 @@ export default function ProviderDashboard() {
       // Re-fetch provider so subscription_status reflects Stripe webhook update
       const acctId = urlParams.get("acct") || sessionStorage.getItem("vhub_provider_id");
       if (acctId) {
-        fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/getProviders", {
+        fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/fetchProviders", {
           method: "POST", headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ session_restore: true, provider_id: acctId }),
         }).then(r => r.json()).then(d => { if (d.success && d.provider) { setProvider(d.provider); seedForm(d.provider); } }).catch(() => {});
@@ -1383,7 +1383,7 @@ export default function ProviderDashboard() {
       window.history.replaceState({}, "", window.location.pathname);
       const acctId = urlParams.get("acct") || sessionStorage.getItem("vhub_provider_id");
       if (acctId) {
-        fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/getProviders", {
+        fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/fetchProviders", {
           method: "POST", headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ session_restore: true, provider_id: acctId }),
         }).then(r => r.json()).then(d => { if (d.success && d.provider) { setProvider(d.provider); seedForm(d.provider); setCancelSuccess(true); } }).catch(() => {});
@@ -1404,7 +1404,7 @@ export default function ProviderDashboard() {
           for (let i = 0; i < 5; i++) {
             await new Promise(r => setTimeout(r, 1500));
             try {
-              const resp = await fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/getProviders", {
+              const resp = await fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/fetchProviders", {
                 method: "POST", headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ session_restore: true, provider_id: acctId }),
               });
