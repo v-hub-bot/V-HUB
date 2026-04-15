@@ -87,6 +87,8 @@ const NEWSPAPER_CONTENT = {
     body: [
       "Spring means pool openings, golf cart tune-ups, and patio projects. Residents turn to V-Hub to find trusted local professionals before the summer heat sets in.",
       "New to The Villages? Hundreds of families arrive each month. V-Hub helps newcomers find reliable providers fast — no word-of-mouth required.",
+      "From Brownwood to Fenney, neighbors are searching for home cleaners, handymen, and landscapers at a record pace. The most searched services this month include lawn care, pressure washing, and interior painting.",
+      "Word travels fast in The Villages — but V-Hub travels faster. Bookmark it, share it with a neighbor, and never scramble for a referral again.",
     ]
   },
   howItWorks: {
