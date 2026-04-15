@@ -491,33 +491,32 @@ function ResetPasswordScreen({ token, providerId, onSuccess }) {
 
 
 
-// ── FORCE PASSWORD CHANGE SCREEN (admin-added accounts, first login) ─────────
-function ForcePasswordChangeScreen({ provider, onComplete }) {
-  const [pass, setPass] = useState("");
-  const [pass2, setPass2] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-  const [showPass, setShowPass] = useState(false);
 
-  const handleSubmit = async (e) => {
-    e && e.preventDefault();
-    if (pass.length < 6) { setError("Password must be at least 6 characters."); return; }
-    if (pass !== pass2) { setError("Passwords don't match."); return; }
-    setLoading(true); setError("");
-    try {
-      const res = await fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/adminUpdateProvider", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ provider_change_password: true, provider_id: provider.id, new_password: pass }),
-      });
-      const data = await res.json();
-      if (!res.ok || data.error) { setError(data.error || "Something went wrong. Please try again."); setLoading(false); return; }
-      onComplete({ ...provider, password_changed: true });
-    } catch {
-      setError("Something went wrong. Please try again.");
-    }
-    setLoading(false);
-  };
+// ── FORCE PASSWORD CHANGE SCREEN (admin-added accounts, first login) ─────────
+// Uses requestPasswordReset (email-based) since it's the most reliable flow
+function ForcePasswordChangeScreen({ provider, onComplete }) {
+  const [sent, setSent]       = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError]     = useState("");
+
+  // Auto-send the reset email as soon as this screen mounts
+  useEffect(() => {
+    const email = (provider.login_email || provider.email || "").trim().toLowerCase();
+    if (!email) { setError("No email on file. Contact admin@v-hub.us."); return; }
+    setLoading(true);
+    fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/requestPasswordReset", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email }),
+    })
+      .then(r => r.json())
+      .then(data => { if (data.error) setError(data.error); else setSent(true); })
+      .catch(() => setError("Could not send email. Contact admin@v-hub.us."))
+      .finally(() => setLoading(false));
+  }, []);
+
+  const provEmail = (provider.login_email || provider.email || "").toLowerCase();
+  const firstName = (provider.owner_name || "").split(" ")[0] || "there";
 
   return (
     <div style={{ minHeight: "100vh", background: PAPER, backgroundImage: "repeating-linear-gradient(0deg,transparent,transparent 27px,rgba(28,15,0,0.03) 27px,rgba(28,15,0,0.03) 28px)", fontFamily: SERIF }}>
@@ -526,7 +525,7 @@ function ForcePasswordChangeScreen({ provider, onComplete }) {
       <div style={{ background: PAPER, borderBottom: `3px double ${INK}` }}>
         <div style={{ display: "flex", alignItems: "center", padding: "10px 14px 8px", boxSizing: "border-box" }}>
           <a href="/" style={{ textDecoration: "none", flexShrink: 0, width: 56 }}>
-            <img src="https://base44.app/api/apps/69d062aca815ce8e697894b1/files/mp/public/69d062aca815ce8e697894b1/f14a7cbd0_logo_icon_small.png" alt="V-Hub" style={{ width: 48, height: 48, objectFit: "contain", display: "block" }} />
+            <img src="https://media.base44.com/images/public/69d062aca815ce8e697894b1/a9af95bc3_V-Hublogo.png" alt="V-Hub" style={{ width: 48, height: 48, objectFit: "contain", display: "block" }} />
           </a>
           <a href="/" style={{ textDecoration: "none", flex: 1, display: "flex", alignItems: "baseline", justifyContent: "center" }}>
             <span style={{ fontStyle: "italic", fontWeight: 700, fontFamily: "'Great Vibes', cursive", fontSize: 48, color: "#003366", lineHeight: 1 }}>V</span>
@@ -536,42 +535,64 @@ function ForcePasswordChangeScreen({ provider, onComplete }) {
           <div style={{ flexShrink: 0, width: 56 }} />
         </div>
       </div>
+
       <div style={{ maxWidth: 460, margin: "40px auto", padding: "0 20px 60px" }}>
-        <div style={{ background: "#E8EAF6", border: "2px solid #3F51B5", borderRadius: 12, padding: "22px 24px", marginBottom: 20, textAlign: "center" }}>
-          <div style={{ fontSize: 36, marginBottom: 10 }}>🔐</div>
-          <div style={{ fontSize: 16, fontWeight: 900, color: "#1A237E", marginBottom: 8, fontFamily: SERIF }}>Welcome to V-Hub, {provider.owner_name?.split(" ")[0] || "there"}!</div>
-          <div style={{ fontSize: 13, color: "#3949AB", lineHeight: 1.7, fontFamily: SANS }}>
-            Your account was set up by our team. Before you enter your dashboard,<br/>
-            <strong>please create your own personal password.</strong><br/>
-            You'll use this every time you log in.
+        {loading && (
+          <div style={{ textAlign: "center", padding: 60, color: INK_FADE, fontSize: 14, fontStyle: "italic" }}>
+            Setting up your account…
           </div>
-        </div>
-        <div style={{ background: PAPER_MID, border: `2px solid ${PAPER_DK}`, borderRadius: 10, padding: "28px 24px", boxShadow: "0 4px 24px rgba(28,15,0,0.10)" }}>
-          <div style={{ fontSize: 14, fontWeight: 900, color: INK, textTransform: "uppercase", letterSpacing: 2, marginBottom: 18, fontFamily: SERIF, textAlign: "center" }}>Create Your Password</div>
-          {error && (
-            <div style={{ background: "#FEE", border: `1.5px solid ${RED_RULE}`, borderRadius: 6, padding: "10px 14px", marginBottom: 16, fontSize: 13, color: RED_RULE, fontFamily: SANS }}>⚠ {error}</div>
-          )}
-          <form onSubmit={handleSubmit}>
-            <div style={{ marginBottom: 14 }}>
-              <label style={lbS}>New Password</label>
-              <div style={{ position: "relative" }}>
-                <input type={showPass ? "text" : "password"} value={pass} onChange={e => setPass(e.target.value)} placeholder="Min 6 characters" style={{ ...inS, paddingRight: 44 }} autoFocus />
-                <button type="button" onClick={() => setShowPass(v => !v)} style={{ position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", fontSize: 16, color: INK_FADE }}>{showPass ? "🙈" : "👁️"}</button>
+        )}
+
+        {!loading && error && (
+          <div style={{ background: "#FEE", border: `1.5px solid ${RED_RULE}`, borderRadius: 8, padding: "20px 18px", textAlign: "center" }}>
+            <div style={{ fontSize: 32, marginBottom: 10 }}>⚠️</div>
+            <div style={{ fontSize: 14, color: RED_RULE, fontFamily: SANS }}>{error}</div>
+          </div>
+        )}
+
+        {!loading && sent && (
+          <>
+            <div style={{ background: "#E8EAF6", border: "2px solid #3F51B5", borderRadius: 12, padding: "22px 24px", marginBottom: 20, textAlign: "center" }}>
+              <div style={{ fontSize: 36, marginBottom: 10 }}>📬</div>
+              <div style={{ fontSize: 16, fontWeight: 900, color: "#1A237E", marginBottom: 8, fontFamily: SERIF }}>
+                Welcome, {firstName}! One more step…
+              </div>
+              <div style={{ fontSize: 13, color: "#3949AB", lineHeight: 1.7, fontFamily: SANS }}>
+                We've sent a <strong>password setup link</strong> to:<br/>
+                <strong>{provEmail}</strong><br/><br/>
+                Click the link in that email to create your personal password, then come back and sign in.
               </div>
             </div>
-            <div style={{ marginBottom: 22 }}>
-              <label style={lbS}>Confirm New Password</label>
-              <input type={showPass ? "text" : "password"} value={pass2} onChange={e => setPass2(e.target.value)} placeholder="Re-enter password" style={inS} />
+            <div style={{ background: PAPER_MID, border: `2px solid ${PAPER_DK}`, borderRadius: 10, padding: "20px 24px", textAlign: "center" }}>
+              <div style={{ fontSize: 12, color: INK_FADE, fontFamily: SANS, lineHeight: 1.7, marginBottom: 16 }}>
+                Don't see it? Check your spam folder.<br/>
+                The link expires in <strong>1 hour</strong>.
+              </div>
+              <button
+                onClick={() => {
+                  setLoading(true); setSent(false);
+                  const email = (provider.login_email || provider.email || "").trim().toLowerCase();
+                  fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/requestPasswordReset", {
+                    method: "POST", headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ email }),
+                  })
+                    .then(r => r.json())
+                    .then(data => { if (data.error) setError(data.error); else setSent(true); })
+                    .catch(() => setError("Could not resend. Contact admin@v-hub.us."))
+                    .finally(() => setLoading(false));
+                }}
+                style={{ background: "none", border: `1.5px solid ${NAVY}`, color: NAVY, borderRadius: 6, padding: "8px 20px", fontSize: 12, fontWeight: 700, cursor: "pointer", fontFamily: SANS }}
+              >
+                Resend Email
+              </button>
             </div>
-            <button type="submit" disabled={loading} style={{ width: "100%", background: loading ? PAPER_DK : "linear-gradient(180deg,#1B3D6F,#0d2447)", color: "#fff", border: `3px solid ${YELLOW}`, boxShadow: `0 0 0 1.5px ${YELLOW}, 0 0 12px 3px rgba(255,220,0,0.25)`, borderRadius: 8, padding: "15px 20px", fontSize: 15, fontWeight: 900, cursor: loading ? "not-allowed" : "pointer", fontFamily: SERIF, letterSpacing: 2, textTransform: "uppercase" }}>
-              {loading ? "Saving..." : "Set My Password & Enter Hub →"}
-            </button>
-          </form>
-        </div>
+          </>
+        )}
       </div>
     </div>
   );
 }
+
 
 
 // ── FORGOT PASSWORD SCREEN ────────────────────────────────────────────────
