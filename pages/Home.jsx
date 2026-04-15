@@ -1084,14 +1084,16 @@ export default function Home() {
     let ENTITY_SVC_MAP = {};   // real Service entity ID -> service name
     let svcEntities = [];
 
-    // ── Step 1: Fetch providers via backend function ──────────────────────
+    // ── Step 1: Fetch providers via entity SDK ──────────────────────────
     try {
-      const provResp = await fetch(
-        'https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/getProviders',
-        { method: 'GET', headers: { 'Content-Type': 'application/json' } }
-      );
-      const data = await provResp.json();
-      all = data.providers || [];
+      const PAGE_SIZE = 100;
+      let skip = 0;
+      let page = [];
+      do {
+        page = await Provider.list({ limit: PAGE_SIZE, skip }).catch(() => []);
+        all = all.concat(page || []);
+        skip += PAGE_SIZE;
+      } while (page && page.length === PAGE_SIZE);
     } catch(e) { all = []; }
 
     // ── Step 2: Try to enrich with entity names (optional, auth may fail on public page) ──
