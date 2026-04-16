@@ -699,14 +699,16 @@ You can resend manually from the Email button.`);
                   <button onClick={() => toggleVisible(p)} style={S.btn(T.teal)}>{p.is_visible === false ? "Make Visible" : "Hide Listing"}</button>
                   <button onClick={() => del(p)} style={S.btn(T.red)}>Delete</button>
                   <button onClick={() => startEdit(p)} style={S.btn("#5a3010")}>✏️ Edit Details</button>
-                  <button
-                    onClick={() => sendAccountToProvider(p)}
-                    disabled={handing === p.id}
-                    style={{ ...S.btn("#1B3D6F"), fontWeight: 900, opacity: handing === p.id ? 0.7 : 1 }}
-                    title={p.email ? `Activate + mark Self-Managed + send login to ${p.email}` : "Add email first"}
-                  >
-                    {handing === p.id ? "Sending…" : p.email ? "📤 Send Account to Provider" : "📤 Send Account (add email first)"}
-                  </button>
+                  {p.managed_by !== "provider" && (
+                    <button
+                      onClick={() => sendAccountToProvider(p)}
+                      disabled={handing === p.id}
+                      style={{ ...S.btn("#1B3D6F"), fontWeight: 900, opacity: handing === p.id ? 0.7 : 1 }}
+                      title={p.email ? `Activate + mark Self-Managed + send login to ${p.email}` : "Add email first"}
+                    >
+                      {handing === p.id ? "Sending…" : p.email ? "📤 Send Account to Provider" : "📤 Send Account (add email first)"}
+                    </button>
+                  )}
                   {p.email && <a href={`mailto:${p.email}`} style={{ ...S.btn(T.brownLight), textDecoration: "none" }}>✉️ Email</a>}
                   {p.phone && <a href={`tel:${p.phone}`} style={{ ...S.btn("#777"), textDecoration: "none" }}>📞 Call</a>}
                 </div>
@@ -1137,8 +1139,18 @@ function AddProviderTab({ onAdded, categories, services: allServices, serviceAre
       });
       const data = await res.json();
       if (data.error) throw new Error(data.error);
+      // If email was sent, immediately mark as Self-Managed — handoff is complete
+      if (data.email_sent && data.id) {
+        try {
+          await fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/adminUpdateProvider", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ pin: adminPin, id: data.id, fields: { managed_by: "provider" } }),
+          });
+        } catch(_) {}
+      }
       setDone({ name: form.business_name, vh: data.vh_number, email: form.email, tempPass: data.temp_password, emailSent: data.email_sent, emailSkipped: data.email_skipped });
-      onAdded({ ...form, id: data.id, vh_number: data.vh_number });
+      onAdded({ ...form, id: data.id, vh_number: data.vh_number, managed_by: data.email_sent ? "provider" : "vhub" });
       setForm(empty);
       setSvcSearch("");
       setOpenMacros({});
