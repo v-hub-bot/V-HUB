@@ -48,7 +48,7 @@ export default function Terms() {
           },
           {
             title: "5. Provider Subscriptions & Billing",
-            body: `Provider listings are offered on a subscription basis at $12 per month following a 45-day free trial. Trial periods begin on the date of listing approval. After the trial, providers who do not subscribe will be removed from the directory. Subscriptions are billed monthly and may be cancelled at any time. Cancellation takes effect at the end of the current billing period. Refunds are not provided for partial billing periods. Pricing is subject to change with reasonable notice.`
+            body: `Provider listings are offered on a subscription basis at $12 per month following a 45-day trial period. Trial periods begin on the date of listing approval. After the trial, providers who do not subscribe will be removed from the directory. Subscriptions are billed monthly and may be cancelled at any time. Cancellation takes effect at the end of the current billing period. Refunds are not provided for partial billing periods. Pricing is subject to change with reasonable notice.`
           },
           {
             title: "6. User Conduct",
