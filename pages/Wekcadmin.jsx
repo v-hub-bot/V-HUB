@@ -223,10 +223,10 @@ function ProvidersTab({ providers, setProviders, catMap, svcMap, areaMap, fullSv
       if (data.error) throw new Error(data.error);
 
       // Also mark as Self-Managed
-      await fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/adminUpdateProvider", {
+      await fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/providerLogin", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ pin: adminPin, id: p.id, fields: { managed_by: "provider" } }),
+        body: JSON.stringify({ action: "admin_update", pin: adminPin, id: p.id, fields: { managed_by: "provider" } }),
       });
 
       // Update local state — active, visible, trial started, Self-Managed
@@ -325,10 +325,10 @@ You can resend manually from the Email button.`);
   };
 
   const adminUpdate = async (id, fields) => {
-    const res = await fetch(`https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/adminUpdateProvider`, {
+    const res = await fetch(`https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/providerLogin`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ pin: adminPin, id, fields }),
+      body: JSON.stringify({ action: "admin_update", pin: adminPin, id, fields }),
     });
     const data = await res.json();
     if (data.error) throw new Error(data.error);
@@ -346,10 +346,10 @@ You can resend manually from the Email button.`);
   };
 
   const adminDelete = async (id) => {
-    const res = await fetch(`https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/adminUpdateProvider`, {
+    const res = await fetch(`https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/providerLogin`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ pin: adminPin, id, delete: true }),
+      body: JSON.stringify({ action: "admin_update", pin: adminPin, id, delete: true }),
     });
     const data = await res.json();
     if (data.error) throw new Error(data.error);
@@ -1157,10 +1157,10 @@ function AddProviderTab({ onAdded, categories, services: allServices, serviceAre
       // If email was sent, immediately mark as Self-Managed — handoff is complete
       if (data.email_sent && data.id) {
         try {
-          await fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/adminUpdateProvider", {
+          await fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/providerLogin", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ pin: adminPin, id: data.id, fields: { managed_by: "provider" } }),
+            body: JSON.stringify({ action: "admin_update", pin: adminPin, id: data.id, fields: { managed_by: "provider" } }),
           });
         } catch(_) {}
       }
