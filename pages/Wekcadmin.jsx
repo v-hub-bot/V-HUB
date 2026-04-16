@@ -89,6 +89,7 @@ function Overview({ providers, reviews, leads, fullAreaMap }) {
     { label: "Trial Expired", val: expired, color: T.red, icon: "⚠️" },
     { label: "Profile Views", val: totalViews, color: T.brownLight, icon: "👁️" },
     { label: "Search Appearances", val: totalSearch, color: T.teal, icon: "🔍" },
+    { label: "New Signups Pending", val: providers.filter(p => p.subscription_status === "pending").length, color: "#E8431A", icon: "🔔" },
     { label: "Reviews Pending", val: pending, color: T.red, icon: "⭐" },
     { label: "Lead Inquiries", val: leads.length, color: T.brown, icon: "📬" },
   ];
@@ -1463,6 +1464,7 @@ function Dashboard({ adminPin }) {
   const fullAreaMap = { ...LEGACY_AREA_MAP, ...areaMap };
 
   const pendingReviews = reviews.filter(r => !r.is_approved);
+  const pendingProviders = providers.filter(p => p.subscription_status === "pending");
   const TABS = ["Overview", "Providers", "Reviews", "Leads", "Analytics", "Add Provider"];
 
   if (loading) return (
@@ -1488,10 +1490,23 @@ function Dashboard({ adminPin }) {
         </div>
       </div>
 
+      {/* ── NEW SIGNUPS ALERT BANNER ── */}
+      {pendingProviders.length > 0 && (
+        <div
+          onClick={() => setTab("Providers")}
+          style={{ background: "#E8431A", color: "#fff", padding: "10px 16px", display: "flex", alignItems: "center", gap: 10, cursor: "pointer", fontFamily: T.sans, fontSize: 14, fontWeight: 700, borderBottom: "3px solid #b33010" }}
+        >
+          <span style={{ fontSize: 20 }}>🔔</span>
+          <span>{pendingProviders.length} new listing{pendingProviders.length > 1 ? "s" : ""} waiting for your review!</span>
+          <span style={{ marginLeft: "auto", background: "rgba(255,255,255,0.25)", borderRadius: 20, padding: "2px 12px", fontSize: 13 }}>Tap to review →</span>
+        </div>
+      )}
+
       <div style={{ background: T.parchmentDark, borderBottom: `2px solid ${T.border}`, overflowX: "auto", display: "flex" }}>
         {TABS.map(t => (
           <button key={t} onClick={() => setTab(t)} style={S.tabBtn(tab === t)}>
             {t}{t === "Reviews" && pendingReviews.length > 0 ? ` (${pendingReviews.length})` : ""}
+            {t === "Providers" && pendingProviders.length > 0 ? ` 🔴${pendingProviders.length}` : ""}
             {t === "Leads" && leads.length > 0 ? ` (${leads.length})` : ""}
           </button>
         ))}
