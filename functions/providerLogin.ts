@@ -1,4 +1,4 @@
-// providerLogin v7 - handles login, session restore, AND password/profile saves
+// providerLogin v8 - secure: all mutating actions require vh_number ownership proof
 import { createClientFromRequest } from "npm:@base44/sdk@0.8.25";
 
 const CORS = {
@@ -58,23 +58,45 @@ Deno.serve(async (req: Request) => {
       return new Response(JSON.stringify({ error: "Session expired" }), { status: 401, headers: CORS });
     }
 
-    // ── SAVE PASSWORD (force change or voluntary) ─────────────────────────
+    // ── SAVE PASSWORD (force change on first login) ───────────────────────
+    // Requires provider_id + vh_number to prove ownership
     if (action === "save_password") {
       const provider_id = (body.provider_id as string || "").trim();
+      const vh_number   = (body.vh_number   as string || "").trim();
       const new_password = (body.new_password as string || "").trim();
-      if (!provider_id || !new_password) return new Response(JSON.stringify({ error: "Missing provider_id or new_password" }), { status: 400, headers: CORS });
-      if (new_password.length < 6) return new Response(JSON.stringify({ error: "Password must be at least 6 characters" }), { status: 400, headers: CORS });
+      if (!provider_id || !vh_number || !new_password) {
+        return new Response(JSON.stringify({ error: "Missing required fields" }), { status: 400, headers: CORS });
+      }
+      if (new_password.length < 6) {
+        return new Response(JSON.stringify({ error: "Password must be at least 6 characters" }), { status: 400, headers: CORS });
+      }
+      // Verify ownership: provider_id must match vh_number
+      const existing = await sr.entities.Provider.get(provider_id);
+      if (!existing) return new Response(JSON.stringify({ error: "Provider not found" }), { status: 404, headers: CORS });
+      if (existing.vh_number !== vh_number) {
+        return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: CORS });
+      }
       const hashed = await sha256(new_password);
       const updated = await sr.entities.Provider.update(provider_id, { login_password: hashed, password_changed: true, managed_by: "Self-Managed" });
       return new Response(JSON.stringify({ success: true, provider: sanitize(updated) }), { headers: CORS });
     }
 
-    // ── SAVE LOGIN EMAIL ──────────────────────────────────────────────────
+    // ── SAVE LOGIN EMAIL / PASSWORD (account settings page) ──────────────
+    // Requires provider_id + vh_number to prove ownership
     if (action === "save_account") {
       const provider_id     = (body.provider_id     as string || "").trim();
+      const vh_number       = (body.vh_number       as string || "").trim();
       const new_login_email = (body.new_login_email as string || "").trim().toLowerCase();
       const new_password    = (body.new_password    as string || "").trim();
-      if (!provider_id || !new_login_email) return new Response(JSON.stringify({ error: "Missing provider_id or new_login_email" }), { status: 400, headers: CORS });
+      if (!provider_id || !vh_number || !new_login_email) {
+        return new Response(JSON.stringify({ error: "Missing provider_id, vh_number, or new_login_email" }), { status: 400, headers: CORS });
+      }
+      // Verify ownership
+      const existing = await sr.entities.Provider.get(provider_id);
+      if (!existing) return new Response(JSON.stringify({ error: "Provider not found" }), { status: 404, headers: CORS });
+      if (existing.vh_number !== vh_number) {
+        return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: CORS });
+      }
       const updates: Record<string, unknown> = { login_email: new_login_email };
       if (new_password && new_password.length >= 6) {
         updates.login_password = await sha256(new_password);

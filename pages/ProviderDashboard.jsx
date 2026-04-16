@@ -542,7 +542,7 @@ function ForcePasswordChangeScreen({ provider, onComplete }) {
       const res = await fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/providerLogin", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "save_password", provider_id: provider.id, new_password: newPass }),
+        body: JSON.stringify({ action: "save_password", provider_id: provider.id, vh_number: provider.vh_number, new_password: newPass }),
       });
       const data = await res.json();
       if (!res.ok || !data.success) {
@@ -1643,6 +1643,7 @@ export default function ProviderDashboard() {
       const payload = {
         provider_id: provider.id,
         new_login_email: newEmail,
+        vh_number: provider.vh_number,
       };
       if (newPass) {
         payload.new_password = newPass;
