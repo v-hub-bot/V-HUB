@@ -661,13 +661,24 @@ You can resend manually from the Email button.`);
                 {/* Action buttons */}
                 <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
                   {(!p.is_active || p.subscription_status === "pending") && p.subscription_status !== "archived" && (
-                    <button
-                      onClick={() => approveAndNotify(p)}
-                      disabled={approving === p.id}
-                      style={S.btn("#2e7d32")}
-                    >
-                      {approving === p.id ? "Approving..." : "✅ Approve & Notify"}
-                    </button>
+                    p.onboarding_type === "admin_added" ? (
+                      !p.is_active && (
+                        <button
+                          onClick={() => toggleActive(p)}
+                          style={S.btn("#2e7d32")}
+                        >
+                          ✅ Activate Listing
+                        </button>
+                      )
+                    ) : (
+                      <button
+                        onClick={() => approveAndNotify(p)}
+                        disabled={approving === p.id}
+                        style={S.btn("#2e7d32")}
+                      >
+                        {approving === p.id ? "Approving..." : "✅ Approve & Notify"}
+                      </button>
+                    )
                   )}
                   {p.subscription_status === "archived" && (
                     <button onClick={() => reactivateArchived(p)} style={{ ...S.btn("#1A237E"), fontWeight: 900 }}>
