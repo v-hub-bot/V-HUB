@@ -17,9 +17,12 @@ Deno.serve(async (req: Request): Promise<Response> => {
       const expires = new Date(ad.deal_expires_at);
       if (expires >= now) continue; // Not expired yet
 
-      // This ad has expired
-      if (ad.next_headline && ad.next_body) {
-        // Promote queued next ad
+      // This ad has expired — check for queued next week
+      const hasNextContent = ad.next_headline && ad.next_body;
+      const hasNextSlot = ad.next_deal_expires_at; // Provider already paid for next week
+
+      if (hasNextContent) {
+        // Promote full queued ad with content
         await base44.asServiceRole.entities.ClassifiedAd.update(ad.id, {
           headline: ad.next_headline,
           body: ad.next_body,
@@ -36,7 +39,26 @@ Deno.serve(async (req: Request): Promise<Response> => {
           is_active: true,
         });
         rolled++;
-        console.log(`Rolled over ad ${ad.id} for provider ${ad.provider_id} (${ad.provider_name})`);
+        console.log(`Rolled over ad ${ad.id} for provider ${ad.provider_id} (${ad.provider_name}) — full content promoted`);
+      } else if (hasNextSlot) {
+        // Provider paid for next week but hasn't filled in content yet — reset to blank active slot
+        await base44.asServiceRole.entities.ClassifiedAd.update(ad.id, {
+          headline: "",
+          body: "",
+          address: "",
+          village: "",
+          image_url: null,
+          deal_expires_at: ad.next_deal_expires_at,
+          next_headline: null,
+          next_body: null,
+          next_address: null,
+          next_village: null,
+          next_image_url: null,
+          next_deal_expires_at: null,
+          is_active: true,
+        });
+        rolled++;
+        console.log(`Rolled over ad ${ad.id} (blank slot — provider needs to fill content) expires: ${ad.next_deal_expires_at}`);
       } else {
         // No queued ad — deactivate
         await base44.asServiceRole.entities.ClassifiedAd.update(ad.id, { is_active: false });
