@@ -374,7 +374,8 @@ function VillageSelect({ selAreas, setSelAreas, dbAreas, areaMap }) {
           {selAreas.map(id => {
             const area = (dbAreas || []).find(a => a.id === id);
             const legAreaName = LEGACY_AREA[id] || null;
-            const name = area ? (area.name.includes(' — ') ? area.name.split(' — ').pop().trim() : area.name) : (legAreaName || (areaMap && areaMap[id]) || "Unknown Village");
+            const areaRaw = area ? area.name : (areaMap && areaMap[id]) || legAreaName || null;
+            const name = areaRaw ? (areaRaw.includes(' — ') ? areaRaw.split(' — ').pop().trim() : areaRaw) : (legAreaName || id);
             return (
               <span key={id} onClick={() => setSelAreas(prev => prev.filter(a => a !== id))}
                 style={{ fontSize: 12, background: TEAL, color: "#fff", borderRadius: 20, padding: "4px 11px", cursor: "pointer", fontFamily: SANS }}>
@@ -1403,6 +1404,7 @@ export default function ProviderDashboard() {
   const [dbCategories, setDbCategories] = useState([]);
   const [dbServices, setDbServices]     = useState([]);
   const [dbAreas, setDbAreas]           = useState([]);
+  const [mapsReady, setMapsReady]       = useState(false);
 
   // Edit form state
   const [form, setForm]             = useState({});
@@ -1543,6 +1545,7 @@ export default function ProviderDashboard() {
         am[a.id] = a.name.includes(" — ") ? a.name.split(" — ").pop().trim() : a.name;
       });
       setAreaMap(am);
+      setMapsReady(true);
     });
   }, []);
 
@@ -1868,13 +1871,18 @@ export default function ProviderDashboard() {
 
         <div style={shS}>Section 2 — Services You Offer</div>
         <div style={{ marginBottom: 24 }}>
-          <SvcAccordion selSvcs={selSvcs} setSelSvcs={setSelSvcs} dbCategories={dbCategories} dbServices={dbServices} />
-          {selSvcs.length > 0 && <div style={{ marginTop: 8, fontSize: 12, color: TEAL, fontFamily: SANS }}>✓ {selSvcs.length} service{selSvcs.length > 1 ? "s" : ""} selected</div>}
+          {mapsReady
+            ? <><SvcAccordion selSvcs={selSvcs} setSelSvcs={setSelSvcs} dbCategories={dbCategories} dbServices={dbServices} />{selSvcs.length > 0 && <div style={{ marginTop: 8, fontSize: 12, color: TEAL, fontFamily: SANS }}>✓ {selSvcs.length} service{selSvcs.length > 1 ? "s" : ""} selected</div>}</>
+            : <div style={{ fontSize: 13, color: INK_FADE, fontStyle: "italic", fontFamily: SANS, padding: "12px 0" }}>Loading services...</div>
+          }
         </div>
 
         <div style={shS}>Section 3 — Villages You Serve</div>
         <div style={{ marginBottom: 28 }}>
-          <VillageSelect selAreas={selAreas} setSelAreas={setSelAreas} dbAreas={dbAreas} areaMap={mergedAreaMap} />
+          {mapsReady
+            ? <VillageSelect selAreas={selAreas} setSelAreas={setSelAreas} dbAreas={dbAreas} areaMap={mergedAreaMap} />
+            : <div style={{ fontSize: 13, color: INK_FADE, fontStyle: "italic", fontFamily: SANS, padding: "12px 0" }}>Loading villages...</div>
+          }
         </div>
 
         <div style={{ textAlign: "center", borderTop: `2px solid ${INK}`, paddingTop: 20 }}>
