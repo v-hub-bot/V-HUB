@@ -785,6 +785,7 @@ function SvcDropdown({ open, cats, svcs, openCat, selSvc, setOpenCat, setSelSvc,
           <div key={c.id} style={{ overflowX: "hidden" }}>
             {/* Macro row — tap to expand/collapse micros */}
             <div
+              data-testid={`cat-${c.name.replace(/[^a-z]/gi,'-').toLowerCase()}`}
               onClick={e => { e.stopPropagation(); setOpenCat(isExpanded ? null : c.id); }}
               style={{
                 display: "flex", alignItems: "center", justifyContent: "space-between",
@@ -812,6 +813,7 @@ function SvcDropdown({ open, cats, svcs, openCat, selSvc, setOpenCat, setSelSvc,
               return (
                 <div
                   key={s.id}
+                  data-testid={`svc-item-${s.name.replace(/[^a-z]/gi,'-').toLowerCase()}`}
                   onClick={e => { e.stopPropagation(); setSelSvc(s); setSOpen(false); setOpenCat(null); }}
                   style={{
                     padding: "10px 14px 10px 28px",
