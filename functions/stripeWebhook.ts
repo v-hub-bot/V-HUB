@@ -195,10 +195,44 @@ Deno.serve(async (req: Request): Promise<Response> => {
         try {
           // Calculate expiry: 7 days from now
           const expires = adExpires || new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split("T")[0];
+
+          // 1. Mark provider as having classifieds
           await base44.asServiceRole.entities.Provider.update(providerRecordId, {
             classifieds_addon: true,
           });
-          console.log("✅ Classifieds weekly ad activated for:", providerRecordId, "expires:", expires);
+
+          // 2. Fetch provider details for the ad
+          let provider: any = null;
+          try {
+            provider = await base44.asServiceRole.entities.Provider.get(providerRecordId);
+          } catch (_) {
+            const results = await base44.asServiceRole.entities.Provider.filter({ id: providerRecordId });
+            if (results.length > 0) provider = results[0];
+          }
+
+          // 3. Check if this provider already has an active ad
+          const existingAds = await base44.asServiceRole.entities.ClassifiedAd.filter({ provider_id: providerRecordId, is_active: true });
+
+          if (existingAds.length > 0) {
+            // Queue as next ad — provider already has a live ad running
+            await base44.asServiceRole.entities.ClassifiedAd.update(existingAds[0].id, {
+              next_deal_expires_at: expires,
+            });
+            console.log("✅ Queued next classifieds ad for:", providerRecordId, "expires:", expires);
+          } else {
+            // No active ad — create a fresh one (provider fills in content from dashboard)
+            await base44.asServiceRole.entities.ClassifiedAd.create({
+              provider_id: providerRecordId,
+              provider_name: provider?.business_name || session.metadata?.provider_name || "Unknown",
+              is_active: true,
+              deal_expires_at: expires,
+              headline: "",
+              body: "",
+              village: "",
+              address: "",
+            });
+            console.log("✅ ClassifiedAd created for:", providerRecordId, "expires:", expires);
+          }
         } catch (err) {
           console.error("Failed to activate classifieds weekly addon:", err);
         }
