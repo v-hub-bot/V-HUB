@@ -1530,23 +1530,33 @@ export default function ProviderDashboard() {
       }
     }
 
-    // Load entity data for name resolution and edit pickers
-    Promise.all([
-      Category.list().catch(() => []),
-      Service.list().catch(() => []),
-      ServiceArea.list().catch(() => []),
-    ]).then(([cats, svcs, areas]) => {
-      setDbCategories(cats || []);
-      setDbServices(svcs || []);
-      setDbAreas(areas || []);
-      const sm = {}; (svcs || []).forEach(s => { sm[s.id] = s.name; });
-      setSvcMap(sm);
-      const am = {}; (areas || []).forEach(a => {
-        am[a.id] = a.name.includes(" — ") ? a.name.split(" — ").pop().trim() : a.name;
+    // Load entity data via backend (service role — works without Base44 auth)
+    fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/getProviders", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ get_lookup_data: true }),
+    })
+      .then(r => r.json())
+      .then(data => {
+        const cats  = data.categories || [];
+        const svcs  = data.services   || [];
+        const areas = data.areas      || [];
+        setDbCategories(cats);
+        setDbServices(svcs);
+        setDbAreas(areas);
+        const sm = {}; svcs.forEach(s => { sm[s.id] = s.name; });
+        setSvcMap(sm);
+        const am = {}; areas.forEach(a => {
+          am[a.id] = a.name.includes(" — ") ? a.name.split(" — ").pop().trim() : a.name;
+        });
+        setAreaMap(am);
+        setMapsReady(true);
+      })
+      .catch(err => {
+        console.error("Lookup data load failed:", err);
+        // Still mark ready so UI doesn't stay stuck on "Loading..."
+        setMapsReady(true);
       });
-      setAreaMap(am);
-      setMapsReady(true);
-    });
   }, []);
 
   const loadClassified = async (pid) => {
