@@ -57,7 +57,7 @@ Deno.serve(async (req) => {
           </p>
         </div>
         <div style="background: #1A0A00; padding: 12px; text-align: center; color: rgba(245,232,204,0.5); font-size: 11px;">
-          V-Hub · The Villages, Florida · admin@v-hub.us
+          🌴 www.v-hub.us · V-Hub · The Villages, Florida · admin@v-hub.us
         </div>
       </div>
     `;
