@@ -1,4 +1,4 @@
-// adminProviderOps v2 — deployed fresh after phantom state fix
+// adminProviderOps v4 — ts=1776378092
 import { createClientFromRequest, createClient } from 'npm:@base44/sdk@0.8.25';
 
 const CORS_OPEN = {
@@ -48,19 +48,15 @@ const PROVIDER_SELF_FIELDS = [
   "services","service_areas","is_mobile","hours_of_operation","google_rating"
 ];
 
-const DEPLOYED_AT = "2026-04-16T09:30:00Z";
-
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: CORS_OPEN });
-  if (req.method !== "POST") return Response.json({ error: "Method not allowed", deployed_at: DEPLOYED_AT }, { status: 405, headers: CORS_OPEN });
+  if (req.method !== "POST") return Response.json({ error: "Method not allowed" }, { status: 405, headers: CORS_OPEN });
 
   let body: Record<string,unknown> = {};
   try { body = await req.json(); } catch { body = {}; }
 
-  // health check
-  if (body.ping === true) return Response.json({ ok: true, deployed_at: DEPLOYED_AT }, { headers: CORS_OPEN });
+  if (body.ping === true) return Response.json({ ok: true, v: 4 }, { headers: CORS_OPEN });
 
-  // Provider password change (no admin auth needed)
   if (body.provider_change_password === true) {
     const pid = String(body.provider_id || "").trim();
     const np  = String(body.new_password || "").trim();
@@ -72,7 +68,6 @@ Deno.serve(async (req: Request) => {
     return Response.json({ success: true, provider: upd }, { headers: CORS_OPEN });
   }
 
-  // Provider self-update
   if (body.provider_self_update === true) {
     const pid   = String(body.provider_id || "").trim();
     const vhnum = String(body.vh_number   || "").trim();
@@ -91,7 +86,6 @@ Deno.serve(async (req: Request) => {
     return Response.json({ success: true, record: updated }, { headers: CORS_OPEN });
   }
 
-  // ADMIN MODE
   const base44 = createClientFromRequest(req);
   const VALID_PINS   = ["1357"];
   const ADMIN_EMAILS = ["kimberlycook1980@gmail.com", "5bebegurlz@gmail.com"];

@@ -1,4 +1,4 @@
-// adminProviderOps v1 — replacement for adminUpdateProvider
+// adminProviderOps v3 — force redeploy 2026-04-16T22:20Z
 import { createClientFromRequest, createClient } from 'npm:@base44/sdk@0.8.25';
 
 const CORS_OPEN = {
@@ -54,6 +54,9 @@ Deno.serve(async (req: Request) => {
 
   let body: Record<string,unknown> = {};
   try { body = await req.json(); } catch { body = {}; }
+
+  // Health check
+  if (body.ping === true) return Response.json({ ok: true, version: "v3", ts: "2026-04-16T22:20Z" }, { headers: CORS_OPEN });
 
   // Provider password change (no admin auth needed)
   if (body.provider_change_password === true) {
