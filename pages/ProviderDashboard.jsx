@@ -1769,8 +1769,15 @@ export default function ProviderDashboard() {
     : null;
 
   // ── Resolved service & area names ─────────────────────────────────────
-  const svcNames  = provider ? (provider.services  || []).map(id => resolveSvc(id, svcMap)).filter(Boolean) : [];
-  const areaNames = provider ? (provider.service_areas || []).map(id => resolveArea(id, areaMap)).filter(Boolean) : [];
+  // Build inline maps directly from dbServices/dbAreas as fallback if svcMap/areaMap not ready yet
+  const liveSvcMap = {};
+  (dbServices || []).forEach(s => { liveSvcMap[s.id] = s.name; });
+  const liveAreaMap = {};
+  (dbAreas || []).forEach(a => { liveAreaMap[a.id] = a.name.includes(" — ") ? a.name.split(" — ").pop().trim() : a.name; });
+  const mergedSvcMap  = Object.keys(svcMap).length  > 0 ? svcMap  : liveSvcMap;
+  const mergedAreaMap = Object.keys(areaMap).length > 0 ? areaMap : liveAreaMap;
+  const svcNames  = provider ? (provider.services  || []).map(id => resolveSvc(id, mergedSvcMap)).filter(Boolean) : [];
+  const areaNames = provider ? (provider.service_areas || []).map(id => resolveArea(id, mergedAreaMap)).filter(Boolean) : [];
 
   // ── STATES ────────────────────────────────────────────────────────────
   if (authState === "loading") return (
@@ -1867,7 +1874,7 @@ export default function ProviderDashboard() {
 
         <div style={shS}>Section 3 — Villages You Serve</div>
         <div style={{ marginBottom: 28 }}>
-          <VillageSelect selAreas={selAreas} setSelAreas={setSelAreas} dbAreas={dbAreas} areaMap={areaMap} />
+          <VillageSelect selAreas={selAreas} setSelAreas={setSelAreas} dbAreas={dbAreas} areaMap={mergedAreaMap} />
         </div>
 
         <div style={{ textAlign: "center", borderTop: `2px solid ${INK}`, paddingTop: 20 }}>
