@@ -220,16 +220,32 @@ Deno.serve(async (req: Request) => {
         <tr><td style="padding:5px 0;color:#888;width:40%;">Business:</td><td style="font-weight:700;">${business_name}</td></tr>
         <tr><td style="padding:5px 0;color:#888;">Owner:</td><td>${owner_name}</td></tr>
         ${phone ? `<tr><td style="padding:5px 0;color:#888;">Phone:</td><td>${phone}</td></tr>` : ''}
-        ${website ? `<tr><td style="padding:5px 0;color:#888;">Website:</td><td>${website}</td></tr>` : ''}
+        ${website ? `<tr><td style="padding:5px 0;color:#888;">Website:</td><td><a href="${website}" style="color:#E8431A;">${website}</a></td></tr>` : ''}
       </table>
+      ${description ? `
+      <div style="margin-top:14px;padding:12px 14px;background:#FBF7EE;border-left:3px solid #C9973A;border-radius:6px;">
+        <div style="font-size:12px;color:#888;margin-bottom:6px;font-weight:700;text-transform:uppercase;letter-spacing:1px;">Your Business Description:</div>
+        <p style="font-size:13px;color:#333;margin:0;line-height:1.7;font-style:italic;">"${description}"</p>
+      </div>` : ''}
       <div style="margin-top:14px;">
         <div style="font-size:12px;color:#888;margin-bottom:6px;font-weight:700;text-transform:uppercase;letter-spacing:1px;">Services Listed:</div>
         <ul style="margin:0;padding-left:18px;font-size:13px;color:#333;">${servicesHtml}</ul>
       </div>
       <div style="margin-top:12px;">
-        <div style="font-size:12px;color:#888;margin-bottom:6px;font-weight:700;text-transform:uppercase;letter-spacing:1px;">Service Areas:</div>
+        <div style="font-size:12px;color:#888;margin-bottom:6px;font-weight:700;text-transform:uppercase;letter-spacing:1px;">Villages You Serve:</div>
         <ul style="margin:0;padding-left:18px;font-size:13px;color:#333;">${areasHtml}</ul>
       </div>
+    </div>
+
+    <!-- What Happens Next -->
+    <div style="background:#EEF2FF;border:1.5px solid #7986CB;border-radius:10px;padding:20px;margin-bottom:20px;">
+      <div style="font-size:13px;font-weight:900;color:#283593;margin-bottom:12px;">📌 WHAT HAPPENS NEXT</div>
+      <ol style="margin:0;padding-left:18px;font-size:14px;color:#333;line-height:2;">
+        <li><strong>Log in to your Provider Hub</strong> — review your listing and make any updates.</li>
+        <li><strong>Personalize your profile</strong> — add your logo, update your description, hours, and service areas anytime.</li>
+        <li><strong>Residents find you</strong> — when someone in The Villages searches for your services, your listing appears and they can contact you directly.</li>
+        <li><strong>At trial end</strong> — we'll send a reminder before your ${trialDays}-day trial expires. Just $12/month to stay listed — cancel anytime.</li>
+      </ol>
     </div>
 
     <!-- Trial Info -->
