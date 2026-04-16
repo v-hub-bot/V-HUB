@@ -264,17 +264,21 @@ Deno.serve(async (req: Request) => {
     <!-- Login Info -->
     <div style="background:#E8F5E9;border:2px solid #66BB6A;border-radius:10px;padding:20px;margin-bottom:20px;">
       <div style="font-size:13px;font-weight:900;color:#2E7D32;margin-bottom:12px;">🔐 YOUR PROVIDER HUB LOGIN</div>
-      <p style="font-size:13px;color:#1B5E20;line-height:1.7;margin:0 0 12px;">
+      <p style="font-size:13px;color:#1B5E20;line-height:1.7;margin:0 0 16px;">
         Your Provider Hub lets you view profile stats, update your listing, change your contact info, and manage your subscription.
       </p>
-      <table style="width:100%;border-collapse:collapse;font-size:14px;color:#333;">
-        <tr><td style="padding:5px 0;color:#555;width:40%;">Portal:</td><td><a href="${APP_URL}/ProviderDashboard" style="color:#2E7D32;font-weight:700;">V-Hub Provider Hub →</a></td></tr>
-        <tr><td style="padding:5px 0;color:#555;">VH Account #:</td><td><strong style="font-family:'Courier New',monospace;font-size:15px;background:#f0f0f0;padding:2px 8px;border-radius:4px;">${vh_number}</strong></td></tr>
-        <tr><td style="padding:5px 0;color:#555;">Email:</td><td>${email}</td></tr>
-        <tr><td style="padding:5px 0;color:#555;">Password:</td><td><strong style="font-family:'Courier New',monospace;font-size:16px;background:#d4edda;padding:3px 10px;border-radius:4px;letter-spacing:1px;">${tempPassword}</strong></td></tr>
+      <table style="width:100%;border-collapse:collapse;font-size:14px;color:#333;margin-bottom:16px;">
+        <tr><td style="padding:6px 0;color:#555;width:40%;">VH Account #:</td><td><strong style="font-family:'Courier New',monospace;font-size:15px;background:#f0f0f0;padding:2px 8px;border-radius:4px;">${vh_number}</strong></td></tr>
+        <tr><td style="padding:6px 0;color:#555;">Login Email:</td><td><strong>${email}</strong></td></tr>
+        <tr><td style="padding:6px 0;color:#555;">Temp Password:</td><td><strong style="font-family:'Courier New',monospace;font-size:16px;background:#d4edda;padding:3px 10px;border-radius:4px;letter-spacing:1px;">${tempPassword}</strong></td></tr>
       </table>
-      <p style="font-size:12px;color:#555;margin:12px 0 0;font-style:italic;">
-        You can log in with either your VH account number or your email address. We recommend changing your password after your first login via Account Settings.
+      <div style="text-align:center;margin-bottom:12px;">
+        <a href="${APP_URL}/ProviderDashboard" style="display:inline-block;background:#1A6B3C;color:#ffffff;font-family:Georgia,serif;font-size:15px;font-weight:900;letter-spacing:2px;text-transform:uppercase;text-decoration:none;padding:14px 32px;border-radius:8px;border:2px solid #0d3d22;">
+          🔑 Log In to Your Provider Hub →
+        </a>
+      </div>
+      <p style="font-size:12px;color:#555;margin:0;font-style:italic;text-align:center;">
+        You can log in with either your VH account number or your email address. Please change your password after your first login.
       </p>
     </div>
 
