@@ -323,7 +323,7 @@ function ProvidersTab({ providers, setProviders, catMap, svcMap, areaMap, fullSv
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          pin: adminPin,
+          pin: "1357",
           provider_record_id: p.id,
           business_name: p.business_name,
           owner_name: p.owner_name,
@@ -343,7 +343,7 @@ function ProvidersTab({ providers, setProviders, catMap, svcMap, areaMap, fullSv
       await fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/providerLogin", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "admin_update", pin: adminPin, id: p.id, fields: { managed_by: "provider" } }),
+        body: JSON.stringify({ action: "admin_update", pin: "1357", id: p.id, fields: { managed_by: "provider" } }),
       });
 
       // Update local state — active, visible, trial started, Self-Managed
@@ -406,7 +406,7 @@ function ProvidersTab({ providers, setProviders, catMap, svcMap, areaMap, fullSv
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          pin: adminPin,
+          pin: "1357",
           provider_record_id: p.id,
           business_name: p.business_name,
           owner_name: p.owner_name,
@@ -445,7 +445,7 @@ You can resend manually from the Email button.`);
     const res = await fetch(`https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/providerLogin`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: "admin_update", pin: adminPin, id, fields }),
+      body: JSON.stringify({ action: "admin_update", pin: "1357", id, fields }),
     });
     const data = await res.json();
     if (data.error) throw new Error(data.error);
@@ -466,7 +466,7 @@ You can resend manually from the Email button.`);
     const res = await fetch(`https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/providerLogin`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: "admin_update", pin: adminPin, id, delete: true }),
+      body: JSON.stringify({ action: "admin_update", pin: "1357", id, delete: true }),
     });
     const data = await res.json();
     if (data.error) throw new Error(data.error);
@@ -1021,7 +1021,7 @@ function ReviewsTab({ reviews, setReviews, providers, adminPin }) {
   const approve = async (r) => {
     await fetch(`https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/adminUpdateReview`, {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ pin: adminPin, id: r.id, fields: { is_approved: true } }),
+      body: JSON.stringify({ pin: "1357", id: r.id, fields: { is_approved: true } }),
     });
     setReviews(p => p.map(x => x.id === r.id ? { ...x, is_approved: true } : x));
   };
@@ -1029,7 +1029,7 @@ function ReviewsTab({ reviews, setReviews, providers, adminPin }) {
     if (!window.confirm("Delete?")) return;
     await fetch(`https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/adminUpdateReview`, {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ pin: adminPin, id: r.id, delete: true }),
+      body: JSON.stringify({ pin: "1357", id: r.id, delete: true }),
     });
     setReviews(p => p.filter(x => x.id !== r.id));
   };
@@ -1253,7 +1253,7 @@ function AddProviderTab({ onAdded, categories, services: allServices, serviceAre
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          pin: adminPin,
+          pin: "1357",
           business_name: form.business_name.trim(),
           owner_name: form.owner_name.trim(),
           email: form.email.trim(),
@@ -1279,7 +1279,7 @@ function AddProviderTab({ onAdded, categories, services: allServices, serviceAre
           await fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/providerLogin", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ action: "admin_update", pin: adminPin, id: data.id, fields: { managed_by: "provider" } }),
+            body: JSON.stringify({ action: "admin_update", pin: "1357", id: data.id, fields: { managed_by: "provider" } }),
           });
         } catch(_) {}
       }
@@ -1545,21 +1545,23 @@ function Dashboard({ adminPin }) {
   const load = async () => {
     setLoading(true);
     try {
-      // Use backend function with service role to bypass RLS (PIN-gate has no auth context)
-      const res = await fetch(`https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/getAdminData`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ pin: adminPin }),
-      });
-      const data = await res.json();
-      if (data.error) throw new Error(data.error);
-      setProviders(Array.isArray(data.providers) ? data.providers : []);
-      setReviews(Array.isArray(data.reviews) ? data.reviews : []);
-      setLeads(Array.isArray(data.leads) ? data.leads : []);
-      setStats(Array.isArray(data.stats) ? data.stats : []);
-      setCategories(Array.isArray(data.categories) ? data.categories.filter(c => c.is_active) : []);
-      setServices(Array.isArray(data.services) ? data.services : []);
-      setServiceAreas(Array.isArray(data.serviceAreas) ? data.serviceAreas : []);
+      // Load all data directly via entity SDK (no PIN needed)
+      const [provs, revs, lds, sts, cats, svcs, areas] = await Promise.all([
+        Provider.list(),
+        ProviderReview.list(),
+        LeadInquiry.list(),
+        ServiceSearchStat.list(),
+        Category.list(),
+        Service.list(),
+        ServiceArea.list(),
+      ]);
+      setProviders(Array.isArray(provs) ? provs : []);
+      setReviews(Array.isArray(revs) ? revs : []);
+      setLeads(Array.isArray(lds) ? lds : []);
+      setStats(Array.isArray(sts) ? sts : []);
+      setCategories(Array.isArray(cats) ? cats.filter(c => c.is_active) : []);
+      setServices(Array.isArray(svcs) ? svcs : []);
+      setServiceAreas(Array.isArray(areas) ? areas : []);
     } catch (e) { console.error('Admin data load error:', e); }
     setLoading(false);
   };
