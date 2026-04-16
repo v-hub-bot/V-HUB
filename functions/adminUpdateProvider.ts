@@ -1,4 +1,4 @@
-// adminUpdateProvider v5.2 — redeployed 2026-04-16T00:10
+// adminUpdateProvider v6.0 — clean redeploy 2026-04-16T09:50
 import { createClientFromRequest, createClient } from 'npm:@base44/sdk@0.8.25';
 
 const ALLOWED_ORIGINS = ["https://www.v-hub.us", "https://v-hub-app-edf7f8e8.base44.app"];
@@ -67,7 +67,7 @@ Deno.serve(async (req: Request) => {
   let body: Record<string,unknown> = {};
   try { body = await req.json(); } catch { body = {}; }
 
-  // ── Provider password change ──────────────────────────────────────────
+  // Provider password change (no admin auth needed)
   if (body.provider_change_password === true) {
     const pid = body.provider_id as string;
     const np  = body.new_password as string;
@@ -86,7 +86,7 @@ Deno.serve(async (req: Request) => {
     }
   }
 
-  // ── Provider self-update ──────────────────────────────────────────────
+  // Provider self-update (authenticated by vh_number)
   if (body.provider_self_update === true) {
     const pid    = body.provider_id as string;
     const vhnum  = body.vh_number   as string;
@@ -109,7 +109,7 @@ Deno.serve(async (req: Request) => {
     return Response.json({ success: true, record: updated }, { headers: cors });
   }
 
-  // ── ADMIN MODE ────────────────────────────────────────────────────────
+  // ADMIN MODE — PIN or role-based auth
   const base44 = createClientFromRequest(req);
   const VALID_PINS = ["1357"];
   const ADMIN_EMAILS = ["kimberlycook1980@gmail.com", "5bebegurlz@gmail.com"];

@@ -1,4 +1,4 @@
-// providerLogin v8 - secure: all mutating actions require vh_number ownership proof
+// providerLogin v9 - adds admin_update action for provider management
 import { createClientFromRequest } from "npm:@base44/sdk@0.8.25";
 
 const CORS = {
@@ -34,6 +34,24 @@ function getInvalidIds(ids: unknown): string[] {
   return ids.filter((id: unknown) => !isValidDbId(String(id))).map(String);
 }
 
+function sanitizeProviderFields(fields: Record<string, unknown>): { safe: Record<string, unknown> | null; errMsg: string | null } {
+  const safe = { ...fields };
+  if ('services' in safe) {
+    const inv = getInvalidIds(safe.services);
+    if (inv.length > 0) return { safe: null, errMsg: `Invalid service IDs: ${inv.join(', ')}` };
+    safe.services = filterValidIds(safe.services);
+  }
+  if ('service_areas' in safe) {
+    const inv = getInvalidIds(safe.service_areas);
+    if (inv.length > 0) return { safe: null, errMsg: `Invalid village IDs: ${inv.join(', ')}` };
+    safe.service_areas = filterValidIds(safe.service_areas);
+  }
+  return { safe, errMsg: null };
+}
+
+const VALID_PINS = ["1357"];
+const ADMIN_EMAILS = ["kimberlycook1980@gmail.com", "5bebegurlz@gmail.com"];
+
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: CORS });
   if (req.method !== "POST") return new Response("Method Not Allowed", { status: 405, headers: CORS });
@@ -59,7 +77,6 @@ Deno.serve(async (req: Request) => {
     }
 
     // ── SAVE PASSWORD (force change on first login) ───────────────────────
-    // Requires provider_id + vh_number to prove ownership
     if (action === "save_password") {
       const provider_id = (body.provider_id as string || "").trim();
       const vh_number   = (body.vh_number   as string || "").trim();
@@ -70,7 +87,6 @@ Deno.serve(async (req: Request) => {
       if (new_password.length < 6) {
         return new Response(JSON.stringify({ error: "Password must be at least 6 characters" }), { status: 400, headers: CORS });
       }
-      // Verify ownership: provider_id must match vh_number
       const existing = await sr.entities.Provider.get(provider_id);
       if (!existing) return new Response(JSON.stringify({ error: "Provider not found" }), { status: 404, headers: CORS });
       if (existing.vh_number !== vh_number) {
@@ -82,7 +98,6 @@ Deno.serve(async (req: Request) => {
     }
 
     // ── SAVE LOGIN EMAIL / PASSWORD (account settings page) ──────────────
-    // Requires provider_id + vh_number to prove ownership
     if (action === "save_account") {
       const provider_id     = (body.provider_id     as string || "").trim();
       const vh_number       = (body.vh_number       as string || "").trim();
@@ -91,7 +106,6 @@ Deno.serve(async (req: Request) => {
       if (!provider_id || !vh_number || !new_login_email) {
         return new Response(JSON.stringify({ error: "Missing provider_id, vh_number, or new_login_email" }), { status: 400, headers: CORS });
       }
-      // Verify ownership
       const existing = await sr.entities.Provider.get(provider_id);
       if (!existing) return new Response(JSON.stringify({ error: "Provider not found" }), { status: 404, headers: CORS });
       if (existing.vh_number !== vh_number) {
@@ -135,6 +149,43 @@ Deno.serve(async (req: Request) => {
 
       const updated = await sr.entities.Provider.update(provider_id, safe);
       return new Response(JSON.stringify({ success: true, provider: sanitize(updated) }), { headers: CORS });
+    }
+
+    // ── ADMIN UPDATE (replaces adminUpdateProvider) ───────────────────────
+    if (action === "admin_update") {
+      const pinOk = body.pin && VALID_PINS.includes(String(body.pin));
+      let isAdmin = false;
+      if (!pinOk) {
+        try {
+          const me = await base44.auth.me();
+          if (me?.email && ADMIN_EMAILS.includes((me.email as string).toLowerCase())) isAdmin = true;
+        } catch { /* */ }
+      }
+      if (!pinOk && !isAdmin) return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: CORS });
+
+      const id      = body.id     as string | undefined;
+      const fields  = body.fields as Record<string, unknown> | undefined;
+      const doDelete = body.delete as boolean | undefined;
+      const doCreate = body.create as boolean | undefined;
+
+      if (doCreate) {
+        const { safe, errMsg } = sanitizeProviderFields((fields || {}) as Record<string, unknown>);
+        if (errMsg) return new Response(JSON.stringify({ error: errMsg }), { status: 400, headers: CORS });
+        const r = await sr.entities.Provider.create(safe!);
+        return new Response(JSON.stringify({ success: true, record: r }), { headers: CORS });
+      }
+      if (!id) return new Response(JSON.stringify({ error: "Missing id" }), { status: 400, headers: CORS });
+      if (doDelete) {
+        await sr.entities.Provider.delete(id);
+        return new Response(JSON.stringify({ success: true }), { headers: CORS });
+      }
+      if (fields) {
+        const { safe, errMsg } = sanitizeProviderFields(fields);
+        if (errMsg) return new Response(JSON.stringify({ error: errMsg }), { status: 400, headers: CORS });
+        const r = await sr.entities.Provider.update(id, safe!);
+        return new Response(JSON.stringify({ success: true, record: r }), { headers: CORS });
+      }
+      return new Response(JSON.stringify({ error: "No action specified" }), { status: 400, headers: CORS });
     }
 
     // ── NORMAL LOGIN ──────────────────────────────────────────────────────
