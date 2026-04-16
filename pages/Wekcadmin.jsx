@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { Provider, ProviderReview, LeadInquiry, ServiceSearchStat, Category, Service, ServiceArea } from "@/api/entities";
 
-const PINS = ["1357"];
 const LOGO = "https://media.base44.com/images/public/69d062aca815ce8e697894b1/a9af95bc3_V-Hublogo.png";
+const FN = "https://v-hub-697894b1.base44.app/functions/adminMagicLink";
 
-// SHA-256 for password hashing
+// SHA-256 for password hashing (used by admin Set Password feature)
 async function sha256(plain) {
   if (!plain) return "";
   const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(plain));
@@ -34,22 +34,139 @@ const S = {
 function fmt(d) { if (!d) return "—"; return new Date(d).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }); }
 function daysLeft(d) { if (!d) return null; return Math.ceil((new Date(d) - new Date()) / 86400000); }
 
-// ── PIN GATE ──────────────────────────────────────────────────────────────────
-function PinGate({ onUnlock }) {
-  const [pin, setPin] = useState(""); const [err, setErr] = useState(false);
-  const go = () => { if (PINS.includes(pin)) onUnlock(pin); else { setErr(true); setPin(""); setTimeout(() => setErr(false), 2500); } };
+// ── MAGIC LINK GATE ───────────────────────────────────────────────────────────
+function MagicLinkGate({ onUnlock }) {
+  const [step, setStep]   = useState("check"); // check | email | sent | invalid
+  const [email, setEmail] = useState("");
+  const [sending, setSending] = useState(false);
+  const [err, setErr]     = useState("");
+  const [reason, setReason] = useState("");
+
+  // On mount — check for ?token= in URL
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const token = params.get("token");
+    if (token) {
+      setStep("verifying");
+      fetch(FN, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "verify", token }),
+      })
+        .then(r => r.json())
+        .then(data => {
+          if (data.valid) {
+            // Clean token from URL without reload
+            window.history.replaceState({}, "", window.location.pathname);
+            onUnlock("magic_" + data.email);
+          } else {
+            const msgs = {
+              expired: "This link has expired. Links are only valid for 15 minutes — please request a new one.",
+              already_used: "This link has already been used. Each link can only be used once — please request a new one.",
+              not_found: "This link is invalid. Please request a new one.",
+            };
+            setReason(msgs[data.reason] || "Invalid link. Please request a new one.");
+            setStep("invalid");
+          }
+        })
+        .catch(() => { setReason("Something went wrong. Please try again."); setStep("invalid"); });
+    } else {
+      setStep("email");
+    }
+  }, []);
+
+  const requestLink = async () => {
+    const e = email.trim().toLowerCase();
+    if (!e || !e.includes("@")) { setErr("Please enter a valid email address."); return; }
+    setSending(true); setErr("");
+    try {
+      const res = await fetch(FN, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "request", email: e }),
+      });
+      const data = await res.json();
+      if (data.status === "sent") {
+        setStep("sent");
+      } else if (data.status === "not_admin") {
+        // Show generic "check your email" — alert already sent to admins
+        setStep("sent");
+      } else {
+        setErr(data.error || "Something went wrong. Try again.");
+      }
+    } catch {
+      setErr("Network error. Please try again.");
+    }
+    setSending(false);
+  };
+
+  const box = { background: T.cream, borderRadius: 12, padding: "40px 32px", boxShadow: `0 8px 32px ${T.shadow}`, textAlign: "center", width: 320, border: `2px solid ${T.border}` };
+
+  if (step === "check" || step === "verifying") return (
+    <div style={{ minHeight: "100vh", background: T.parchment, display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <div style={box}>
+        <img src={LOGO} style={{ width: 72, borderRadius: 12, marginBottom: 16 }} alt="" />
+        <div style={{ fontSize: 16, color: T.brownLight, fontStyle: "italic", fontFamily: T.sans }}>
+          {step === "verifying" ? "Verifying your link…" : "Loading…"}
+        </div>
+      </div>
+    </div>
+  );
+
+  if (step === "invalid") return (
+    <div style={{ minHeight: "100vh", background: T.parchment, display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <div style={box}>
+        <img src={LOGO} style={{ width: 72, borderRadius: 12, marginBottom: 16 }} alt="" />
+        <div style={{ fontSize: 22, fontWeight: 800, color: T.brownDark, marginBottom: 12, fontFamily: T.font }}>V-HUB Admin</div>
+        <div style={{ fontSize: 13, color: T.red, marginBottom: 20, fontFamily: T.sans, lineHeight: 1.7 }}>{reason}</div>
+        <button onClick={() => { setStep("email"); setReason(""); }} style={{ ...S.btn(T.brown), width: "100%", padding: 12, fontSize: 14 }}>Request New Link</button>
+        <a href="/" style={{ display: "block", marginTop: 14, fontSize: 12, color: T.brownLight, textDecoration: "none" }}>← Back to V-HUB</a>
+      </div>
+    </div>
+  );
+
+  if (step === "sent") return (
+    <div style={{ minHeight: "100vh", background: T.parchment, display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <div style={box}>
+        <img src={LOGO} style={{ width: 72, borderRadius: 12, marginBottom: 16 }} alt="" />
+        <div style={{ fontSize: 22, fontWeight: 800, color: T.brownDark, marginBottom: 12, fontFamily: T.font }}>Check Your Email</div>
+        <div style={{ fontSize: 42, marginBottom: 12 }}>📬</div>
+        <div style={{ fontSize: 14, color: T.brownLight, marginBottom: 8, fontFamily: T.sans, lineHeight: 1.7 }}>
+          If that email is authorized, a login link is on its way. Check your inbox — it expires in <strong>15 minutes</strong>.
+        </div>
+        <div style={{ fontSize: 12, color: T.brownLight, fontStyle: "italic", marginBottom: 20, fontFamily: T.sans }}>Don't see it? Check your spam folder.</div>
+        <button onClick={() => { setStep("email"); setEmail(""); }} style={{ ...S.btn(T.brownLight), width: "100%", padding: 10, fontSize: 13 }}>Try a different email</button>
+        <a href="/" style={{ display: "block", marginTop: 14, fontSize: 12, color: T.brownLight, textDecoration: "none" }}>← Back to V-HUB</a>
+      </div>
+    </div>
+  );
+
+  // Default: email entry
   return (
     <div style={{ minHeight: "100vh", background: T.parchment, display: "flex", alignItems: "center", justifyContent: "center" }}>
-      <div style={{ background: T.cream, borderRadius: 12, padding: "40px 32px", boxShadow: `0 8px 32px ${T.shadow}`, textAlign: "center", width: 300, border: `2px solid ${T.border}` }}>
+      <div style={box}>
         <img src={LOGO} style={{ width: 72, borderRadius: 12, marginBottom: 16 }} alt="" />
         <div style={{ fontSize: 22, fontWeight: 800, color: T.brownDark, marginBottom: 4, fontFamily: T.font }}>V-HUB Admin</div>
-        <div style={{ fontSize: 13, color: T.brownLight, marginBottom: 22, fontStyle: "italic", fontFamily: T.sans }}>Enter your 4-digit PIN</div>
-        <input autoFocus type="password" inputMode="numeric" maxLength={4} value={pin}
-          onChange={e => setPin(e.target.value.replace(/\D/g, "").slice(0, 4))}
-          onKeyDown={e => e.key === "Enter" && go()} placeholder="••••"
-          style={{ ...S.inp, fontSize: 28, textAlign: "center", letterSpacing: 10, marginBottom: 10, border: err ? `2px solid ${T.red}` : `2px solid ${T.border}` }} />
-        {err && <div style={{ color: T.red, fontSize: 13, marginBottom: 8 }}>Incorrect PIN — try again</div>}
-        <button onClick={go} style={{ ...S.btn(T.brown), width: "100%", padding: 13, fontSize: 16 }}>Unlock Dashboard</button>
+        <div style={{ fontSize: 13, color: T.brownLight, marginBottom: 24, fontStyle: "italic", fontFamily: T.sans, lineHeight: 1.6 }}>
+          Enter your admin email and we'll send you a secure login link.
+        </div>
+        <input
+          autoFocus
+          type="email"
+          value={email}
+          onChange={e => { setEmail(e.target.value); setErr(""); }}
+          onKeyDown={e => e.key === "Enter" && !sending && requestLink()}
+          placeholder="your@email.com"
+          style={{ ...S.inp, fontSize: 15, textAlign: "center", marginBottom: 10, border: err ? `2px solid ${T.red}` : `2px solid ${T.border}` }}
+        />
+        {err && <div style={{ color: T.red, fontSize: 13, marginBottom: 8, fontFamily: T.sans }}>{err}</div>}
+        <button
+          onClick={requestLink}
+          disabled={sending}
+          style={{ ...S.btn(T.brown), width: "100%", padding: 13, fontSize: 15, opacity: sending ? 0.7 : 1 }}
+        >
+          {sending ? "Sending…" : "📧 Send Me a Login Link"}
+        </button>
         <a href="/" style={{ display: "block", marginTop: 14, fontSize: 12, color: T.brownLight, textDecoration: "none" }}>← Back to V-HUB</a>
       </div>
     </div>
@@ -1526,5 +1643,5 @@ function Dashboard({ adminPin }) {
 export default function Wekcadmin() {
   const [unlocked, setUnlocked] = useState(false);
   const [adminPin, setAdminPin] = useState("");
-  return unlocked ? <Dashboard adminPin={adminPin} /> : <PinGate onUnlock={(p) => { setAdminPin(p); setUnlocked(true); }} />;
+  return unlocked ? <Dashboard adminPin={adminPin} /> : <MagicLinkGate onUnlock={(p) => { setAdminPin(p); setUnlocked(true); }} />;
 }

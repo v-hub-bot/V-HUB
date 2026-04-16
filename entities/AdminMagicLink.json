@@ -1,0 +1,22 @@
+{
+  "type": "object",
+  "properties": {
+    "email": {
+      "type": "string"
+    },
+    "token": {
+      "type": "string"
+    },
+    "expires_at": {
+      "type": "string"
+    },
+    "used": {
+      "type": "boolean"
+    },
+    "ip_hint": {
+      "type": "string"
+    }
+  },
+  "required": [],
+  "name": "AdminMagicLink"
+}
