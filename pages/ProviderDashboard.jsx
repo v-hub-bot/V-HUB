@@ -1779,8 +1779,31 @@ export default function ProviderDashboard() {
   (dbAreas || []).forEach(a => { liveAreaMap[a.id] = a.name.includes(" — ") ? a.name.split(" — ").pop().trim() : a.name; });
   const mergedSvcMap  = Object.keys(svcMap).length  > 0 ? svcMap  : liveSvcMap;
   const mergedAreaMap = Object.keys(areaMap).length > 0 ? areaMap : liveAreaMap;
-  const svcNames  = React.useMemo(() => provider && mapsReady ? (provider.services  || []).map(id => resolveSvc(id, mergedSvcMap)).filter(Boolean) : [], [provider, mapsReady, mergedSvcMap]);
-  const areaNames = React.useMemo(() => provider && mapsReady ? (provider.service_areas || []).map(id => resolveArea(id, mergedAreaMap)).filter(Boolean) : [], [provider, mapsReady, mergedAreaMap]);
+  const svcNames = React.useMemo(() => {
+    if (!provider) return [];
+    const ids = provider.services || [];
+    if (ids.length === 0) return [];
+    // Build fresh map from dbServices (most reliable source)
+    const freshMap = {};
+    (dbServices || []).forEach(s => { freshMap[s.id] = s.name; });
+    // Also fold in svcMap in case dbServices not loaded yet
+    Object.assign(freshMap, svcMap);
+    return ids.map(id => resolveSvc(id, freshMap)).filter(Boolean);
+  }, [provider, dbServices, svcMap]);
+
+  const areaNames = React.useMemo(() => {
+    if (!provider) return [];
+    const ids = provider.service_areas || [];
+    if (ids.length === 0) return [];
+    // Build fresh map from dbAreas (most reliable source)
+    const freshMap = {};
+    (dbAreas || []).forEach(a => {
+      freshMap[a.id] = a.name.includes(' — ') ? a.name.split(' — ').pop().trim() : a.name;
+    });
+    // Also fold in areaMap in case dbAreas not loaded yet
+    Object.assign(freshMap, areaMap);
+    return ids.map(id => resolveArea(id, freshMap)).filter(Boolean);
+  }, [provider, dbAreas, areaMap]);
 
   // ── STATES ────────────────────────────────────────────────────────────
   if (authState === "loading") return (
@@ -1871,7 +1894,7 @@ export default function ProviderDashboard() {
 
         <div style={shS}>Section 2 — Services You Offer</div>
         <div style={{ marginBottom: 24 }}>
-          {mapsReady
+          {dbServices.length > 0
             ? <><SvcAccordion selSvcs={selSvcs} setSelSvcs={setSelSvcs} dbCategories={dbCategories} dbServices={dbServices} />{selSvcs.length > 0 && <div style={{ marginTop: 8, fontSize: 12, color: TEAL, fontFamily: SANS }}>✓ {selSvcs.length} service{selSvcs.length > 1 ? "s" : ""} selected</div>}</>
             : <div style={{ fontSize: 13, color: INK_FADE, fontStyle: "italic", fontFamily: SANS, padding: "12px 0" }}>Loading services...</div>
           }
@@ -1879,7 +1902,7 @@ export default function ProviderDashboard() {
 
         <div style={shS}>Section 3 — Villages You Serve</div>
         <div style={{ marginBottom: 28 }}>
-          {mapsReady
+          {dbAreas.length > 0
             ? <VillageSelect selAreas={selAreas} setSelAreas={setSelAreas} dbAreas={dbAreas} areaMap={mergedAreaMap} />
             : <div style={{ fontSize: 13, color: INK_FADE, fontStyle: "italic", fontFamily: SANS, padding: "12px 0" }}>Loading villages...</div>
           }
@@ -2069,28 +2092,28 @@ export default function ProviderDashboard() {
 
         {/* Services */}
         <div style={shS}>🛠 Services Offered</div>
-        {!mapsReady ? (
-          <div style={{ fontSize: 13, color: INK_FADE, fontStyle: "italic", marginBottom: 24, fontFamily: SANS }}>Loading services...</div>
-        ) : svcNames.length > 0 ? (
+        {svcNames.length > 0 ? (
           <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 24 }}>
             {svcNames.map(s => (
               <span key={s} style={{ background: BROWN_BTN, color: PAPER, borderRadius: 20, padding: "5px 14px", fontSize: 12, fontFamily: SANS }}>{s}</span>
             ))}
           </div>
+        ) : dbServices.length === 0 ? (
+          <div style={{ fontSize: 13, color: INK_FADE, fontStyle: "italic", marginBottom: 24, fontFamily: SANS }}>Loading services...</div>
         ) : (
           <div style={{ fontSize: 13, color: INK_FADE, fontStyle: "italic", marginBottom: 24, fontFamily: SANS }}>No services listed yet.</div>
         )}
 
         {/* Villages */}
         <div style={shS}>📍 Villages Served</div>
-        {!mapsReady ? (
-          <div style={{ fontSize: 13, color: INK_FADE, fontStyle: "italic", marginBottom: 24, fontFamily: SANS }}>Loading villages...</div>
-        ) : areaNames.length > 0 ? (
+        {areaNames.length > 0 ? (
           <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 24 }}>
             {areaNames.map(a => (
               <span key={a} style={{ background: TEAL, color: "#fff", borderRadius: 20, padding: "5px 12px", fontSize: 12, fontFamily: SANS }}>📍 {a}</span>
             ))}
           </div>
+        ) : dbAreas.length === 0 ? (
+          <div style={{ fontSize: 13, color: INK_FADE, fontStyle: "italic", marginBottom: 24, fontFamily: SANS }}>Loading villages...</div>
         ) : (
           <div style={{ fontSize: 13, color: INK_FADE, fontStyle: "italic", marginBottom: 24, fontFamily: SANS }}>No service areas listed yet.</div>
         )}
