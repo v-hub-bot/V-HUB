@@ -58,7 +58,7 @@ function MagicLinkGate({ onUnlock }) {
           if (data.valid) {
             // Clean token from URL without reload
             window.history.replaceState({}, "", window.location.pathname);
-            onUnlock("magic_" + data.email);
+            onUnlock("1357");
           } else {
             const msgs = {
               expired: "This link has expired. Links are only valid for 15 minutes — please request a new one.",
@@ -1545,23 +1545,20 @@ function Dashboard({ adminPin }) {
   const load = async () => {
     setLoading(true);
     try {
-      // Load all data directly via entity SDK (no PIN needed)
-      const [provs, revs, lds, sts, cats, svcs, areas] = await Promise.all([
-        Provider.list(),
-        ProviderReview.list(),
-        LeadInquiry.list(),
-        ServiceSearchStat.list(),
-        Category.list(),
-        Service.list(),
-        ServiceArea.list(),
-      ]);
-      setProviders(Array.isArray(provs) ? provs : []);
-      setReviews(Array.isArray(revs) ? revs : []);
-      setLeads(Array.isArray(lds) ? lds : []);
-      setStats(Array.isArray(sts) ? sts : []);
-      setCategories(Array.isArray(cats) ? cats.filter(c => c.is_active) : []);
-      setServices(Array.isArray(svcs) ? svcs : []);
-      setServiceAreas(Array.isArray(areas) ? areas : []);
+      const res = await fetch(`https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/getAdminData`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ pin: adminPin }),
+      });
+      const data = await res.json();
+      if (data.error) throw new Error(data.error);
+      setProviders(Array.isArray(data.providers) ? data.providers : []);
+      setReviews(Array.isArray(data.reviews) ? data.reviews : []);
+      setLeads(Array.isArray(data.leads) ? data.leads : []);
+      setStats(Array.isArray(data.stats) ? data.stats : []);
+      setCategories(Array.isArray(data.categories) ? data.categories.filter(c => c.is_active) : []);
+      setServices(Array.isArray(data.services) ? data.services : []);
+      setServiceAreas(Array.isArray(data.serviceAreas) ? data.serviceAreas : []);
     } catch (e) { console.error('Admin data load error:', e); }
     setLoading(false);
   };
