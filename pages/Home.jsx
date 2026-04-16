@@ -1509,7 +1509,7 @@ export default function Home() {
             padding: "8px 16px", textAlign: "center", fontSize: 13, fontWeight: 900,
             letterSpacing: 2, color: "#000", textTransform: "uppercase",
             borderBottom: "1px solid #1A6B3C88",
-          }}>Classifieds</div>
+          }}>Find Services</div>
           {/* Search box */}
           <div style={{ padding: "8px 12px 4px" }}>
             <SearchBox cats={cats} svcs={svcs} areas={areas} onSearch={doSearch} selSvc={selSvc} setSelSvc={setSelSvc} selArea={selArea} setSelArea={setSelArea} />
