@@ -416,7 +416,19 @@ You can resend manually from the Email button.`);
     setEditSaving(false);
   };
 
-  const del = async (p) => { if (!window.confirm(`Delete ${p.business_name}?`)) return; await adminDelete(p.id); setProviders(prev => prev.filter(x => x.id !== p.id)); };
+  const archiveProvider = async (p) => {
+    if (!window.confirm(`Archive ${p.business_name}?\n\nThis hides them from the directory but keeps all their data. You can restore them anytime from the Archived filter.`)) return;
+    await adminUpdate(p.id, { subscription_status: "archived", is_active: false, is_visible: false });
+    setProviders(prev => prev.map(x => x.id === p.id ? { ...x, subscription_status: "archived", is_active: false, is_visible: false } : x));
+  };
+  const permanentDelete = async (p) => {
+    const confirmed = window.confirm(`⚠️ PERMANENTLY DELETE ${p.business_name}?\n\nThis cannot be undone. All data will be gone forever.\n\nClick OK only if you are absolutely sure.`);
+    if (!confirmed) return;
+    const doubleCheck = window.confirm(`Last chance — permanently delete "${p.business_name}" (${p.vh_number})?`);
+    if (!doubleCheck) return;
+    await adminDelete(p.id);
+    setProviders(prev => prev.filter(x => x.id !== p.id));
+  };
 
   // Auto-expand when exactly 1 result
   React.useEffect(() => {
@@ -697,7 +709,10 @@ You can resend manually from the Email button.`);
                   )}
                   <button onClick={() => toggleActive(p)} style={S.btn(p.is_active ? "#8B4513" : "#2e7d32")}>{p.is_active ? "Deactivate" : "Activate"}</button>
                   <button onClick={() => toggleVisible(p)} style={S.btn(T.teal)}>{p.is_visible === false ? "Make Visible" : "Hide Listing"}</button>
-                  <button onClick={() => del(p)} style={S.btn(T.red)}>Delete</button>
+                  {p.subscription_status === "archived"
+                    ? <button onClick={() => permanentDelete(p)} style={{ ...S.btn(T.red), fontSize: 11 }}>🗑️ Perm. Delete</button>
+                    : <button onClick={() => archiveProvider(p)} style={{ ...S.btn("#5C4033"), fontSize: 12 }}>📁 Archive</button>
+                  }
                   <button onClick={() => startEdit(p)} style={S.btn("#5a3010")}>✏️ Edit Details</button>
                   {p.managed_by !== "provider" && (
                     <button
