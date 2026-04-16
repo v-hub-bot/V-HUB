@@ -397,7 +397,7 @@ You can resend manually from the Email button.`);
       website: editForm.website,
       address: editForm.address,
       description: editForm.description,
-      years_in_business: editForm.years_in_business ? Number(editForm.years_in_business) : 0,
+      years_in_business: editForm.years_in_business ? Number(editForm.years_in_business) : null,
       license_number: editForm.license_number,
       google_review_url: editForm.google_review_url,
       google_rating: editForm.google_rating ? parseFloat(editForm.google_rating) : null,
@@ -701,18 +701,9 @@ You can resend manually from the Email button.`);
                   </div>
                 )}
                 {/* Action buttons */}
-                <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                  {p.subscription_status === "archived" && (
-                    <button onClick={() => reactivateArchived(p)} style={{ ...S.btn("#1A237E"), fontWeight: 900 }}>
-                      🔓 Reactivate Account
-                    </button>
-                  )}
+                <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 8 }}>
                   <button onClick={() => toggleActive(p)} style={S.btn(p.is_active ? "#8B4513" : "#2e7d32")}>{p.is_active ? "Deactivate" : "Activate"}</button>
                   <button onClick={() => toggleVisible(p)} style={S.btn(T.teal)}>{p.is_visible === false ? "Make Visible" : "Hide Listing"}</button>
-                  {p.subscription_status === "archived"
-                    ? <button onClick={() => permanentDelete(p)} style={{ ...S.btn(T.red), fontSize: 11 }}>🗑️ Perm. Delete</button>
-                    : <button onClick={() => archiveProvider(p)} style={{ ...S.btn("#5C4033"), fontSize: 12 }}>📁 Archive</button>
-                  }
                   <button onClick={() => startEdit(p)} style={S.btn("#5a3010")}>✏️ Edit Details</button>
                   {p.managed_by !== "provider" && (
                     <button
@@ -726,6 +717,17 @@ You can resend manually from the Email button.`);
                   )}
                   {p.email && <a href={`mailto:${p.email}`} style={{ ...S.btn(T.brownLight), textDecoration: "none" }}>✉️ Email</a>}
                   {p.phone && <a href={`tel:${p.phone}`} style={{ ...S.btn("#777"), textDecoration: "none" }}>📞 Call</a>}
+                </div>
+                {/* Archive / Delete row — always visible */}
+                <div style={{ display: "flex", gap: 8, flexWrap: "wrap", borderTop: "1px solid #ddd", paddingTop: 8 }}>
+                  {p.subscription_status === "archived" ? (
+                    <>
+                      <button onClick={() => reactivateArchived(p)} style={{ ...S.btn("#1A237E"), fontWeight: 900 }}>🔓 Reactivate Account</button>
+                      <button onClick={() => permanentDelete(p)} style={{ ...S.btn(T.red), fontWeight: 900, fontSize: 13 }}>🗑️ Permanently Delete</button>
+                    </>
+                  ) : (
+                    <button onClick={() => archiveProvider(p)} style={{ ...S.btn("#5C4033"), fontSize: 13 }}>📁 Archive / Remove from View</button>
+                  )}
                 </div>
                 {/* ── INLINE EDIT FORM ── */}
                 {editId === p.id && (
