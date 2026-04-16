@@ -148,12 +148,13 @@ Deno.serve(async (req) => {
           </ol>
           
           <div style="text-align: center; margin-top: 24px;">
-            <a href="https://app.base44.com/superagent/69d062aca815ce8e697894b1/Wekcadmin" style="display: inline-block; background: #E8431A; color: white; padding: 12px 28px; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 14px;">Go to Admin Dashboard</a>
+            <a href="https://www.v-hub.us/Admin" style="display: inline-block; background: #E8431A; color: white; padding: 12px 28px; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 14px;">Go to Admin Dashboard</a>
           </div>
           
-          <p style="font-size: 12px; color: #888; text-align: center; margin-top: 28px; border-top: 1px solid #ddd; padding-top: 16px;">
-            This is an automated notification from V-Hub Admin System
-          </p>
+          <div style="border-top: 1px solid #ddd; margin-top: 28px; padding-top: 16px; text-align: center;">
+            <p style="font-size: 12px; color: #888; margin-bottom: 8px;">This is an automated notification from V-Hub Admin System</p>
+            <a href="https://www.v-hub.us" style="color: #C9973A; font-size: 13px; font-weight: 700; text-decoration: none;">🌴 www.v-hub.us</a>
+          </div>
         </div>
       </div>
     `;
