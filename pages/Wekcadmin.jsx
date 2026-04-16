@@ -295,7 +295,7 @@ You can resend manually from the Email button.`);
   };
 
   const adminUpdate = async (id, fields) => {
-    const res = await fetch(`https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/adminUpdateProvider`, {
+    const res = await fetch(`https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/adminUpdate`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ pin: adminPin, id, fields }),
@@ -316,7 +316,7 @@ You can resend manually from the Email button.`);
   };
 
   const adminDelete = async (id) => {
-    const res = await fetch(`https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/adminUpdateProvider`, {
+    const res = await fetch(`https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/adminUpdate`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ pin: adminPin, id, delete: true }),

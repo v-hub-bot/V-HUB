@@ -1,5 +1,4 @@
-// adminUpdateProvider v4 — admin CRUD + provider self-update + password change mode
-// Updated: force redeploy 2026-04-14b
+// adminUpdateProvider v5.2 — redeployed 2026-04-16T00:10
 import { createClientFromRequest, createClient } from 'npm:@base44/sdk@0.8.25';
 
 const ALLOWED_ORIGINS = ["https://www.v-hub.us", "https://v-hub-app-edf7f8e8.base44.app"];
@@ -16,53 +15,34 @@ function getCorsHeaders(req: Request) {
   };
 }
 
-// ── ID Validation ─────────────────────────────────────────────────────────────
 function isValidDbId(id: unknown): boolean {
   return typeof id === 'string' && /^[0-9a-f]{24}$/.test(id);
 }
-
 function filterValidIds(ids: unknown): string[] {
   if (!Array.isArray(ids)) return [];
   return ids.filter(isValidDbId) as string[];
 }
-
 function getInvalidIds(ids: unknown): string[] {
   if (!Array.isArray(ids)) return [];
   return ids.filter((id: unknown) => !isValidDbId(id)).map(String);
 }
 
-// Validate and sanitize any provider data before saving
 function sanitizeProviderFields(fields: Record<string, unknown>, cors: Record<string, string>): { safe: Record<string, unknown> | null; error: Response | null } {
   const safe = { ...fields };
-
   if ('services' in safe) {
     const invalid = getInvalidIds(safe.services);
     if (invalid.length > 0) {
-      console.error('adminUpdateProvider: invalid service IDs rejected:', invalid);
-      return {
-        safe: null,
-        error: Response.json({
-          error: `Invalid service IDs: ${invalid.join(', ')}. Use real database IDs from the Service entity.`
-        }, { status: 400, headers: cors })
-      };
+      return { safe: null, error: Response.json({ error: `Invalid service IDs: ${invalid.join(', ')}` }, { status: 400, headers: cors }) };
     }
     safe.services = filterValidIds(safe.services);
   }
-
   if ('service_areas' in safe) {
     const invalid = getInvalidIds(safe.service_areas);
     if (invalid.length > 0) {
-      console.error('adminUpdateProvider: invalid area IDs rejected:', invalid);
-      return {
-        safe: null,
-        error: Response.json({
-          error: `Invalid village IDs: ${invalid.join(', ')}. Use real database IDs from the ServiceArea entity.`
-        }, { status: 400, headers: cors })
-      };
+      return { safe: null, error: Response.json({ error: `Invalid village IDs: ${invalid.join(', ')}` }, { status: 400, headers: cors }) };
     }
     safe.service_areas = filterValidIds(safe.service_areas);
   }
-
   return { safe, error: null };
 }
 
@@ -87,22 +67,22 @@ Deno.serve(async (req: Request) => {
   let body: Record<string,unknown> = {};
   try { body = await req.json(); } catch { body = {}; }
 
-  // ── Provider password change (first login force-change) ───────────────
+  // ── Provider password change ──────────────────────────────────────────
   if (body.provider_change_password === true) {
     const pid = body.provider_id as string;
     const np  = body.new_password as string;
     if (!pid || !np || String(np).length < 6) {
-      return Response.json({ error: "Missing provider_id or password too short (min 6 chars)" }, { status: 400, headers: cors });
+      return Response.json({ error: "Missing provider_id or password too short" }, { status: 400, headers: cors });
     }
     try {
-      let ex: any = null;
+      let ex: Record<string,unknown> | null = null;
       try { ex = await srClient.entities.Provider.get(pid); } catch { /**/ }
       if (!ex) return Response.json({ error: "Provider not found" }, { status: 404, headers: cors });
       const hashed = await sha256hex(String(np));
       const upd = await srClient.entities.Provider.update(pid, { login_password: hashed, password_changed: true });
       return Response.json({ success: true, provider: upd }, { headers: cors });
-    } catch (e: any) {
-      return Response.json({ error: e.message || "Password change failed" }, { status: 500, headers: cors });
+    } catch (e: unknown) {
+      return Response.json({ error: e instanceof Error ? e.message : "Password change failed" }, { status: 500, headers: cors });
     }
   }
 
@@ -116,24 +96,22 @@ Deno.serve(async (req: Request) => {
     }
     let rec: Record<string,unknown> | null = null;
     try { rec = await srClient.entities.Provider.get(pid); } catch { /* */ }
-    if (!rec)             return Response.json({ error: "Provider not found" },  { status: 404, headers: cors });
+    if (!rec) return Response.json({ error: "Provider not found" }, { status: 404, headers: cors });
     if (rec.vh_number !== vhnum) return Response.json({ error: "Unauthorized" }, { status: 401, headers: cors });
 
     const safe: Record<string,unknown> = {};
     for (const k of PROVIDER_SELF_FIELDS) { if (k in fields) safe[k] = fields[k]; }
-
     const { safe: sanitized, error: validationError } = sanitizeProviderFields(safe, cors);
     if (validationError) return validationError;
-
     if (!Object.keys(sanitized!).length) return Response.json({ error: "No valid fields" }, { status: 400, headers: cors });
 
     const updated = await srClient.entities.Provider.update(pid, sanitized!);
     return Response.json({ success: true, record: updated }, { headers: cors });
   }
 
-  // ── Admin mode ────────────────────────────────────────────────────────
-  const base44      = createClientFromRequest(req);
-  const VALID_PINS  = ["1357"];
+  // ── ADMIN MODE ────────────────────────────────────────────────────────
+  const base44 = createClientFromRequest(req);
+  const VALID_PINS = ["1357"];
   const ADMIN_EMAILS = ["kimberlycook1980@gmail.com", "5bebegurlz@gmail.com"];
   const pinOk = body.pin && VALID_PINS.includes(String(body.pin));
   let isAdmin = false;
@@ -154,7 +132,10 @@ Deno.serve(async (req: Request) => {
       return Response.json({ success: true, record: r }, { headers: cors });
     }
     if (!id) return Response.json({ error: "Missing id" }, { status: 400, headers: cors });
-    if (doDelete) { await sr.entities.Provider.delete(id as string); return Response.json({ success: true }, { headers: cors }); }
+    if (doDelete) {
+      await sr.entities.Provider.delete(id as string);
+      return Response.json({ success: true }, { headers: cors });
+    }
     if (fields) {
       const { safe: sanitized, error: validationError } = sanitizeProviderFields(fields as Record<string, unknown>, cors);
       if (validationError) return validationError;
@@ -164,7 +145,6 @@ Deno.serve(async (req: Request) => {
     return Response.json({ error: "No action" }, { status: 400, headers: cors });
   } catch (e: unknown) {
     const msg = e instanceof Error ? e.message : "Server error";
-    console.error("adminUpdateProvider:", msg);
     return Response.json({ error: msg }, { status: 500, headers: cors });
   }
 });
