@@ -192,9 +192,16 @@ function ProvidersTab({ providers, setProviders, catMap, svcMap, areaMap, fullSv
 
   const sendAccountToProvider = async (p) => {
     if (!p.email) return alert("No email on file — edit the provider first and add their email, then send.");
-    if (!window.confirm(`Send ${p.business_name} their account credentials and welcome email to ${p.email}?`)) return;
+    if (!window.confirm(`Send ${p.business_name} their account credentials to ${p.email}?\n\nThis will:\n• Activate their listing\n• Mark them as Self-Managed\n• Send their login email`)) return;
     setHanding(p.id);
     try {
+      // Compute trial dates
+      const now = new Date();
+      const trialEnd = new Date(now);
+      trialEnd.setDate(trialEnd.getDate() + 45);
+      const trialStartStr = now.toISOString().split('T')[0];
+      const trialEndStr = trialEnd.toISOString().split('T')[0];
+
       const res = await fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/approveProvider", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -209,12 +216,35 @@ function ProvidersTab({ providers, setProviders, catMap, svcMap, areaMap, fullSv
           service_areas: p.service_areas || [],
           vh_number: p.vh_number,
           login_email: p.login_email || p.email,
-          email_only: true,
+          email_only: false,
         }),
       });
       const data = await res.json();
       if (data.error) throw new Error(data.error);
-      alert(`✅ Account details sent to ${p.email}! They can now log into Provider Hub with their VH number and password.`);
+
+      // Also mark as Self-Managed
+      await fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/adminUpdateProvider", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ pin: adminPin, id: p.id, fields: { managed_by: "provider" } }),
+      });
+
+      // Update local state — active, visible, trial started, Self-Managed
+      setProviders(prev => prev.map(x => x.id === p.id ? {
+        ...x,
+        is_active: true,
+        is_visible: true,
+        subscription_status: x.subscription_status || "trial",
+        trial_start_date: x.trial_start_date || trialStartStr,
+        trial_end_date: x.trial_end_date || trialEndStr,
+        managed_by: "provider",
+      } : x));
+
+      if (data.email_error) {
+        alert(`⚠️ Account activated and marked Self-Managed, but email failed: ${data.email_error}`);
+      } else {
+        alert(`✅ Done! ${p.business_name} has been activated, marked as Self-Managed, and their login email was sent to ${p.email}.`);
+      }
     } catch(e) {
       alert("❌ Error: " + e.message);
     }
@@ -660,32 +690,12 @@ You can resend manually from the Email button.`);
                 )}
                 {/* Action buttons */}
                 <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                  {(!p.is_active || p.subscription_status === "pending") && p.subscription_status !== "archived" && (
-                    p.onboarding_type === "admin_added" ? (
-                      !p.is_active && (
-                        <button
-                          onClick={() => toggleActive(p)}
-                          style={S.btn("#2e7d32")}
-                        >
-                          ✅ Activate Listing
-                        </button>
-                      )
-                    ) : (
-                      <button
-                        onClick={() => approveAndNotify(p)}
-                        disabled={approving === p.id}
-                        style={S.btn("#2e7d32")}
-                      >
-                        {approving === p.id ? "Approving..." : "✅ Approve & Notify"}
-                      </button>
-                    )
-                  )}
                   {p.subscription_status === "archived" && (
                     <button onClick={() => reactivateArchived(p)} style={{ ...S.btn("#1A237E"), fontWeight: 900 }}>
                       🔓 Reactivate Account
                     </button>
                   )}
-                  <button onClick={() => toggleActive(p)} style={S.btn(p.is_active ? "#8B4513" : "#555")}>{p.is_active ? "Deactivate" : "Activate Only"}</button>
+                  <button onClick={() => toggleActive(p)} style={S.btn(p.is_active ? "#8B4513" : "#2e7d32")}>{p.is_active ? "Deactivate" : "Activate"}</button>
                   <button onClick={() => toggleVisible(p)} style={S.btn(T.teal)}>{p.is_visible === false ? "Make Visible" : "Hide Listing"}</button>
                   <button onClick={() => del(p)} style={S.btn(T.red)}>Delete</button>
                   <button onClick={() => startEdit(p)} style={S.btn("#5a3010")}>✏️ Edit Details</button>
@@ -693,7 +703,7 @@ You can resend manually from the Email button.`);
                     onClick={() => sendAccountToProvider(p)}
                     disabled={handing === p.id}
                     style={{ ...S.btn("#1B3D6F"), fontWeight: 900, opacity: handing === p.id ? 0.7 : 1 }}
-                    title={p.email ? `Send login credentials to ${p.email}` : "Add email first"}
+                    title={p.email ? `Activate + mark Self-Managed + send login to ${p.email}` : "Add email first"}
                   >
                     {handing === p.id ? "Sending…" : p.email ? "📤 Send Account to Provider" : "📤 Send Account (add email first)"}
                   </button>
