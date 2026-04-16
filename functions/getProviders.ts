@@ -89,7 +89,7 @@ Deno.serve(async (req: Request) => {
         const { provider_id } = body;
         if (!provider_id) return Response.json({ error: "Missing provider_id" }, { status: 400, headers: CORS });
         try {
-          const prov = await createClient({ appId: "69d062aca815ce8e697894b1" }).asServiceRole.entities.Provider.get(provider_id);
+          const prov = await base44.asServiceRole.entities.Provider.get(provider_id);
           if (!prov) return Response.json({ success: false, error: "Not found" }, { status: 404, headers: CORS });
           return Response.json({ success: true, provider: sanitize(prov) }, { status: 200, headers: CORS });
         } catch (e: any) {
@@ -104,7 +104,7 @@ Deno.serve(async (req: Request) => {
           return Response.json({ error: "Missing credentials" }, { status: 400, headers: CORS });
         }
 
-        const db = createClient({ appId: "69d062aca815ce8e697894b1" }).asServiceRole.entities;
+        const db = base44.asServiceRole.entities;
         const inp = identifier.trim();
         const isVH = /^vh-?\d{4}$/i.test(inp);
         let results: any[] = [];
@@ -148,22 +148,14 @@ Deno.serve(async (req: Request) => {
     // ── LISTING MODE ──────────────────────────────────────────────────────
     console.log("[getProviders] Starting provider listing...");
     let providers: any[] = [];
-    let usedFallback = false;
+    const usedFallback = false;
 
-    const srClient = createClient({ appId: "69d062aca815ce8e697894b1" }).asServiceRole;
     try {
-      providers = await fetchAllProvidersWithRetry(srClient.entities);
-      console.log(`[getProviders] asServiceRole: got ${providers.length} providers`);
-    } catch (e1: any) {
-      console.log(`[getProviders] asServiceRole failed: ${e1.message}, trying request-scoped`);
-      usedFallback = true;
-      try {
-        providers = await fetchAllProvidersWithRetry(base44.asServiceRole.entities);
-        console.log(`[getProviders] request-scoped fallback: got ${providers.length} providers`);
-      } catch (e2: any) {
-        console.log(`[getProviders] BOTH FAILED: ${e1.message} | ${e2.message}`);
-        return Response.json({ error: `Both fetch methods failed: ${e1.message} | ${e2.message}`, providers: [], count: 0 }, { status: 500, headers: CORS });
-      }
+      providers = await fetchAllProvidersWithRetry(base44.asServiceRole.entities);
+      console.log(`[getProviders] got ${providers.length} providers`);
+    } catch (e: any) {
+      console.log(`[getProviders] fetch failed: ${e.message}`);
+      return Response.json({ error: `Fetch failed: ${e.message}`, providers: [], count: 0 }, { status: 500, headers: CORS });
     }
 
     const sanitized = providers.map(sanitize);
