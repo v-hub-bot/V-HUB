@@ -166,19 +166,34 @@ Deno.serve(async (req) => {
       htmlContent
     );
 
-    // SMS alert text
-    const smsText = `<p>🔔 V-HUB NEW SIGNUP<br/>
-<strong>${business_name}</strong><br/>
-${owner_name} · ${phone}<br/>
-Account: ${vh_number}<br/>
-Log in to review & approve:<br/>
-www.v-hub.us/Wekcadmin</p>`;
+    // SMS alert - plain text only for carrier gateway compatibility
+    const smsBody = `V-HUB NEW SIGNUP: ${business_name} (${vh_number}). Owner: ${owner_name} ${phone}. Login to approve: www.v-hub.us/Wekcadmin`;
+
+    const sendSms = async (to: string) => {
+      const res = await fetch('https://api.sendgrid.com/v3/mail/send', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${SENDGRID_API_KEY}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          personalizations: [{ to: [{ email: to }] }],
+          from: { email: 'admin@v-hub.us', name: 'V-Hub' },
+          subject: 'V-HUB New Signup',
+          content: [{ type: 'text/plain', value: smsBody }],
+        }),
+      });
+      if (!res.ok) {
+        const err = await res.text();
+        console.error('SMS SendGrid error:', err);
+      }
+    };
 
     // SMS to Kimberly (T-Mobile)
-    await sendEmail('5406540988@tmomail.net', `V-HUB New Signup`, smsText);
+    await sendSms('5406540988@tmomail.net');
 
     // SMS to co-admin (T-Mobile)
-    await sendEmail('5404089821@tmomail.net', `V-HUB New Signup`, smsText);
+    await sendSms('5404089821@tmomail.net');
 
     return Response.json({ ok: true, message: "Admin notifications sent" });
   } catch (error) {
