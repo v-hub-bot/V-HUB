@@ -1,4 +1,4 @@
-import { createClientFromRequest, createClient } from 'npm:@base44/sdk@0.8.25';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.23';
 
 const SENSITIVE_FIELDS = ['login_email', 'login_password', 'stripe_customer_id', 'stripe_subscription_id', 'notes', 'classifieds_stripe_subscription_id'];
 
@@ -151,8 +151,19 @@ Deno.serve(async (req: Request) => {
     const usedFallback = false;
 
     try {
-      providers = await fetchAllProvidersWithRetry(base44.asServiceRole.entities);
-      console.log(`[getProviders] got ${providers.length} providers`);
+      // Try filter first (no pagination needed for small dataset), fall back to list
+      try {
+        providers = await base44.asServiceRole.entities.Provider.filter({ is_active: true });
+        console.log(`[getProviders] filter(active) got ${providers.length} providers`);
+        // Also grab inactive ones for completeness
+        const inactive = await base44.asServiceRole.entities.Provider.filter({ is_active: false }).catch(() => []);
+        providers = [...providers, ...(inactive || [])];
+        console.log(`[getProviders] total with inactive: ${providers.length}`);
+      } catch (filterErr: any) {
+        console.log(`[getProviders] filter failed (${filterErr.message}), trying list...`);
+        providers = await fetchAllProvidersWithRetry(base44.asServiceRole.entities);
+      }
+      console.log(`[getProviders] final count: ${providers.length}`);
     } catch (e: any) {
       console.log(`[getProviders] fetch failed: ${e.message}`);
       return Response.json({ error: `Fetch failed: ${e.message}`, providers: [], count: 0 }, { status: 500, headers: CORS });
