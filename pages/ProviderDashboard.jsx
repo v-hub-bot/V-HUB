@@ -1779,8 +1779,8 @@ export default function ProviderDashboard() {
   (dbAreas || []).forEach(a => { liveAreaMap[a.id] = a.name.includes(" — ") ? a.name.split(" — ").pop().trim() : a.name; });
   const mergedSvcMap  = Object.keys(svcMap).length  > 0 ? svcMap  : liveSvcMap;
   const mergedAreaMap = Object.keys(areaMap).length > 0 ? areaMap : liveAreaMap;
-  const svcNames  = provider ? (provider.services  || []).map(id => resolveSvc(id, mergedSvcMap)).filter(Boolean) : [];
-  const areaNames = provider ? (provider.service_areas || []).map(id => resolveArea(id, mergedAreaMap)).filter(Boolean) : [];
+  const svcNames  = React.useMemo(() => provider && mapsReady ? (provider.services  || []).map(id => resolveSvc(id, mergedSvcMap)).filter(Boolean) : [], [provider, mapsReady, mergedSvcMap]);
+  const areaNames = React.useMemo(() => provider && mapsReady ? (provider.service_areas || []).map(id => resolveArea(id, mergedAreaMap)).filter(Boolean) : [], [provider, mapsReady, mergedAreaMap]);
 
   // ── STATES ────────────────────────────────────────────────────────────
   if (authState === "loading") return (
@@ -2069,7 +2069,9 @@ export default function ProviderDashboard() {
 
         {/* Services */}
         <div style={shS}>🛠 Services Offered</div>
-        {svcNames.length > 0 ? (
+        {!mapsReady ? (
+          <div style={{ fontSize: 13, color: INK_FADE, fontStyle: "italic", marginBottom: 24, fontFamily: SANS }}>Loading services...</div>
+        ) : svcNames.length > 0 ? (
           <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 24 }}>
             {svcNames.map(s => (
               <span key={s} style={{ background: BROWN_BTN, color: PAPER, borderRadius: 20, padding: "5px 14px", fontSize: 12, fontFamily: SANS }}>{s}</span>
@@ -2081,7 +2083,9 @@ export default function ProviderDashboard() {
 
         {/* Villages */}
         <div style={shS}>📍 Villages Served</div>
-        {areaNames.length > 0 ? (
+        {!mapsReady ? (
+          <div style={{ fontSize: 13, color: INK_FADE, fontStyle: "italic", marginBottom: 24, fontFamily: SANS }}>Loading villages...</div>
+        ) : areaNames.length > 0 ? (
           <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 24 }}>
             {areaNames.map(a => (
               <span key={a} style={{ background: TEAL, color: "#fff", borderRadius: 20, padding: "5px 12px", fontSize: 12, fontFamily: SANS }}>📍 {a}</span>
