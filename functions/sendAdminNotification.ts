@@ -166,18 +166,19 @@ Deno.serve(async (req) => {
       htmlContent
     );
 
-    // Send SMS to Kimberly via T-Mobile email-to-text gateway
+    // SMS alert text
     const smsText = `<p>🔔 V-HUB NEW SIGNUP<br/>
 <strong>${business_name}</strong><br/>
 ${owner_name} · ${phone}<br/>
 Account: ${vh_number}<br/>
 Log in to review & approve:<br/>
 www.v-hub.us/Wekcadmin</p>`;
-    await sendEmail(
-      '5406540988@tmomail.net',
-      `V-HUB New Signup`,
-      smsText
-    );
+
+    // SMS to Kimberly (T-Mobile)
+    await sendEmail('5406540988@tmomail.net', `V-HUB New Signup`, smsText);
+
+    // SMS to co-admin (T-Mobile)
+    await sendEmail('5404089821@tmomail.net', `V-HUB New Signup`, smsText);
 
     return Response.json({ ok: true, message: "Admin notifications sent" });
   } catch (error) {
