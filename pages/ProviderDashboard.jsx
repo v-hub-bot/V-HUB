@@ -343,12 +343,14 @@ function VillageSelect({ selAreas, setSelAreas, dbAreas, areaMap }) {
 
   const toggle = (vName) => {
     const id = nameToId[vName];
-    const key = id || vName;
-    setSelAreas(prev => prev.includes(key) ? prev.filter(a => a !== key) : [...prev, key]);
+    // Only allow toggling if we have a valid DB ID — prevents saving plain village name strings
+    if (!id) return;
+    setSelAreas(prev => prev.includes(id) ? prev.filter(a => a !== id) : [...prev, id]);
   };
 
   const selectAll = (group) => {
-    const keys = group.villages.map(v => nameToId[v] || v).filter(Boolean);
+    // Only add villages that have a valid DB ID
+    const keys = group.villages.map(v => nameToId[v]).filter(Boolean);
     setSelAreas(prev => {
       const s = new Set(prev);
       keys.forEach(k => s.add(k));
@@ -357,7 +359,7 @@ function VillageSelect({ selAreas, setSelAreas, dbAreas, areaMap }) {
   };
 
   const deselectAll = (group) => {
-    const keys = new Set(group.villages.map(v => nameToId[v] || v).filter(Boolean));
+    const keys = new Set(group.villages.map(v => nameToId[v]).filter(Boolean));
     setSelAreas(prev => prev.filter(k => !keys.has(k)));
   };
 
@@ -407,9 +409,12 @@ function VillageSelect({ selAreas, setSelAreas, dbAreas, areaMap }) {
               <div style={{ background: PAPER, padding: "8px 10px", display: "flex", flexWrap: "wrap", gap: 6 }}>
                 {group.villages.map(vName => {
                   const sel = isSelected(vName);
+                  const hasId = !!nameToId[vName];
                   return (
                     <button key={vName} onClick={() => toggle(vName)}
-                      style={{ fontSize: 12, padding: "5px 12px", borderRadius: 20, border: `2px solid ${sel ? TEAL : PAPER_DK}`, background: sel ? TEAL : PAPER, color: sel ? "#fff" : INK, cursor: "pointer", fontWeight: sel ? 700 : 400, fontFamily: SANS, transition: "all 0.1s" }}>
+                      disabled={!hasId}
+                      title={!hasId ? "Loading..." : vName}
+                      style={{ fontSize: 12, padding: "5px 12px", borderRadius: 20, border: `2px solid ${sel ? TEAL : PAPER_DK}`, background: sel ? TEAL : PAPER, color: sel ? "#fff" : (!hasId ? "#bbb" : INK), cursor: hasId ? "pointer" : "not-allowed", fontWeight: sel ? 700 : 400, fontFamily: SANS, transition: "all 0.1s", opacity: hasId ? 1 : 0.5 }}>
                       {sel ? "✓ " : ""}{vName}
                     </button>
                   );
@@ -1638,8 +1643,10 @@ export default function ProviderDashboard() {
         "years_in_business","license_number","google_review_url","is_mobile","hours_of_operation","google_rating"];
       const fields = {};
       for (const k of ALLOWED) { if (k in form) fields[k] = form[k]; }
-      fields.services = selSvcs;
-      fields.service_areas = selAreas;
+      // Strip any legacy string values — only send valid 24-char DB IDs
+      const validId = id => typeof id === 'string' && /^[0-9a-f]{24}$/.test(id);
+      fields.services = selSvcs.filter(validId);
+      fields.service_areas = selAreas.filter(validId);
       const res = await fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/providerLogin", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
