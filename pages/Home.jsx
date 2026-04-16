@@ -1569,7 +1569,7 @@ export default function Home() {
             border: `3px solid #1B3D6F`,
             boxShadow: `0 0 0 1.5px #1B3D6F, 0 2px 12px rgba(27,61,111,0.4)`,
             boxSizing: "border-box", cursor: "pointer", lineHeight: 1.4, width: "100%",
-          }}>📋 List My Service</div>
+          }}>📋 List Your Service</div>
         </a>
 
         <Rule />

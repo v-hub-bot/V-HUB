@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from "react";
-import { Provider, ProviderReview, LeadInquiry, ServiceSearchStat, Category, Service, ServiceArea } from "@/api/entities";
+import { Provider, ProviderReview, LeadInquiry, ServiceSearchStat, Category, Service, ServiceArea, User } from "@/api/entities";
 
-const PINS = ["1357"];
+const ADMIN_EMAILS = ["kimberlycook1980@gmail.com", "5bebegurlz@gmail.com", "evansrus@comcast.net"];
 const LOGO = "https://media.base44.com/images/public/69d062aca815ce8e697894b1/a9af95bc3_V-Hublogo.png";
 
-
-// SHA-256 for admin password setting
+// SHA-256 for password hashing
 async function sha256(plain) {
   if (!plain) return "";
   const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(plain));
@@ -35,26 +34,55 @@ const S = {
 function fmt(d) { if (!d) return "—"; return new Date(d).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }); }
 function daysLeft(d) { if (!d) return null; return Math.ceil((new Date(d) - new Date()) / 86400000); }
 
-// ── PIN GATE ──────────────────────────────────────────────────────────────────
-function PinGate({ onUnlock }) {
-  const [pin, setPin] = useState(""); const [err, setErr] = useState(false);
-  const go = () => { if (PINS.includes(pin)) onUnlock(pin); else { setErr(true); setPin(""); setTimeout(() => setErr(false), 2500); } };
-  return (
+// ── ACCESS GATE — email-based role check ─────────────────────────────────────
+function AccessGate({ onUnlock }) {
+  const [checking, setChecking] = useState(true);
+  const [denied, setDenied]     = useState(false);
+  const [userEmail, setUserEmail] = useState("");
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const me = await User.me();
+        const email = me?.email || "";
+        setUserEmail(email);
+        if (ADMIN_EMAILS.includes(email.toLowerCase())) {
+          // Derive a stable token from the email for backend calls
+          const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(email + "vhub_admin_2026"));
+          const token = Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, "0")).join("").slice(0, 16);
+          onUnlock(token);
+        } else {
+          setDenied(true);
+        }
+      } catch (_) {
+        setDenied(true);
+      }
+      setChecking(false);
+    })();
+  }, []);
+
+  if (checking) return (
+    <div style={{ minHeight: "100vh", background: T.parchment, display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", gap: 12 }}>
+      <img src={LOGO} style={{ width: 64, borderRadius: 10 }} alt="" />
+      <div style={{ color: T.brownLight, fontSize: 15, fontStyle: "italic", fontFamily: T.font }}>Verifying access...</div>
+    </div>
+  );
+
+  if (denied) return (
     <div style={{ minHeight: "100vh", background: T.parchment, display: "flex", alignItems: "center", justifyContent: "center" }}>
-      <div style={{ background: T.cream, borderRadius: 12, padding: "40px 32px", boxShadow: `0 8px 32px ${T.shadow}`, textAlign: "center", width: 300, border: `2px solid ${T.border}` }}>
+      <div style={{ background: T.cream, borderRadius: 12, padding: "40px 32px", boxShadow: `0 8px 32px ${T.shadow}`, textAlign: "center", width: 320, border: `2px solid ${T.border}` }}>
         <img src={LOGO} style={{ width: 72, borderRadius: 12, marginBottom: 16 }} alt="" />
-        <div style={{ fontSize: 22, fontWeight: 800, color: T.brownDark, marginBottom: 4, fontFamily: T.font }}>V-HUB Admin</div>
-        <div style={{ fontSize: 13, color: T.brownLight, marginBottom: 22, fontStyle: "italic", fontFamily: T.sans }}>Enter your 4-digit PIN</div>
-        <input autoFocus type="password" inputMode="numeric" maxLength={4} value={pin}
-          onChange={e => setPin(e.target.value.replace(/\D/g, "").slice(0, 4))}
-          onKeyDown={e => e.key === "Enter" && go()} placeholder="••••"
-          style={{ ...S.inp, fontSize: 28, textAlign: "center", letterSpacing: 10, marginBottom: 10, border: err ? `2px solid ${T.red}` : `2px solid ${T.border}` }} />
-        {err && <div style={{ color: T.red, fontSize: 13, marginBottom: 8 }}>Incorrect PIN — try again</div>}
-        <button onClick={go} style={{ ...S.btn(T.brown), width: "100%", padding: 13, fontSize: 16 }}>Unlock Dashboard</button>
-        <a href="/" style={{ display: "block", marginTop: 14, fontSize: 12, color: T.brownLight, textDecoration: "none" }}>← Back to V-HUB</a>
+        <div style={{ fontSize: 22, fontWeight: 800, color: T.brownDark, marginBottom: 8, fontFamily: T.font }}>V-HUB Admin</div>
+        <div style={{ fontSize: 13, color: T.red, marginBottom: 16, fontFamily: T.sans, lineHeight: 1.6 }}>
+          {userEmail ? `Access denied for ${userEmail}.` : "You must be signed in to access this page."}<br />
+          This area is restricted to authorized administrators only.
+        </div>
+        <a href="/" style={{ display: "block", marginTop: 8, fontSize: 13, color: T.brownLight, textDecoration: "none", fontFamily: T.sans }}>← Back to V-HUB</a>
       </div>
     </div>
   );
+
+  return null;
 }
 
 // ── OVERVIEW ──────────────────────────────────────────────────────────────────
@@ -1527,5 +1555,5 @@ function Dashboard({ adminPin }) {
 export default function Wekcadmin() {
   const [unlocked, setUnlocked] = useState(false);
   const [adminPin, setAdminPin] = useState("");
-  return unlocked ? <Dashboard adminPin={adminPin} /> : <PinGate onUnlock={(p) => { setAdminPin(p); setUnlocked(true); }} />;
+  return unlocked ? <Dashboard adminPin={adminPin} /> : <AccessGate onUnlock={(p) => { setAdminPin(p); setUnlocked(true); }} />;
 }

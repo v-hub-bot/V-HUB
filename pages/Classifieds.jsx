@@ -1,5 +1,35 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 
+// ── SEO Meta Tags ──────────────────────────────────────────────────────────
+function useMeta({ title, description, canonical }) {
+  useEffect(() => {
+    document.title = title || "Deals of the Week | V-Hub — The Villages, FL";
+    const setMeta = (name, content, prop = false) => {
+      const attr = prop ? "property" : "name";
+      let el = document.querySelector(`meta[${attr}="${name}"]`);
+      if (!el) { el = document.createElement("meta"); el.setAttribute(attr, name); document.head.appendChild(el); }
+      el.setAttribute("content", content);
+    };
+    setMeta("description", description || "Browse weekly deals and special offers from local service providers in The Villages, FL. Exclusive discounts updated every week.");
+    setMeta("robots", "index, follow");
+    setMeta("og:type", "website", true);
+    setMeta("og:site_name", "V-Hub", true);
+    setMeta("og:url", canonical || "https://www.v-hub.us/Classifieds", true);
+    setMeta("og:title", title || "Deals of the Week | V-Hub", true);
+    setMeta("og:description", description || "Browse weekly deals from local service providers in The Villages, FL.", true);
+    setMeta("og:image", "https://media.base44.com/images/public/69d062aca815ce8e697894b1/a9af95bc3_V-Hublogo.png", true);
+    setMeta("twitter:card", "summary_large_image");
+    setMeta("twitter:title", title || "Deals of the Week | V-Hub");
+    setMeta("twitter:description", description || "Browse weekly deals from local service providers in The Villages, FL.");
+    setMeta("twitter:image", "https://media.base44.com/images/public/69d062aca815ce8e697894b1/a9af95bc3_V-Hublogo.png");
+    if (canonical) {
+      let link = document.querySelector('link[rel="canonical"]');
+      if (!link) { link = document.createElement("link"); link.rel = "canonical"; document.head.appendChild(link); }
+      link.href = canonical;
+    }
+  }, [title]);
+}
+
 const PAPER     = "#F0E6C8";
 const PAPER_MID = "#E4D5A8";
 const PAPER_DK  = "#C8B07A";
@@ -257,6 +287,12 @@ function DealsCarousel({ ads }) {
 }
 
 export default function Classifieds() {
+  useMeta({
+    title: "Deals of the Week | V-Hub — The Villages, FL",
+    description: "Browse weekly deals and special offers from local service providers in The Villages, FL. Exclusive discounts updated every week on V-Hub.",
+    canonical: "https://www.v-hub.us/Classifieds",
+  });
+
   const [ads, setAds]         = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch]   = useState("");
