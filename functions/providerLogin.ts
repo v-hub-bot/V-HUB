@@ -132,8 +132,20 @@ Deno.serve(async (req: Request) => {
       if (existing.vh_number !== vh_number) return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: CORS });
 
       const ALLOWED = ["business_name","owner_name","phone","email","website","description","address","years_in_business","license_number","google_review_url","services","service_areas","is_mobile","hours_of_operation","google_rating"];
+      const NUMERIC_FIELDS = ["years_in_business","google_rating"];
       const safe: Record<string, unknown> = {};
-      for (const k of ALLOWED) { if (k in fields) safe[k] = fields[k]; }
+      for (const k of ALLOWED) {
+        if (k in fields) {
+          if (NUMERIC_FIELDS.includes(k)) {
+            const v = fields[k];
+            // Convert empty string to null; parse strings as numbers
+            if (v === "" || v === null || v === undefined) { /* skip empty numeric fields */ }
+            else { safe[k] = Number(v); }
+          } else {
+            safe[k] = fields[k];
+          }
+        }
+      }
 
       if ('services' in safe) {
         const inv = getInvalidIds(safe.services);

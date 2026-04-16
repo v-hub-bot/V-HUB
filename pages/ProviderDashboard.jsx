@@ -1641,8 +1641,19 @@ export default function ProviderDashboard() {
     try {
       const ALLOWED = ["business_name","owner_name","phone","email","website","description","address",
         "years_in_business","license_number","google_review_url","is_mobile","hours_of_operation","google_rating"];
+      const NUMERIC = ["years_in_business","google_rating"];
       const fields = {};
-      for (const k of ALLOWED) { if (k in form) fields[k] = form[k]; }
+      for (const k of ALLOWED) {
+        if (k in form) {
+          // Don't send empty strings for numeric fields — backend will reject them
+          if (NUMERIC.includes(k)) {
+            const v = form[k];
+            if (v !== "" && v !== null && v !== undefined) fields[k] = Number(v);
+          } else {
+            fields[k] = form[k];
+          }
+        }
+      }
       // Strip any legacy string values — only send valid 24-char DB IDs
       const validId = id => typeof id === 'string' && /^[0-9a-f]{24}$/.test(id);
       fields.services = selSvcs.filter(validId);
