@@ -901,7 +901,7 @@ function SearchBox({ cats, svcs, areas, onSearch, selSvc, setSelSvc, selArea, se
       {(() => {
         const bothSelected = !!(selSvc && selArea);
         return (
-          <button onClick={e => { e.stopPropagation(); onSearch(selSvc, selArea); }} style={{
+          <button data-testid="find-services-btn" onClick={e => { e.stopPropagation(); onSearch(selSvc, selArea); }} style={{
             width: "100%",
             background: bothSelected ? "linear-gradient(180deg,#1A6B3C,#145530)" : `linear-gradient(180deg,#9A6030,${BROWN_BTN} 60%,#5A3010)`,
             border: bothSelected ? "3px solid #1A6B3C" : `3px solid ${YELLOW}`,
