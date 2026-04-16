@@ -1162,7 +1162,7 @@ function AddProviderTab({ onAdded, categories, services: allServices, serviceAre
     <div style={S.card}>
       <div style={S.secTitle}>➕ Add Provider on Their Behalf</div>
       <div style={{ fontSize: 13, color: T.brownLight, fontFamily: T.sans, marginBottom: 16, lineHeight: 1.7, background: T.parchmentDark, borderRadius: 6, padding: "12px 14px", borderLeft: `4px solid ${T.gold}` }}>
-        <strong style={{ color: T.brownDark }}>Only Business Name is required.</strong> Add what you have — fill in email, areas, and services later. The provider goes live immediately with a 45-day free trial from today. Once you have their email, use <strong>"Send Account to Provider"</strong> from their profile to hand it off.
+        <strong style={{ color: T.brownDark }}>Only Business Name is required.</strong> Add what you have — fill in email, areas, and services later. The provider goes live immediately with a 45-day trial from today. Once you have their email, use <strong>"Send Account to Provider"</strong> from their profile to hand it off.
       </div>
 
       {done && (
@@ -1260,7 +1260,7 @@ function AddProviderTab({ onAdded, categories, services: allServices, serviceAre
 
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, alignItems: "end" }}>
           <div>
-            <div style={{ fontSize: 11, color: T.brownLight, fontFamily: T.sans, marginBottom: 3 }}>Free Trial Length (days)</div>
+            <div style={{ fontSize: 11, color: T.brownLight, fontFamily: T.sans, marginBottom: 3 }}>Trial Length (days)</div>
             <input type="number" value={form.trial_days} onChange={e => set("trial_days", e.target.value)} style={S.inp} min={1} max={365} />
           </div>
           <div style={{ fontSize: 12, color: T.brownLight, fontFamily: T.sans, lineHeight: 1.5, paddingBottom: 4 }}>

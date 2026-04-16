@@ -288,7 +288,7 @@ export default function ListService() {
 
   useMeta({
     title: "List Your Business | V-Hub — The Villages, FL",
-    description: "List your local service business on V-Hub and get discovered by Villages residents. Free listing review. No commissions — contact directly.",
+    description: "List your local service business on V-Hub and get discovered by Villages residents. No commissions — contact directly.",
     keywords: "list local business The Villages FL, V-Hub provider listing, Villages Florida directory, advertise services Villages",
     canonical: "https://www.v-hub.us/ListService",
   });

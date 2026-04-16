@@ -102,7 +102,7 @@ function StatusBanner({ provider, onUpgrade, onCancel, onManageBilling, paymentL
     if (expired) {
       return (
         <div style={{ background: "#FFF3E0", border: `2px solid ${RED_RULE}`, borderRadius: 10, padding: "18px 20px", marginBottom: 20 }}>
-          <div style={{ fontWeight: 900, color: RED_RULE, fontSize: 15, fontFamily: SERIF, marginBottom: 6 }}>⚠ Your Free Trial Has Ended</div>
+          <div style={{ fontWeight: 900, color: RED_RULE, fontSize: 15, fontFamily: SERIF, marginBottom: 6 }}>⚠ Your Trial Has Ended</div>
           <div style={{ fontSize: 13, color: INK_FADE, fontFamily: SANS, marginBottom: 14, lineHeight: 1.6 }}>Your listing is currently <strong>hidden</strong> from search results. Subscribe for $12/month to go live again.</div>
           {paymentError && <div style={{ fontSize: 12, color: RED_RULE, marginBottom: 10, fontFamily: SANS }}>{paymentError}</div>}
           <button onClick={onUpgrade} disabled={paymentLoading} style={{ background: `linear-gradient(180deg,#9A6030,${BROWN_BTN})`, color: PAPER, border: `2px solid ${YELLOW}`, boxShadow: `0 0 10px 2px rgba(255,220,0,0.3)`, borderRadius: 8, padding: "12px 28px", fontWeight: 900, fontSize: 14, cursor: paymentLoading ? "default" : "pointer", fontFamily: SERIF, letterSpacing: 1, opacity: paymentLoading ? 0.7 : 1 }}>
@@ -116,7 +116,7 @@ function StatusBanner({ provider, onUpgrade, onCancel, onManageBilling, paymentL
       <div style={{ background: urgent ? "#FFF3E0" : PAPER_MID, border: `2px solid ${urgent ? "#E65100" : PAPER_DK}`, borderRadius: 10, padding: "18px 20px", marginBottom: 20 }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8, flexWrap: "wrap", gap: 8 }}>
           <div style={{ fontWeight: 900, color: urgent ? "#BF360C" : BROWN_BTN, fontSize: 14, fontFamily: SERIF }}>
-            {urgent ? `⏰ Trial ends in ${days} day${days !== 1 ? "s" : ""}!` : `🎁 Free Trial — ${days} day${days !== 1 ? "s" : ""} remaining`}
+            {urgent ? `⏰ Trial ends in ${days} day${days !== 1 ? "s" : ""}!` : `Trial — ${days} day${days !== 1 ? "s" : ""} remaining`}
           </div>
           <div style={{ fontSize: 12, color: INK_FADE, fontFamily: SANS }}>Ends {endFmt}</div>
         </div>
@@ -170,7 +170,7 @@ function StatusBanner({ provider, onUpgrade, onCancel, onManageBilling, paymentL
 
   if (status === "trial_expired") return (
     <div style={{ background: "#FFF3E0", border: `2px solid ${RED_RULE}`, borderRadius: 10, padding: "18px 20px", marginBottom: 20 }}>
-      <div style={{ fontWeight: 900, color: RED_RULE, fontSize: 15, fontFamily: SERIF, marginBottom: 6 }}>⚠ Your Free Trial Has Ended</div>
+      <div style={{ fontWeight: 900, color: RED_RULE, fontSize: 15, fontFamily: SERIF, marginBottom: 6 }}>⚠ Your Trial Has Ended</div>
       <div style={{ fontSize: 13, color: INK_FADE, fontFamily: SANS, marginBottom: 14, lineHeight: 1.6 }}>Your listing is currently <strong>hidden</strong> from search results. Subscribe for $12/month to go live again.</div>
       {paymentError && <div style={{ fontSize: 12, color: RED_RULE, marginBottom: 10, fontFamily: SANS }}>{paymentError}</div>}
       <button onClick={onUpgrade} disabled={paymentLoading} style={{ background: `linear-gradient(180deg,#9A6030,${BROWN_BTN})`, color: PAPER, border: `2px solid ${YELLOW}`, borderRadius: 8, padding: "12px 28px", fontWeight: 900, fontSize: 14, cursor: paymentLoading ? "default" : "pointer", fontFamily: SERIF, letterSpacing: 1, opacity: paymentLoading ? 0.7 : 1 }}>
