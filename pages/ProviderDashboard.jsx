@@ -817,8 +817,8 @@ function LoginScreen({ onLogin, onForgot }) {
   const handleLogin = async (e) => {
     e && e.preventDefault();
     setError("");
-    const emailVal = loginEmail.trim();
-    const passVal  = loginPass;
+    const emailVal = (loginEmail || (emailRef.current && emailRef.current.value) || "").trim();
+    const passVal  = loginPass || (passRef.current && passRef.current.value) || "";
     if (!emailVal || !passVal) { setError("Please enter your email/VH number and password."); return; }
     setLoading(true);
     try {
