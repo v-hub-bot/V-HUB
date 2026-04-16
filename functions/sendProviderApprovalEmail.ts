@@ -71,7 +71,7 @@ Deno.serve(async (req) => {
           </div>
           
           <p style="font-size: 15px; color: #5A3010; margin: 0 0 20px;">
-            Your 45-day free trial is active. After that, keep your listing live for just <strong>$12/month</strong>. You can manage your subscription anytime from your dashboard.
+            Your 45-day trial is now active. After that, keep your listing live for just <strong>$12/month</strong>. You can manage your subscription anytime from your dashboard.
           </p>
           
           <p style="font-size: 13px; color: #888; text-align: center; margin-top: 24px;">

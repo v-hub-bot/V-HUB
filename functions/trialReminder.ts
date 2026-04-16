@@ -104,11 +104,11 @@ Deno.serve(async (req) => {
             const graceFmt = graceEnd.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
             await sendEmail(p.email, `Your V-Hub trial has ended — ${p.business_name}`, `
               <div style="font-family:Georgia,serif;max-width:600px;margin:0 auto;background:#F5E8CC;border:2px solid #8B4513;border-radius:12px;overflow:hidden;">
-                ${emailHeader("⏰ Your Free Trial Has Ended")}
+                ${emailHeader("⏰ Your Trial Has Ended")}
                 <div style="padding:28px 24px;">
                   <p style="font-size:16px;color:#3a1f00;margin:0 0 16px;">Hi ${p.owner_name || 'there'},</p>
                   <p style="font-size:15px;color:#5A3010;margin:0 0 16px;">
-                    Your 45-day free trial for <strong>${p.business_name}</strong> has ended. Your listing has been temporarily paused.
+                    Your 45-day trial for <strong>${p.business_name}</strong> has ended. Your listing has been temporarily paused.
                   </p>
                   <div style="background:#fff3cd;border-left:4px solid #E8431A;border-radius:8px;padding:16px;margin:16px 0;">
                     <div style="font-size:14px;font-weight:700;color:#8B0000;margin-bottom:6px;">⏳ You have until ${graceFmt} to reactivate</div>
@@ -147,7 +147,7 @@ Deno.serve(async (req) => {
                 </p>
                 <div style="background:#fff;border-radius:10px;padding:18px;margin:20px 0;border-left:4px solid #E8431A;text-align:center;">
                   <div style="font-size:26px;font-weight:800;color:#E8431A;">$12 / month</div>
-                  <div style="font-size:12px;color:#888;margin-top:4px;">No charge until ${trialEndFmt}. Cancel anytime.</div>
+                  <div style="font-size:12px;color:#888;margin-top:4px;">Billing begins on ${trialEndFmt}. Cancel anytime.</div>
                 </div>
                 <div style="text-align:center;margin:24px 0;">
                   <a href="${checkoutUrl}" style="display:inline-block;background:#E8431A;color:#fff;text-decoration:none;padding:14px 32px;border-radius:8px;font-weight:700;font-size:16px;">Set Up My Billing →</a>

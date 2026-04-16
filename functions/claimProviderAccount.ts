@@ -110,7 +110,7 @@ Deno.serve(async (req) => {
             Thanks for signing up! Your listing for <strong>${business_name}</strong> has been submitted and is pending approval from our team. We'll notify you once it's live.
           </p>
           <div style="background: #fff; border-radius: 10px; padding: 18px; margin: 20px 0; border-left: 4px solid #E8431A;">
-            <div style="font-size: 14px; font-weight: 700; color: #5A3010; margin-bottom: 8px;">YOUR FREE TRIAL DETAILS</div>
+            <div style="font-size: 14px; font-weight: 700; color: #5A3010; margin-bottom: 8px;">YOUR TRIAL DETAILS</div>
             <div style="font-size: 14px; color: #333;">📋 Your V-Hub ID: <strong>${vh_number}</strong></div>
             <div style="font-size: 14px; color: #333; margin-top: 6px;">📅 Trial ends: <strong>${trialEndFormatted}</strong></div>
             <div style="font-size: 14px; color: #333; margin-top: 6px;">💰 After trial: <strong>$12/month</strong> to stay listed</div>

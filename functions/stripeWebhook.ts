@@ -34,7 +34,7 @@ async function sendReceiptEmail(opts: {
     ? `V-Hub Payment Receipt — ${formattedAmount} · Your Trial Has Ended, Subscription Active`
     : `V-Hub Payment Receipt — ${formattedAmount} · Monthly Subscription Renewed`;
   const intro = isFirstPayment
-    ? `Your free trial has ended and your first subscription payment has been processed. Your V-Hub listing remains <strong>active</strong> and visible to residents across The Villages.`
+    ? `Your trial period has ended and your first subscription payment has been processed. Your V-Hub listing remains <strong>active</strong> and visible to residents across The Villages.`
     : `Your V-Hub monthly subscription has been renewed successfully. Your listing remains <strong>active</strong>.`;
 
   const viewBtn = hostedInvoiceUrl
@@ -109,7 +109,7 @@ async function sendTrialStartEmail(opts: {
     <div style="font-family:Georgia,serif;max-width:600px;margin:0 auto;background:#F5E8CC;border:2px solid #8B4513;border-radius:12px;overflow:hidden;">
       <div style="background:#1A0A00;padding:24px;text-align:center;">
         <img src="${LOGO_URL}" style="height:60px;border-radius:10px;margin-bottom:10px;"/>
-        <div style="color:#F5E8CC;font-size:20px;font-weight:900;letter-spacing:2px;">🎉 YOUR FREE TRIAL HAS STARTED!</div>
+        <div style="color:#F5E8CC;font-size:20px;font-weight:900;letter-spacing:2px;">🎉 YOUR TRIAL HAS STARTED!</div>
         <div style="color:#C9973A;font-size:13px;margin-top:6px;font-style:italic;">V-Hub · The Villages, FL</div>
       </div>
       <div style="padding:28px 24px;">
@@ -127,7 +127,7 @@ async function sendTrialStartEmail(opts: {
           </table>
         </div>
         <p style="color:#5A3010;font-size:14px;line-height:1.7;">
-          <strong>Nothing is charged today.</strong> Your card will be automatically billed on <strong>${trialEndDate}</strong> when your free trial ends. 
+          <strong>Nothing is charged today.</strong> Your card will be automatically billed on <strong>${trialEndDate}</strong> when your trial period ends. 
           You can cancel anytime before that date from your <a href="${APP_URL}/ProviderDashboard" style="color:#C9973A;">Provider Hub</a>.
         </p>
         <p style="color:#5A3010;font-size:13px;line-height:1.7;margin-top:12px;">
@@ -147,7 +147,7 @@ async function sendTrialStartEmail(opts: {
     body: JSON.stringify({
       personalizations: [{ to: [{ email: to }] }],
       from: { email: "admin@v-hub.us", name: "V-Hub" },
-      subject: `V-Hub — Your Free Trial is Active! First charge on ${trialEndDate}`,
+      subject: `V-Hub — Your Trial is Active! First charge on ${trialEndDate}`,
       content: [{ type: "text/html", value: html }],
     }),
   });
