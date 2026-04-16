@@ -148,7 +148,7 @@ Deno.serve(async (req) => {
           </ol>
           
           <div style="text-align: center; margin-top: 24px;">
-            <a href="https://www.v-hub.us/Admin" style="display: inline-block; background: #E8431A; color: white; padding: 12px 28px; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 14px;">Go to Admin Dashboard</a>
+            <a href="https://www.v-hub.us/Wekcadmin" style="display: inline-block; background: #E8431A; color: white; padding: 12px 28px; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 14px;">Go to Admin Dashboard</a>
           </div>
           
           <div style="border-top: 1px solid #ddd; margin-top: 28px; padding-top: 16px; text-align: center;">
