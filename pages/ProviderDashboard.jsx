@@ -1968,7 +1968,7 @@ export default function ProviderDashboard() {
 
         <div style={{ textAlign: "center", borderTop: `2px solid ${INK}`, paddingTop: 20 }}>
           {saveMsg && <div style={{ fontSize: 13, color: saveMsg.startsWith("✓") ? GREEN : RED_RULE, fontStyle: "italic", marginBottom: 12 }}>{saveMsg}</div>}
-          <button onClick={handleSave} disabled={saving} style={{ background: saving ? PAPER_DK : `linear-gradient(180deg,#9A6030,${BROWN_BTN} 60%,#5A3010)`, color: PAPER, border: `3px solid ${YELLOW}`, boxShadow: `0 0 0 1.5px ${YELLOW}, 0 0 12px 3px rgba(255,220,0,0.3)`, borderRadius: 6, padding: "14px 48px", fontSize: 15, fontWeight: 900, cursor: saving ? "not-allowed" : "pointer", fontFamily: SERIF, letterSpacing: 3, textTransform: "uppercase" }}>
+          <button data-testid="save-changes-btn" onClick={handleSave} disabled={saving} style={{ background: saving ? PAPER_DK : `linear-gradient(180deg,#9A6030,${BROWN_BTN} 60%,#5A3010)`, color: PAPER, border: `3px solid ${YELLOW}`, boxShadow: `0 0 0 1.5px ${YELLOW}, 0 0 12px 3px rgba(255,220,0,0.3)`, borderRadius: 6, padding: "14px 48px", fontSize: 15, fontWeight: 900, cursor: saving ? "not-allowed" : "pointer", fontFamily: SERIF, letterSpacing: 3, textTransform: "uppercase" }}>
             {saving ? "Saving…" : "Save Changes →"}
           </button>
           <div style={{ fontSize: 11, color: INK_FADE, fontStyle: "italic", marginTop: 8, fontFamily: SANS }}>Changes go live immediately on your V-Hub listing.</div>
@@ -2018,7 +2018,7 @@ export default function ProviderDashboard() {
               <input type={showNewPass ? "text" : "password"} value={newPass2} onChange={e => setNewPass2(e.target.value)} placeholder="Re-enter new password..." style={inS} />
             </div>
           )}
-          <button onClick={handleSaveAccount} style={{ background: `linear-gradient(180deg,#9A6030,${BROWN_BTN})`, color: PAPER, border: `2px solid ${YELLOW}`, borderRadius: 6, padding: "11px 28px", fontWeight: 900, fontSize: 13, cursor: "pointer", fontFamily: SERIF, letterSpacing: 1, textTransform: "uppercase" }}>
+          <button data-testid="save-account-btn" onClick={handleSaveAccount} style={{ background: `linear-gradient(180deg,#9A6030,${BROWN_BTN})`, color: PAPER, border: `2px solid ${YELLOW}`, borderRadius: 6, padding: "11px 28px", fontWeight: 900, fontSize: 13, cursor: "pointer", fontFamily: SERIF, letterSpacing: 1, textTransform: "uppercase" }}>
             Save Changes
           </button>
         </div>
