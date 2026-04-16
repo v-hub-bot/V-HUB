@@ -1087,7 +1087,7 @@ function LeadsTab({ leads, providers }) {
 }
 
 // ── ANALYTICS TAB ─────────────────────────────────────────────────────────────
-function AnalyticsTab({ providers, reviews, leads, stats, catMap, svcMap, fullSvcMap }) {
+function AnalyticsTab({ providers, reviews, leads, stats, catMap, svcMap, fullSvcMap, classifiedAds }) {
   const paid = providers.filter(p => ["active", "paid"].includes(p.subscription_status)).length;
   const trial = providers.filter(p => p.subscription_status === "trial").length;
   const byMonth = {};
@@ -1105,14 +1105,50 @@ function AnalyticsTab({ providers, reviews, leads, stats, catMap, svcMap, fullSv
     <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
       <div style={S.card}>
         <div style={S.secTitle}>💰 Revenue Snapshot</div>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8 }}>
-          {[["Est. MRR", `$${paid * 12}`, T.green], ["Paid", paid, T.teal], ["Trial", trial, T.gold]].map(([l, v, c]) => (
-            <div key={l} style={{ textAlign: "center", background: T.parchment, borderRadius: 6, padding: "10px 6px" }}>
-              <div style={{ fontSize: 22, fontWeight: 800, color: c, fontFamily: T.sans }}>{v}</div>
-              <div style={{ fontSize: 10, color: T.brownLight, fontFamily: T.sans }}>{l}</div>
-            </div>
-          ))}
-        </div>
+        {(() => {
+          const now = new Date();
+          const activeAds = (classifiedAds || []).filter(a => {
+            if (!a.is_active) return false;
+            if (a.deal_expires_at) { const exp = new Date(a.deal_expires_at); if (exp < now) return false; }
+            return true;
+          });
+          const dealsRevenue = activeAds.length * 10;
+          const totalRevenue = (paid * 12) + dealsRevenue;
+          return (
+            <>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8, marginBottom: 10 }}>
+                {[["Est. MRR", `$${paid * 12}`, T.green], ["Paid Providers", paid, T.teal], ["Trial", trial, T.gold]].map(([l, v, c]) => (
+                  <div key={l} style={{ textAlign: "center", background: T.parchment, borderRadius: 6, padding: "10px 6px" }}>
+                    <div style={{ fontSize: 22, fontWeight: 800, color: c, fontFamily: T.sans }}>{v}</div>
+                    <div style={{ fontSize: 10, color: T.brownLight, fontFamily: T.sans }}>{l}</div>
+                  </div>
+                ))}
+              </div>
+              <div style={{ borderTop: `1px solid ${T.border}`, paddingTop: 10 }}>
+                <div style={{ fontSize: 11, fontWeight: 700, color: T.brownLight, textTransform: "uppercase", letterSpacing: 1, marginBottom: 8, fontFamily: T.sans }}>Deals of the Week</div>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8, marginBottom: 10 }}>
+                  {[["Active Ads", activeAds.length, T.teal], ["Ad Revenue (week)", `$${dealsRevenue}`, "#1A6B3C"], ["Est. Total Revenue", `$${totalRevenue}`, T.green]].map(([l, v, c]) => (
+                    <div key={l} style={{ textAlign: "center", background: T.parchment, borderRadius: 6, padding: "10px 6px" }}>
+                      <div style={{ fontSize: 20, fontWeight: 800, color: c, fontFamily: T.sans }}>{v}</div>
+                      <div style={{ fontSize: 10, color: T.brownLight, fontFamily: T.sans }}>{l}</div>
+                    </div>
+                  ))}
+                </div>
+                {activeAds.length > 0 && (
+                  <div style={{ fontSize: 12, color: T.brownLight, fontFamily: T.sans }}>
+                    {activeAds.map(a => (
+                      <div key={a.id} style={{ display: "flex", justifyContent: "space-between", padding: "4px 0", borderBottom: `1px solid ${T.parchmentDark}` }}>
+                        <span style={{ color: T.brownDark }}>{a.provider_name || "Unknown"}</span>
+                        <span style={{ fontWeight: 700, color: "#1A6B3C" }}>$10 · expires {a.deal_expires_at || "?"}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                {activeAds.length === 0 && <div style={{ fontSize: 12, color: "#aaa", fontFamily: T.sans }}>No active deals this week</div>}
+              </div>
+            </>
+          );
+        })()}
       </div>
       <div style={S.card}>
         <div style={S.secTitle}>📈 Provider Signups by Month</div>
@@ -1536,6 +1572,7 @@ function Dashboard({ adminPin }) {
   const [reviews, setReviews] = useState([]);
   const [leads, setLeads] = useState([]);
   const [stats, setStats] = useState([]);
+  const [classifiedAds, setClassifiedAds] = useState([]);
   const [categories, setCategories] = useState([]);
   const [services, setServices] = useState([]);
   const [serviceAreas, setServiceAreas] = useState([]);
@@ -1556,6 +1593,7 @@ function Dashboard({ adminPin }) {
       setReviews(Array.isArray(data.reviews) ? data.reviews : []);
       setLeads(Array.isArray(data.leads) ? data.leads : []);
       setStats(Array.isArray(data.stats) ? data.stats : []);
+      setClassifiedAds(Array.isArray(data.classifiedAds) ? data.classifiedAds : []);
       setCategories(Array.isArray(data.categories) ? data.categories.filter(c => c.is_active) : []);
       setServices(Array.isArray(data.services) ? data.services : []);
       setServiceAreas(Array.isArray(data.serviceAreas) ? data.serviceAreas : []);
@@ -1632,7 +1670,7 @@ function Dashboard({ adminPin }) {
         {tab === "Providers" && <ProvidersTab providers={providers} setProviders={setProviders} catMap={catMap} svcMap={svcMap} areaMap={areaMap} fullSvcMap={fullSvcMap} fullAreaMap={fullAreaMap} adminPin={adminPin} allCategories={categories} allServices={services} allAreas={serviceAreas} />}
         {tab === "Reviews" && <ReviewsTab reviews={reviews} setReviews={setReviews} providers={providers} adminPin={adminPin} />}
         {tab === "Leads" && <LeadsTab leads={leads} providers={providers} />}
-        {tab === "Analytics" && <AnalyticsTab providers={providers} reviews={reviews} leads={leads} stats={stats} catMap={catMap} svcMap={svcMap} fullSvcMap={fullSvcMap} />}
+        {tab === "Analytics" && <AnalyticsTab providers={providers} reviews={reviews} leads={leads} stats={stats} catMap={catMap} svcMap={svcMap} fullSvcMap={fullSvcMap} classifiedAds={classifiedAds} />}
         {tab === "Add Provider" && <AddProviderTab onAdded={p => { setProviders(prev => [p, ...prev]); setTab("Providers"); }} categories={categories} services={services} serviceAreas={serviceAreas} adminPin={adminPin} />}
       </div>
     </div>

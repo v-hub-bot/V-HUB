@@ -41,8 +41,6 @@ Deno.serve(async (req) => {
     } catch (_) {}
 
     if (!userIsAdmin && !pinProvided) {
-      // Fallback: allow if request comes from known admin origins without auth
-      // (admin page is already gated by role check on frontend)
       const origin = req.headers.get("origin") || "";
       if (!ALLOWED_ORIGINS.includes(origin) && origin !== "") {
         return Response.json({ error: "Unauthorized" }, { status: 401, headers: getCorsHeaders(req) });
@@ -51,7 +49,7 @@ Deno.serve(async (req) => {
 
     const sr = base44.asServiceRole;
 
-    const [providers, reviews, leads, stats, categories, services, serviceAreas] = await Promise.all([
+    const [providers, reviews, leads, stats, categories, services, serviceAreas, classifiedAds] = await Promise.all([
       sr.entities.Provider.list(),
       sr.entities.ProviderReview.list(),
       sr.entities.LeadInquiry.list(),
@@ -59,6 +57,7 @@ Deno.serve(async (req) => {
       sr.entities.Category.list(),
       sr.entities.Service.list(),
       sr.entities.ServiceArea.list(),
+      sr.entities.ClassifiedAd.list(),
     ]);
 
     return Response.json({
@@ -69,6 +68,7 @@ Deno.serve(async (req) => {
       categories: categories || [],
       services: services || [],
       serviceAreas: serviceAreas || [],
+      classifiedAds: classifiedAds || [],
     }, { headers: getCorsHeaders(req) });
   } catch (error) {
     console.error('getAdminData error:', error);
