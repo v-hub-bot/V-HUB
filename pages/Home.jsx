@@ -730,10 +730,10 @@ function Results({ results, areas, cats, svcs, onReset, onSel, selArea, selCatId
 }
 
 // ── Dropdown Button ───────────────────────────────────────────────────────────
-function DropBtn({ label, isOpen, onClick }) {
+function DropBtn({ label, isOpen, onClick, testId }) {
   const isPlaceholder = label === "Select a Service..." || label === "Select a Village...";
   return (
-    <button onClick={onClick} style={{
+    <button data-testid={testId} onClick={onClick} style={{
       width: "100%", background: PAPER,
       border: "3px solid #1A6B3C",
       boxShadow: "0 0 0 1.5px #1A6B3C, 0 0 10px 2px rgba(26,107,60,0.3)",
@@ -890,11 +890,11 @@ function SearchBox({ cats, svcs, areas, onSearch, selSvc, setSelSvc, selArea, se
       </div>
       <div style={{ display: "flex", gap: 8, marginBottom: 10 }}>
         <div style={{ flex: 1, minWidth: 0, position: "relative" }}>
-          <DropBtn label={svcLabel} isOpen={sOpen} onClick={e => { e.stopPropagation(); if (sOpen) { setSOpen(false); setOpenCat(null); } else { setSOpen(true); setVOpen(false); } }} />
+          <DropBtn label={svcLabel} testId="svc-dropdown" isOpen={sOpen} onClick={e => { e.stopPropagation(); if (sOpen) { setSOpen(false); setOpenCat(null); } else { setSOpen(true); setVOpen(false); } }} />
           <SvcDropdown open={sOpen} cats={cats} svcs={svcs} openCat={openCat} selSvc={selSvc} setOpenCat={setOpenCat} setSelSvc={s => { setSelSvc(s); setSOpen(false); }} setSOpen={setSOpen} />
         </div>
         <div style={{ flex: 1, minWidth: 0, position: "relative" }}>
-          <DropBtn label={selArea ? selArea.name : "Select a Village..."} isOpen={vOpen} onClick={e => { e.stopPropagation(); if (vOpen) { setVOpen(false); } else { setVOpen(true); setSOpen(false); setOpenCat(null); } }} />
+          <DropBtn label={selArea ? selArea.name : "Select a Village..."} testId="vil-dropdown" isOpen={vOpen} onClick={e => { e.stopPropagation(); if (vOpen) { setVOpen(false); } else { setVOpen(true); setSOpen(false); setOpenCat(null); } }} />
           <VilDropdown open={vOpen} areas={areas} selArea={selArea} setSelArea={a => { setSelArea(a); setVOpen(false); }} setVOpen={setVOpen} />
         </div>
       </div>
