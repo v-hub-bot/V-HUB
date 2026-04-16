@@ -1765,6 +1765,7 @@ export default function ProviderDashboard() {
           provider_email: provider.email,
           provider_name: provider.owner_name || provider.business_name,
           business_name: provider.business_name,
+          trial_end_date: provider.trial_end_date || null,
         }),
       });
       const data = await res.json();
