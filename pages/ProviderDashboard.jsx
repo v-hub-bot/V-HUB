@@ -233,6 +233,20 @@ const LEGACY_CAT_META = {
 function SvcAccordion({ selSvcs, setSelSvcs, dbCategories, dbServices }) {
   const [openCat, setOpenCat] = useState(null);
 
+  // Auto-open first category that has selected services
+  useEffect(() => {
+    if (!dbCategories || !dbServices || dbCategories.length === 0) return;
+    const firstMatch = (dbCategories || []).find(cat =>
+      (dbServices || []).some(s => s.category_id === cat.id && selSvcs.includes(s.id))
+    );
+    if (firstMatch && !openCat) setOpenCat(firstMatch.id);
+  }, [dbCategories, dbServices]);
+
+  // If data not loaded yet, show a spinner
+  if (!dbCategories || dbCategories.length === 0) {
+    return <div style={{ padding: "14px 0", fontSize: 13, color: INK_FADE, fontFamily: SANS, fontStyle: "italic" }}>Loading services…</div>;
+  }
+
   // Build category list: use live DB data, fall back to legacy meta
   const cats = (dbCategories || []).filter(c => c.is_active !== false).map(cat => {
     const meta = LEGACY_CAT_META[cat.id] || {};
@@ -299,7 +313,7 @@ function SvcAccordion({ selSvcs, setSelSvcs, dbCategories, dbServices }) {
 }
 
 // ── Village picker — grouped by region, works with entity IDs ─────────────
-function VillageSelect({ selAreas, setSelAreas, dbAreas }) {
+function VillageSelect({ selAreas, setSelAreas, dbAreas, areaMap }) {
   const [openGroup, setOpenGroup] = useState(null);
 
   const MACRO_GROUPS = [
@@ -360,7 +374,7 @@ function VillageSelect({ selAreas, setSelAreas, dbAreas }) {
           {selAreas.map(id => {
             const area = (dbAreas || []).find(a => a.id === id);
             const legAreaName = LEGACY_AREA[id] || null;
-            const name = area ? (area.name.includes(' — ') ? area.name.split(' — ').pop().trim() : area.name) : (legAreaName || "Unknown Village");
+            const name = area ? (area.name.includes(' — ') ? area.name.split(' — ').pop().trim() : area.name) : (legAreaName || (areaMap && areaMap[id]) || "Unknown Village");
             return (
               <span key={id} onClick={() => setSelAreas(prev => prev.filter(a => a !== id))}
                 style={{ fontSize: 12, background: TEAL, color: "#fff", borderRadius: 20, padding: "4px 11px", cursor: "pointer", fontFamily: SANS }}>
@@ -1805,9 +1819,7 @@ export default function ProviderDashboard() {
   if (view === "edit") return (
     <div style={{ minHeight: "100vh", background: PAPER, backgroundImage: "repeating-linear-gradient(0deg,transparent,transparent 27px,rgba(28,15,0,0.03) 27px,rgba(28,15,0,0.03) 28px)", fontFamily: SERIF }}>
       <TopNav rightContent={
-        <button onClick={handleSave} disabled={saving} style={{ background: `linear-gradient(180deg,#9A6030,${BROWN_BTN})`, color: PAPER, border: `2px solid ${YELLOW}`, borderRadius: 6, padding: "7px 16px", fontSize: 13, fontWeight: 900, cursor: "pointer", letterSpacing: 1, fontFamily: SERIF }}>
-          {saving ? "Saving…" : "Save →"}
-        </button>
+        <button onClick={() => setView("dashboard")} style={{ background: "transparent", border: `1.5px solid ${PAPER_DK}`, color: INK_FADE, borderRadius: 6, padding: "7px 16px", fontSize: 12, cursor: "pointer", fontFamily: SANS }}>← Back</button>
       } />
 
       <div style={{ maxWidth: 700, margin: "0 auto", padding: "24px 16px 60px" }}>
@@ -1855,7 +1867,7 @@ export default function ProviderDashboard() {
 
         <div style={shS}>Section 3 — Villages You Serve</div>
         <div style={{ marginBottom: 28 }}>
-          <VillageSelect selAreas={selAreas} setSelAreas={setSelAreas} dbAreas={dbAreas} />
+          <VillageSelect selAreas={selAreas} setSelAreas={setSelAreas} dbAreas={dbAreas} areaMap={areaMap} />
         </div>
 
         <div style={{ textAlign: "center", borderTop: `2px solid ${INK}`, paddingTop: 20 }}>
@@ -1864,6 +1876,7 @@ export default function ProviderDashboard() {
             {saving ? "Saving…" : "Save Changes →"}
           </button>
           <div style={{ fontSize: 11, color: INK_FADE, fontStyle: "italic", marginTop: 8, fontFamily: SANS }}>Changes go live immediately on your V-Hub listing.</div>
+          <button onClick={() => setView("dashboard")} style={{ marginTop: 16, background: "transparent", border: `1.5px solid ${PAPER_DK}`, color: INK_FADE, borderRadius: 6, padding: "10px 28px", fontSize: 13, cursor: "pointer", fontFamily: SANS }}>← Return to Hub</button>
         </div>
       </div>
     </div>
