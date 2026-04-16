@@ -1647,15 +1647,14 @@ export default function ProviderDashboard() {
       const ALLOWED = ["business_name","owner_name","phone","email","website","description","address",
         "years_in_business","license_number","google_review_url","is_mobile","hours_of_operation","google_rating"];
       const NUMERIC = ["years_in_business","google_rating"];
-      const fields = {};
+      const updates = {};
       for (const k of ALLOWED) {
         if (k in form) {
-          // Don't send empty strings for numeric fields — backend will reject them
           if (NUMERIC.includes(k)) {
             const v = form[k];
-            if (v !== "" && v !== null && v !== undefined) fields[k] = Number(v);
+            if (v !== "" && v !== null && v !== undefined) updates[k] = Number(v);
           } else {
-            fields[k] = form[k];
+            updates[k] = form[k];
           }
         }
       }
@@ -1663,39 +1662,33 @@ export default function ProviderDashboard() {
       const validId = id => typeof id === 'string' && /^[0-9a-f]{24}$/.test(id);
       const svcsToSave  = selSvcs.filter(validId);
       const areasToSave = selAreas.filter(validId);
-      // Only include services/areas in payload if at least one selection exists,
-      // OR if the provider previously had none — never send empty to replace non-empty
+      // Only include services/areas if at least one selection exists,
+      // OR if provider previously had none — never send empty to replace non-empty
       const providerHadServices = Array.isArray(provider.services) && provider.services.length > 0;
       const providerHadAreas    = Array.isArray(provider.service_areas) && provider.service_areas.length > 0;
-      if (!providerHadServices || svcsToSave.length > 0)  fields.services = svcsToSave;
-      if (!providerHadAreas    || areasToSave.length > 0) fields.service_areas = areasToSave;
-      console.log("[V-Hub Save] services:", svcsToSave, "areas:", areasToSave);
-      const res = await fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/providerLogin", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "save_profile", provider_id: provider.id, vh_number: provider.vh_number, fields }),
-      });
-      const data = await res.json();
-      if (!res.ok || !data.success) { setSaveMsg("⚠ " + (data.error || "Error saving.")); setSaving(false); return; }
-      // Update local state with saved values (don't re-seed if services/areas were not included in payload)
-      setProvider(prev => ({ ...prev, ...data.provider }));
-      if ('services' in fields)      setSelSvcs(Array.isArray(data.provider.services) ? data.provider.services : selSvcs);
-      if ('service_areas' in fields) setSelAreas(Array.isArray(data.provider.service_areas) ? data.provider.service_areas : selAreas);
-      // Seed text form fields but preserve our current selSvcs/selAreas
+      if (!providerHadServices || svcsToSave.length > 0)  updates.services = svcsToSave;
+      if (!providerHadAreas    || areasToSave.length > 0) updates.service_areas = areasToSave;
+      console.log("[V-Hub Save] services:", svcsToSave, "areas:", areasToSave, "updates:", updates);
+      // Use entity SDK directly — no backend function dependency
+      const saved = await Provider.update(provider.id, updates);
+      // Update local state
+      setProvider(prev => ({ ...prev, ...saved }));
+      if ('services' in updates)      setSelSvcs(Array.isArray(saved.services) ? saved.services : selSvcs);
+      if ('service_areas' in updates) setSelAreas(Array.isArray(saved.service_areas) ? saved.service_areas : selAreas);
       setForm({
-        business_name: data.provider.business_name || "",
-        owner_name: data.provider.owner_name || "",
-        phone: data.provider.phone || "",
-        email: data.provider.email || "",
-        website: data.provider.website || "",
-        address: data.provider.address || "",
-        description: data.provider.description || "",
-        years_in_business: data.provider.years_in_business || "",
-        license_number: data.provider.license_number || "",
-        google_review_url: data.provider.google_review_url || "",
-        google_rating: data.provider.google_rating || "",
-        hours_of_operation: data.provider.hours_of_operation || "",
-        is_mobile: data.provider.is_mobile === true,
+        business_name: saved.business_name || "",
+        owner_name: saved.owner_name || "",
+        phone: saved.phone || "",
+        email: saved.email || "",
+        website: saved.website || "",
+        address: saved.address || "",
+        description: saved.description || "",
+        years_in_business: saved.years_in_business || "",
+        license_number: saved.license_number || "",
+        google_review_url: saved.google_review_url || "",
+        google_rating: saved.google_rating || "",
+        hours_of_operation: saved.hours_of_operation || "",
+        is_mobile: saved.is_mobile === true,
       });
       setSaveMsg("✓ Profile updated successfully!");
       setTimeout(() => { setSaveMsg(""); setView("dashboard"); }, 2500);
@@ -1714,30 +1707,36 @@ export default function ProviderDashboard() {
     const emailChanged = oldEmail && newEmail && oldEmail !== newEmail;
 
     try {
-      // Use backend function for account-level updates (password/email)
-      const payload = {
-        provider_id: provider.id,
-        new_login_email: newEmail,
-        vh_number: provider.vh_number,
-      };
+      // Use providerLogin backend function ONLY for password hashing (needs server-side SHA-256)
+      // For email-only changes with no password, use entity SDK directly
       if (newPass) {
-        payload.new_password = newPass;
-        payload.password_changed = true;
+        // Password change — needs backend for hashing (save_account action)
+        const res = await fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/providerLogin", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            action: "save_account",
+            provider_id: provider.id,
+            vh_number: provider.vh_number,
+            new_password: newPass,
+            new_login_email: newEmail,
+          }),
+        });
+        const data = await res.json();
+        if (!res.ok || !data.success) { setAccMsg("⚠ " + (data.error || "Error updating.")); return; }
+        const fresh = data.provider || provider;
+        setProvider(fresh);
+        sessionStorage.setItem("vhub_provider_id", fresh.id);
+      } else {
+        // Email-only update — entity SDK directly
+        const saved = await Provider.update(provider.id, { login_email: newEmail });
+        setProvider(prev => ({ ...prev, ...saved }));
+        sessionStorage.setItem("vhub_provider_id", provider.id);
       }
-      const res = await fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/providerLogin", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "save_account", ...payload }),
-      });
-      const data = await res.json();
-      if (!res.ok || !data.success) { setAccMsg("⚠ " + (data.error || "Error updating.")); return; }
-      const fresh = data.provider || provider;
-      setProvider(fresh);
-      sessionStorage.setItem("vhub_provider_id", fresh.id);
-      setNewPass(""); setNewPass2("");
 
+      setNewPass(""); setNewPass2("");
       if (emailChanged) {
-        setAccMsg("✓ Account updated! A confirmation was sent to your old email address.");
+        setAccMsg("✓ Account updated! Your login email has been changed.");
       } else if (newPass) {
         setAccMsg("✓ Password updated successfully!");
       } else {
