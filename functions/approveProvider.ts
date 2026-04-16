@@ -82,12 +82,9 @@ async function resolveServiceNames(base44: any, ids: string[]): Promise<string> 
     const all = await base44.asServiceRole.entities.Service.list();
     const map = new Map(all.map((s: any) => [s.id, s.name]));
     const names = ids.map(id => map.get(id) || SERVICE_LEGACY_MAP[id] || null).filter(Boolean) as string[];
-    const clean = names.map(cleanName);
-    return clean.length > 0 ? clean.join(', ') : 'See listing details';
-  } catch (e) {
-    console.error('resolveServiceNames failed:', e);
-    const names = ids.map(id => SERVICE_LEGACY_MAP[id] || null).filter(Boolean) as string[];
-    return names.length > 0 ? names.join(', ') : 'See listing details';
+    return names.map(cleanName).join(', ') || 'See listing details';
+  } catch {
+    return ids.map(id => SERVICE_LEGACY_MAP[id] || null).filter(Boolean).join(', ') || 'See listing details';
   }
 }
 
@@ -97,12 +94,31 @@ async function resolveAreaNames(base44: any, ids: string[]): Promise<string> {
     const all = await base44.asServiceRole.entities.ServiceArea.list();
     const map = new Map(all.map((a: any) => [a.id, a.name]));
     const names = ids.map(id => map.get(id) || AREA_LEGACY_MAP[id] || null).filter(Boolean) as string[];
-    const clean = names.map(cleanName);
-    return clean.length > 0 ? clean.join(', ') : 'See listing details';
-  } catch (e) {
-    console.error('resolveAreaNames failed:', e);
-    const names = ids.map(id => AREA_LEGACY_MAP[id] || null).filter(Boolean) as string[];
-    return names.length > 0 ? names.join(', ') : 'See listing details';
+    return names.map(cleanName).join(', ') || 'See listing details';
+  } catch {
+    return ids.map(id => AREA_LEGACY_MAP[id] || null).filter(Boolean).join(', ') || 'See listing details';
+  }
+}
+
+async function resolveServiceList(base44: any, ids: string[]): Promise<string[]> {
+  if (!ids || ids.length === 0) return [];
+  try {
+    const all = await base44.asServiceRole.entities.Service.list();
+    const map = new Map(all.map((s: any) => [s.id, s.name]));
+    return ids.map(id => map.get(id) || SERVICE_LEGACY_MAP[id] || null).filter(Boolean).map(cleanName) as string[];
+  } catch {
+    return ids.map(id => SERVICE_LEGACY_MAP[id] || null).filter(Boolean).map(cleanName) as string[];
+  }
+}
+
+async function resolveAreaList(base44: any, ids: string[]): Promise<string[]> {
+  if (!ids || ids.length === 0) return [];
+  try {
+    const all = await base44.asServiceRole.entities.ServiceArea.list();
+    const map = new Map(all.map((a: any) => [a.id, a.name]));
+    return ids.map(id => map.get(id) || AREA_LEGACY_MAP[id] || null).filter(Boolean).map(cleanName) as string[];
+  } catch {
+    return ids.map(id => AREA_LEGACY_MAP[id] || null).filter(Boolean).map(cleanName) as string[];
   }
 }
 
@@ -133,7 +149,7 @@ Deno.serve(async (req) => {
     const trialEndStr = trialEnd.toISOString().split('T')[0];
     const trialEndFormatted = trialEnd.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
 
-    // ── Update DB record via SDK (not raw fetch) ──────────────────────────
+    // ── Update DB record ──────────────────────────────────────────────────
     if (!email_only) {
       try {
         await base44.asServiceRole.entities.Provider.update(provider_record_id, {
@@ -152,122 +168,171 @@ Deno.serve(async (req) => {
       }
     }
 
-    // ── Resolve human-readable names via SDK ──────────────────────────────
+    // ── Resolve human-readable names ──────────────────────────────────────
     const servicesList = await resolveServiceNames(base44, services || []);
     const areasList = await resolveAreaNames(base44, service_areas || []);
+    const svcArray = await resolveServiceList(base44, services || []);
+    const areaArray = await resolveAreaList(base44, service_areas || []);
     const displayLoginEmail = login_email || email;
 
     let emailError: string | null = null;
 
-    // ── Provider "You're Live!" email ────────────────────────────────────
+    // ── Single combined provider email ────────────────────────────────────
     if (email) {
       try {
-        const vhDisplay = vh_number
-          ? `<div style="font-size:13px;color:#1A237E;line-height:1.9;"><strong>VH Account #:</strong> <span style="font-family:'Courier New',monospace;font-weight:900;font-size:15px;">${vh_number}</span> &nbsp;<span style="font-size:11px;color:#5C6BC0;">(use this or your email to log in)</span></div>`
-          : '';
+        const servicesHtml = svcArray.length > 0
+          ? svcArray.map(s => `<li style="margin-bottom:4px;">${s}</li>`).join('')
+          : '<li>See your listing</li>';
+        const areasHtml = areaArray.length > 0
+          ? areaArray.map(a => `<li style="margin-bottom:4px;">${a}</li>`).join('')
+          : '<li>See your listing</li>';
+
+        const passwordBlock = temp_password
+          ? `<tr>
+              <td style="padding:7px 0;color:#555;width:38%;vertical-align:top;">Temp Password:</td>
+              <td>
+                <span style="font-family:'Courier New',monospace;font-weight:900;font-size:16px;background:#d4edda;padding:3px 10px;border-radius:4px;letter-spacing:1px;">${temp_password}</span>
+                <span style="font-size:11px;color:#c62828;display:block;margin-top:4px;">⚠️ Please change this after your first login</span>
+              </td>
+            </tr>`
+          : `<tr>
+              <td style="padding:7px 0;color:#555;width:38%;">Password:</td>
+              <td>The password you set during signup</td>
+            </tr>`;
 
         const providerHtml = `
-          <div style="font-family:Georgia,serif;max-width:600px;margin:0 auto;background:#F5E8CC;border:2px solid #8B4513;border-radius:12px;overflow:hidden;">
-            <div style="background:#1A0A00;padding:24px;text-align:center;">
-              <img src="${LOGO_URL}" style="height:65px;border-radius:10px;margin-bottom:10px;"/>
-              <div style="color:#F5E8CC;font-size:22px;font-weight:900;letter-spacing:2px;">🎉 YOU'RE LIVE ON V-HUB!</div>
-              <div style="color:#C9973A;font-size:13px;margin-top:6px;font-style:italic;">The Villages' #1 Local Services Directory</div>
-            </div>
-            <div style="padding:28px 24px;">
-              <p style="color:#1A0A00;font-size:17px;font-weight:700;margin:0 0 6px;">Hi ${owner_name},</p>
-              <p style="color:#5A3010;font-size:15px;line-height:1.7;margin:0 0 20px;">
-                Congratulations — <strong>${business_name}</strong> has been reviewed and <strong>approved!</strong>
-                Your listing is now live and searchable by residents throughout The Villages.
-              </p>
+<!DOCTYPE html>
+<html>
+<body style="margin:0;padding:0;background:#e8dcc8;">
+<div style="font-family:Georgia,serif;max-width:600px;margin:0 auto;background:#F5E8CC;border:2px solid #8B4513;border-radius:12px;overflow:hidden;">
 
-              <div style="background:#FFF3CD;border:1px solid #FFC107;border-radius:8px;padding:12px 16px;margin:0 0 20px;font-size:13px;color:#856404;text-align:center;">
-                📬 <strong>Heads up:</strong> Future V-Hub emails may land in your <strong>Spam or Junk</strong> folder.<br/>
-                To make sure you never miss an update, add <strong>admin@v-hub.us</strong> to your contacts.
-              </div>
+  <!-- Header -->
+  <div style="background:#1A0A00;padding:28px 24px;text-align:center;">
+    <img src="${LOGO_URL}" style="height:70px;border-radius:10px;margin-bottom:12px;" />
+    <div style="color:#F5E8CC;font-size:24px;font-weight:900;letter-spacing:2px;">🎉 You're Live on V-Hub!</div>
+    <div style="color:#C9973A;font-size:13px;margin-top:6px;font-style:italic;">The Villages, FL — Local Services Directory</div>
+  </div>
 
-              <div style="background:#fff;border:2px solid #8B4513;border-radius:8px;padding:20px;text-align:center;margin:0 0 20px;">
-                <div style="font-size:11px;font-weight:700;letter-spacing:3px;color:#8B5E3C;text-transform:uppercase;margin-bottom:8px;">Your V-Hub Account Number</div>
-                <div style="font-size:36px;font-weight:900;color:#5C3317;letter-spacing:6px;font-family:'Courier New',monospace;">${vh_number || 'See Dashboard'}</div>
-                <div style="font-size:11px;color:#8B5E3C;margin-top:8px;font-style:italic;">Save this — you can use it instead of your email to log in</div>
-              </div>
+  <!-- Body -->
+  <div style="padding:30px 26px;">
 
-              <div style="background:#fff;border:1px solid #C4A270;border-radius:10px;padding:18px 20px;margin-bottom:20px;">
-                <div style="font-weight:800;color:#5A3010;margin-bottom:12px;font-size:14px;text-transform:uppercase;letter-spacing:1px;">📋 Your Listing</div>
-                <div style="font-size:13px;color:#333;margin-bottom:6px;"><strong>Business:</strong> ${business_name}</div>
-                <div style="font-size:13px;color:#333;margin-bottom:6px;"><strong>Services:</strong> ${servicesList}</div>
-                <div style="font-size:13px;color:#333;"><strong>Villages Served:</strong> ${areasList}</div>
-              </div>
+    <p style="color:#1A0A00;font-size:17px;font-weight:700;margin:0 0 10px;">Hi ${owner_name},</p>
+    <p style="color:#5A3010;font-size:15px;line-height:1.75;margin:0 0 14px;">
+      Your listing for <strong>${business_name}</strong> has been reviewed and is now <strong>live on V-Hub</strong> — The Villages' local services directory. Residents searching for your services can find and contact you directly, with <strong>no middleman and no commissions.</strong>
+    </p>
+    <p style="color:#5A3010;font-size:15px;line-height:1.75;margin:0 0 24px;">
+      Your <strong>45-day complimentary trial starts today</strong> — no credit card needed to get started.
+    </p>
 
-              <div style="background:#E8EAF6;border:2px solid #3F51B5;border-radius:10px;padding:20px;margin-bottom:20px;">
-                <div style="font-weight:800;color:#1A237E;font-size:14px;margin-bottom:12px;text-transform:uppercase;letter-spacing:1px;">🔐 Your Login Credentials</div>
-                <div style="font-size:13px;color:#1A237E;line-height:1.9;">
-                  <strong>Login Email:</strong> ${displayLoginEmail}<br/>
-                  <strong>Password:</strong> <span style="font-family:'Courier New',monospace;font-weight:900;font-size:15px;color:#1A237E;">${temp_password || "The password you set during signup"}</span>${temp_password ? ' &nbsp;<span style="font-size:11px;color:#e53935;">(Please change this after your first login)</span>' : ""}<br/>
-                  ${vhDisplay}
-                </div>
-                <div style="text-align:center;margin-top:14px;">
-                  <a href="${APP_URL}/ProviderDashboard" style="display:inline-block;background:#3F51B5;color:#fff;text-decoration:none;padding:11px 24px;border-radius:8px;font-weight:700;font-size:13px;letter-spacing:1px;">🔑 Log In to Provider Dashboard →</a>
-                </div>
-                <div style="font-size:12px;color:#5C6BC0;margin-top:10px;text-align:center;">Forgot your password? Use the "Forgot Password" link on the login page.</div>
-              </div>
+    <!-- Spam notice -->
+    <div style="background:#FFF3CD;border:1px solid #FFC107;border-radius:8px;padding:12px 16px;margin-bottom:22px;font-size:13px;color:#856404;text-align:center;">
+      📬 <strong>Heads up:</strong> Future V-Hub emails may land in your <strong>Spam or Junk</strong> folder.<br/>
+      Add <strong>admin@v-hub.us</strong> to your contacts to make sure you never miss an update.
+    </div>
 
-              <div style="background:#E8F5E9;border:2px solid #4CAF50;border-radius:10px;padding:20px;margin-bottom:20px;text-align:center;">
-                <div style="font-size:28px;margin-bottom:6px;">🌴</div>
-                <div style="font-weight:900;color:#2E7D32;font-size:18px;margin-bottom:8px;">45-DAY FREE TRIAL — STARTS TODAY</div>
-                <div style="font-size:14px;color:#388E3C;line-height:1.7;margin-bottom:10px;">
-                  Your listing is <strong>completely free</strong> for the next 45 days.<br/>
-                  <strong>No credit card needed now. No charges until your trial ends.</strong>
-                </div>
-                <div style="background:#fff;border-radius:8px;padding:12px 18px;display:inline-block;border:1px solid #A5D6A7;">
-                  <div style="font-size:12px;color:#777;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">Trial Expires On</div>
-                  <div style="font-size:20px;font-weight:900;color:#2E7D32;">${trialEndFormatted}</div>
-                  <div style="font-size:12px;color:#888;margin-top:4px;">(45 days from today)</div>
-                </div>
-              </div>
+    <!-- VH Account Number -->
+    <div style="background:#fff;border:2px solid #8B4513;border-radius:8px;padding:18px 20px;text-align:center;margin-bottom:20px;">
+      <div style="font-size:11px;font-weight:700;letter-spacing:3px;color:#8B5E3C;text-transform:uppercase;margin-bottom:8px;">Your V-Hub Account Number</div>
+      <div style="font-size:36px;font-weight:900;color:#5C3317;letter-spacing:6px;font-family:'Courier New',monospace;">${vh_number || 'See Dashboard'}</div>
+      <div style="font-size:11px;color:#8B5E3C;margin-top:8px;font-style:italic;">Save this — you can use it instead of your email to log in</div>
+    </div>
 
-              <div style="background:#FFF8E1;border:1px solid #FFD54F;border-radius:10px;padding:18px 20px;margin-bottom:20px;">
-                <div style="font-weight:800;color:#E65100;font-size:14px;margin-bottom:12px;text-transform:uppercase;letter-spacing:1px;">💳 How Billing Works</div>
-                <div style="font-size:13px;color:#5A3010;line-height:1.8;">
-                  ✅ <strong>Free for 45 days</strong> — no payment needed now<br/>
-                  ✅ <strong>$12/month</strong> after your trial period ends<br/>
-                  ✅ <strong>Pay anytime</strong> through your Provider Dashboard<br/>
-                  ✅ <strong>Cancel anytime</strong> — no contracts, no fees<br/>
-                  ✅ Admin will notify you as your trial end date approaches
-                </div>
-              </div>
+    <!-- Listing Summary -->
+    <div style="background:#fff;border-radius:10px;padding:20px;margin-bottom:20px;border:1.5px solid #D4B896;">
+      <div style="font-size:13px;font-weight:900;color:#5A3010;text-transform:uppercase;letter-spacing:1px;margin-bottom:14px;">📋 Your Listing Summary</div>
+      <table style="width:100%;border-collapse:collapse;font-size:14px;color:#333;">
+        <tr><td style="padding:5px 0;color:#888;width:38%;">Business:</td><td style="font-weight:700;">${business_name}</td></tr>
+        <tr><td style="padding:5px 0;color:#888;">Owner:</td><td>${owner_name}</td></tr>
+        ${phone ? `<tr><td style="padding:5px 0;color:#888;">Phone:</td><td>${phone}</td></tr>` : ''}
+      </table>
+      <div style="margin-top:14px;">
+        <div style="font-size:12px;color:#888;margin-bottom:6px;font-weight:700;text-transform:uppercase;letter-spacing:1px;">Services Listed:</div>
+        <ul style="margin:0;padding-left:18px;font-size:13px;color:#333;">${servicesHtml}</ul>
+      </div>
+      <div style="margin-top:12px;">
+        <div style="font-size:12px;color:#888;margin-bottom:6px;font-weight:700;text-transform:uppercase;letter-spacing:1px;">Villages You Serve:</div>
+        <ul style="margin:0;padding-left:18px;font-size:13px;color:#333;">${areasHtml}</ul>
+      </div>
+    </div>
 
-              <div style="background:#E3F2FD;border:1px solid #90CAF9;border-radius:10px;padding:18px 20px;margin-bottom:24px;">
-                <div style="font-weight:800;color:#1565C0;font-size:14px;margin-bottom:10px;text-transform:uppercase;letter-spacing:1px;">📊 Your Provider Dashboard</div>
-                <div style="font-size:13px;color:#1A237E;line-height:1.8;margin-bottom:14px;">
-                  Log in to:<br/>
-                  • See how many people viewed or found your listing<br/>
-                  • Check your trial countdown and days remaining<br/>
-                  • Manage your subscription and make payments<br/>
-                  • Update your business info at any time
-                </div>
-                <div style="text-align:center;">
-                  <a href="${APP_URL}/ProviderDashboard" style="display:inline-block;background:#1565C0;color:#fff;text-decoration:none;padding:12px 26px;border-radius:8px;font-weight:700;font-size:14px;letter-spacing:1px;">📊 Go to My Provider Dashboard →</a>
-                </div>
-              </div>
+    <!-- Login Credentials -->
+    <div style="background:#E8EAF6;border:2px solid #3F51B5;border-radius:10px;padding:20px;margin-bottom:20px;">
+      <div style="font-weight:900;color:#1A237E;font-size:14px;margin-bottom:14px;text-transform:uppercase;letter-spacing:1px;">🔐 Your Provider Hub Login</div>
+      <table style="width:100%;border-collapse:collapse;font-size:14px;color:#333;margin-bottom:16px;">
+        <tr><td style="padding:7px 0;color:#555;width:38%;">Login Email:</td><td><strong>${displayLoginEmail}</strong></td></tr>
+        ${passwordBlock}
+        <tr><td style="padding:7px 0;color:#555;">VH Account #:</td><td><strong style="font-family:'Courier New',monospace;font-size:15px;">${vh_number || 'See Dashboard'}</strong> <span style="font-size:11px;color:#5C6BC0;">(use this or your email to log in)</span></td></tr>
+      </table>
+      <div style="text-align:center;margin-bottom:10px;">
+        <a href="${APP_URL}/ProviderDashboard" style="display:inline-block;background:#3F51B5;color:#fff;text-decoration:none;padding:13px 28px;border-radius:8px;font-weight:700;font-size:14px;letter-spacing:1px;">🔑 Log In to Your Provider Hub →</a>
+      </div>
+      <div style="font-size:12px;color:#5C6BC0;text-align:center;">Forgot your password? Use the "Forgot Password" link on the login page.</div>
+    </div>
 
-              <p style="color:#5A3010;font-size:14px;line-height:1.7;margin:0 0 20px;">
-                When residents search for your services, your listing appears with your contact info so they can reach you directly —
-                <strong>no middleman, no commissions.</strong>
-              </p>
-              <div style="text-align:center;margin-bottom:10px;">
-                <a href="${APP_URL}" style="display:inline-block;background:#E8431A;color:#fff;text-decoration:none;padding:14px 28px;border-radius:8px;font-weight:700;font-size:15px;letter-spacing:1px;">🌴 View V-Hub Directory</a>
-              </div>
-              <p style="font-size:12px;color:#8B5E3C;text-align:center;margin-top:14px;">
-                Questions? Reply to this email or reach us at <a href="mailto:admin@v-hub.us" style="color:#E8431A;">admin@v-hub.us</a>
-              </p>
-            </div>
-            <div style="background:#1A0A00;padding:14px;text-align:center;color:rgba(245,232,204,0.5);font-size:11px;">
-              V-Hub · The Villages, Florida · A community-first local directory
-            </div>
-          </div>
-        `;
+    <!-- Trial Info -->
+    <div style="background:#E8F5E9;border:2px solid #4CAF50;border-radius:10px;padding:20px;margin-bottom:20px;text-align:center;">
+      <div style="font-size:28px;margin-bottom:6px;">🌴</div>
+      <div style="font-weight:900;color:#2E7D32;font-size:18px;margin-bottom:8px;">45-DAY FREE TRIAL — STARTS TODAY</div>
+      <div style="font-size:14px;color:#388E3C;line-height:1.7;margin-bottom:14px;">
+        Your listing is <strong>completely free</strong> for the next 45 days.<br/>
+        <strong>No credit card needed now. No charges until your trial ends.</strong>
+      </div>
+      <div style="background:#fff;border-radius:8px;padding:12px 18px;display:inline-block;border:1px solid #A5D6A7;">
+        <div style="font-size:12px;color:#777;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">Trial Expires On</div>
+        <div style="font-size:20px;font-weight:900;color:#2E7D32;">${trialEndFormatted}</div>
+        <div style="font-size:12px;color:#888;margin-top:4px;">(45 days from today)</div>
+      </div>
+    </div>
+
+    <!-- Billing -->
+    <div style="background:#FFF8E1;border-left:4px solid #C9973A;border-radius:8px;padding:18px 20px;margin-bottom:20px;">
+      <div style="font-size:13px;font-weight:900;color:#5A3010;margin-bottom:10px;">💳 HOW BILLING WORKS</div>
+      <div style="font-size:14px;color:#333;line-height:1.9;">
+        ✅ <strong>Free for 45 days</strong> — no payment needed now<br/>
+        ✅ <strong>$12/month</strong> after your trial period ends<br/>
+        ✅ <strong>Pay anytime</strong> through your Provider Dashboard<br/>
+        ✅ <strong>Cancel anytime</strong> — no contracts, no fees<br/>
+        ✅ We'll send a reminder before your trial expires
+      </div>
+    </div>
+
+    <!-- What Happens Next -->
+    <div style="background:#EEF2FF;border:1.5px solid #7986CB;border-radius:10px;padding:20px;margin-bottom:20px;">
+      <div style="font-size:13px;font-weight:900;color:#283593;margin-bottom:12px;">📌 WHAT HAPPENS NEXT</div>
+      <ol style="margin:0;padding-left:18px;font-size:14px;color:#333;line-height:2;">
+        <li><strong>Log in to your Provider Hub</strong> — review your listing and make any updates.</li>
+        <li><strong>Personalize your profile</strong> — add your logo, update your description, hours, and service areas anytime.</li>
+        <li><strong>Residents find you</strong> — when someone in The Villages searches for your services, your listing appears and they can contact you directly.</li>
+        <li><strong>At trial end</strong> — we'll send a reminder before your 45-day trial expires. Just $12/month to stay listed — cancel anytime.</li>
+      </ol>
+    </div>
+
+    <!-- View Homepage CTA -->
+    <div style="text-align:center;margin-bottom:24px;">
+      <a href="${APP_URL}" style="display:inline-block;background:#E8431A;color:#fff;text-decoration:none;padding:14px 32px;border-radius:8px;font-weight:700;font-size:15px;letter-spacing:1px;">🌴 Visit the V-Hub Directory</a>
+    </div>
+
+    <p style="font-size:13px;color:#8B5E3C;text-align:center;margin:0 0 6px;">
+      Questions? Reply to this email or reach us at <a href="mailto:admin@v-hub.us" style="color:#E8431A;font-weight:700;">admin@v-hub.us</a>
+    </p>
+
+  </div>
+
+  <!-- Footer -->
+  <div style="background:#1A0A00;padding:16px 20px;text-align:center;">
+    <a href="${APP_URL}" style="color:#C9973A;font-size:13px;font-weight:700;text-decoration:none;">🌴 www.v-hub.us</a>
+    <div style="color:rgba(245,232,204,0.45);font-size:11px;margin-top:6px;">V-Hub · The Villages, Florida · A community-first local directory</div>
+    <div style="color:rgba(245,232,204,0.35);font-size:10px;margin-top:4px;">
+      <a href="mailto:admin@v-hub.us" style="color:rgba(201,151,58,0.7);text-decoration:none;">admin@v-hub.us</a>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>`;
+
         await sendEmail(email, `🎉 You're live on V-Hub — ${business_name} | 45-Day Free Trial Started`, providerHtml);
-        console.log("✅ Provider welcome email sent to:", email);
+        console.log("✅ Combined provider welcome email sent to:", email);
       } catch (emailErr: any) {
         console.error("Provider email failed:", emailErr);
         emailError = emailErr.message;
@@ -279,7 +344,7 @@ Deno.serve(async (req) => {
       const adminHtml = `
         <div style="font-family:Arial,sans-serif;max-width:520px;margin:0 auto;background:#f9f9f9;border:1px solid #ddd;border-radius:10px;overflow:hidden;">
           <div style="background:#2e7d32;padding:16px 20px;text-align:center;">
-            <div style="color:#fff;font-size:18px;font-weight:900;">✅ Provider Approved</div>
+            <div style="color:#fff;font-size:18px;font-weight:900;">✅ Provider Approved & Live</div>
           </div>
           <div style="padding:20px;">
             <p style="font-size:14px;color:#333;margin:0 0 12px;"><strong>${business_name}</strong> is now live on V-Hub.</p>

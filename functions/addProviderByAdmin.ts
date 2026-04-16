@@ -292,8 +292,12 @@ Deno.serve(async (req: Request) => {
   </div>
 
   <!-- Footer -->
-  <div style="background:#1A0A00;padding:14px;text-align:center;color:rgba(245,232,204,0.5);font-size:11px;">
-    V-Hub · The Villages, Florida · <a href="mailto:admin@v-hub.us" style="color:#C9973A;">admin@v-hub.us</a>
+  <div style="background:#1A0A00;padding:16px 20px;text-align:center;">
+    <a href="${APP_URL}" style="color:#C9973A;font-size:13px;font-weight:700;text-decoration:none;">🌴 www.v-hub.us</a>
+    <div style="color:rgba(245,232,204,0.45);font-size:11px;margin-top:6px;">V-Hub · The Villages, Florida · A community-first local directory</div>
+    <div style="color:rgba(245,232,204,0.35);font-size:10px;margin-top:4px;">
+      <a href="mailto:admin@v-hub.us" style="color:rgba(201,151,58,0.7);text-decoration:none;">admin@v-hub.us</a>
+    </div>
   </div>
 </div>
 </body>
