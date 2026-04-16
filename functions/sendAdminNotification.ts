@@ -159,13 +159,32 @@ Deno.serve(async (req) => {
       </div>
     `;
 
+    // Send email to both admins
+    await sendEmail(
+      'kimberlycook1980@gmail.com',
+      `🔔 V-HUB: New Listing — ${business_name} (${vh_number})`,
+      htmlContent
+    );
     await sendEmail(
       'evansrus@comcast.net',
       `[V-HUB Admin] New Provider Listing — ${business_name} (${vh_number})`,
       htmlContent
     );
 
-    return Response.json({ ok: true, message: "Admin notification sent" });
+    // Send SMS to Kimberly via T-Mobile email-to-text gateway
+    const smsText = `<p>🔔 V-HUB NEW SIGNUP<br/>
+<strong>${business_name}</strong><br/>
+${owner_name} · ${phone}<br/>
+Account: ${vh_number}<br/>
+Log in to review & approve:<br/>
+www.v-hub.us/Wekcadmin</p>`;
+    await sendEmail(
+      '5406540988@tmomail.net',
+      `V-HUB New Signup`,
+      smsText
+    );
+
+    return Response.json({ ok: true, message: "Admin notifications sent" });
   } catch (error) {
     console.error('sendAdminNotification error:', error);
     return Response.json({ error: error.message }, { status: 500 });
