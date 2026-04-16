@@ -224,6 +224,13 @@ function ProvDetail({ prov, areas, cats, svcs, onBack }) {
   const [showReviewForm, setShowReviewForm] = useState(false);
   const [reviewSaved, setReviewSaved] = useState(false);
   const [reviewForm, setReviewForm] = useState({ customer_name: "", customer_village: "", rating: 5, review_text: "", service_used: "" });
+  // Self-review block: check if logged-in provider is viewing their own profile
+  const isOwnProfile = React.useMemo(() => {
+    try {
+      const loggedInProviderId = sessionStorage.getItem("vhub_provider_id");
+      return loggedInProviderId && loggedInProviderId === prov.id;
+    } catch(e) { return false; }
+  }, [prov.id]);
   const cat = cats.find(c => c.id === prov.category_id);
   const GREEN = "#1A6B3C";
   const RED_RULE = "#8B1A1A";
@@ -431,10 +438,13 @@ function ProvDetail({ prov, areas, cats, svcs, onBack }) {
           <div style={{ fontSize: 12, fontWeight: 900, color: INK, textTransform: "uppercase", letterSpacing: 2 }}>
             ⭐ V-Hub Community Reviews
           </div>
-          {!showReviewForm && !reviewSaved && (
+          {!showReviewForm && !reviewSaved && !isOwnProfile && (
             <button onClick={() => setShowReviewForm(true)} style={{ background: BROWN_BTN, color: PAPER, border: "none", borderRadius: 4, padding: "4px 12px", fontSize: 11, cursor: "pointer", fontFamily: "'Times New Roman', serif", fontWeight: 700, letterSpacing: 1 }}>
               + Write a Review
             </button>
+          )}
+          {isOwnProfile && (
+            <span style={{ fontSize: 10, color: INK_FADE, fontStyle: "italic" }}>Providers cannot review their own listing.</span>
           )}
         </div>
 

@@ -2149,7 +2149,7 @@ export default function ProviderDashboard() {
         {/* Edit profile CTA */}
         <div style={{ textAlign: "center", background: PAPER_MID, border: `2px solid ${PAPER_DK}`, borderRadius: 10, padding: "18px 20px", marginBottom: 28 }}>
           <div style={{ fontSize: 13, color: INK_FADE, fontStyle: "italic", marginBottom: 12, fontFamily: SERIF }}>Update your services, villages, or business info at any time.</div>
-          <button onClick={() => setView("edit")} style={{ background: `linear-gradient(180deg,#9A6030,${BROWN_BTN} 60%,#5A3010)`, color: PAPER, border: `3px solid ${YELLOW}`, boxShadow: `0 0 0 1.5px ${YELLOW}, 0 0 12px 3px rgba(255,220,0,0.25)`, borderRadius: 6, padding: "13px 40px", fontSize: 14, fontWeight: 900, cursor: "pointer", fontFamily: SERIF, letterSpacing: 2, textTransform: "uppercase" }}>
+          <button data-testid="edit-profile-btn" onClick={() => setView("edit")} style={{ background: `linear-gradient(180deg,#9A6030,${BROWN_BTN} 60%,#5A3010)`, color: PAPER, border: `3px solid ${YELLOW}`, boxShadow: `0 0 0 1.5px ${YELLOW}, 0 0 12px 3px rgba(255,220,0,0.25)`, borderRadius: 6, padding: "13px 40px", fontSize: 14, fontWeight: 900, cursor: "pointer", fontFamily: SERIF, letterSpacing: 2, textTransform: "uppercase" }}>
             ✏ Edit My Profile →
           </button>
         </div>
