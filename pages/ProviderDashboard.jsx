@@ -1636,6 +1636,11 @@ export default function ProviderDashboard() {
   };
 
   const handleSave = async () => {
+    // Safety check: if service/area lookup data hasn't loaded yet, block save to prevent wiping existing selections
+    if (!mapsReady || dbServices.length === 0 || dbAreas.length === 0) {
+      setSaveMsg("⚠ Service and village data is still loading. Please wait a moment and try again.");
+      return;
+    }
     setSaving(true);
     setSaveMsg("");
     try {
@@ -1656,8 +1661,15 @@ export default function ProviderDashboard() {
       }
       // Strip any legacy string values — only send valid 24-char DB IDs
       const validId = id => typeof id === 'string' && /^[0-9a-f]{24}$/.test(id);
-      fields.services = selSvcs.filter(validId);
-      fields.service_areas = selAreas.filter(validId);
+      const svcsToSave  = selSvcs.filter(validId);
+      const areasToSave = selAreas.filter(validId);
+      // Only include services/areas in payload if at least one selection exists,
+      // OR if the provider previously had none — never send empty to replace non-empty
+      const providerHadServices = Array.isArray(provider.services) && provider.services.length > 0;
+      const providerHadAreas    = Array.isArray(provider.service_areas) && provider.service_areas.length > 0;
+      if (!providerHadServices || svcsToSave.length > 0)  fields.services = svcsToSave;
+      if (!providerHadAreas    || areasToSave.length > 0) fields.service_areas = areasToSave;
+      console.log("[V-Hub Save] services:", svcsToSave, "areas:", areasToSave);
       const res = await fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/providerLogin", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -1665,11 +1677,29 @@ export default function ProviderDashboard() {
       });
       const data = await res.json();
       if (!res.ok || !data.success) { setSaveMsg("⚠ " + (data.error || "Error saving.")); setSaving(false); return; }
-      setProvider(data.provider);
-      seedForm(data.provider);
+      // Update local state with saved values (don't re-seed if services/areas were not included in payload)
+      setProvider(prev => ({ ...prev, ...data.provider }));
+      if ('services' in fields)      setSelSvcs(Array.isArray(data.provider.services) ? data.provider.services : selSvcs);
+      if ('service_areas' in fields) setSelAreas(Array.isArray(data.provider.service_areas) ? data.provider.service_areas : selAreas);
+      // Seed text form fields but preserve our current selSvcs/selAreas
+      setForm({
+        business_name: data.provider.business_name || "",
+        owner_name: data.provider.owner_name || "",
+        phone: data.provider.phone || "",
+        email: data.provider.email || "",
+        website: data.provider.website || "",
+        address: data.provider.address || "",
+        description: data.provider.description || "",
+        years_in_business: data.provider.years_in_business || "",
+        license_number: data.provider.license_number || "",
+        google_review_url: data.provider.google_review_url || "",
+        google_rating: data.provider.google_rating || "",
+        hours_of_operation: data.provider.hours_of_operation || "",
+        is_mobile: data.provider.is_mobile === true,
+      });
       setSaveMsg("✓ Profile updated successfully!");
-      setTimeout(() => { setSaveMsg(""); setView("dashboard"); }, 2000);
-    } catch (err) { setSaveMsg("⚠ Error saving. Please try again."); console.error(err); }
+      setTimeout(() => { setSaveMsg(""); setView("dashboard"); }, 2500);
+    } catch (err) { setSaveMsg("⚠ Error saving. Please try again."); console.error("[V-Hub Save Error]", err); }
     setSaving(false);
   };
 
