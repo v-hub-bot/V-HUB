@@ -1,5 +1,5 @@
 // providerUpdateProfile — secure self-service update for provider hub sessions
-// v5 - all modes work without Base44 user auth (service role throughout) [1776267137]
+// v6 - force redeploy [1776267200]
 import { createClient } from "npm:@base44/sdk@0.8.25";
 
 const CORS_HEADERS = {
@@ -61,14 +61,13 @@ Deno.serve(async (req: Request) => {
     return new Response(JSON.stringify({ error: "Missing provider_id" }), { status: 400, headers: CORS_HEADERS });
   }
 
-  // Fetch existing provider (needed for all modes)
   let existing: Record<string, unknown> | null = null;
   try { existing = await sr.entities.Provider.get(provider_id); } catch { /* not found */ }
   if (!existing) {
     return new Response(JSON.stringify({ error: "Provider not found" }), { status: 404, headers: CORS_HEADERS });
   }
 
-  // ── MODE 1: FORCE PASSWORD CHANGE (first login for admin-added accounts) ──
+  // MODE 1: Force password change
   if (new_password && password_changed === true && !new_login_email && !fields) {
     if (new_password.length < 6) {
       return new Response(JSON.stringify({ error: "Password must be at least 6 characters" }), { status: 400, headers: CORS_HEADERS });
@@ -87,7 +86,7 @@ Deno.serve(async (req: Request) => {
     }
   }
 
-  // ── MODE 2: ACCOUNT SETTINGS UPDATE (email + optional password change) ──
+  // MODE 2: Account settings (email + optional password)
   if (new_login_email && !fields) {
     const updates: Record<string, unknown> = { login_email: new_login_email };
     if (new_password && new_password.length >= 6) {
@@ -103,12 +102,11 @@ Deno.serve(async (req: Request) => {
     }
   }
 
-  // ── MODE 3: PROFILE UPDATE (business info, services, villages) ──────────
+  // MODE 3: Profile update (business info, services, villages)
   if (!vh_number || !fields) {
     return new Response(JSON.stringify({ error: "Missing vh_number or fields" }), { status: 400, headers: CORS_HEADERS });
   }
 
-  // Auth: confirm provider_id + vh_number match
   if (existing.vh_number !== vh_number) {
     return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: CORS_HEADERS });
   }
@@ -127,7 +125,7 @@ Deno.serve(async (req: Request) => {
   if ('services' in safe) {
     const invalid = getInvalidIds(safe.services);
     if (invalid.length > 0) {
-      return new Response(JSON.stringify({ error: `Invalid service IDs: ${invalid.join(', ')}. Please select services from the dropdown.` }), { status: 400, headers: CORS_HEADERS });
+      return new Response(JSON.stringify({ error: `Invalid service IDs: ${invalid.join(', ')}.` }), { status: 400, headers: CORS_HEADERS });
     }
     safe.services = filterValidIds(safe.services);
   }
@@ -135,7 +133,7 @@ Deno.serve(async (req: Request) => {
   if ('service_areas' in safe) {
     const invalid = getInvalidIds(safe.service_areas);
     if (invalid.length > 0) {
-      return new Response(JSON.stringify({ error: `Invalid village IDs: ${invalid.join(', ')}. Please select villages from the dropdown.` }), { status: 400, headers: CORS_HEADERS });
+      return new Response(JSON.stringify({ error: `Invalid village IDs: ${invalid.join(', ')}.` }), { status: 400, headers: CORS_HEADERS });
     }
     safe.service_areas = filterValidIds(safe.service_areas);
   }
