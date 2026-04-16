@@ -318,11 +318,11 @@ function VillageSelect({ selAreas, setSelAreas, dbAreas, areaMap }) {
 
   const MACRO_GROUPS = [
     { key: "historic",     label: "🌴 Historic Side / Spanish Springs Area", villages: ["Alhambra","Country Club","Del Mar","El Cortez","Hacienda","La Reynalda","La Zamora","Mira Mesa","Orange Blossom","Silver Lake","Spring Arbor","Valle Verde"] },
-    { key: "established_n", label: "🏡 Established Villages (North of SR-466A)", villages: ["Ashland","Belle Aire","Belvedere","Bonita","Bonnybrook","Bridgeport at Laurel Valley","Bridgeport at Mission Hills","Calumet Grove","Caroline","Chatham","Duval","Glenbrook","Hadley","Hemingway","Lynnhaven","Mallory Square","Pennecamp","Poinciana","Sabal Chase","Santiago","Sunset Pointe","Tall Trees","Virginia Trace","Winifred"] },
-    { key: "established_s", label: "🏡 Established Villages (South of SR-466A)", villages: ["Charlotte","Collier","Dunedin","Fernandina","Gilchrist","Hillsborough","LaBelle","Lake Deaton","Osceola Hills","Pinellas","Sanibel"] },
-    { key: "newer",        label: "🌿 Newer Villages (south of SR 44)", villages: ["Bradford","Cason Hammock","Chitty Chatty","Citrus Grove","DeLuna","DeSoto","Fenney","Hammock at Fenney","Hawkins","Linden","Marsh Bend","McClure","Monarch Grove","Richmond","St. Catherine","St. Johns"] },
-    { key: "eastport",     label: "🌊 Eastport / newest development area", villages: ["Moultrie Creek","Newell","Lake Denham","Dabney","Shady Brook"] },
-    { key: "family",       label: "🏠 Family / non-age-restricted villages", villages: ["Bison Valley","Oak Meadows","Oxford Oaks","Middleton"] },
+    { key: "established_n", label: "🏡 Established Villages (North of SR-466A)", villages: ["Ashland","Belle Aire","Belvedere","Bonita","Bonnybrook","Calumet Grove","Caroline","Chatham","Duval","Glenbrook","Hadley","Hemingway","Lynnhaven","Mallory Square","Pennecamp","Poinciana","Sabal Chase","Santiago","Sunset Pointe","Tall Trees","Virginia Trace","Winifred"] },
+    { key: "established_s", label: "🏡 Established Villages (South of SR-466A)", villages: ["Bridgeport at Laurel Valley","Bridgeport at Mission Hills","Charlotte","Collier","Dunedin","Fernandina","Gilchrist","Hillsborough","LaBelle","Lake Deaton","Osceola Hills","Pinellas","Sanibel"] },
+    { key: "newer",        label: "🌿 Newer Villages (South of SR-44)", villages: ["Bradford","Brownwood","Cason Hammock","Chitty Chatty","Citrus Grove","DeLuna","DeSoto","Fenney","Hammock at Fenney","Hawkins","Linden","Marsh Bend","McClure","Monarch Grove","Richmond","St. Catherine","St. Johns"] },
+    { key: "eastport",     label: "🌊 Eastport / Newest Development Area", villages: ["Dabney","Lake Denham","Moultrie Creek","Newell","Shady Brook"] },
+    { key: "family",       label: "🏠 Family / Non-Age-Restricted Villages", villages: ["Bison Valley","Middleton","Oak Meadows","Oxford Oaks"] },
   ];
 
   // Build name→id map from live DB areas
