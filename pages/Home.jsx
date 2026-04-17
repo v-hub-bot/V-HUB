@@ -221,6 +221,8 @@ function ProvDetail({ prov, areas, cats, svcs, onBack }) {
     if (!reviewForm.service_used) { alert("Please select the service you used."); return; }
     if (!reviewForm.review_text.trim()) { alert("Please write your review before submitting."); return; }
     if (!reviewForm.rating) { alert("Please select a star rating."); return; }
+    // Prevent providers from reviewing their own listing
+    try { const pid = sessionStorage.getItem("vhub_provider_id"); if (pid && pid === prov.id) { alert("You cannot leave a review on your own business listing."); return; } } catch(e) {}
     try {
       await ProviderReview.create({ ...reviewForm, provider_id: prov.id, is_approved: false, helpful_count: 0 });
       setReviewSaved(true); setShowReviewForm(false);
@@ -560,6 +562,20 @@ function DropBtn({ label, isOpen, onClick, testId }) {
 function SvcDropdown({ open, cats, svcs, openCat, selSvc, setOpenCat, setSelSvc, setSOpen }) {
   const scrollRef = React.useRef(null);
   React.useEffect(() => { if (open && scrollRef.current) scrollRef.current.scrollTop = 0; }, [open]);
+  // Auto-scroll so the expanded category's children are visible
+  const catRowRefs = React.useRef({});
+  React.useEffect(() => {
+    if (openCat && catRowRefs.current[openCat] && scrollRef.current) {
+      const el = catRowRefs.current[openCat];
+      const container = scrollRef.current;
+      const elTop = el.offsetTop;
+      const elBottom = elTop + el.offsetHeight + 120; // extra space for children
+      const containerBottom = container.scrollTop + container.clientHeight;
+      if (elBottom > containerBottom) {
+        container.scrollTo({ top: elBottom - container.clientHeight + 20, behavior: "smooth" });
+      }
+    }
+  }, [openCat]);
   if (!open) return null;
   const sortedCats = [...cats].sort((a, b) => a.name.localeCompare(b.name));
   return (
@@ -570,7 +586,7 @@ function SvcDropdown({ open, cats, svcs, openCat, selSvc, setOpenCat, setSelSvc,
         const isExpanded = openCat === c.id;
         const isSelected = selSvc?.category_id === c.id || selSvc?.id === c.id;
         return (
-          <div key={c.id} style={{ overflowX: "hidden" }}>
+          <div key={c.id} ref={el => { catRowRefs.current[c.id] = el; }}>
             <div data-testid={`cat-${c.name.replace(/[^a-z]/gi,'-').toLowerCase()}`} onClick={e => { e.stopPropagation(); setOpenCat(isExpanded ? null : c.id); }} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "11px 14px", borderBottom: `1px solid ${PAPER_DK}`, background: isSelected ? "#e8f5ee" : PAPER, cursor: "pointer", userSelect: "none" }}>
               <span style={{ fontSize: 13, fontWeight: 700, color: INK, fontFamily: "'Times New Roman', serif", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", maxWidth: "88%" }}>{c.icon} {c.name}</span>
               <span style={{ fontSize: 10, color: INK_FADE, flexShrink: 0, marginLeft: 4 }}>{isExpanded ? "▲" : "▼"}</span>

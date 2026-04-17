@@ -56,7 +56,7 @@ async function getStripeCheckoutUrl(provider: any): Promise<string> {
 
 function emailFooter() {
   return `<div style="background:#1A0A00;padding:14px;text-align:center;color:rgba(245,232,204,0.5);font-size:11px;">
-    <a href="https://www.v-hub.us" style="color:#C9973A;font-weight:700;text-decoration:none;font-size:13px;">🌴 www.v-hub.us</a>
+    <a href="https://www.v-hub.us" style="color:#CC0000;font-weight:700;text-decoration:none;font-size:13px;">🌴 www.v-hub.us</a>
     <span style="margin:0 8px;">·</span>V-Hub · The Villages, Florida
     <span style="margin:0 8px;">·</span><a href="mailto:admin@v-hub.us" style="color:#C9973A;">admin@v-hub.us</a>
   </div>`;

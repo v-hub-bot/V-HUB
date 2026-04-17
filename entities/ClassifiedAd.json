@@ -28,6 +28,12 @@
     "is_active": {
       "type": "boolean"
     },
+    "slot_number": {
+      "type": "number"
+    },
+    "ai_prompt": {
+      "type": "string"
+    },
     "next_headline": {
       "type": "string"
     },

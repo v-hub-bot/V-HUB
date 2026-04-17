@@ -1388,12 +1388,17 @@ export default function ProviderDashboard() {
   const [view, setView]             = useState("dashboard"); // dashboard | edit | account
   const [reviews, setReviews]       = useState([]);
   const [classifiedAd, setClassifiedAd] = useState(null);
+  const [adSlots, setAdSlots] = useState([null, null, null]); // 3 saved ad slots
+  const [activeSlot, setActiveSlot] = useState(0); // which slot is currently being edited
   const [classifiedForm, setClassifiedForm] = useState({ headline: "", body: "", image_url: "", village: "", address: "", deal_expires_at: "" });
   const [classifiedSaving, setClassifiedSaving] = useState(false);
   const [classifiedSaved, setClassifiedSaved] = useState(false);
   const [classifiedImageFile, setClassifiedImageFile] = useState(null);
   const [classifiedImagePreview, setClassifiedImagePreview] = useState(null);
   const classifiedImageRef = useRef(null);
+  const [aiPrompt, setAiPrompt] = useState("");
+  const [aiGenerating, setAiGenerating] = useState(false);
+  const [aiGenerated, setAiGenerated] = useState(null);
   const [nextAdForm, setNextAdForm] = useState({ headline: "", body: "", address: "", village: "", deal_expires_at: "" });
   const [nextAdSaving, setNextAdSaving] = useState(false);
   const [nextAdSaved, setNextAdSaved] = useState(false);
@@ -1560,21 +1565,25 @@ export default function ProviderDashboard() {
   const loadClassified = async (pid) => {
     try {
       const ads = await ClassifiedAd.filter({ provider_id: pid });
-      const active = (ads || []).find(a => a.is_active) || null;
-      const anyAd = active || (ads || [])[0] || null;
+      const sorted = [...(ads || [])].sort((a,b) => (a.slot_number||0) - (b.slot_number||0));
+      // Build 3 slots — slot_number 1,2,3
+      const slots = [null, null, null];
+      sorted.forEach(ad => {
+        const idx = (ad.slot_number || 1) - 1;
+        if (idx >= 0 && idx < 3) slots[idx] = ad;
+      });
+      // Legacy: if ads exist without slot_number, put them in slot 0
+      if (!slots[0] && sorted.length > 0) slots[0] = sorted[0];
+      setAdSlots(slots);
+      const active = slots.find(s => s && s.is_active) || null;
       setClassifiedAd(active);
-      if (active) {
+      // Seed form from slot 0 by default
+      const first = slots[0];
+      if (first) {
         setClassifiedForm({
-          headline: active.headline || "", body: active.body || "",
-          image_url: active.image_url || "", village: active.village || "",
-          address: active.address || "", deal_expires_at: active.deal_expires_at ? active.deal_expires_at.slice(0,10) : "",
-        });
-      }
-      if (anyAd && anyAd.next_headline) {
-        setNextAdForm({
-          headline: anyAd.next_headline || "", body: anyAd.next_body || "",
-          address: anyAd.next_address || "", village: anyAd.next_village || "",
-          deal_expires_at: anyAd.next_deal_expires_at ? anyAd.next_deal_expires_at.slice(0,10) : "",
+          headline: first.headline || "", body: first.body || "",
+          image_url: first.image_url || "", village: first.village || "",
+          address: first.address || "", deal_expires_at: first.deal_expires_at ? first.deal_expires_at.slice(0,10) : "",
         });
       }
     } catch { setClassifiedAd(null); }
@@ -2082,8 +2091,11 @@ export default function ProviderDashboard() {
 
       <TopNav rightContent={
         <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
-          <button onClick={() => setView("account")} style={{ background: "rgba(255,255,255,0.1)", border: `1.5px solid ${PAPER_DK}`, color: PAPER, borderRadius: 6, padding: "6px 12px", fontSize: 12, cursor: "pointer", fontFamily: SANS }}>⚙ Account</button>
-          <button onClick={handleLogout} style={{ background: "rgba(255,255,255,0.1)", border: `1.5px solid ${PAPER_DK}`, color: PAPER, borderRadius: 6, padding: "6px 12px", fontSize: 12, cursor: "pointer", fontFamily: SANS }}>Sign Out</button>
+          <button onClick={() => setView("account")} style={{ background: "transparent", border: `1.5px solid ${PAPER_DK}`, color: INK_FADE, borderRadius: 6, padding: "6px 12px", fontSize: 12, cursor: "pointer", fontFamily: SANS }}>⚙ Account</button>
+          <button onClick={handleLogout} style={{ background: "transparent", border: `1.5px solid ${PAPER_DK}`, color: INK_FADE, borderRadius: 6, padding: "6px 12px", fontSize: 12, cursor: "pointer", fontFamily: SANS }}>Sign Out</button>
+          <a href="/" style={{ textDecoration: "none" }}>
+            <button style={{ background: `linear-gradient(180deg,#9A6030,${BROWN_BTN} 60%,#5A3010)`, border: `2px solid #1B3D6F`, borderRadius: 4, color: "#F5E8CC", fontFamily: SANS, fontWeight: 700, fontSize: 13, padding: "8px 18px", cursor: "pointer", whiteSpace: "nowrap" }}>{'\u00AB'} Home</button>
+          </a>
         </div>
       } />
 
