@@ -1,4 +1,4 @@
-// V-Hub Home — v2026-04-14c
+// V-Hub Home — v2026-04-17b BUILD_FORCE
 import React, { useState, useEffect, useRef } from "react"; // v3 - expanded content
 import { createPortal } from "react-dom";
 import { ServiceArea, Category, Service, Provider, ProviderReview, User } from "@/api/entities";
@@ -463,7 +463,7 @@ function ProvDetail({ prov, areas, cats, svcs, onBack }) {
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px 14px", marginBottom: 8 }}>
               <div style={{ gridColumn: "1/-1" }}>
                 <label style={lblS}>Your Name <span style={{fontSize:9,fontStyle:"italic",fontWeight:400,textTransform:"none",letterSpacing:0}}>(We will NOT display your name on any posted review)</span></label>
-                <input style={inputS} value={reviewForm.customer_name} onChange={e => setReviewForm(p => ({ ...p, customer_name: e.target.value }))} placeholder="First name is fine — it stays private" />
+                <input style={inputS} value={reviewForm.customer_name} onChange={e => setReviewForm(p => ({ ...p, customer_name: e.target.value }))} placeholder="Your first name only — kept private" />
               </div>
               <div>
                 <label style={lblS}>Your Village</label>
