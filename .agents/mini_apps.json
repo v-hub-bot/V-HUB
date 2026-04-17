@@ -2,23 +2,23 @@
   "app_id": "69d06ada8019d7e9edf7f8e8",
   "slug": "v-hub-app-edf7f8e8",
   "pages": {
+    "Wekcadmin": {
+      "title": "Wekcadmin"
+    },
     "Terms": {
       "title": "Terms"
     },
     "Home": {
       "title": "Home"
     },
-    "Classifieds": {
-      "title": "Classifieds"
-    },
     "ListService": {
       "title": "ListService"
     },
+    "Classifieds": {
+      "title": "Classifieds"
+    },
     "ProviderDashboard": {
       "title": "ProviderDashboard"
-    },
-    "Wekcadmin": {
-      "title": "Wekcadmin"
     },
     "Privacy": {
       "title": "Privacy"

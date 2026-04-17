@@ -445,7 +445,7 @@ function ProvDetail({ prov, areas, cats, svcs, onBack }) {
             ⭐ V-Hub Community Reviews
           </div>
           {!showReviewForm && !reviewSaved && !isOwnProfile && (
-            <button onClick={() => setShowReviewForm(true)} style={{ background: BROWN_BTN, color: PAPER, border: "none", borderRadius: 4, padding: "4px 12px", fontSize: 11, cursor: "pointer", fontFamily: "'Times New Roman', serif", fontWeight: 700, letterSpacing: 1 }}>
+            <button data-testid="write-review-btn" onClick={() => setShowReviewForm(true)} style={{ background: BROWN_BTN, color: PAPER, border: "none", borderRadius: 4, padding: "4px 12px", fontSize: 11, cursor: "pointer", fontFamily: "'Times New Roman', serif", fontWeight: 700, letterSpacing: 1 }}>
               + Write a Review
             </button>
           )}
