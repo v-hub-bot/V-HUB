@@ -217,10 +217,12 @@ function ProvDetail({ prov, areas, cats, svcs, onBack }) {
   const vhubAvgStr = vhubAvg !== null ? vhubAvg.toFixed(1) : null;
 
   const handleReviewSubmit = async () => {
-    if (!reviewForm.review_text || !reviewForm.rating) { alert("Please write your review before submitting."); return; }
+    if (!reviewForm.customer_village) { alert("Please select your village."); return; }
+    if (!reviewForm.service_used) { alert("Please select the service you used."); return; }
+    if (!reviewForm.review_text.trim()) { alert("Please write your review before submitting."); return; }
+    if (!reviewForm.rating) { alert("Please select a star rating."); return; }
     try {
-      const { customer_name, ...reviewData } = reviewForm;
-      await ProviderReview.create({ ...reviewData, provider_id: prov.id, is_approved: false, helpful_count: 0 });
+      await ProviderReview.create({ ...reviewForm, provider_id: prov.id, is_approved: false, helpful_count: 0 });
       setReviewSaved(true); setShowReviewForm(false);
       setReviewForm({ customer_name: "", customer_village: "", rating: 5, review_text: "", service_used: "" });
     } catch(err) { console.error("Review submit error:", err); alert("There was a problem submitting your review. Please try again."); }
