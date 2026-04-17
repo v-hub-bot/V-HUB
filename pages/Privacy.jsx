@@ -88,7 +88,7 @@ export default function Privacy() {
 
       {/* Footer */}
       <div style={{ background: INK, padding: "12px 24px", textAlign: "center", fontSize: 11, color: "rgba(245,232,204,0.5)", fontFamily: T.sans }}>
-        © 2026 V-Hub · The Villages, Florida · <a href="/Terms" style={{ color: "rgba(245,232,204,0.4)" }}>Terms of Service</a>
+        &copy; 2026 V-Hub · The Villages, Florida · <a href="/Terms" style={{ color: "rgba(245,232,204,0.4)" }}>Terms of Service</a>
       </div>
     </div>
   );
