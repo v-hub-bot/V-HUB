@@ -593,7 +593,7 @@ function ForcePasswordChangeScreen({ provider, onComplete }) {
       <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet" />
       <div style={{ background: PAPER, borderBottom: `3px double ${INK}` }}>
         <div style={{ display: "flex", alignItems: "center", padding: "10px 14px 8px", boxSizing: "border-box" }}>
-          <a href="/" style={{ textDecoration: "none", flexShrink: 0, width: 56, display: "flex", alignItems: "center" }}>
+          <a href="/" style={{ textDecoration: "none", flexShrink: 0, minWidth: 80, display: "flex", alignItems: "center" }}>
             <img src="https://media.base44.com/images/public/69d062aca815ce8e697894b1/a9af95bc3_V-Hublogo.png" alt="V-Hub" style={{ width: 48, height: 48, objectFit: "contain", display: "block" }} />
           </a>
           <a href="/" style={{ textDecoration: "none", flex: 1, display: "flex", alignItems: "baseline", justifyContent: "center" }}>
@@ -601,7 +601,7 @@ function ForcePasswordChangeScreen({ provider, onComplete }) {
             <span style={{ fontSize: 32, fontWeight: 900, color: INK, fontFamily: "'Times New Roman', serif", lineHeight: 1, margin: "0 2px" }}>-</span>
             <span style={{ fontSize: 40, fontWeight: 900, color: INK, fontFamily: "'Times New Roman', serif", letterSpacing: -1, lineHeight: 1 }}>Hub</span>
           </a>
-          <div style={{ flexShrink: 0, width: 56 }} />
+          <div style={{ flexShrink: 0, minWidth: 80 }} />
         </div>
       </div>
 
@@ -714,7 +714,7 @@ function ForgotPasswordScreen({ onBack }) {
       <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet" />
       <div style={{ background: PAPER, borderBottom: `3px double ${INK}` }}>
         <div style={{ display: "flex", alignItems: "center", padding: "10px 14px 8px", boxSizing: "border-box" }}>
-          <a href="/" style={{ textDecoration: "none", flexShrink: 0, width: 56, display: "flex", alignItems: "center" }}>
+          <a href="/" style={{ textDecoration: "none", flexShrink: 0, minWidth: 80, display: "flex", alignItems: "center" }}>
             <img src="https://base44.app/api/apps/69d062aca815ce8e697894b1/files/mp/public/69d062aca815ce8e697894b1/f14a7cbd0_logo_icon_small.png" alt="V-Hub" style={{ width: 48, height: 48, objectFit: "contain", display: "block" }} />
           </a>
           <a href="/" style={{ textDecoration: "none", flex: 1, display: "flex", alignItems: "baseline", justifyContent: "center", gap: 0 }}>
@@ -722,7 +722,7 @@ function ForgotPasswordScreen({ onBack }) {
             <span style={{ fontSize: 32, fontWeight: 900, color: INK, fontFamily: "'Times New Roman', serif", lineHeight: 1, margin: "0 2px" }}>-</span>
             <span style={{ fontSize: 40, fontWeight: 900, color: INK, fontFamily: "'Times New Roman', serif", letterSpacing: -1, lineHeight: 1 }}>Hub</span>
           </a>
-          <div style={{ flexShrink: 0, width: 56, display: "flex", justifyContent: "flex-end", alignItems: "center" }}>
+          <div style={{ flexShrink: 0, minWidth: 80, display: "flex", justifyContent: "flex-end", alignItems: "center" }}>
             <button onClick={onBack} style={{ background: `linear-gradient(180deg,#9A6030,${BROWN_BTN} 60%,#5A3010)`, border: `2px solid #1B3D6F`, borderRadius: 4, color: "#F5E8CC", fontFamily: SANS, fontWeight: 700, fontSize: 10, letterSpacing: 0.5, padding: "6px 10px", cursor: "pointer", whiteSpace: "nowrap" }}>← Back</button>
           </div>
         </div>
@@ -857,7 +857,7 @@ function LoginScreen({ onLogin, onForgot }) {
       {/* Masthead — matches homepage style */}
       <div style={{ background: PAPER, borderBottom: `3px double ${INK}` }}>
         <div style={{ display: "flex", alignItems: "center", padding: "10px 14px 8px", boxSizing: "border-box" }}>
-          <a href="/" style={{ textDecoration: "none", flexShrink: 0, width: 56, display: "flex", alignItems: "center" }}>
+          <a href="/" style={{ textDecoration: "none", flexShrink: 0, minWidth: 80, display: "flex", alignItems: "center" }}>
             <img src="https://base44.app/api/apps/69d062aca815ce8e697894b1/files/mp/public/69d062aca815ce8e697894b1/f14a7cbd0_logo_icon_small.png" alt="V-Hub" style={{ width: 48, height: 48, objectFit: "contain", display: "block" }} />
           </a>
           <a href="/" style={{ textDecoration: "none", flex: 1, display: "flex", alignItems: "baseline", justifyContent: "center", gap: 0 }}>
@@ -865,7 +865,7 @@ function LoginScreen({ onLogin, onForgot }) {
             <span style={{ fontSize: 32, fontWeight: 900, color: INK, fontFamily: "'Times New Roman', serif", lineHeight: 1, margin: "0 2px" }}>-</span>
             <span style={{ fontSize: 40, fontWeight: 900, color: INK, fontFamily: "'Times New Roman', serif", letterSpacing: -1, lineHeight: 1 }}>Hub</span>
           </a>
-          <div style={{ flexShrink: 0, width: 56, display: "flex", justifyContent: "flex-end", alignItems: "center" }}>
+          <div style={{ flexShrink: 0, minWidth: 80, display: "flex", justifyContent: "flex-end", alignItems: "center" }}>
             <a href="/" style={{ textDecoration: "none" }}>
               <button style={{ background: `linear-gradient(180deg,#9A6030,${BROWN_BTN} 60%,#5A3010)`, border: `2px solid #1B3D6F`, borderRadius: 4, color: "#F5E8CC", fontFamily: SANS, fontWeight: 700, fontSize: 10, letterSpacing: 0.5, padding: "6px 10px", cursor: "pointer", whiteSpace: "nowrap" }}>← Home</button>
             </a>
@@ -1921,7 +1921,7 @@ export default function ProviderDashboard() {
     <div style={{ background: PAPER, borderBottom: `3px double ${INK}`, position: "sticky", top: 0, zIndex: 50 }}>
       <div style={{ display: "flex", alignItems: "center", padding: "10px 14px 8px", boxSizing: "border-box" }}>
         {/* Left — home button, fixed width */}
-        <div style={{ flexShrink: 0, width: 56, display: "flex", alignItems: "center" }}>
+        <div style={{ flexShrink: 0, minWidth: 80, display: "flex", alignItems: "center" }}>
           <a href="/" style={{ textDecoration: "none" }}>
             <img src="https://base44.app/api/apps/69d062aca815ce8e697894b1/files/mp/public/69d062aca815ce8e697894b1/f14a7cbd0_logo_icon_small.png" alt="V-Hub" style={{ width: 48, height: 48, objectFit: "contain", display: "block" }} />
           </a>
@@ -1933,7 +1933,7 @@ export default function ProviderDashboard() {
           <span style={{ fontSize: 40, fontWeight: 900, color: INK, fontFamily: "'Times New Roman', serif", letterSpacing: -1, lineHeight: 1 }}>Hub</span>
         </a>
         {/* Right — action button or home, fixed width */}
-        <div style={{ flexShrink: 0, width: 56, display: "flex", justifyContent: "flex-end", alignItems: "center" }}>
+        <div style={{ flexShrink: 0, minWidth: 80, display: "flex", justifyContent: "flex-end", alignItems: "center" }}>
           {rightContent || (
             <a href="/" style={{ textDecoration: "none" }}>
               <button style={{ background: `linear-gradient(180deg,#9A6030,${BROWN_BTN} 60%,#5A3010)`, border: `2px solid #1B3D6F`, borderRadius: 4, color: "#F5E8CC", fontFamily: SANS, fontWeight: 700, fontSize: 10, letterSpacing: 0.5, padding: "6px 10px", cursor: "pointer", whiteSpace: "nowrap" }}>← Home</button>
