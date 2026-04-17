@@ -1661,7 +1661,7 @@ export default function ProviderDashboard() {
     try {
       const ALLOWED = ["business_name","owner_name","phone","email","website","description","address",
         "years_in_business","license_number","google_review_url","is_mobile","hours_of_operation","google_rating"];
-      const NUMERIC = ["years_in_business","google_rating"];
+      const NUMERIC = ["google_rating"];
       const updates = {};
       for (const k of ALLOWED) {
         if (k in form) {
