@@ -251,6 +251,8 @@ function ProvDetail({ prov, areas, cats, svcs, onBack }) {
 
   const resolvedServices = (prov.services || []).map(s => svcMap[s] || s).filter(Boolean);
   const resolvedAreas    = (prov.service_areas || []).map(a => areaMap[a] || MACRO_AREAS_MAP[a] || a).filter(Boolean);
+  const ALL_VILLAGES = ["Alhambra","Ashland","Belle Aire","Belvedere","Bison Valley","Bonita","Bonnybrook","Bradford","Bridgeport at Laurel Valley","Bridgeport at Mission Hills","Calumet Grove","Caroline","Cason Hammock","Charlotte","Chatham","Chitty Chatty","Citrus Grove","Collier","Country Club","Dabney","Del Mar","DeLuna","DeSoto","Dunedin","Duval","El Cortez","Fenney","Fernandina","Gilchrist","Glenbrook","Hacienda","Hadley","Hammock at Fenney","Hawkins","Hemingway","Hillsborough","LaBelle","La Reynalda","La Zamora","Lake Deaton","Lake Denham","Linden","Lynnhaven","Mallory Square","Marsh Bend","McClure","Middleton","Mira Mesa","Monarch Grove","Moultrie Creek","Newell","Oak Meadows","Orange Blossom","Osceola Hills","Oxford Oaks","Pennecamp","Pinellas","Poinciana","Richmond","Sabal Chase","Sanibel","Santiago","Shady Brook","Silver Lake","Spring Arbor","St. Catherine","St. Johns","Sunset Pointe","Tall Trees","Valle Verde","Virginia Trace","Winifred"];
+  const provSvcNames = (prov.services || []).map(sid => { const found = svcs.find(s => s.id === sid); return found ? found.name : null; }).filter(Boolean);
 
   useEffect(() => {
     ProviderReview.filter({ provider_id: prov.id })
@@ -458,44 +460,33 @@ function ProvDetail({ prov, areas, cats, svcs, onBack }) {
         {showReviewForm && (
           <div style={{ background: PAPER_MID, border: `1.5px solid ${PAPER_DK}`, borderRadius: 6, padding: "14px 16px", marginBottom: 12 }}>
             <div style={{ fontSize: 13, fontWeight: 900, color: INK, marginBottom: 10, textTransform: "uppercase", letterSpacing: 1 }}>Write a V-Hub Review</div>
-            {/* Village list for dropdown */}
-            {(() => {
-              const ALL_VILLAGES = ["Alhambra","Ashland","Belle Aire","Belvedere","Bison Valley","Bonita","Bonnybrook","Bradford","Bridgeport at Laurel Valley","Bridgeport at Mission Hills","Calumet Grove","Caroline","Cason Hammock","Charlotte","Chatham","Chitty Chatty","Citrus Grove","Collier","Country Club","Dabney","Del Mar","DeLuna","DeSoto","Dunedin","Duval","El Cortez","Fenney","Fernandina","Gilchrist","Glenbrook","Hacienda","Hadley","Hammock at Fenney","Hawkins","Hemingway","Hillsborough","LaBelle","La Reynalda","La Zamora","Lake Deaton","Lake Denham","Linden","Lynnhaven","Mallory Square","Marsh Bend","McClure","Middleton","Mira Mesa","Monarch Grove","Moultrie Creek","Newell","Oak Meadows","Orange Blossom","Osceola Hills","Oxford Oaks","Pennecamp","Pinellas","Poinciana","Richmond","Sabal Chase","Sanibel","Santiago","Shady Brook","Silver Lake","Spring Arbor","St. Catherine","St. Johns","Sunset Pointe","Tall Trees","Valle Verde","Virginia Trace","Winifred"];
-              // Get provider's services for the service dropdown
-              const provSvcNames = (prov.services || []).map(sid => {
-                const found = svcs.find(s => s.id === sid);
-                return found ? found.name : null;
-              }).filter(Boolean);
-              return (
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px 14px", marginBottom: 8 }}>
-                  <div style={{ gridColumn: "1/-1" }}>
-                    <label style={lblS}>Your Name <span style={{fontSize:9,fontStyle:"italic",fontWeight:400,textTransform:"none",letterSpacing:0}}>(We will NOT display your name on any posted review)</span></label>
-                    <input style={inputS} value={reviewForm.customer_name} onChange={e => setReviewForm(p => ({ ...p, customer_name: e.target.value }))} placeholder="First name is fine — it stays private" />
-                  </div>
-                  <div>
-                    <label style={lblS}>Your Village</label>
-                    <select style={inputS} value={reviewForm.customer_village} onChange={e => setReviewForm(p => ({ ...p, customer_village: e.target.value }))}>
-                      <option value="">— Select your village —</option>
-                      {ALL_VILLAGES.map(v => <option key={v} value={v}>{v}</option>)}
-                    </select>
-                  </div>
-                  <div>
-                    <label style={lblS}>Service Used</label>
-                    <select style={inputS} value={reviewForm.service_used} onChange={e => setReviewForm(p => ({ ...p, service_used: e.target.value }))}>
-                      <option value="">— Select a service —</option>
-                      {provSvcNames.length > 0
-                        ? provSvcNames.map(s => <option key={s} value={s}>{s}</option>)
-                        : svcs.map(s => <option key={s.id} value={s.name}>{s.name}</option>)
-                      }
-                    </select>
-                  </div>
-                  <div style={{ gridColumn: "1/-1" }}>
-                    <label style={lblS}>Rating</label>
-                    <select style={inputS} value={reviewForm.rating} onChange={e => setReviewForm(p => ({ ...p, rating: parseInt(e.target.value) }))}>{[5,4,3,2,1].map(n => <option key={n} value={n}>{n} Star{n > 1 ? "s" : ""} — {"★".repeat(n)}</option>)}</select>
-                  </div>
-                </div>
-              );
-            })()}
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px 14px", marginBottom: 8 }}>
+              <div style={{ gridColumn: "1/-1" }}>
+                <label style={lblS}>Your Name <span style={{fontSize:9,fontStyle:"italic",fontWeight:400,textTransform:"none",letterSpacing:0}}>(We will NOT display your name on any posted review)</span></label>
+                <input style={inputS} value={reviewForm.customer_name} onChange={e => setReviewForm(p => ({ ...p, customer_name: e.target.value }))} placeholder="First name is fine — it stays private" />
+              </div>
+              <div>
+                <label style={lblS}>Your Village</label>
+                <select style={inputS} value={reviewForm.customer_village} onChange={e => setReviewForm(p => ({ ...p, customer_village: e.target.value }))}>
+                  <option value="">— Select your village —</option>
+                  {ALL_VILLAGES.map(v => <option key={v} value={v}>{v}</option>)}
+                </select>
+              </div>
+              <div>
+                <label style={lblS}>Service Used</label>
+                <select style={inputS} value={reviewForm.service_used} onChange={e => setReviewForm(p => ({ ...p, service_used: e.target.value }))}>
+                  <option value="">— Select a service —</option>
+                  {provSvcNames.length > 0
+                    ? provSvcNames.map(s => <option key={s} value={s}>{s}</option>)
+                    : svcs.map(s => <option key={s.id} value={s.name}>{s.name}</option>)
+                  }
+                </select>
+              </div>
+              <div style={{ gridColumn: "1/-1" }}>
+                <label style={lblS}>Rating</label>
+                <select style={inputS} value={reviewForm.rating} onChange={e => setReviewForm(p => ({ ...p, rating: parseInt(e.target.value) }))}>{[5,4,3,2,1].map(n => <option key={n} value={n}>{n} Star{n > 1 ? "s" : ""} — {"★".repeat(n)}</option>)}</select>
+              </div>
+            </div>
             <div style={{ marginBottom: 10 }}><label style={lblS}>Your Review *</label><textarea style={{ ...inputS, minHeight: 70, resize: "vertical", lineHeight: 1.6 }} value={reviewForm.review_text} onChange={e => setReviewForm(p => ({ ...p, review_text: e.target.value }))} placeholder="Tell other residents about your experience..." /></div>
             <div style={{ display: "flex", gap: 8 }}>
               <button data-testid="review-submit" onClick={handleReviewSubmit} style={{ background: `linear-gradient(180deg,#9A6030,${BROWN_BTN})`, color: PAPER, border: `2px solid ${YELLOW}`, borderRadius: 5, padding: "8px 20px", fontSize: 12, fontWeight: 700, cursor: "pointer", fontFamily: "'Times New Roman', serif" }}>Submit</button>
