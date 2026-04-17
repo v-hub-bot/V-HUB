@@ -253,10 +253,12 @@ function ProvDetail({ prov, areas, cats, svcs, onBack }) {
               </div>
             )}
             {hasGoogleRating && (
-              <div style={{ display: "flex", alignItems: "center", gap: 5, marginTop: vhubAvg !== null ? 3 : 5 }}>
-                <span style={{ fontSize: 12, color: "#F9A825" }}>{"★".repeat(Math.round(prov.google_rating))}</span>
-                <span style={{ fontSize: 11, color: "#4285F4", fontWeight: 700 }}>{prov.google_rating}/5 Google</span>
-                {prov.google_review_url && <a href={prov.google_review_url} target="_blank" rel="noreferrer" style={{ fontSize: 10, color: "#4285F4", textDecoration: "underline", marginLeft: 2 }}>See reviews ↗</a>}
+              <div style={{ display: "flex", alignItems: "center", gap: 5, marginTop: 3, flexWrap: "wrap" }}>
+                <span style={{ fontSize: 13, color: "#F9A825", letterSpacing: 0 }}>
+                  {"★".repeat(Math.round(prov.google_rating))}{"☆".repeat(5 - Math.round(prov.google_rating))}
+                </span>
+                <span style={{ fontSize: 11, color: "#4285F4", fontWeight: 700 }}>{prov.google_rating.toFixed(1)} Google</span>
+                {prov.google_review_url && <a href={prov.google_review_url} target="_blank" rel="noreferrer" style={{ fontSize: 10, color: "#4285F4", textDecoration: "underline" }}>See reviews ↗</a>}
               </div>
             )}
             {!hasGoogleRating && prov.google_review_url && (
@@ -418,16 +420,57 @@ function StarRating({ n = 5 }) {
   return <span style={{ color: "#F9A825", fontSize: 13, letterSpacing: 0 }}>{"★".repeat(full)}{half ? "½" : ""}{"☆".repeat(Math.max(0, 5 - full - (half ? 1 : 0)))}</span>;
 }
 
-function ProviderRatingBadge({ providerId, googleRating }) {
+function ProviderRatingBadge({ providerId, googleRating, googleReviewUrl }) {
   const [vhubRating, setVhubRating] = React.useState(null);
   const [count, setCount] = React.useState(0);
   React.useEffect(() => {
     ProviderReview.filter({ provider_id: providerId, is_approved: true })
-      .then(revs => { const approved = (revs || []); if (approved.length > 0) { const avg = approved.reduce((s, r) => s + (r.rating || 0), 0) / approved.length; setVhubRating(avg); setCount(approved.length); } }).catch(() => {});
+      .then(revs => {
+        const approved = (revs || []);
+        if (approved.length > 0) {
+          const avg = approved.reduce((s, r) => s + (r.rating || 0), 0) / approved.length;
+          setVhubRating(avg); setCount(approved.length);
+        }
+      }).catch(() => {});
   }, [providerId]);
-  if (vhubRating !== null) return <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 6 }}><StarRating n={vhubRating} /><span style={{ fontSize: 11, color: INK_FADE, fontFamily: "'Times New Roman', serif" }}>{vhubRating.toFixed(1)}/5 · <span style={{ color: TEAL, fontWeight: 700 }}>{count} Villager {count === 1 ? "review" : "reviews"}</span></span></div>;
-  if (typeof googleRating === "number" && googleRating > 0) return <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 6 }}><StarRating n={googleRating} /><span style={{ fontSize: 11, color: INK_FADE, fontFamily: "'Times New Roman', serif" }}>{googleRating}/5 · <span style={{ color: "#4285F4", fontWeight: 700 }}>Google rating</span></span></div>;
-  return null;
+
+  const hasGoogle = typeof googleRating === "number" && googleRating > 0;
+
+  return (
+    <div style={{ marginBottom: 6 }}>
+      {/* V-Hub rating — always first */}
+      {vhubRating !== null && (
+        <div style={{ display: "flex", alignItems: "center", gap: 5, marginBottom: 3 }}>
+          <StarRating n={vhubRating} />
+          <span style={{ fontSize: 11, fontWeight: 700, color: TEAL, fontFamily: "'Times New Roman', serif" }}>
+            {vhubRating.toFixed(1)} V-Hub
+          </span>
+          <span style={{ fontSize: 11, color: INK_FADE, fontFamily: "'Times New Roman', serif" }}>
+            · {count} Villager {count === 1 ? "review" : "reviews"}
+          </span>
+        </div>
+      )}
+      {/* Google rating — always second */}
+      {hasGoogle && (
+        <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+          <span style={{ color: "#F9A825", fontSize: 12, letterSpacing: 0 }}>
+            {"★".repeat(Math.round(googleRating))}{"☆".repeat(5 - Math.round(googleRating))}
+          </span>
+          <span style={{ fontSize: 11, fontWeight: 700, color: "#4285F4", fontFamily: "'Times New Roman', serif" }}>
+            {googleRating.toFixed(1)} Google
+          </span>
+          {googleReviewUrl && (
+            <a href={googleReviewUrl} target="_blank" rel="noreferrer"
+               onClick={e => e.stopPropagation()}
+               style={{ fontSize: 10, color: "#4285F4", textDecoration: "underline", fontFamily: "'Times New Roman', serif" }}>
+              See reviews ↗
+            </a>
+          )}
+        </div>
+      )}
+      {/* If neither, show nothing — no clutter */}
+    </div>
+  );
 }
 
 function ClassifiedAd({ p, onSel, svcs }) {
@@ -445,7 +488,7 @@ function ClassifiedAd({ p, onSel, svcs }) {
         {p.email && <a href={`mailto:${p.email}`} onClick={e => e.stopPropagation()} style={{ textDecoration: "none", color: BROWN_BTN, fontSize: 12, fontFamily: "'Times New Roman', serif", display: "flex", alignItems: "center", gap: 3, wordBreak: "break-all" }}><span style={{ fontSize: 11 }}>✉</span> {p.email}</a>}
         {p.website && <a href={p.website.startsWith("http") ? p.website : `https://${p.website}`} target="_blank" rel="noreferrer" onClick={e => e.stopPropagation()} style={{ textDecoration: "none", color: "#0077B6", fontSize: 12, fontFamily: "'Times New Roman', serif", display: "flex", alignItems: "center", gap: 3, wordBreak: "break-all" }}><span style={{ fontSize: 11 }}>🌐</span> {p.website.replace(/^https?:\/\//, "")}</a>}
       </div>
-      <ProviderRatingBadge providerId={p.id} googleRating={p.rating} />
+      <ProviderRatingBadge providerId={p.id} googleRating={p.google_rating} googleReviewUrl={p.google_review_url} />
       {p.description && <div style={{ borderLeft: `3px solid ${PAPER_DK}`, paddingLeft: 10, marginTop: 4 }}><p style={{ margin: 0, fontSize: 12, color: INK_FADE, fontFamily: "Georgia, serif", lineHeight: 1.7, fontStyle: "italic" }}>{p.description}</p></div>}
       {(p.services || []).length > 0 && (
         <div style={{ display: "flex", flexWrap: "wrap", gap: 4, marginTop: 8 }}>
