@@ -1662,15 +1662,23 @@ export default function ProviderDashboard() {
       const validId = id => typeof id === 'string' && /^[0-9a-f]{24}$/.test(id);
       const svcsToSave  = selSvcs.filter(validId);
       const areasToSave = selAreas.filter(validId);
-      // Only include services/areas if at least one selection exists,
-      // OR if provider previously had none — never send empty to replace non-empty
-      const providerHadServices = Array.isArray(provider.services) && provider.services.length > 0;
-      const providerHadAreas    = Array.isArray(provider.service_areas) && provider.service_areas.length > 0;
-      if (!providerHadServices || svcsToSave.length > 0)  updates.services = svcsToSave;
-      if (!providerHadAreas    || areasToSave.length > 0) updates.service_areas = areasToSave;
+      // Always include services and areas (even if empty — let the provider clear them)
+      updates.services      = svcsToSave;
+      updates.service_areas = areasToSave;
       console.log("[V-Hub Save] services:", svcsToSave, "areas:", areasToSave, "updates:", updates);
-      // Use entity SDK directly — no backend function dependency
-      const saved = await Provider.update(provider.id, updates);
+      // Call backend function (service role) — direct SDK fails for unauthenticated providers
+      const res = await fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/providerUpdateProfile", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          provider_id: provider.id,
+          vh_number: provider.vh_number,
+          fields: updates,
+        }),
+      });
+      const json = await res.json();
+      if (!json.success) throw new Error(json.error || "Save failed");
+      const saved = json.provider;
       // Update local state
       setProvider(prev => ({ ...prev, ...saved }));
       if ('services' in updates)      setSelSvcs(Array.isArray(saved.services) ? saved.services : selSvcs);
