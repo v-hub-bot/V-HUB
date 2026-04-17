@@ -225,7 +225,7 @@ function ProvDetail({ prov, areas, cats, svcs, onBack }) {
     if (!reviewForm.review_text.trim()) { setReviewError("Please write your review before submitting."); return; }
     if (!reviewForm.rating) { setReviewError("Please select a star rating."); return; }
     // Prevent providers from reviewing their own listing
-    try { const pid = sessionStorage.getItem("vhub_provider_id"); if (pid && pid === prov.id) { alert("You cannot leave a review on your own business. Ask a satisfied customer to share their experience!"); return; } } catch(e) {}
+    try { const pid = sessionStorage.getItem("vhub_provider_id"); if (pid && pid === prov.id) { setReviewError("You cannot leave a review on your own business. Ask a satisfied customer to share their experience!"); return; } } catch(e) {}
     try {
       await ProviderReview.create({ ...reviewForm, provider_id: prov.id, is_approved: false, helpful_count: 0 });
       setReviewSaved(true); setShowReviewForm(false);

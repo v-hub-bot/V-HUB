@@ -37,7 +37,8 @@ const LEGACY_AREA = {"va001":"Alhambra","va002":"Amelia","va003":"Ashland","va00
 // ── Helpers ───────────────────────────────────────────────────────────────
 function daysLeft(dateStr) {
   if (!dateStr) return null;
-  return Math.ceil((new Date(dateStr) - new Date()) / 86400000);
+  const d = Math.ceil((new Date(dateStr) - new Date()) / 86400000);
+  return isNaN(d) ? null : d;
 }
 function fmt(d) {
   if (!d) return "—";
@@ -1400,6 +1401,8 @@ export default function ProviderDashboard() {
   const [aiPrompt, setAiPrompt] = useState("");
   const [aiGenerating, setAiGenerating] = useState(false);
   const [aiGenerated, setAiGenerated] = useState(null);
+  const [aiError, setAiError] = useState("");
+  const [classifiedError, setClassifiedError] = useState("");
   const [nextAdForm, setNextAdForm] = useState({ headline: "", body: "", address: "", village: "", deal_expires_at: "" });
   const [nextAdSaving, setNextAdSaving] = useState(false);
   const [nextAdSaved, setNextAdSaved] = useState(false);
@@ -2409,7 +2412,7 @@ export default function ProviderDashboard() {
                     disabled={aiGenerating || !aiPrompt.trim()}
                     onClick={async () => {
                       if (!aiPrompt.trim()) return;
-                      setAiGenerating(true);
+                      setAiError(""); setAiGenerating(true);
                       try {
                         const resp = await fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/generateAdImage", {
                           method: "POST",
@@ -2423,10 +2426,10 @@ export default function ProviderDashboard() {
                           setClassifiedImagePreview(null);
                           setClassifiedForm(p => ({ ...p, image_url: data.url }));
                         } else {
-                          alert("AI image generation failed: " + (data.error || "unknown error"));
+                          setAiError("AI image generation failed: " + (data.error || "unknown error"));
                         }
                       } catch(e) {
-                        alert("Error generating image. Please try again.");
+                        setAiError("Error generating image. Please try again.");
                       } finally {
                         setAiGenerating(false);
                       }
@@ -2440,17 +2443,19 @@ export default function ProviderDashboard() {
                   >
                     {aiGenerating ? "✨ Generating…" : "✨ Generate AI Image"}
                   </button>
+                  {aiError && <div style={{ marginTop: 8, background: "#FEE", border: "1.5px solid #c00", borderRadius: 4, padding: "7px 10px", fontSize: 11, color: "#c00", fontFamily: "sans-serif" }}>⚠ {aiError}</div>}
                 </div>
 
-                {/* ── Save / Activate / Deactivate buttons ── */}
+                {/* ── classifiedError + Save / Activate / Deactivate buttons ── */}
+                {classifiedError && <div style={{ background: "#FEE", border: "1.5px solid #c00", borderRadius: 5, padding: "9px 12px", marginTop: 10, fontSize: 12, color: "#c00", fontFamily: "sans-serif" }}>⚠ {classifiedError}</div>}}
                 <div style={{ display: "flex", gap: 8, marginTop: 14, flexWrap: "wrap", alignItems: "center" }}>
                   {/* Save to slot */}
                   <button
                     disabled={classifiedSaving}
                     onClick={async () => {
-                      if (!classifiedForm.headline.trim()) { alert("Please enter an ad headline."); return; }
-                      if (!classifiedForm.body.trim()) { alert("Please enter an ad description."); return; }
-                      setClassifiedSaving(true); setClassifiedSaved(false);
+                      if (!classifiedForm.headline.trim()) { setClassifiedError("Please enter an ad headline."); return; }
+                      if (!classifiedForm.body.trim()) { setClassifiedError("Please enter an ad description."); return; }
+                      setClassifiedError(""); setClassifiedSaving(true); setClassifiedSaved(false);
                       try {
                         let imageUrl = classifiedForm.image_url;
                         if (classifiedImageFile) {
@@ -2485,7 +2490,7 @@ export default function ProviderDashboard() {
                         setClassifiedImagePreview(null);
                         setAiGenerated(null);
                       } catch(e) {
-                        alert("Error saving ad. Please try again.");
+                        setClassifiedError("Error saving ad. Please try again.");
                       } finally {
                         setClassifiedSaving(false);
                       }
@@ -2517,7 +2522,7 @@ export default function ProviderDashboard() {
                           await ClassifiedAd.update(currentSlotAd.id, { is_active: true });
                           await loadClassified(provider.id);
                         } catch(e) {
-                          alert("Error activating ad. Please try again.");
+                          setClassifiedError("Error activating ad. Please try again.");
                         }
                       }}
                       style={{ background: "#2E7D32", color: "#fff", border: "none", borderRadius: 5, padding: "10px 18px", fontSize: 12, fontWeight: 700, cursor: "pointer", fontFamily: SANS }}
@@ -2589,9 +2594,9 @@ export default function ProviderDashboard() {
                         });
                         const data = await resp.json();
                         if (data.url) window.location.href = data.url;
-                        else alert("Could not start checkout: " + (data.error || "unknown error"));
+                        else setClassifiedError("Could not start checkout: " + (data.error || "unknown error"));
                       } catch(e) {
-                        alert("Error starting checkout. Please try again.");
+                        setClassifiedError("Error starting checkout. Please try again.");
                       }
                     }}
                     style={{
