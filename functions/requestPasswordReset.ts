@@ -101,7 +101,7 @@ Deno.serve(async (req) => {
           </p>
         </div>
         <div style="background: #1A0A00; padding: 12px; text-align: center; color: rgba(245,232,204,0.5); font-size: 11px;">
-          <a href="https://www.v-hub.us" style="color:#CC0000;font-weight:700;text-decoration:none;">🌴 www.v-hub.us</a> · V-Hub · The Villages, Florida · <a href="mailto:admin@v-hub.us" style="color:#C9973A;">admin@v-hub.us</a>
+          <a href="https://www.v-hub.us" style="color:#E8431A;font-weight:700;text-decoration:none;">🌴 www.v-hub.us</a> · V-Hub · The Villages, Florida · <a href="mailto:admin@v-hub.us" style="color:#C9973A;">admin@v-hub.us</a>
         </div>
       </div>
     `;

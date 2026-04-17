@@ -185,6 +185,7 @@ function ProvDetail({ prov, areas, cats, svcs, onBack }) {
   const [showReviewForm, setShowReviewForm] = useState(false);
   const [reviewSaved, setReviewSaved] = useState(false);
   const [reviewForm, setReviewForm] = useState({ customer_name: "", customer_village: "", rating: 5, review_text: "", service_used: "" });
+  const [reviewError, setReviewError] = useState("");
   const isOwnProfile = React.useMemo(() => {
     try { const id = sessionStorage.getItem("vhub_provider_id"); return id && id === prov.id; } catch(e) { return false; }
   }, [prov.id]);
@@ -217,17 +218,19 @@ function ProvDetail({ prov, areas, cats, svcs, onBack }) {
   const vhubAvgStr = vhubAvg !== null ? vhubAvg.toFixed(1) : null;
 
   const handleReviewSubmit = async () => {
-    if (!reviewForm.customer_village) { alert("Please select your village."); return; }
-    if (!reviewForm.service_used) { alert("Please select the service you used."); return; }
-    if (!reviewForm.review_text.trim()) { alert("Please write your review before submitting."); return; }
-    if (!reviewForm.rating) { alert("Please select a star rating."); return; }
+    setReviewError("");
+    if (!reviewForm.customer_name.trim()) { setReviewError("Please enter your name."); return; }
+    if (!reviewForm.customer_village) { setReviewError("Please select your village."); return; }
+    if (!reviewForm.service_used) { setReviewError("Please select the service you used."); return; }
+    if (!reviewForm.review_text.trim()) { setReviewError("Please write your review before submitting."); return; }
+    if (!reviewForm.rating) { setReviewError("Please select a star rating."); return; }
     // Prevent providers from reviewing their own listing
-    try { const pid = sessionStorage.getItem("vhub_provider_id"); if (pid && pid === prov.id) { alert("You cannot leave a review on your own business listing."); return; } } catch(e) {}
+    try { const pid = sessionStorage.getItem("vhub_provider_id"); if (pid && pid === prov.id) { alert("You cannot leave a review on your own business. Ask a satisfied customer to share their experience!"); return; } } catch(e) {}
     try {
       await ProviderReview.create({ ...reviewForm, provider_id: prov.id, is_approved: false, helpful_count: 0 });
       setReviewSaved(true); setShowReviewForm(false);
       setReviewForm({ customer_name: "", customer_village: "", rating: 5, review_text: "", service_used: "" });
-    } catch(err) { console.error("Review submit error:", err); alert("There was a problem submitting your review. Please try again."); }
+    } catch(err) { console.error("Review submit error:", err); setReviewError("There was a problem submitting your review. Please try again."); }
   };
 
   const inputS = { width: "100%", boxSizing: "border-box", background: PAPER, border: `1.5px solid ${PAPER_DK}`, borderRadius: 4, color: INK, fontFamily: "'Times New Roman', serif", fontSize: 13, padding: "8px 11px", outline: "none" };
@@ -337,7 +340,8 @@ function ProvDetail({ prov, areas, cats, svcs, onBack }) {
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px 14px", marginBottom: 8 }}>
               <div style={{ gridColumn: "1/-1" }}>
                 <label style={lblS}>Your Name <span style={{fontSize:9,fontStyle:"italic",fontWeight:400,textTransform:"none",letterSpacing:0}}>(We will NOT display your name on any posted review)</span></label>
-                <input style={inputS} value={reviewForm.customer_name} onChange={e => setReviewForm(p => ({ ...p, customer_name: e.target.value }))} placeholder="Your first name only — kept private" />
+                <input style={inputS} value={reviewForm.customer_name} onChange={e => setReviewForm(p => ({ ...p, customer_name: e.target.value }))} placeholder="e.g. Jim S." required />
+                <div style={{ fontSize: 10, color: INK_FADE, fontStyle: "italic", marginTop: 3, fontFamily: "Georgia, serif" }}>🔒 Your name will <strong>not</strong> be visible to others — it is used for admin verification only.</div>
               </div>
               <div>
                 <label style={lblS}>Your Village</label>
@@ -362,6 +366,7 @@ function ProvDetail({ prov, areas, cats, svcs, onBack }) {
               </div>
             </div>
             <div style={{ marginBottom: 10 }}><label style={lblS}>Your Review *</label><textarea style={{ ...inputS, minHeight: 70, resize: "vertical", lineHeight: 1.6 }} value={reviewForm.review_text} onChange={e => setReviewForm(p => ({ ...p, review_text: e.target.value }))} placeholder="Tell other residents about your experience..." /></div>
+            {reviewError && <div style={{ background: "#FEE", border: "1.5px solid #c00", borderRadius: 5, padding: "8px 12px", marginBottom: 8, fontSize: 12, color: "#c00", fontFamily: "Georgia, serif" }}>⚠ {reviewError}</div>}
             <div style={{ display: "flex", gap: 8 }}>
               <button data-testid="review-submit" onClick={handleReviewSubmit} style={{ background: `linear-gradient(180deg,#9A6030,${BROWN_BTN})`, color: PAPER, border: `2px solid ${YELLOW}`, borderRadius: 5, padding: "8px 20px", fontSize: 12, fontWeight: 700, cursor: "pointer", fontFamily: "'Times New Roman', serif" }}>Submit</button>
               <button data-testid="review-cancel" onClick={() => setShowReviewForm(false)} style={{ background: PAPER, border: `1.5px solid ${PAPER_DK}`, color: INK_FADE, borderRadius: 5, padding: "8px 14px", fontSize: 12, cursor: "pointer", fontFamily: "'Times New Roman', serif" }}>Cancel</button>

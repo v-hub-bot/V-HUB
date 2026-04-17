@@ -153,7 +153,7 @@ Deno.serve(async (req) => {
           
           <div style="border-top: 1px solid #ddd; margin-top: 28px; padding-top: 16px; text-align: center;">
             <p style="font-size: 12px; color: #888; margin-bottom: 8px;">This is an automated notification from V-Hub Admin System</p>
-            <a href="https://www.v-hub.us" style="color:#CC0000;font-size:13px;font-weight:700;text-decoration:none;">🌴 www.v-hub.us</a>
+            <a href="https://www.v-hub.us" style="color:#E8431A;font-size:13px;font-weight:700;text-decoration:none;">🌴 www.v-hub.us</a>
           </div>
         </div>
       </div>

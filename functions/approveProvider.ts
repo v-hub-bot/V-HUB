@@ -320,7 +320,7 @@ Deno.serve(async (req) => {
 
   <!-- Footer -->
   <div style="background:#1A0A00;padding:16px 20px;text-align:center;">
-    <a href="${APP_URL}" style="color:#CC0000;font-size:13px;font-weight:700;text-decoration:none;">🌴 www.v-hub.us</a>
+    <a href="${APP_URL}" style="color:#E8431A;font-size:13px;font-weight:700;text-decoration:none;">🌴 www.v-hub.us</a>
     <div style="color:rgba(245,232,204,0.45);font-size:11px;margin-top:6px;">V-Hub &middot; The Villages, Florida &middot; A community-first local directory</div>
     <div style="color:rgba(245,232,204,0.35);font-size:10px;margin-top:4px;">
       <a href="mailto:admin@v-hub.us" style="color:rgba(201,151,58,0.7);text-decoration:none;">admin@v-hub.us</a>
