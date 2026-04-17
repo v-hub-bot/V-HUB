@@ -592,16 +592,15 @@ function ForcePasswordChangeScreen({ provider, onComplete }) {
       <link rel="preconnect" href="https://fonts.googleapis.com" />
       <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet" />
       <div style={{ background: PAPER, borderBottom: `3px double ${INK}` }}>
-        <div style={{ display: "flex", alignItems: "center", padding: "10px 14px 8px", boxSizing: "border-box" }}>
-          <a href="/" style={{ textDecoration: "none", flexShrink: 0, minWidth: 80, display: "flex", alignItems: "center" }}>
-            <img src="https://media.base44.com/images/public/69d062aca815ce8e697894b1/a9af95bc3_V-Hublogo.png" alt="V-Hub" style={{ width: 48, height: 48, objectFit: "contain", display: "block" }} />
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 16px 8px", boxSizing: "border-box" }}>
+          <a href="/" style={{ textDecoration: "none", display: "flex", alignItems: "baseline" }}>
+            <span style={{ fontStyle: "italic", fontWeight: 700, fontFamily: "'Great Vibes', cursive", fontSize: 42, color: "#003366", lineHeight: 1 }}>V</span>
+            <span style={{ fontSize: 28, fontWeight: 900, color: INK, fontFamily: "'Times New Roman', serif", lineHeight: 1, margin: "0 2px" }}>-</span>
+            <span style={{ fontSize: 34, fontWeight: 900, color: INK, fontFamily: "'Times New Roman', serif", letterSpacing: -1, lineHeight: 1 }}>Hub</span>
           </a>
-          <a href="/" style={{ textDecoration: "none", flex: 1, display: "flex", alignItems: "baseline", justifyContent: "center" }}>
-            <span style={{ fontStyle: "italic", fontWeight: 700, fontFamily: "'Great Vibes', cursive", fontSize: 48, color: "#003366", lineHeight: 1 }}>V</span>
-            <span style={{ fontSize: 32, fontWeight: 900, color: INK, fontFamily: "'Times New Roman', serif", lineHeight: 1, margin: "0 2px" }}>-</span>
-            <span style={{ fontSize: 40, fontWeight: 900, color: INK, fontFamily: "'Times New Roman', serif", letterSpacing: -1, lineHeight: 1 }}>Hub</span>
+          <a href="/" style={{ textDecoration: "none" }}>
+            <button style={{ background: `linear-gradient(180deg,#9A6030,${BROWN_BTN} 60%,#5A3010)`, border: `2px solid #1B3D6F`, borderRadius: 4, color: "#F5E8CC", fontFamily: SANS, fontWeight: 700, fontSize: 13, padding: "8px 18px", cursor: "pointer", whiteSpace: "nowrap" }}>&#171; Home</button>
           </a>
-          <div style={{ flexShrink: 0, minWidth: 80 }} />
         </div>
       </div>
 
@@ -713,18 +712,15 @@ function ForgotPasswordScreen({ onBack }) {
       <link rel="preconnect" href="https://fonts.googleapis.com" />
       <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet" />
       <div style={{ background: PAPER, borderBottom: `3px double ${INK}` }}>
-        <div style={{ display: "flex", alignItems: "center", padding: "10px 14px 8px", boxSizing: "border-box" }}>
-          <a href="/" style={{ textDecoration: "none", flexShrink: 0, minWidth: 80, display: "flex", alignItems: "center" }}>
-            <img src="https://base44.app/api/apps/69d062aca815ce8e697894b1/files/mp/public/69d062aca815ce8e697894b1/f14a7cbd0_logo_icon_small.png" alt="V-Hub" style={{ width: 48, height: 48, objectFit: "contain", display: "block" }} />
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 16px 8px", boxSizing: "border-box" }}>
+          <a href="/" style={{ textDecoration: "none", display: "flex", alignItems: "baseline" }}>
+            <span style={{ fontStyle: "italic", fontWeight: 700, fontFamily: "'Great Vibes', cursive", fontSize: 42, color: "#003366", lineHeight: 1 }}>V</span>
+            <span style={{ fontSize: 28, fontWeight: 900, color: INK, fontFamily: "'Times New Roman', serif", lineHeight: 1, margin: "0 2px" }}>-</span>
+            <span style={{ fontSize: 34, fontWeight: 900, color: INK, fontFamily: "'Times New Roman', serif", letterSpacing: -1, lineHeight: 1 }}>Hub</span>
           </a>
-          <a href="/" style={{ textDecoration: "none", flex: 1, display: "flex", alignItems: "baseline", justifyContent: "center", gap: 0 }}>
-            <span style={{ fontStyle: "italic", fontWeight: 700, fontFamily: "'Great Vibes', cursive", fontSize: 48, color: "#003366", WebkitTextStroke: "0.5px #003366", textShadow: "0.5px 0.5px 0 #001a40", lineHeight: 1 }}>V</span>
-            <span style={{ fontSize: 32, fontWeight: 900, color: INK, fontFamily: "'Times New Roman', serif", lineHeight: 1, margin: "0 2px" }}>-</span>
-            <span style={{ fontSize: 40, fontWeight: 900, color: INK, fontFamily: "'Times New Roman', serif", letterSpacing: -1, lineHeight: 1 }}>Hub</span>
+          <a href="/" style={{ textDecoration: "none" }}>
+            <button style={{ background: `linear-gradient(180deg,#9A6030,${BROWN_BTN} 60%,#5A3010)`, border: `2px solid #1B3D6F`, borderRadius: 4, color: "#F5E8CC", fontFamily: SANS, fontWeight: 700, fontSize: 13, padding: "8px 18px", cursor: "pointer", whiteSpace: "nowrap" }}>&#171; Home</button>
           </a>
-          <div style={{ flexShrink: 0, minWidth: 100, display: "flex", justifyContent: "flex-end", alignItems: "center" }}>
-            <button onClick={onBack} style={{ background: `linear-gradient(180deg,#9A6030,${BROWN_BTN} 60%,#5A3010)`, border: `2px solid #1B3D6F`, borderRadius: 4, color: "#F5E8CC", fontFamily: SANS, fontWeight: 700, fontSize: 12, letterSpacing: 0.5, padding: "7px 14px", cursor: "pointer", whiteSpace: "nowrap" }> « Back</button>
-          </div>
         </div>
       </div>
       <div style={{ textAlign: "center", padding: "32px 20px 24px", borderBottom: `3px double ${INK}` }}>
@@ -856,21 +852,17 @@ function LoginScreen({ onLogin, onForgot }) {
       <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet" />
       {/* Masthead — matches homepage style */}
       <div style={{ background: PAPER, borderBottom: `3px double ${INK}` }}>
-        <div style={{ display: "flex", alignItems: "center", padding: "10px 14px 8px", boxSizing: "border-box" }}>
-          <a href="/" style={{ textDecoration: "none", flexShrink: 0, minWidth: 80, display: "flex", alignItems: "center" }}>
-            <img src="https://base44.app/api/apps/69d062aca815ce8e697894b1/files/mp/public/69d062aca815ce8e697894b1/f14a7cbd0_logo_icon_small.png" alt="V-Hub" style={{ width: 48, height: 48, objectFit: "contain", display: "block" }} />
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 16px 8px", boxSizing: "border-box" }}>
+          <a href="/" style={{ textDecoration: "none", display: "flex", alignItems: "baseline" }}>
+            <span style={{ fontStyle: "italic", fontWeight: 700, fontFamily: "'Great Vibes', cursive", fontSize: 42, color: "#003366", lineHeight: 1 }}>V</span>
+            <span style={{ fontSize: 28, fontWeight: 900, color: INK, fontFamily: "'Times New Roman', serif", lineHeight: 1, margin: "0 2px" }}>-</span>
+            <span style={{ fontSize: 34, fontWeight: 900, color: INK, fontFamily: "'Times New Roman', serif", letterSpacing: -1, lineHeight: 1 }}>Hub</span>
           </a>
-          <a href="/" style={{ textDecoration: "none", flex: 1, display: "flex", alignItems: "baseline", justifyContent: "center", gap: 0 }}>
-            <span style={{ fontStyle: "italic", fontWeight: 700, fontFamily: "'Great Vibes', cursive", fontSize: 48, color: "#003366", WebkitTextStroke: "0.5px #003366", textShadow: "0.5px 0.5px 0 #001a40", lineHeight: 1 }}>V</span>
-            <span style={{ fontSize: 32, fontWeight: 900, color: INK, fontFamily: "'Times New Roman', serif", lineHeight: 1, margin: "0 2px" }}>-</span>
-            <span style={{ fontSize: 40, fontWeight: 900, color: INK, fontFamily: "'Times New Roman', serif", letterSpacing: -1, lineHeight: 1 }}>Hub</span>
+          <a href="/" style={{ textDecoration: "none" }}>
+            <button style={{ background: `linear-gradient(180deg,#9A6030,${BROWN_BTN} 60%,#5A3010)`, border: `2px solid #1B3D6F`, borderRadius: 4, color: "#F5E8CC", fontFamily: SANS, fontWeight: 700, fontSize: 13, padding: "8px 18px", cursor: "pointer", whiteSpace: "nowrap" }}>&#171; Home</button>
           </a>
-          <div style={{ flexShrink: 0, minWidth: 100, display: "flex", justifyContent: "flex-end", alignItems: "center" }}>
-            <a href="/" style={{ textDecoration: "none" }}>
-              <button style={{ background: `linear-gradient(180deg,#9A6030,${BROWN_BTN} 60%,#5A3010)`, border: `2px solid #1B3D6F`, borderRadius: 4, color: "#F5E8CC", fontFamily: SANS, fontWeight: 700, fontSize: 12, letterSpacing: 0.5, padding: "7px 14px", cursor: "pointer", whiteSpace: "nowrap" }> « Home</button>
-            </a>
-          </div>
         </div>
+      </div>
       </div>
 
       {/* Page header */}
@@ -1919,30 +1911,25 @@ export default function ProviderDashboard() {
   // ── TOP NAV (shared across dashboard/edit/account) ────────────────────
   const TopNav = ({ rightContent }) => (
     <div style={{ background: PAPER, borderBottom: `3px double ${INK}`, position: "sticky", top: 0, zIndex: 50 }}>
-      <div style={{ display: "flex", alignItems: "center", padding: "10px 14px 8px", boxSizing: "border-box" }}>
-        {/* Left — home button, fixed width */}
-        <div style={{ flexShrink: 0, minWidth: 80, display: "flex", alignItems: "center" }}>
-          <a href="/" style={{ textDecoration: "none" }}>
-            <img src="https://base44.app/api/apps/69d062aca815ce8e697894b1/files/mp/public/69d062aca815ce8e697894b1/f14a7cbd0_logo_icon_small.png" alt="V-Hub" style={{ width: 48, height: 48, objectFit: "contain", display: "block" }} />
-          </a>
-        </div>
-        {/* Center — V-Hub inline */}
-        <a href="/" style={{ textDecoration: "none", flex: 1, display: "flex", alignItems: "baseline", justifyContent: "center", gap: 0 }}>
-          <span style={{ fontStyle: "italic", fontWeight: 700, fontFamily: "'Great Vibes', cursive", fontSize: 48, color: "#003366", WebkitTextStroke: "0.5px #003366", textShadow: "0.5px 0.5px 0 #001a40", lineHeight: 1 }}>V</span>
-          <span style={{ fontSize: 32, fontWeight: 900, color: INK, fontFamily: "'Times New Roman', serif", lineHeight: 1, margin: "0 2px" }}>-</span>
-          <span style={{ fontSize: 40, fontWeight: 900, color: INK, fontFamily: "'Times New Roman', serif", letterSpacing: -1, lineHeight: 1 }}>Hub</span>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 16px 8px", boxSizing: "border-box" }}>
+        {/* Left — V-Hub wordmark links home */}
+        <a href="/" style={{ textDecoration: "none", display: "flex", alignItems: "baseline" }}>
+          <span style={{ fontStyle: "italic", fontWeight: 700, fontFamily: "'Great Vibes', cursive", fontSize: 42, color: "#003366", lineHeight: 1 }}>V</span>
+          <span style={{ fontSize: 28, fontWeight: 900, color: INK, fontFamily: "'Times New Roman', serif", lineHeight: 1, margin: "0 2px" }}>-</span>
+          <span style={{ fontSize: 34, fontWeight: 900, color: INK, fontFamily: "'Times New Roman', serif", letterSpacing: -1, lineHeight: 1 }}>Hub</span>
         </a>
-        {/* Right — action button or home, fixed width */}
-        <div style={{ flexShrink: 0, minWidth: 100, display: "flex", justifyContent: "flex-end", alignItems: "center" }}>
+        {/* Right — action button or Home */}
+        <div style={{ display: "flex", alignItems: "center" }}>
           {rightContent || (
             <a href="/" style={{ textDecoration: "none" }}>
-              <button style={{ background: `linear-gradient(180deg,#9A6030,${BROWN_BTN} 60%,#5A3010)`, border: `2px solid #1B3D6F`, borderRadius: 4, color: "#F5E8CC", fontFamily: SANS, fontWeight: 700, fontSize: 12, letterSpacing: 0.5, padding: "7px 14px", cursor: "pointer", whiteSpace: "nowrap" }> « Home</button>
+              <button style={{ background: `linear-gradient(180deg,#9A6030,${BROWN_BTN} 60%,#5A3010)`, border: `2px solid #1B3D6F`, borderRadius: 4, color: "#F5E8CC", fontFamily: SANS, fontWeight: 700, fontSize: 13, padding: "8px 18px", cursor: "pointer", whiteSpace: "nowrap" }}>&#171; Home</button>
             </a>
           )}
         </div>
       </div>
     </div>
   );
+
 
   // ── EDIT VIEW ─────────────────────────────────────────────────────────
   if (view === "edit") return (
