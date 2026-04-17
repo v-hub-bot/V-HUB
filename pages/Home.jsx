@@ -592,7 +592,7 @@ function SvcDropdown({ open, cats, svcs, openCat, selSvc, setOpenCat, setSelSvc,
         const isSelected = selSvc?.category_id === c.id || selSvc?.id === c.id;
         return (
           <div key={c.id} ref={el => { catRowRefs.current[c.id] = el; }}>
-            <div data-testid={`cat-${c.name.replace(/[^a-z]/gi,'-').toLowerCase()}`} onClick={e => { e.stopPropagation(); setOpenCat(isExpanded ? null : c.id); }} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "11px 14px", borderBottom: `1px solid ${PAPER_DK}`, background: isSelected ? "#e8f5ee" : PAPER, cursor: "pointer", userSelect: "none" }}>
+            <div data-testid={`cat-${c.name.replace(/[^a-z]/gi,'-').toLowerCase()}`} onClick={e => { e.stopPropagation(); setOpenCat(isExpanded ? null : c.id); }} onTouchEnd={e => { e.stopPropagation(); e.preventDefault(); setOpenCat(isExpanded ? null : c.id); }} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "11px 14px", borderBottom: `1px solid ${PAPER_DK}`, background: isSelected ? "#e8f5ee" : PAPER, cursor: "pointer", userSelect: "none" }}>
               <span style={{ fontSize: 13, fontWeight: 700, color: INK, fontFamily: "'Times New Roman', serif", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", maxWidth: "88%" }}>{c.icon} {c.name}</span>
               <span style={{ fontSize: 10, color: INK_FADE, flexShrink: 0, marginLeft: 4 }}>{isExpanded ? "▲" : "▼"}</span>
             </div>

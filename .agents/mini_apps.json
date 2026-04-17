@@ -8,20 +8,20 @@
     "Home": {
       "title": "Home"
     },
-    "ListService": {
-      "title": "ListService"
+    "Privacy": {
+      "title": "Privacy"
     },
     "Terms": {
       "title": "Terms"
     },
-    "Wekcadmin": {
-      "title": "Wekcadmin"
-    },
     "Classifieds": {
       "title": "Classifieds"
     },
-    "Privacy": {
-      "title": "Privacy"
+    "Wekcadmin": {
+      "title": "Wekcadmin"
+    },
+    "ListService": {
+      "title": "ListService"
     }
   }
 }
