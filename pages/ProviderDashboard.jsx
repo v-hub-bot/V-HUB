@@ -1636,13 +1636,28 @@ export default function ProviderDashboard() {
   };
 
   const handleSave = async () => {
-    // Safety check: if service/area lookup data hasn't loaded yet, block save to prevent wiping existing selections
-    if (!mapsReady || dbServices.length === 0 || dbAreas.length === 0) {
-      setSaveMsg("⚠ Service and village data is still loading. Please wait a moment and try again.");
-      return;
-    }
     setSaving(true);
     setSaveMsg("");
+
+    // If lookup data isn't ready yet, fetch it now before proceeding
+    let svcs = dbServices;
+    let areas = dbAreas;
+    if (!mapsReady || svcs.length === 0 || areas.length === 0) {
+      try {
+        const lkup = await fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/getProviders", {
+          method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ get_lookup_data: true }),
+        }).then(r => r.json());
+        svcs  = lkup.services || [];
+        areas = lkup.areas    || [];
+        setDbServices(svcs);
+        setDbAreas(areas);
+        setMapsReady(true);
+      } catch (e) {
+        console.warn("[V-Hub Save] Could not reload lookup data, proceeding anyway:", e);
+      }
+    }
+
     try {
       const ALLOWED = ["business_name","owner_name","phone","email","website","description","address",
         "years_in_business","license_number","google_review_url","is_mobile","hours_of_operation","google_rating"];
@@ -1662,28 +1677,38 @@ export default function ProviderDashboard() {
       const validId = id => typeof id === 'string' && /^[0-9a-f]{24}$/.test(id);
       const svcsToSave  = selSvcs.filter(validId);
       const areasToSave = selAreas.filter(validId);
-      // Always include services and areas (even if empty — let the provider clear them)
       updates.services      = svcsToSave;
       updates.service_areas = areasToSave;
       console.log("[V-Hub Save] services:", svcsToSave, "areas:", areasToSave, "updates:", updates);
-      // Call backend function (service role) — direct SDK fails for unauthenticated providers
-      const res = await fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/getProviders", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          provider_update: true,
-          provider_id: provider.id,
-          vh_number: provider.vh_number,
-          fields: updates,
-        }),
-      });
-      const json = await res.json();
-      if (!json.success) throw new Error(json.error || "Save failed");
+
+      // Save via getProviders provider_update path (service role, no auth needed)
+      let json = null;
+      for (let attempt = 1; attempt <= 3; attempt++) {
+        try {
+          const res = await fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/getProviders", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              provider_update: true,
+              provider_id: provider.id,
+              vh_number: provider.vh_number,
+              fields: updates,
+            }),
+          });
+          json = await res.json();
+          if (json.success || json.error) break; // got a real response
+        } catch (netErr) {
+          console.warn(`[V-Hub Save] attempt ${attempt} failed:`, netErr);
+          if (attempt < 3) await new Promise(r => setTimeout(r, 800 * attempt));
+        }
+      }
+
+      if (!json || !json.success) throw new Error((json && json.error) || "Save failed — please try again.");
       const saved = json.record;
-      // Update local state
+      // Update local state immediately so changes are visible without a page reload
       setProvider(prev => ({ ...prev, ...saved }));
-      if ('services' in updates)      setSelSvcs(Array.isArray(saved.services) ? saved.services : selSvcs);
-      if ('service_areas' in updates) setSelAreas(Array.isArray(saved.service_areas) ? saved.service_areas : selAreas);
+      setSelSvcs(Array.isArray(saved.services) ? saved.services : svcsToSave);
+      setSelAreas(Array.isArray(saved.service_areas) ? saved.service_areas : areasToSave);
       setForm({
         business_name: saved.business_name || "",
         owner_name: saved.owner_name || "",
@@ -1699,9 +1724,13 @@ export default function ProviderDashboard() {
         hours_of_operation: saved.hours_of_operation || "",
         is_mobile: saved.is_mobile === true,
       });
-      setSaveMsg("✓ Profile updated successfully!");
-      setTimeout(() => { setSaveMsg(""); setView("dashboard"); }, 2500);
-    } catch (err) { setSaveMsg("⚠ Error saving. Please try again."); console.error("[V-Hub Save Error]", err); }
+      setSaveMsg("✓ Profile updated! Your listing is now live.");
+      // Stay on edit page so provider can see the success — they can navigate away themselves
+      setTimeout(() => setSaveMsg(""), 5000);
+    } catch (err) {
+      setSaveMsg("⚠ " + (err.message || "Error saving. Please try again."));
+      console.error("[V-Hub Save Error]", err);
+    }
     setSaving(false);
   };
 
