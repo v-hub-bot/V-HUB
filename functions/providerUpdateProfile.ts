@@ -1,5 +1,5 @@
 // providerUpdateProfile — secure self-service update for provider hub sessions
-// v13 - force redeploy [1776395207]
+// v15 - redeploy-1776395462
 import { createClient } from "npm:@base44/sdk@0.8.25";
 
 const CORS_HEADERS = {
