@@ -1954,7 +1954,8 @@ export default function ProviderDashboard() {
           ))}
           <div style={{ gridColumn: "1 / -1" }}>
             <label style={lbS}>Google Review URL</label>
-            <input value={form.google_review_url || ""} onChange={e => setForm(f => ({ ...f, google_review_url: e.target.value }))} style={inS} placeholder="https://g.page/your-business/review" />
+            <input value={form.google_review_url || ""} onChange={e => setForm(f => ({ ...f, google_review_url: e.target.value }))} style={inS} placeholder="https://maps.app.goo.gl/..." />
+            <div style={{ fontSize: 11, color: "#888", marginTop: 4, fontFamily: "Arial, sans-serif" }}>Paste your Google Maps business link here — your star rating will sync automatically each night.</div>
           </div>
           <div>
             <label style={lbS}>Google Rating (e.g. 4.7)</label>
