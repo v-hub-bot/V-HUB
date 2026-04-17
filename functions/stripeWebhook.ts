@@ -61,8 +61,8 @@ async function sendReceiptEmail(opts: {
   const { to, ownerName, businessName, amount, currency, invoiceNumber, periodStart, periodEnd, isFirstPayment, hostedInvoiceUrl } = opts;
   const formattedAmount = (amount / 100).toLocaleString("en-US", { style: "currency", currency: currency.toUpperCase() });
   const subject = isFirstPayment
-    ? `V-Hub Payment Receipt — ${formattedAmount} · Your Trial Has Ended, Subscription Active`
-    : `V-Hub Payment Receipt — ${formattedAmount} · Monthly Subscription Renewed`;
+    ? `V-Hub Payment Receipt - ${formattedAmount} | Trial Ended, Subscription Active`
+    : `V-Hub Payment Receipt - ${formattedAmount} | Monthly Subscription Renewed`;
   const intro = isFirstPayment
     ? `Your trial period has ended and your first subscription payment has been processed. Your V-Hub listing remains <strong>active</strong> and visible to residents across The Villages.`
     : `Your V-Hub monthly subscription has been renewed successfully. Your listing remains <strong>active</strong>.`;
@@ -88,7 +88,7 @@ async function sendReceiptEmail(opts: {
     <p style="color:#5A3010;font-size:14px;line-height:1.7;">Log in to your <a href="${APP_URL}/ProviderDashboard" style="color:#C9973A;">Provider Hub</a> anytime to update your profile, view stats, and manage your subscription.</p>
     <p style="color:#5A3010;font-size:13px;line-height:1.7;margin-top:12px;">Questions? Contact us at <a href="mailto:admin@v-hub.us" style="color:#C9973A;">admin@v-hub.us</a></p>`;
 
-  await sendEmail(to, subject, emailWrapper("✅ PAYMENT RECEIVED", body));
+await sendEmail(to, subject, emailWrapper("PAYMENT RECEIVED", body));
 }
 
 async function sendTrialStartEmail(opts: {
@@ -109,7 +109,7 @@ async function sendTrialStartEmail(opts: {
     </div>
     <p style="color:#5A3010;font-size:14px;line-height:1.7;"><strong>Nothing is charged today.</strong> Your card will be automatically billed on <strong>${trialEndDate}</strong> when your trial period ends. You can cancel anytime before that date from your <a href="${APP_URL}/ProviderDashboard" style="color:#C9973A;">Provider Hub</a>.</p>
     <p style="color:#5A3010;font-size:13px;line-height:1.7;margin-top:12px;">Questions? Contact us at <a href="mailto:admin@v-hub.us" style="color:#C9973A;">admin@v-hub.us</a></p>`;
-  await sendEmail(to, `V-Hub — Your Trial is Active! First charge on ${trialEndDate}`, emailWrapper("🎉 YOUR TRIAL HAS STARTED!", body));
+await sendEmail(to, `V-Hub - Your Trial is Active! First charge on ${trialEndDate}`, emailWrapper("YOUR TRIAL HAS STARTED!", body));
 }
 
 async function sendPaymentFailedEmail(opts: {
@@ -129,7 +129,7 @@ async function sendPaymentFailedEmail(opts: {
       <a href="${APP_URL}/ProviderDashboard" style="background:#C62828;color:#fff;padding:14px 32px;border-radius:8px;font-weight:900;font-size:14px;text-decoration:none;letter-spacing:1px;">UPDATE BILLING INFO →</a>
     </div>
     <p style="color:#5A3010;font-size:13px;line-height:1.7;margin-top:12px;">Questions? Contact us at <a href="mailto:admin@v-hub.us" style="color:#C9973A;">admin@v-hub.us</a></p>`;
-  await sendEmail(to, `V-Hub — Payment Failed · Action Required for ${businessName}`, emailWrapper("⚠️ PAYMENT FAILED", body));
+await sendEmail(to, `V-Hub - Payment Failed | Action Required for ${businessName}`, emailWrapper("PAYMENT FAILED", body));
 }
 
 async function sendCancellationEmail(opts: {
@@ -150,7 +150,7 @@ async function sendCancellationEmail(opts: {
     <p style="color:#5A3010;font-size:14px;line-height:1.7;">Your listing will remain visible to residents until <strong>${accessUntil}</strong>, then it will be removed. No further charges will be made.</p>
     <p style="color:#5A3010;font-size:14px;line-height:1.7;margin-top:12px;">Changed your mind? You can reactivate your listing anytime from your <a href="${APP_URL}/ProviderDashboard" style="color:#C9973A;">Provider Hub</a> — $12/month, no contracts.</p>
     <p style="color:#5A3010;font-size:13px;line-height:1.7;margin-top:12px;">Questions? Contact us at <a href="mailto:admin@v-hub.us" style="color:#C9973A;">admin@v-hub.us</a></p>`;
-  await sendEmail(to, `V-Hub — Subscription Cancelled · ${businessName}`, emailWrapper("🔔 SUBSCRIPTION CANCELLED", body));
+await sendEmail(to, `V-Hub - Subscription Cancelled | ${businessName}`, emailWrapper("SUBSCRIPTION CANCELLED", body));
 }
 
 async function sendTrialEndingEmail(opts: {
@@ -171,7 +171,7 @@ async function sendTrialEndingEmail(opts: {
     <p style="color:#5A3010;font-size:14px;line-height:1.7;">If you'd like to continue, <strong>no action is needed</strong> — your subscription will automatically begin on ${trialEndDate}.</p>
     <p style="color:#5A3010;font-size:14px;line-height:1.7;margin-top:8px;">Want to cancel before being charged? Visit your <a href="${APP_URL}/ProviderDashboard" style="color:#C9973A;">Provider Hub</a> and click <strong>"Cancel My Subscription"</strong>.</p>
     <p style="color:#5A3010;font-size:13px;line-height:1.7;margin-top:12px;">Questions? Contact us at <a href="mailto:admin@v-hub.us" style="color:#C9973A;">admin@v-hub.us</a></p>`;
-  await sendEmail(to, `V-Hub — Your Trial Ends in ${daysLeft} Day${daysLeft !== 1 ? "s" : ""} · ${businessName}`, emailWrapper("⏰ TRIAL ENDING SOON", body));
+await sendEmail(to, `V-Hub - Your Trial Ends in ${daysLeft} Day${daysLeft !== 1 ? "s" : ""} | ${businessName}`, emailWrapper("TRIAL ENDING SOON", body));
 }
 
 // ── Main webhook handler ─────────────────────────────────────────────────────

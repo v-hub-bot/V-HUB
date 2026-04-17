@@ -331,7 +331,7 @@ Deno.serve(async (req) => {
 </body>
 </html>`;
 
-        await sendEmail(email, `You're Live on V-Hub! — ${business_name} | 45-Day Free Trial Started`, providerHtml);
+await sendEmail(email, `You're Live on V-Hub! - ${business_name} | 45-Day Free Trial Started`, providerHtml);
         console.log("✅ Combined provider welcome email sent to:", email);
       } catch (emailErr: any) {
         console.error("Provider email failed:", emailErr);

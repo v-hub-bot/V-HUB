@@ -306,7 +306,7 @@ Deno.serve(async (req: Request) => {
     let emailSent = false;
     let emailSkipped = false;
     if (email && email.trim()) {
-      await sendEmail(email, `Welcome to V-Hub — Your Listing for ${business_name} is Live!`, welcomeHtml);
+await sendEmail(email, `Welcome to V-Hub - Your Listing for ${business_name} is Live!`, welcomeHtml);
       emailSent = true;
     } else {
       emailSkipped = true;

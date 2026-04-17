@@ -128,7 +128,7 @@ Deno.serve(async (req) => {
       </div>
     `;
 
-    await sendEmail(me.email, `Welcome to V-Hub — Your listing has been submitted!`, welcomeHtml);
+await sendEmail(me.email, `Welcome to V-Hub - Your listing has been submitted!`, welcomeHtml);
 
     // Notify admin
     const adminHtml = `<div style="font-family:sans-serif;padding:20px;background:#f5f5f5;border-radius:8px;max-width:500px;">

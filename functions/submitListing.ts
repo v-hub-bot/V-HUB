@@ -195,7 +195,7 @@ Deno.serve(async (req) => {
           </div>
           <div style="background: #1A0A00; padding: 12px; text-align: center; color: rgba(245,232,204,0.5); font-size: 11px;">V-Hub · The Villages, Florida · admin@v-hub.us</div>
         </div>`;
-      await sendEmail(email, `V-Hub Listing Received — ${business_name}`, providerHtml);
+await sendEmail(email, `V-Hub Listing Received - ${business_name}`, providerHtml);
     } catch (emailErr) { console.error("Provider confirmation email failed:", emailErr); }
 
     return Response.json({ success: true, vh_number, id: record.id });

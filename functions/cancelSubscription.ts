@@ -52,7 +52,7 @@ async function sendCancellationEmail(opts: {
     body: JSON.stringify({
       personalizations: [{ to: [{ email: to }] }],
       from: { email: "admin@v-hub.us", name: "V-Hub" },
-      subject: `V-Hub — Subscription Cancelled · ${businessName}`,
+subject: `V-Hub - Subscription Cancelled | ${businessName}`,
       content: [{ type: "text/html", value: html }],
     }),
   });
