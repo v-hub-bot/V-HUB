@@ -1,5 +1,5 @@
 // providerUpdateProfile — secure self-service update for provider hub sessions
-// v11 - force redeploy [1316132830]
+// v13 - force redeploy [1776395207]
 import { createClient } from "npm:@base44/sdk@0.8.25";
 
 const CORS_HEADERS = {
@@ -57,6 +57,8 @@ Deno.serve(async (req: Request) => {
   const vh_number        = (body.vh_number        as string || "").trim();
   const fields           = body.fields as Record<string, unknown> | undefined;
 
+  console.log("📥 providerUpdateProfile called — provider_id:", provider_id, "vh_number:", vh_number);
+
   if (!provider_id) {
     return new Response(JSON.stringify({ error: "Missing provider_id" }), { status: 400, headers: CORS_HEADERS });
   }
@@ -64,8 +66,11 @@ Deno.serve(async (req: Request) => {
   let existing: Record<string, unknown> | null = null;
   try { existing = await sr.entities.Provider.get(provider_id); } catch { /* not found */ }
   if (!existing) {
+    console.error("❌ Provider not found:", provider_id);
     return new Response(JSON.stringify({ error: "Provider not found" }), { status: 404, headers: CORS_HEADERS });
   }
+
+  console.log("✅ Provider found:", existing.vh_number, existing.business_name);
 
   // MODE 1: Force password change
   if (new_password && password_changed === true && !new_login_email && !fields) {
@@ -79,9 +84,11 @@ Deno.serve(async (req: Request) => {
         password_changed: true,
         managed_by: "provider",
       });
+      console.log("✅ Password changed for:", provider_id);
       return new Response(JSON.stringify({ success: true, provider: sanitize(updated) }), { headers: CORS_HEADERS });
     } catch (e: unknown) {
       const msg = (e instanceof Error) ? e.message : "Password update failed";
+      console.error("❌ Password change error:", msg);
       return new Response(JSON.stringify({ error: msg }), { status: 500, headers: CORS_HEADERS });
     }
   }
@@ -95,19 +102,23 @@ Deno.serve(async (req: Request) => {
     }
     try {
       const updated = await sr.entities.Provider.update(provider_id, updates);
+      console.log("✅ Account settings updated for:", provider_id);
       return new Response(JSON.stringify({ success: true, provider: sanitize(updated) }), { headers: CORS_HEADERS });
     } catch (e: unknown) {
       const msg = (e instanceof Error) ? e.message : "Account update failed";
+      console.error("❌ Account update error:", msg);
       return new Response(JSON.stringify({ error: msg }), { status: 500, headers: CORS_HEADERS });
     }
   }
 
   // MODE 3: Profile update (business info, services, villages)
   if (!vh_number || !fields) {
+    console.warn("⚠️ Missing vh_number or fields for MODE 3");
     return new Response(JSON.stringify({ error: "Missing vh_number or fields" }), { status: 400, headers: CORS_HEADERS });
   }
 
   if (existing.vh_number !== vh_number) {
+    console.error("❌ VH number mismatch — existing:", existing.vh_number, "provided:", vh_number);
     return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: CORS_HEADERS });
   }
 
@@ -125,6 +136,7 @@ Deno.serve(async (req: Request) => {
   if ('services' in safe) {
     const invalid = getInvalidIds(safe.services);
     if (invalid.length > 0) {
+      console.error("❌ Invalid service IDs:", invalid);
       return new Response(JSON.stringify({ error: `Invalid service IDs: ${invalid.join(', ')}.` }), { status: 400, headers: CORS_HEADERS });
     }
     safe.services = filterValidIds(safe.services);
@@ -133,6 +145,7 @@ Deno.serve(async (req: Request) => {
   if ('service_areas' in safe) {
     const invalid = getInvalidIds(safe.service_areas);
     if (invalid.length > 0) {
+      console.error("❌ Invalid village IDs:", invalid);
       return new Response(JSON.stringify({ error: `Invalid village IDs: ${invalid.join(', ')}.` }), { status: 400, headers: CORS_HEADERS });
     }
     safe.service_areas = filterValidIds(safe.service_areas);
@@ -142,12 +155,15 @@ Deno.serve(async (req: Request) => {
     return new Response(JSON.stringify({ error: "No updatable fields provided" }), { status: 400, headers: CORS_HEADERS });
   }
 
+  console.log("📝 Updating fields:", Object.keys(safe));
+
   try {
     const updated = await sr.entities.Provider.update(provider_id, safe);
+    console.log("✅ Profile saved for:", vh_number, "fields:", Object.keys(safe));
     return new Response(JSON.stringify({ success: true, provider: sanitize(updated) }), { headers: CORS_HEADERS });
   } catch (e: unknown) {
     const msg = (e instanceof Error) ? e.message : "Update failed";
-    console.error("providerUpdateProfile error:", msg);
+    console.error("❌ providerUpdateProfile save error:", msg);
     return new Response(JSON.stringify({ error: msg }), { status: 500, headers: CORS_HEADERS });
   }
 });
