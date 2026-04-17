@@ -159,7 +159,7 @@ Deno.serve(async (req) => {
               <a href="${APP_URL}/Wekcadmin" style="display: inline-block; background: #2e7d32; color: #fff; text-decoration: none; padding: 14px 28px; border-radius: 8px; font-weight: 700; font-size: 15px; letter-spacing: 1px;">✅ Review &amp; Approve in Admin Dashboard</a>
             </div>
           </div>
-          <div style="background: #1A0A00; padding: 12px; text-align: center; color: rgba(245,232,204,0.5); font-size: 11px;">V-Hub · The Villages, Florida · admin@v-hub.us</div>
+          <div style="background: #1A0A00; padding: 14px; text-align: center;"><a href="https://www.v-hub.us" style="color:#E8431A;font-weight:700;text-decoration:none;font-size:13px;">🌴 www.v-hub.us</a><span style="color:rgba(245,232,204,0.4);font-size:11px;margin:0 8px;">·</span><a href="mailto:admin@v-hub.us" style="color:rgba(201,151,58,0.7);text-decoration:none;font-size:11px;">admin@v-hub.us</a><br/><span style="color:rgba(245,232,204,0.3);font-size:10px;">V-Hub · The Villages, Florida</span></div>
         </div>`;
       await sendEmail('admin@v-hub.us', `New Listing: ${business_name} (${vh_number})`, adminHtml);
     } catch (emailErr) { console.error("Admin notification email failed:", emailErr); }
@@ -193,7 +193,7 @@ Deno.serve(async (req) => {
             </div>
             <p style="color: #5A3010; font-size: 13px;">Once approved, log in at <a href="${APP_URL}/ProviderHub" style="color: #8B4513;">${APP_URL}/ProviderHub</a> to manage your listing.</p>
           </div>
-          <div style="background: #1A0A00; padding: 12px; text-align: center; color: rgba(245,232,204,0.5); font-size: 11px;">V-Hub · The Villages, Florida · admin@v-hub.us</div>
+          <div style="background: #1A0A00; padding: 14px; text-align: center;"><a href="https://www.v-hub.us" style="color:#E8431A;font-weight:700;text-decoration:none;font-size:13px;">🌴 www.v-hub.us</a><span style="color:rgba(245,232,204,0.4);font-size:11px;margin:0 8px;">·</span><a href="mailto:admin@v-hub.us" style="color:rgba(201,151,58,0.7);text-decoration:none;font-size:11px;">admin@v-hub.us</a><br/><span style="color:rgba(245,232,204,0.3);font-size:10px;">V-Hub · The Villages, Florida</span></div>
         </div>`;
 await sendEmail(email, `V-Hub Listing Received - ${business_name}`, providerHtml);
     } catch (emailErr) { console.error("Provider confirmation email failed:", emailErr); }

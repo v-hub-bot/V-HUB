@@ -86,7 +86,7 @@ async function sendReceiptEmail(opts: {
     </div>
     ${viewBtn}
     <p style="color:#5A3010;font-size:14px;line-height:1.7;">Log in to your <a href="${APP_URL}/ProviderDashboard" style="color:#C9973A;">Provider Hub</a> anytime to update your profile, view stats, and manage your subscription.</p>
-    <p style="color:#5A3010;font-size:13px;line-height:1.7;margin-top:12px;">Questions? Contact us at <a href="mailto:admin@v-hub.us" style="color:#C9973A;">admin@v-hub.us</a></p>`;
+    <p style="color:#5A3010;font-size:13px;line-height:1.7;margin-top:12px;">Questions? Contact us at <a href="mailto:admin@v-hub.us" style="color:#E8431A;font-weight:700;">admin@v-hub.us</a></p><div style="margin-top:16px;padding:14px;background:#1A0A00;text-align:center;border-radius:0 0 10px 10px;"><a href="https://www.v-hub.us" style="color:#E8431A;font-weight:700;text-decoration:none;font-size:13px;">🌴 www.v-hub.us</a><span style="color:rgba(245,232,204,0.4);font-size:11px;margin:0 8px;">·</span><a href="mailto:admin@v-hub.us" style="color:rgba(201,151,58,0.7);text-decoration:none;font-size:11px;">admin@v-hub.us</a></div>`;
 
 await sendEmail(to, subject, emailWrapper("PAYMENT RECEIVED", body));
 }
@@ -108,7 +108,7 @@ async function sendTrialStartEmail(opts: {
       </table>
     </div>
     <p style="color:#5A3010;font-size:14px;line-height:1.7;"><strong>Nothing is charged today.</strong> Your card will be automatically billed on <strong>${trialEndDate}</strong> when your trial period ends. You can cancel anytime before that date from your <a href="${APP_URL}/ProviderDashboard" style="color:#C9973A;">Provider Hub</a>.</p>
-    <p style="color:#5A3010;font-size:13px;line-height:1.7;margin-top:12px;">Questions? Contact us at <a href="mailto:admin@v-hub.us" style="color:#C9973A;">admin@v-hub.us</a></p>`;
+    <p style="color:#5A3010;font-size:13px;line-height:1.7;margin-top:12px;">Questions? Contact us at <a href="mailto:admin@v-hub.us" style="color:#E8431A;font-weight:700;">admin@v-hub.us</a></p><div style="margin-top:16px;padding:14px;background:#1A0A00;text-align:center;border-radius:0 0 10px 10px;"><a href="https://www.v-hub.us" style="color:#E8431A;font-weight:700;text-decoration:none;font-size:13px;">🌴 www.v-hub.us</a><span style="color:rgba(245,232,204,0.4);font-size:11px;margin:0 8px;">·</span><a href="mailto:admin@v-hub.us" style="color:rgba(201,151,58,0.7);text-decoration:none;font-size:11px;">admin@v-hub.us</a></div>`;
 await sendEmail(to, `V-Hub - Your Trial is Active! First charge on ${trialEndDate}`, emailWrapper("YOUR TRIAL HAS STARTED!", body));
 }
 
@@ -128,7 +128,7 @@ async function sendPaymentFailedEmail(opts: {
     <div style="text-align:center;margin:24px 0;">
       <a href="${APP_URL}/ProviderDashboard" style="background:#C62828;color:#fff;padding:14px 32px;border-radius:8px;font-weight:900;font-size:14px;text-decoration:none;letter-spacing:1px;">UPDATE BILLING INFO →</a>
     </div>
-    <p style="color:#5A3010;font-size:13px;line-height:1.7;margin-top:12px;">Questions? Contact us at <a href="mailto:admin@v-hub.us" style="color:#C9973A;">admin@v-hub.us</a></p>`;
+    <p style="color:#5A3010;font-size:13px;line-height:1.7;margin-top:12px;">Questions? Contact us at <a href="mailto:admin@v-hub.us" style="color:#E8431A;font-weight:700;">admin@v-hub.us</a></p><div style="margin-top:16px;padding:14px;background:#1A0A00;text-align:center;border-radius:0 0 10px 10px;"><a href="https://www.v-hub.us" style="color:#E8431A;font-weight:700;text-decoration:none;font-size:13px;">🌴 www.v-hub.us</a><span style="color:rgba(245,232,204,0.4);font-size:11px;margin:0 8px;">·</span><a href="mailto:admin@v-hub.us" style="color:rgba(201,151,58,0.7);text-decoration:none;font-size:11px;">admin@v-hub.us</a></div>`;
 await sendEmail(to, `V-Hub - Payment Failed | Action Required for ${businessName}`, emailWrapper("PAYMENT FAILED", body));
 }
 
@@ -149,7 +149,7 @@ async function sendCancellationEmail(opts: {
     </div>
     <p style="color:#5A3010;font-size:14px;line-height:1.7;">Your listing will remain visible to residents until <strong>${accessUntil}</strong>, then it will be removed. No further charges will be made.</p>
     <p style="color:#5A3010;font-size:14px;line-height:1.7;margin-top:12px;">Changed your mind? You can reactivate your listing anytime from your <a href="${APP_URL}/ProviderDashboard" style="color:#C9973A;">Provider Hub</a> — $12/month, no contracts.</p>
-    <p style="color:#5A3010;font-size:13px;line-height:1.7;margin-top:12px;">Questions? Contact us at <a href="mailto:admin@v-hub.us" style="color:#C9973A;">admin@v-hub.us</a></p>`;
+    <p style="color:#5A3010;font-size:13px;line-height:1.7;margin-top:12px;">Questions? Contact us at <a href="mailto:admin@v-hub.us" style="color:#E8431A;font-weight:700;">admin@v-hub.us</a></p><div style="margin-top:16px;padding:14px;background:#1A0A00;text-align:center;border-radius:0 0 10px 10px;"><a href="https://www.v-hub.us" style="color:#E8431A;font-weight:700;text-decoration:none;font-size:13px;">🌴 www.v-hub.us</a><span style="color:rgba(245,232,204,0.4);font-size:11px;margin:0 8px;">·</span><a href="mailto:admin@v-hub.us" style="color:rgba(201,151,58,0.7);text-decoration:none;font-size:11px;">admin@v-hub.us</a></div>`;
 await sendEmail(to, `V-Hub - Subscription Cancelled | ${businessName}`, emailWrapper("SUBSCRIPTION CANCELLED", body));
 }
 
@@ -170,7 +170,7 @@ async function sendTrialEndingEmail(opts: {
     </div>
     <p style="color:#5A3010;font-size:14px;line-height:1.7;">If you'd like to continue, <strong>no action is needed</strong> — your subscription will automatically begin on ${trialEndDate}.</p>
     <p style="color:#5A3010;font-size:14px;line-height:1.7;margin-top:8px;">Want to cancel before being charged? Visit your <a href="${APP_URL}/ProviderDashboard" style="color:#C9973A;">Provider Hub</a> and click <strong>"Cancel My Subscription"</strong>.</p>
-    <p style="color:#5A3010;font-size:13px;line-height:1.7;margin-top:12px;">Questions? Contact us at <a href="mailto:admin@v-hub.us" style="color:#C9973A;">admin@v-hub.us</a></p>`;
+    <p style="color:#5A3010;font-size:13px;line-height:1.7;margin-top:12px;">Questions? Contact us at <a href="mailto:admin@v-hub.us" style="color:#E8431A;font-weight:700;">admin@v-hub.us</a></p><div style="margin-top:16px;padding:14px;background:#1A0A00;text-align:center;border-radius:0 0 10px 10px;"><a href="https://www.v-hub.us" style="color:#E8431A;font-weight:700;text-decoration:none;font-size:13px;">🌴 www.v-hub.us</a><span style="color:rgba(245,232,204,0.4);font-size:11px;margin:0 8px;">·</span><a href="mailto:admin@v-hub.us" style="color:rgba(201,151,58,0.7);text-decoration:none;font-size:11px;">admin@v-hub.us</a></div>`;
 await sendEmail(to, `V-Hub - Your Trial Ends in ${daysLeft} Day${daysLeft !== 1 ? "s" : ""} | ${businessName}`, emailWrapper("TRIAL ENDING SOON", body));
 }
 
