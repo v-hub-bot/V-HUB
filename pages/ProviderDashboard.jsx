@@ -2091,8 +2091,8 @@ export default function ProviderDashboard() {
 
       <TopNav rightContent={
         <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
-          <button onClick={() => setView("account")} style={{ background: "transparent", border: `1.5px solid ${PAPER_DK}`, color: INK_FADE, borderRadius: 6, padding: "6px 12px", fontSize: 12, cursor: "pointer", fontFamily: SANS }}>⚙ Account</button>
-          <button onClick={handleLogout} style={{ background: "transparent", border: `1.5px solid ${PAPER_DK}`, color: INK_FADE, borderRadius: 6, padding: "6px 12px", fontSize: 12, cursor: "pointer", fontFamily: SANS }}>Sign Out</button>
+          <button onClick={() => setView("account")} style={{ background: "#1B3D6F", border: `1.5px solid #1B3D6F`, color: "#F5E8CC", borderRadius: 6, padding: "6px 12px", fontSize: 12, cursor: "pointer", fontFamily: SANS, fontWeight: 700 }}>⚙ Account</button>
+          <button onClick={handleLogout} style={{ background: BROWN_BTN, border: `1.5px solid ${BROWN_BTN}`, color: PAPER, borderRadius: 6, padding: "6px 12px", fontSize: 12, cursor: "pointer", fontFamily: SANS, fontWeight: 700 }}>Sign Out</button>
           <a href="/" style={{ textDecoration: "none" }}>
             <button style={{ background: `linear-gradient(180deg,#9A6030,${BROWN_BTN} 60%,#5A3010)`, border: `2px solid #1B3D6F`, borderRadius: 4, color: "#F5E8CC", fontFamily: SANS, fontWeight: 700, fontSize: 13, padding: "8px 18px", cursor: "pointer", whiteSpace: "nowrap" }}>{'\u00AB'} Home</button>
           </a>
