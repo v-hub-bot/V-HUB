@@ -860,7 +860,6 @@ You can resend manually from the Email button.`);
                         ["Address", "address"],
                         ["Years in Business", "years_in_business"],
                         ["License #", "license_number"],
-                        ["Google Review URL", "google_review_url"],
                         ["Google Rating (1–5)", "google_rating"],
                       ].map(([label, key]) => (
                         <div key={key}>
@@ -872,6 +871,17 @@ You can resend manually from the Email button.`);
                           />
                         </div>
                       ))}
+                      <div style={{ gridColumn: "1 / -1" }}>
+                        <div style={{ fontSize: 10, color: T.brownLight, fontFamily: T.sans, fontWeight: 700, marginBottom: 2 }}>Google Review URL</div>
+                        <input
+                          type="url"
+                          value={editForm.google_review_url || ""}
+                          onChange={e => setEditForm(f => ({ ...f, google_review_url: e.target.value }))}
+                          style={{ width: "100%", padding: "7px 10px", fontSize: 13, fontFamily: T.sans, border: `1px solid ${T.border}`, borderRadius: 6, boxSizing: "border-box" }}
+                          placeholder="https://maps.app.goo.gl/..."
+                        />
+                        <div style={{ fontSize: 10, color: "#999", marginTop: 3, fontFamily: T.sans }}>Paste their Google Maps link — rating syncs automatically each night at 3 AM.</div>
+                      </div>
                       {/* Hours of operation */}
                       <div style={{ gridColumn: "1 / -1" }}>
                         <div style={{ fontSize: 10, color: T.brownLight, fontFamily: T.sans, fontWeight: 700, marginBottom: 2 }}>Hours of Operation</div>
@@ -1417,7 +1427,8 @@ function AddProviderTab({ onAdded, categories, services: allServices, serviceAre
 
         <div>
           <div style={{ fontSize: 11, color: T.brownLight, fontFamily: T.sans, marginBottom: 3 }}>Google Review URL</div>
-          <input type="url" value={form.google_review_url} onChange={e => set("google_review_url", e.target.value)} style={S.inp} placeholder="https://g.page/..." />
+          <input type="url" value={form.google_review_url} onChange={e => set("google_review_url", e.target.value)} style={S.inp} placeholder="https://maps.app.goo.gl/..." />
+          <div style={{ fontSize: 10, color: "#999", marginTop: 3, fontFamily: T.sans }}>Paste their Google Maps link — rating syncs automatically each night.</div>
         </div>
 
         <div>
