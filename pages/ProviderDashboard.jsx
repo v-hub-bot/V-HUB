@@ -1,3 +1,4 @@
+// @build 2026-04-17b
 // ProviderDashboard — REBUILD 1776411339
 import React, { useState, useEffect, useRef } from "react";
 const _BUILD = "1776411339"; // cache-bust
@@ -118,7 +119,7 @@ function StatusBanner({ provider, onUpgrade, onCancel, onManageBilling, paymentL
       <div style={{ background: urgent ? "#FFF3E0" : PAPER_MID, border: `2px solid ${urgent ? "#E65100" : PAPER_DK}`, borderRadius: 10, padding: "18px 20px", marginBottom: 20 }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8, flexWrap: "wrap", gap: 8 }}>
           <div style={{ fontWeight: 900, color: urgent ? "#BF360C" : BROWN_BTN, fontSize: 14, fontFamily: SERIF }}>
-            {urgent ? `⏰ Trial ends in ${days} day${days !== 1 ? "s" : ""}!` : `Trial — ${days} day${days !== 1 ? "s" : ""} remaining`}
+            {urgent ? `⏰ Trial ends in ${days} day${days !== 1 ? "s" : ""}!` : days !== null ? `Trial — ${days} day${days !== 1 ? "s" : ""} remaining` : "Trial Active"}
           </div>
           <div style={{ fontSize: 12, color: INK_FADE, fontFamily: SANS }}>Ends {endFmt}</div>
         </div>
