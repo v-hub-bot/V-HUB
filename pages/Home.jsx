@@ -920,12 +920,23 @@ export default function Home() {
       return exclusionReasons.length === 0;
     });
 
-    const getScore = (p) => typeof p.rating === "number" ? p.rating : 0;
+    // V-HUB rating (p.rating) is primary rank — recalculated nightly from approved reviews.
+    // Google rating is tiebreaker. Fully unrated providers appear last.
     out.sort((a, b) => {
-      const ratingDiff = getScore(b) - getScore(a);
-      if (ratingDiff !== 0) return ratingDiff;
-      const tier = { premium: 0, featured: 1, standard: 2, basic: 3 };
-      return (tier[a.subscription_tier] ?? 3) - (tier[b.subscription_tier] ?? 3);
+      const vhA = typeof a.rating === "number" && a.rating > 0 ? a.rating : null;
+      const vhB = typeof b.rating === "number" && b.rating > 0 ? b.rating : null;
+      const gA  = typeof a.google_rating === "number" && a.google_rating > 0 ? a.google_rating : null;
+      const gB  = typeof b.google_rating === "number" && b.google_rating > 0 ? b.google_rating : null;
+      if (vhA !== null && vhB !== null) {
+        if (vhB !== vhA) return vhB - vhA;
+        return (gB || 0) - (gA || 0);
+      }
+      if (vhA !== null) return -1;
+      if (vhB !== null) return 1;
+      if (gA !== null && gB !== null) return gB - gA;
+      if (gA !== null) return -1;
+      if (gB !== null) return 1;
+      return 0;
     });
     setResults(out);
     setIsLoading(false);
