@@ -331,7 +331,7 @@ Deno.serve(async (req) => {
 </body>
 </html>`;
 
-        await sendEmail(email, `🎉 You're live on V-Hub — ${business_name} | 45-Day Free Trial Started`, providerHtml);
+        await sendEmail(email, `You're Live on V-Hub! — ${business_name} | 45-Day Free Trial Started`, providerHtml);
         console.log("✅ Combined provider welcome email sent to:", email);
       } catch (emailErr: any) {
         console.error("Provider email failed:", emailErr);
@@ -361,7 +361,7 @@ Deno.serve(async (req) => {
           </div>
         </div>
       `;
-      await sendEmail('admin@v-hub.us', `✅ Approved: ${business_name} is now live`, adminHtml);
+      await sendEmail('admin@v-hub.us', `Approved: ${business_name} is Now Live`, adminHtml);
     } catch (adminErr) {
       console.error("Admin confirmation email failed:", adminErr);
     }

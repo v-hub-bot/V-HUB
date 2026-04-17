@@ -162,7 +162,7 @@ Deno.serve(async (req) => {
     // Send email to admin
     await sendEmail(
       'kimberlycook1980@gmail.com',
-      `🔔 V-HUB: New Listing — ${business_name} (${vh_number})`,
+      `V-HUB: New Listing — ${business_name} (${vh_number})`,
       htmlContent
     );
 

@@ -140,7 +140,7 @@ Deno.serve(async (req) => {
       <br/>
       <a href="https://www.v-hub.us/Admin" style="background:#E8431A;color:#fff;padding:10px 20px;border-radius:6px;text-decoration:none;font-weight:700;">Review in Admin Dashboard</a>
     </div>`;
-    await sendEmail('admin@v-hub.us', `📋 New Self-Signup: ${business_name}`, adminHtml);
+    await sendEmail('admin@v-hub.us', `New Self-Signup: ${business_name}`, adminHtml);
 
     return Response.json({ ok: true, action: 'created', provider: record });
   } catch (error) {

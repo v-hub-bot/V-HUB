@@ -129,7 +129,7 @@ async function sendPaymentFailedEmail(opts: {
       <a href="${APP_URL}/ProviderDashboard" style="background:#C62828;color:#fff;padding:14px 32px;border-radius:8px;font-weight:900;font-size:14px;text-decoration:none;letter-spacing:1px;">UPDATE BILLING INFO →</a>
     </div>
     <p style="color:#5A3010;font-size:13px;line-height:1.7;margin-top:12px;">Questions? Contact us at <a href="mailto:admin@v-hub.us" style="color:#C9973A;">admin@v-hub.us</a></p>`;
-  await sendEmail(to, `⚠️ V-Hub — Payment Failed · Action Required for ${businessName}`, emailWrapper("⚠️ PAYMENT FAILED", body));
+  await sendEmail(to, `V-Hub — Payment Failed · Action Required for ${businessName}`, emailWrapper("⚠️ PAYMENT FAILED", body));
 }
 
 async function sendCancellationEmail(opts: {

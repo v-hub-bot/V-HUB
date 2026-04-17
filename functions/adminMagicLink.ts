@@ -73,7 +73,7 @@ Deno.serve(async (req) => {
             <p style="color:#999;font-size:11px;margin:0;">Time: ${new Date().toLocaleString("en-US", { timeZone: "America/Detroit" })} ET</p>
           </div>`;
         for (const a of ALERT_EMAILS) {
-          try { await sendEmail(accessToken, a, "⚠️ V-Hub Admin — Unauthorized Access Attempt", alertHtml); } catch (_) {}
+          try { await sendEmail(accessToken, a, "V-Hub Admin — Unauthorized Access Attempt", alertHtml); } catch (_) {}
         }
         return Response.json({ status: "not_admin" });
       }
@@ -103,7 +103,7 @@ Deno.serve(async (req) => {
           </div>
         </div>`;
 
-      await sendEmail(accessToken, email, "🔓 Your V-Hub Admin Login Link", linkHtml);
+      await sendEmail(accessToken, email, "Your V-Hub Admin Login Link", linkHtml);
       return Response.json({ status: "sent", email });
     }
 

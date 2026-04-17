@@ -136,7 +136,7 @@ Deno.serve(async (req) => {
         if (daysLeft <= 10 && !p.reminder_sent) {
           const checkoutUrl = await getStripeCheckoutUrl(p);
           const trialEndFmt = trialEnd.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
-          await sendEmail(p.email, `⏰ Your V-Hub trial ends in ${daysLeft} day${daysLeft !== 1 ? 's' : ''} — ${p.business_name}`, `
+          await sendEmail(p.email, `V-Hub Trial Ending Soon — ${p.business_name}`, `
             <div style="font-family:Georgia,serif;max-width:600px;margin:0 auto;background:#F5E8CC;border:2px solid #8B4513;border-radius:12px;overflow:hidden;">
               ${emailHeader(`Trial Ends in ${daysLeft} Day${daysLeft !== 1 ? 's' : ''}`)}
               <div style="padding:28px 24px;">
