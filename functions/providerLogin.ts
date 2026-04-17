@@ -1,6 +1,30 @@
 // providerLogin v9 - adds admin_update action for provider management
 import { createClientFromRequest } from "npm:@base44/sdk@0.8.25";
 
+async function sleep(ms: number): Promise<void> {
+  return new Promise(r => setTimeout(r, ms));
+}
+
+async function withRetry<T>(fn: () => Promise<T>, label = "op", maxAttempts = 4): Promise<T> {
+  let lastErr: unknown;
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    try {
+      return await fn();
+    } catch (e: unknown) {
+      lastErr = e;
+      const msg = String((e instanceof Error) ? e.message : e);
+      const isRetryable = msg.includes("403") || msg.includes("429") || msg.includes("auth_required") || msg.includes("private");
+      if (isRetryable && attempt < maxAttempts) {
+        const delay = attempt * 500;
+        console.log(`[providerLogin] ${label} attempt ${attempt} failed (${msg.slice(0,60)}), retrying in ${delay}ms`);
+        await sleep(delay);
+      } else { throw e; }
+    }
+  }
+  throw lastErr;
+}
+
+
 const CORS = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
@@ -71,7 +95,7 @@ Deno.serve(async (req: Request) => {
     if (action === "restore" || body.restore_id) {
       const id = (body.restore_id as string || "").trim();
       let p: Record<string, unknown> | null = null;
-      try { p = await sr.entities.Provider.get(id); } catch { p = null; }
+      try { p = await withRetry(() => sr.entities.Provider.get(id), "restore"); } catch { p = null; }
       if (p && p.id) return new Response(JSON.stringify({ success: true, provider: sanitize(p) }), { headers: CORS });
       return new Response(JSON.stringify({ error: "Session expired" }), { status: 401, headers: CORS });
     }
@@ -87,13 +111,13 @@ Deno.serve(async (req: Request) => {
       if (new_password.length < 6) {
         return new Response(JSON.stringify({ error: "Password must be at least 6 characters" }), { status: 400, headers: CORS });
       }
-      const existing = await sr.entities.Provider.get(provider_id);
+      const existing = await withRetry(() => sr.entities.Provider.get(provider_id), "save-pw-get");
       if (!existing) return new Response(JSON.stringify({ error: "Provider not found" }), { status: 404, headers: CORS });
       if (existing.vh_number !== vh_number) {
         return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: CORS });
       }
       const hashed = await sha256(new_password);
-      const updated = await sr.entities.Provider.update(provider_id, { login_password: hashed, password_changed: true, managed_by: "Self-Managed" });
+      const updated = await withRetry(() => sr.entities.Provider.update(provider_id, { login_password: hashed, password_changed: true, managed_by: "Self-Managed" }), "save-pw-update");
       return new Response(JSON.stringify({ success: true, provider: sanitize(updated) }), { headers: CORS });
     }
 
@@ -211,11 +235,11 @@ Deno.serve(async (req: Request) => {
     let rows: Record<string, unknown>[] = [];
     if (isVH) {
       const vhNorm = identifier.toUpperCase().replace(/^VH(\d)/, "VH-$1");
-      rows = (await sr.entities.Provider.filter({ vh_number: vhNorm })) || [];
+      rows = (await withRetry(() => sr.entities.Provider.filter({ vh_number: vhNorm }), "login-vh")) || [];
     } else {
       const em = identifier.toLowerCase();
-      const a = (await sr.entities.Provider.filter({ login_email: em })) || [];
-      const b = (await sr.entities.Provider.filter({ email: em }))       || [];
+      const a = (await withRetry(() => sr.entities.Provider.filter({ login_email: em }), "login-email-a")) || [];
+      const b = (await withRetry(() => sr.entities.Provider.filter({ email: em }), "login-email-b"))       || [];
       const seen = new Set<string>();
       for (const p of [...a, ...b]) {
         const pid = p.id as string;

@@ -24,6 +24,28 @@ async function sleep(ms: number) {
   return new Promise(r => setTimeout(r, ms));
 }
 
+// Retry wrapper — handles intermittent 403/429 from service role
+async function withRetry<T>(fn: () => Promise<T>, label = "op", maxAttempts = 4): Promise<T> {
+  let lastErr: any;
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    try {
+      return await fn();
+    } catch (e: any) {
+      lastErr = e;
+      const msg = String(e?.message || "");
+      const isRetryable = msg.includes("403") || msg.includes("429") || msg.includes("auth_required") || msg.includes("private");
+      if (isRetryable && attempt < maxAttempts) {
+        const delay = attempt * 500;
+        console.log(`[getProviders] ${label} attempt ${attempt} failed (${msg.slice(0,60)}), retrying in ${delay}ms`);
+        await sleep(delay);
+      } else {
+        throw e;
+      }
+    }
+  }
+  throw lastErr;
+}
+
 async function fetchAllProvidersWithRetry(db: any): Promise<any[]> {
   const PAGE_SIZE = 100;
   let all: any[] = [];
@@ -33,23 +55,7 @@ async function fetchAllProvidersWithRetry(db: any): Promise<any[]> {
   while (true) {
     pageNum++;
     if (pageNum > 30) break;
-    let page: any[] | null = null;
-    let lastErr: any = null;
-    for (let attempt = 1; attempt <= 4; attempt++) {
-      try {
-        page = await db.Provider.list({ limit: PAGE_SIZE, skip });
-        break;
-      } catch (e: any) {
-        lastErr = e;
-        const msg = String(e?.message || "");
-        if (msg.includes("429") && attempt < 4) {
-          console.log(`[getProviders] 429 on page ${pageNum} attempt ${attempt}, retrying in ${attempt * 600}ms`);
-          await sleep(attempt * 600);
-        } else {
-          throw e;
-        }
-      }
-    }
+    const page = await withRetry(() => db.Provider.list({ limit: PAGE_SIZE, skip }), `page-${pageNum}`);
     if (!page || page.length === 0) break;
     all = all.concat(page);
     console.log(`[getProviders] fetched page ${pageNum}: ${page.length} records (total=${all.length})`);
@@ -74,12 +80,13 @@ Deno.serve(async (req: Request) => {
         try {
           const db = base44.asServiceRole.entities;
           const [cats, svcs, areas] = await Promise.all([
-            db.Category.list().catch(() => []),
-            db.Service.list().catch(() => []),
-            db.ServiceArea.list().catch(() => []),
+            withRetry(() => db.Category.list(), "categories"),
+            withRetry(() => db.Service.list(), "services"),
+            withRetry(() => db.ServiceArea.list(), "areas"),
           ]);
           return Response.json({ ok: true, categories: cats || [], services: svcs || [], areas: areas || [] }, { headers: CORS });
         } catch (e: any) {
+          console.log(`[getProviders] lookup_data error: ${e.message}`);
           return Response.json({ ok: false, error: e.message, categories: [], services: [], areas: [] }, { headers: CORS });
         }
       }
@@ -92,7 +99,7 @@ Deno.serve(async (req: Request) => {
         }
         const db = base44.asServiceRole.entities;
         let rec: any = null;
-        try { rec = await db.Provider.get(provider_id); } catch {}
+        try { rec = await withRetry(() => db.Provider.get(provider_id), "get-provider-update"); } catch {}
         if (!rec) return Response.json({ error: "Provider not found" }, { status: 404, headers: CORS });
         if (rec.vh_number !== vh_number) return Response.json({ error: "Unauthorized" }, { status: 401, headers: CORS });
 
@@ -116,7 +123,7 @@ Deno.serve(async (req: Request) => {
         if (!Object.keys(safe).length) return Response.json({ error: "No valid fields" }, { status: 400, headers: CORS });
 
         try {
-          const updated = await db.Provider.update(provider_id, safe);
+          const updated = await withRetry(() => db.Provider.update(provider_id, safe), "update-provider");
           console.log('[getProviders] provider_update:', provider_id, Object.keys(safe));
           return Response.json({ success: true, record: sanitize(updated) }, { headers: CORS });
         } catch (e: any) {
@@ -124,12 +131,12 @@ Deno.serve(async (req: Request) => {
         }
       }
 
-            // ── SESSION RESTORE ───────────────────────────────────────────────
+      // ── SESSION RESTORE ───────────────────────────────────────────────
       if (body?.session_restore === true) {
         const { provider_id } = body;
         if (!provider_id) return Response.json({ error: "Missing provider_id" }, { status: 400, headers: CORS });
         try {
-          const prov = await base44.asServiceRole.entities.Provider.get(provider_id);
+          const prov = await withRetry(() => base44.asServiceRole.entities.Provider.get(provider_id), "session-restore");
           if (!prov) return Response.json({ success: false, error: "Not found" }, { status: 404, headers: CORS });
           return Response.json({ success: true, provider: sanitize(prov) }, { status: 200, headers: CORS });
         } catch (e: any) {
@@ -151,11 +158,13 @@ Deno.serve(async (req: Request) => {
 
         if (isVH) {
           const vhNorm = inp.toUpperCase().replace(/^VH(\d)/, "VH-$1");
-          results = await db.Provider.filter({ vh_number: vhNorm });
+          results = await withRetry(() => db.Provider.filter({ vh_number: vhNorm }), "login-vh-filter");
         } else {
           const email = inp.toLowerCase();
-          const a = await db.Provider.filter({ login_email: email });
-          const b = await db.Provider.filter({ email: email });
+          const [a, b] = await Promise.all([
+            withRetry(() => db.Provider.filter({ login_email: email }), "login-email-a"),
+            withRetry(() => db.Provider.filter({ email: email }), "login-email-b"),
+          ]);
           const seen = new Set<string>();
           for (const p of [...(a || []), ...(b || [])]) {
             if (!seen.has(p.id)) { seen.add(p.id); results.push(p); }
@@ -188,15 +197,12 @@ Deno.serve(async (req: Request) => {
     // ── LISTING MODE ──────────────────────────────────────────────────────
     console.log("[getProviders] Starting provider listing...");
     let providers: any[] = [];
-    const usedFallback = false;
 
     try {
-      // Try filter first (no pagination needed for small dataset), fall back to list
       try {
-        providers = await base44.asServiceRole.entities.Provider.filter({ is_active: true });
+        providers = await withRetry(() => base44.asServiceRole.entities.Provider.filter({ is_active: true }), "filter-active");
         console.log(`[getProviders] filter(active) got ${providers.length} providers`);
-        // Also grab inactive ones for completeness
-        const inactive = await base44.asServiceRole.entities.Provider.filter({ is_active: false }).catch(() => []);
+        const inactive = await withRetry(() => base44.asServiceRole.entities.Provider.filter({ is_active: false }), "filter-inactive").catch(() => []);
         providers = [...providers, ...(inactive || [])];
         console.log(`[getProviders] total with inactive: ${providers.length}`);
       } catch (filterErr: any) {
@@ -210,7 +216,7 @@ Deno.serve(async (req: Request) => {
     }
 
     const sanitized = providers.map(sanitize);
-    return Response.json({ providers: sanitized, count: sanitized.length, usedFallback }, { headers: CORS });
+    return Response.json({ providers: sanitized, count: sanitized.length }, { headers: CORS });
 
   } catch (error: any) {
     console.log(`[getProviders] Unhandled error: ${error.message}`);
