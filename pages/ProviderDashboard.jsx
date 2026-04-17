@@ -1,5 +1,6 @@
-// ProviderDashboard — REBUILD 2026-04-17 05:51
+// ProviderDashboard — REBUILD 2026-04-17 06:37 v3
 import React, { useState, useEffect, useRef } from "react";
+const _BUILD = "2026-04-17-0637-v3"; // cache-bust
 import { Provider, ProviderReview, Service, ServiceArea, Category, ClassifiedAd, ProviderAnalytic } from "@/api/entities";
 
 // ── SEO ───────────────────────────────────────────────────────────────────
