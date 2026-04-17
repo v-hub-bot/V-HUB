@@ -84,7 +84,47 @@ Deno.serve(async (req: Request) => {
         }
       }
 
-      // ── SESSION RESTORE ───────────────────────────────────────────────
+      // ── PROVIDER SELF-UPDATE (services, areas, profile) ─────────────
+      if (body?.provider_update === true) {
+        const { provider_id, vh_number, fields } = body;
+        if (!provider_id || !vh_number || !fields) {
+          return Response.json({ error: "Missing provider_id, vh_number, or fields" }, { status: 400, headers: CORS });
+        }
+        const db = base44.asServiceRole.entities;
+        let rec: any = null;
+        try { rec = await db.Provider.get(provider_id); } catch {}
+        if (!rec) return Response.json({ error: "Provider not found" }, { status: 404, headers: CORS });
+        if (rec.vh_number !== vh_number) return Response.json({ error: "Unauthorized" }, { status: 401, headers: CORS });
+
+        const ALLOWED = ["business_name","owner_name","phone","email","website",
+          "description","address","years_in_business","license_number",
+          "google_review_url","services","service_areas","is_mobile","hours_of_operation","google_rating"];
+        const safe: any = {};
+        for (const k of ALLOWED) { if (k in (fields as any)) safe[k] = (fields as any)[k]; }
+
+        const validId = (id: any) => typeof id === 'string' && /^[0-9a-f]{24}$/.test(id);
+        if ('services' in safe) {
+          const bad = (safe.services || []).filter((id: any) => !validId(id));
+          if (bad.length > 0) return Response.json({ error: `Invalid service IDs: ${bad.join(', ')}` }, { status: 400, headers: CORS });
+          safe.services = (safe.services || []).filter(validId);
+        }
+        if ('service_areas' in safe) {
+          const bad = (safe.service_areas || []).filter((id: any) => !validId(id));
+          if (bad.length > 0) return Response.json({ error: `Invalid village IDs: ${bad.join(', ')}` }, { status: 400, headers: CORS });
+          safe.service_areas = (safe.service_areas || []).filter(validId);
+        }
+        if (!Object.keys(safe).length) return Response.json({ error: "No valid fields" }, { status: 400, headers: CORS });
+
+        try {
+          const updated = await db.Provider.update(provider_id, safe);
+          console.log('[getProviders] provider_update:', provider_id, Object.keys(safe));
+          return Response.json({ success: true, record: sanitize(updated) }, { headers: CORS });
+        } catch (e: any) {
+          return Response.json({ error: e.message || "Update failed" }, { status: 500, headers: CORS });
+        }
+      }
+
+            // ── SESSION RESTORE ───────────────────────────────────────────────
       if (body?.session_restore === true) {
         const { provider_id } = body;
         if (!provider_id) return Response.json({ error: "Missing provider_id" }, { status: 400, headers: CORS });

@@ -1667,10 +1667,11 @@ export default function ProviderDashboard() {
       updates.service_areas = areasToSave;
       console.log("[V-Hub Save] services:", svcsToSave, "areas:", areasToSave, "updates:", updates);
       // Call backend function (service role) — direct SDK fails for unauthenticated providers
-      const res = await fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/providerUpdateProfile", {
+      const res = await fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/getProviders", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          provider_update: true,
           provider_id: provider.id,
           vh_number: provider.vh_number,
           fields: updates,
@@ -1678,7 +1679,7 @@ export default function ProviderDashboard() {
       });
       const json = await res.json();
       if (!json.success) throw new Error(json.error || "Save failed");
-      const saved = json.provider;
+      const saved = json.record;
       // Update local state
       setProvider(prev => ({ ...prev, ...saved }));
       if ('services' in updates)      setSelSvcs(Array.isArray(saved.services) ? saved.services : selSvcs);
