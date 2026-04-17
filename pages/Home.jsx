@@ -567,24 +567,27 @@ function DropBtn({ label, isOpen, onClick, testId }) {
 function SvcDropdown({ open, cats, svcs, openCat, selSvc, setOpenCat, setSelSvc, setSOpen }) {
   const scrollRef = React.useRef(null);
   React.useEffect(() => { if (open && scrollRef.current) scrollRef.current.scrollTop = 0; }, [open]);
-  // Auto-scroll so the expanded category's children are visible
+  // Auto-scroll so expanded category children are visible — use setTimeout so DOM updates first
   const catRowRefs = React.useRef({});
   React.useEffect(() => {
-    if (openCat && catRowRefs.current[openCat] && scrollRef.current) {
+    if (!openCat || !scrollRef.current) return;
+    const timer = setTimeout(() => {
       const el = catRowRefs.current[openCat];
       const container = scrollRef.current;
+      if (!el || !container) return;
       const elTop = el.offsetTop;
-      const elBottom = elTop + el.offsetHeight + 120; // extra space for children
+      const elBottom = elTop + el.offsetHeight + 160; // extra space for sub-items
       const containerBottom = container.scrollTop + container.clientHeight;
       if (elBottom > containerBottom) {
         container.scrollTo({ top: elBottom - container.clientHeight + 20, behavior: "smooth" });
       }
-    }
+    }, 50);
+    return () => clearTimeout(timer);
   }, [openCat]);
   if (!open) return null;
   const sortedCats = [...cats].sort((a, b) => a.name.localeCompare(b.name));
   return (
-    <div ref={scrollRef} onClick={e => e.stopPropagation()} style={{ position: "absolute", top: "calc(100% + 2px)", left: 0, right: 0, background: PAPER, border: `2px solid ${INK}`, borderRadius: 4, zIndex: 9999, boxShadow: "0 8px 28px rgba(0,0,0,0.4)", maxHeight: 340, overflowY: "auto", overflowX: "hidden", WebkitOverflowScrolling: "touch" }}>
+    <div ref={scrollRef} onClick={e => e.stopPropagation()} style={{ position: "absolute", top: "calc(100% + 2px)", left: 0, right: 0, background: PAPER, border: `2px solid ${INK}`, borderRadius: 4, zIndex: 9999, boxShadow: "0 8px 28px rgba(0,0,0,0.4)", maxHeight: 380, overflowY: "auto", overflowX: "hidden", WebkitOverflowScrolling: "touch" }}>
       {cats.length === 0 && <div style={{ padding: 12, fontSize: 13, color: INK_FADE, fontFamily: "'Times New Roman', serif" }}>Loading...</div>}
       {sortedCats.map(c => {
         const catSvcs = [...svcs.filter(s => s.category_id === c.id)].sort((a, b) => a.name.localeCompare(b.name));
@@ -592,12 +595,16 @@ function SvcDropdown({ open, cats, svcs, openCat, selSvc, setOpenCat, setSelSvc,
         const isSelected = selSvc?.category_id === c.id || selSvc?.id === c.id;
         return (
           <div key={c.id} ref={el => { catRowRefs.current[c.id] = el; }}>
-            <div data-testid={`cat-${c.name.replace(/[^a-z]/gi,'-').toLowerCase()}`} onClick={e => { e.stopPropagation(); setOpenCat(isExpanded ? null : c.id); }} onTouchEnd={e => { e.stopPropagation(); e.preventDefault(); setOpenCat(isExpanded ? null : c.id); }} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "11px 14px", borderBottom: `1px solid ${PAPER_DK}`, background: isSelected ? "#e8f5ee" : PAPER, cursor: "pointer", userSelect: "none" }}>
+            <div
+              data-testid={`cat-${c.name.replace(/[^a-z]/gi,'-').toLowerCase()}`}
+              onClick={e => { e.stopPropagation(); setOpenCat(isExpanded ? null : c.id); }}
+              style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "11px 14px", borderBottom: `1px solid ${PAPER_DK}`, background: isSelected ? "#e8f5ee" : PAPER, cursor: "pointer", userSelect: "none", WebkitTapHighlightColor: "transparent" }}
+            >
               <span style={{ fontSize: 13, fontWeight: 700, color: INK, fontFamily: "'Times New Roman', serif", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", maxWidth: "88%" }}>{c.icon} {c.name}</span>
               <span style={{ fontSize: 10, color: INK_FADE, flexShrink: 0, marginLeft: 4 }}>{isExpanded ? "▲" : "▼"}</span>
             </div>
             {isExpanded && catSvcs.map(s => (
-              <div key={s.id} data-testid={`svc-${s.name.replace(/[^a-z]/gi,'-').toLowerCase()}`} onClick={e => { e.stopPropagation(); setSelSvc(s); setSOpen(false); }} style={{ padding: "9px 14px 9px 28px", borderBottom: `1px solid ${PAPER_DK}88`, background: selSvc?.id === s.id ? "#d0f0da" : PAPER_MID, cursor: "pointer", fontSize: 12, color: selSvc?.id === s.id ? GREEN : INK, fontFamily: "'Times New Roman', serif", fontWeight: selSvc?.id === s.id ? 700 : 400, userSelect: "none", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+              <div key={s.id} data-testid={`svc-${s.name.replace(/[^a-z]/gi,'-').toLowerCase()}`} onClick={e => { e.stopPropagation(); setSelSvc(s); setSOpen(false); }} style={{ padding: "9px 14px 9px 28px", borderBottom: `1px solid ${PAPER_DK}88`, background: selSvc?.id === s.id ? "#d0f0da" : PAPER_MID, cursor: "pointer", fontSize: 12, color: selSvc?.id === s.id ? GREEN : INK, fontFamily: "'Times New Roman', serif", fontWeight: selSvc?.id === s.id ? 700 : 400, userSelect: "none", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", WebkitTapHighlightColor: "transparent" }}>
                 {s.name}
               </div>
             ))}
