@@ -38,6 +38,7 @@ function sanitize(p: Record<string, unknown>): Record<string, unknown> {
   return safe;
 }
 
+const _DEPLOY_TS = 1776435816;
 const base44 = createClient({ appId: "69d062aca815ce8e697894b1" });
 const sr = base44.asServiceRole;
 
