@@ -1,3 +1,4 @@
+// ProviderDashboard — REBUILD 2026-04-17 05:51
 import React, { useState, useEffect, useRef } from "react";
 import { Provider, ProviderReview, Service, ServiceArea, Category, ClassifiedAd, ProviderAnalytic } from "@/api/entities";
 
@@ -862,7 +863,6 @@ function LoginScreen({ onLogin, onForgot }) {
             <button style={{ background: `linear-gradient(180deg,#9A6030,${BROWN_BTN} 60%,#5A3010)`, border: `2px solid #1B3D6F`, borderRadius: 4, color: "#F5E8CC", fontFamily: SANS, fontWeight: 700, fontSize: 13, padding: "8px 18px", cursor: "pointer", whiteSpace: "nowrap" }}>&#171; Home</button>
           </a>
         </div>
-      </div>
       </div>
 
       {/* Page header */}
