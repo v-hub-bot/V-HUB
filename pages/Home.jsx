@@ -575,18 +575,20 @@ function SvcDropdown({ open, cats, svcs, openCat, selSvc, setOpenCat, setSelSvc,
       const el = catRowRefs.current[openCat];
       const container = scrollRef.current;
       if (!el || !container) return;
-      // Scroll so the category row is near the top of the dropdown,
-      // giving space for the sub-items that appear below it
+      // Scroll so the category row is near the top and sub-items are visible
       const elTop = el.offsetTop;
-      const targetScroll = Math.max(0, elTop - 20);
+      const containerH = container.clientHeight;
+      const elH = el.scrollHeight || 44;
+      // If the expanded category + its children might overflow, scroll up to show it
+      const targetScroll = Math.max(0, elTop - 16);
       container.scrollTo({ top: targetScroll, behavior: "smooth" });
-    }, 60);
+    }, 80);
     return () => clearTimeout(timer);
   }, [openCat]);
   if (!open) return null;
   const sortedCats = [...cats].sort((a, b) => a.name.localeCompare(b.name));
   return (
-    <div ref={scrollRef} onClick={e => e.stopPropagation()} style={{ position: "absolute", top: "calc(100% + 2px)", left: 0, right: 0, background: PAPER, border: `2px solid ${INK}`, borderRadius: 4, zIndex: 9999, boxShadow: "0 8px 28px rgba(0,0,0,0.4)", maxHeight: 380, overflowY: "auto", overflowX: "hidden", WebkitOverflowScrolling: "touch" }}>
+    <div ref={scrollRef} onClick={e => e.stopPropagation()} style={{ position: "absolute", top: "calc(100% + 2px)", left: 0, right: 0, background: PAPER, border: `2px solid ${INK}`, borderRadius: 4, zIndex: 9999, boxShadow: "0 8px 28px rgba(0,0,0,0.4)", maxHeight: 480, overflowY: "auto", overflowX: "hidden", WebkitOverflowScrolling: "touch" }}>
       {cats.length === 0 && <div style={{ padding: 12, fontSize: 13, color: INK_FADE, fontFamily: "'Times New Roman', serif" }}>Loading...</div>}
       {sortedCats.map(c => {
         const catSvcs = [...svcs.filter(s => s.category_id === c.id)].sort((a, b) => a.name.localeCompare(b.name));

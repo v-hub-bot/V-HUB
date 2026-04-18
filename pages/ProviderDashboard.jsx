@@ -2568,43 +2568,59 @@ export default function ProviderDashboard() {
               {/* ── NOT SUBSCRIBED — pay wall at the bottom ── */}
               {!provider.classifieds_addon && (
                 <div style={{ background: "#F9F3E3", border: "2px solid #2E7D32", borderRadius: 8, padding: "14px 16px", marginTop: 12 }}>
-                  <div style={{ fontSize: 13, fontWeight: 900, color: "#2E7D32", marginBottom: 6, fontFamily: SERIF, textTransform: "uppercase", letterSpacing: 1 }}>
-                    Ready to Go Live?
-                  </div>
-                  <div style={{ fontSize: 12, color: INK, lineHeight: 1.7, fontFamily: SANS, marginBottom: 10 }}>
-                    Build your ads above, then pay $10 to run your deal for 7 days. Your ad appears in the Deals of the Week carousel seen by every visitor to V-Hub.
-                  </div>
-                  <div style={{ fontSize: 11, color: INK_FADE, fontFamily: SANS, marginBottom: 12, lineHeight: 1.8 }}>
-                    ✓ Up to 3 saved ad slots &nbsp;·&nbsp; ✓ AI image generator &nbsp;·&nbsp; ✓ One-click go-live &nbsp;·&nbsp; ✓ 7 days per payment
-                  </div>
-                  <button
-                    onClick={async () => {
-                      try {
-                        const resp = await fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/createClassifiedsCheckout", {
-                          method: "POST",
-                          headers: { "Content-Type": "application/json" },
-                          body: JSON.stringify({
-                            provider_record_id: provider.id,
-                            provider_email: provider.login_email || provider.email,
-                            provider_name: provider.business_name,
-                          }),
-                        });
-                        const data = await resp.json();
-                        if (data.url) window.location.href = data.url;
-                        else setClassifiedError("Could not start checkout: " + (data.error || "unknown error"));
-                      } catch(e) {
-                        setClassifiedError("Error starting checkout. Please try again.");
-                      }
-                    }}
-                    style={{
-                      background: `linear-gradient(180deg,#9A6030,${BROWN_BTN})`,
-                      color: PAPER, border: "2px solid #2E7D32", borderRadius: 6,
-                      padding: "11px 28px", fontSize: 13, fontWeight: 900,
-                      cursor: "pointer", letterSpacing: 1, fontFamily: SERIF,
-                    }}
-                  >
-                    Post My Ad — $10 for 7 Days →
-                  </button>
+                  {!currentSlotAd?.headline ? (
+                    <>
+                      <div style={{ fontSize: 13, fontWeight: 900, color: "#2E7D32", marginBottom: 6, fontFamily: SERIF, textTransform: "uppercase", letterSpacing: 1 }}>
+                        🎨 Build Your Ad First
+                      </div>
+                      <div style={{ fontSize: 12, color: INK, lineHeight: 1.7, fontFamily: SANS, marginBottom: 8 }}>
+                        Use the form above to create your ad — add a headline, description, your village, expiry date, and an image (or let AI generate one for you). Save it to a slot, then come back here to pay and go live.
+                      </div>
+                      <div style={{ fontSize: 11, color: INK_FADE, fontFamily: SANS, lineHeight: 1.8 }}>
+                        ✓ Up to 3 saved ad slots &nbsp;·&nbsp; ✓ AI image generator &nbsp;·&nbsp; ✓ One-click go-live &nbsp;·&nbsp; ✓ $10 for 7 days
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div style={{ fontSize: 13, fontWeight: 900, color: "#2E7D32", marginBottom: 4, fontFamily: SERIF, textTransform: "uppercase", letterSpacing: 1 }}>
+                        ✅ Ad Ready — Pay to Go Live
+                      </div>
+                      <div style={{ fontSize: 12, color: INK, lineHeight: 1.7, fontFamily: SANS, marginBottom: 4 }}>
+                        Your ad <strong>"{currentSlotAd.headline}"</strong> is saved and ready. Pay $10 to run it in the Deals of the Week carousel for 7 days — visible to every visitor on V-Hub.
+                      </div>
+                      <div style={{ fontSize: 11, color: INK_FADE, fontFamily: SANS, marginBottom: 12, lineHeight: 1.8 }}>
+                        ✓ Up to 3 saved ad slots &nbsp;·&nbsp; ✓ AI image generator &nbsp;·&nbsp; ✓ One-click go-live &nbsp;·&nbsp; ✓ 7 days per payment
+                      </div>
+                      <button
+                        onClick={async () => {
+                          try {
+                            const resp = await fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/createClassifiedsCheckout", {
+                              method: "POST",
+                              headers: { "Content-Type": "application/json" },
+                              body: JSON.stringify({
+                                provider_record_id: provider.id,
+                                provider_email: provider.login_email || provider.email,
+                                provider_name: provider.business_name,
+                              }),
+                            });
+                            const data = await resp.json();
+                            if (data.url) window.location.href = data.url;
+                            else setClassifiedError("Could not start checkout: " + (data.error || "unknown error"));
+                          } catch(e) {
+                            setClassifiedError("Error starting checkout. Please try again.");
+                          }
+                        }}
+                        style={{
+                          background: `linear-gradient(180deg,#1A6B3C,#145530)`,
+                          color: "#fff", border: "2px solid #1A6B3C", borderRadius: 6,
+                          padding: "11px 28px", fontSize: 13, fontWeight: 900,
+                          cursor: "pointer", letterSpacing: 1, fontFamily: SERIF,
+                        }}
+                      >
+                        💳 Pay $10 — Post for 7 Days →
+                      </button>
+                    </>
+                  )}
                 </div>
               )}
             </div>

@@ -1668,10 +1668,21 @@ function Dashboard({ adminPin }) {
 
       <div style={{ background: T.parchmentDark, borderBottom: `2px solid ${T.border}`, overflowX: "auto", display: "flex" }}>
         {TABS.map(t => (
-          <button key={t} onClick={() => setTab(t)} style={S.tabBtn(tab === t)}>
-            {t}{t === "Reviews" && pendingReviews.length > 0 ? ` (${pendingReviews.length})` : ""}
-            {t === "Providers" && pendingProviders.length > 0 ? ` 🔴${pendingProviders.length}` : ""}
-            {t === "Leads" && leads.length > 0 ? ` (${leads.length})` : ""}
+          <button key={t} onClick={() => setTab(t)} style={{ ...S.tabBtn(tab === t), position: "relative" }}>
+            {t}
+            {t === "Reviews" && pendingReviews.length > 0 && (
+              <span style={{ marginLeft: 6, background: "#E8431A", color: "#fff", borderRadius: 10, padding: "1px 6px", fontSize: 10, fontWeight: 900, fontFamily: T.sans, verticalAlign: "middle" }}>
+                {pendingReviews.length}
+              </span>
+            )}
+            {t === "Providers" && pendingProviders.length > 0 && (
+              <span style={{ marginLeft: 6, background: "#E65100", color: "#fff", borderRadius: 10, padding: "1px 6px", fontSize: 10, fontWeight: 900, fontFamily: T.sans, verticalAlign: "middle" }}>
+                {pendingProviders.length}
+              </span>
+            )}
+            {t === "Leads" && leads.length > 0 && (
+              <span style={{ marginLeft: 4, color: T.brownLight, fontSize: 10, fontFamily: T.sans }}>({leads.length})</span>
+            )}
           </button>
         ))}
       </div>
