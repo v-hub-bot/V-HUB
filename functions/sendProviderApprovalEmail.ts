@@ -78,8 +78,11 @@ Deno.serve(async (req) => {
             Questions? Email us at <a href="mailto:admin@v-hub.us" style="color: #E8431A;">admin@v-hub.us</a>
           </p>
         </div>
-        <div style="background: #1A0A00; padding: 12px; text-align: center; color: rgba(245,232,204,0.5); font-size: 11px;">
-          V-Hub · The Villages, Florida · admin@v-hub.us
+        <div style="background: #1A0A00; padding: 14px; text-align: center; border-radius: 0 0 10px 10px;">
+          <a href="https://www.v-hub.us" style="color:#E8431A;font-weight:700;text-decoration:none;font-size:13px;">🌴 www.v-hub.us</a>
+          <span style="color:rgba(245,232,204,0.4);font-size:11px;margin:0 8px;">·</span>
+          <a href="mailto:admin@v-hub.us" style="color:rgba(201,151,58,0.7);text-decoration:none;font-size:11px;">admin@v-hub.us</a>
+          <br/><span style="color:rgba(245,232,204,0.3);font-size:10px;">V-Hub · The Villages, Florida</span>
         </div>
       </div>
     `;

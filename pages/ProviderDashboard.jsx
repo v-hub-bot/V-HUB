@@ -2093,9 +2093,10 @@ export default function ProviderDashboard() {
       <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet" />
 
       <TopNav rightContent={
-        <a href="/" style={{ textDecoration: "none" }}>
-          <button style={{ background: `linear-gradient(180deg,#9A6030,${BROWN_BTN} 60%,#5A3010)`, border: `2px solid #1B3D6F`, borderRadius: 4, color: "#F5E8CC", fontFamily: SANS, fontWeight: 700, fontSize: 13, padding: "8px 18px", cursor: "pointer", whiteSpace: "nowrap" }}>{\'\u00AB\'} Home</button>
-        </a>
+        <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+          <button onClick={() => setView("account")} style={{ background: "transparent", border: `1.5px solid ${PAPER_DK}`, color: INK_FADE, borderRadius: 6, padding: "6px 14px", fontSize: 11, cursor: "pointer", fontFamily: SANS }}>⚙ Settings</button>
+          <button onClick={handleLogout} style={{ background: "transparent", border: `1.5px solid ${PAPER_DK}`, color: INK_FADE, borderRadius: 6, padding: "6px 14px", fontSize: 11, cursor: "pointer", fontFamily: SANS }}>Sign Out</button>
+        </div>
       } />
 
       {/* Masthead */}
@@ -2111,10 +2112,7 @@ export default function ProviderDashboard() {
           <span style={{ fontSize: 11, fontFamily: SANS, background: isLive ? "#E8F5E9" : "#FEE", color: isLive ? GREEN : RED_RULE, border: `1px solid ${isLive ? "#4CAF50" : RED_RULE}`, borderRadius: 20, padding: "3px 12px", fontWeight: 700 }}>
             {isLive ? "🟢 Live on V-Hub" : provider.is_active ? "👁 Hidden from Search" : "⏸ Not Yet Active"}
           </span>
-          <div style={{ display: "flex", gap: 8 }}>
-            <button onClick={() => setView("account")} style={{ background: "#1B3D6F", border: "1.5px solid #1B3D6F", color: "#F5E8CC", borderRadius: 6, padding: "5px 14px", fontSize: 11, cursor: "pointer", fontFamily: SANS, fontWeight: 700 }}>⚙ Account Settings</button>
-            <button onClick={handleLogout} style={{ background: PAPER, border: `1.5px solid ${PAPER_DK}`, color: INK_FADE, borderRadius: 6, padding: "5px 14px", fontSize: 11, cursor: "pointer", fontFamily: SANS }}>Sign Out</button>
-          </div>
+
         </div>
       </div>
 
