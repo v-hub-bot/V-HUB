@@ -250,9 +250,9 @@ function DealsCarousel({ ads }) {
         {arrowBtn("right", next)}
       </div>
 
-      {/* Dot indicators */}
-      {total > 1 && (
-        <div style={{ display: "flex", justifyContent: "center", gap: 6, marginTop: 14 }}>
+      {/* Dot indicators — only shown when ≤20 ads (prevents overflow with many ads) */}
+      {total > 1 && total <= 20 && (
+        <div style={{ display: "flex", justifyContent: "center", gap: 6, marginTop: 14, flexWrap: "wrap" }}>
           {ads.map((_, i) => (
             <button
               key={i}
@@ -273,13 +273,31 @@ function DealsCarousel({ ads }) {
         </div>
       )}
 
+      {/* Jump-to-number input — shown when >20 ads */}
+      {total > 20 && (
+        <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: 8, marginTop: 12 }}>
+          <span style={{ fontSize: 11, color: INK_FADE, fontFamily: SANS }}>Jump to:</span>
+          <input
+            type="number"
+            min={1}
+            max={total}
+            defaultValue={idx + 1}
+            key={idx}
+            onBlur={e => { const v = parseInt(e.target.value); if (v >= 1 && v <= total) setIdx(v - 1); }}
+            onKeyDown={e => { if (e.key === "Enter") { const v = parseInt(e.target.value); if (v >= 1 && v <= total) setIdx(v - 1); } }}
+            style={{ width: 60, padding: "4px 8px", fontSize: 12, fontFamily: SANS, border: `1.5px solid ${PAPER_DK}`, borderRadius: 3, background: PAPER, color: INK, textAlign: "center" }}
+          />
+          <span style={{ fontSize: 11, color: INK_FADE, fontFamily: SANS }}>of {total}</span>
+        </div>
+      )}
+
       {/* Swipe hint — shown only when >1 deal */}
       {total > 1 && (
         <div style={{
           textAlign: "center", marginTop: 10, fontFamily: SERIF,
           fontSize: 11, color: INK_FADE, fontStyle: "italic",
         }}>
-          ← Swipe or use arrows to browse all {total} deals →
+          ← Swipe or use arrows to browse all {total} deal{total !== 1 ? "s" : ""} →
         </div>
       )}
     </div>
@@ -395,14 +413,14 @@ export default function Classifieds() {
             <span style={{ fontSize: 32, fontWeight: 900, color: INK, fontFamily: "'Times New Roman', serif", lineHeight: 1, margin: "0 2px" }}>-</span>
             <span style={{ fontSize: 40, fontWeight: 900, color: INK, fontFamily: "'Times New Roman', serif", letterSpacing: -1, lineHeight: 1 }}>Hub</span>
           </a>
-          <div style={{ flexShrink: 0, width: 56, display: "flex", justifyContent: "flex-end" }}>
+          <div style={{ flexShrink: 0, display: "flex", justifyContent: "flex-end" }}>
             <a href="/" style={{ textDecoration: "none" }}>
               <button style={{
                 background: `linear-gradient(180deg,#9A6030,${BROWN_BTN} 60%,#5A2F10)`,
                 border: `2px solid ${NAVY}`, borderRadius: 4,
                 color: "#F5E8CC", fontFamily: SANS, fontWeight: 700,
-                fontSize: 10, letterSpacing: 0.5, padding: "6px 10px", cursor: "pointer",
-              }}>← Home</button>
+                fontSize: 13, padding: "8px 16px", cursor: "pointer", whiteSpace: "nowrap",
+              }}>« Home</button>
             </a>
           </div>
         </div>

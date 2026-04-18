@@ -2379,13 +2379,12 @@ export default function ProviderDashboard() {
           <span style={{ fontSize: 28, fontWeight: 900, color: INK, fontFamily: "'Times New Roman', serif", lineHeight: 1, margin: "0 2px" }}>-</span>
           <span style={{ fontSize: 34, fontWeight: 900, color: INK, fontFamily: "'Times New Roman', serif", letterSpacing: -1, lineHeight: 1 }}>Hub</span>
         </a>
-        {/* Right — action button or Home */}
-        <div style={{ display: "flex", alignItems: "center" }}>
-          {rightContent || (
-            <a href="/" style={{ textDecoration: "none" }}>
-              <button onClick={() => window.location.href = '/'} style={{ background: `linear-gradient(180deg,#9A6030,${BROWN_BTN} 60%,#5A3010)`, border: `2px solid #1B3D6F`, borderRadius: 4, color: "#F5E8CC", fontFamily: SANS, fontWeight: 700, fontSize: 13, padding: "8px 18px", cursor: "pointer", whiteSpace: "nowrap" }>{'\u00AB'} Home</button>
-            </a>
-          )}
+        {/* Right — Home always visible, plus any contextual action */}
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <a href="/" style={{ textDecoration: "none" }}>
+            <button style={{ background: `linear-gradient(180deg,#9A6030,${BROWN_BTN} 60%,#5A3010)`, border: `2px solid #1B3D6F`, borderRadius: 4, color: "#F5E8CC", fontFamily: SANS, fontWeight: 700, fontSize: 13, padding: "8px 16px", cursor: "pointer", whiteSpace: "nowrap" }}>« Home</button>
+          </a>
+          {rightContent && rightContent}
         </div>
       </div>
     </div>
@@ -2539,11 +2538,7 @@ export default function ProviderDashboard() {
       <link rel="preconnect" href="https://fonts.googleapis.com" />
       <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet" />
 
-      <TopNav rightContent={
-        <a href="/" style={{ textDecoration: "none" }}>
-          <button onClick={() => window.location.href = '/'} style={{ background: `linear-gradient(180deg,#9A6030,${BROWN_BTN} 60%,#5A3010)`, border: `2px solid ${NAVY}`, borderRadius: 4, color: "#F5E8CC", fontFamily: SANS, fontWeight: 700, fontSize: 13, padding: "8px 18px", cursor: "pointer", whiteSpace: "nowrap" }}>« Home</button>
-        </a>
-      } />
+      <TopNav />
 
       {/* Masthead */}
       <div style={{ textAlign: "center", padding: "24px 20px 18px", borderBottom: `3px double ${INK}` }}>
