@@ -227,16 +227,7 @@ function ProvDetail({ prov, areas, cats, svcs, onBack }) {
     // Prevent providers from reviewing their own listing
     try { const pid = sessionStorage.getItem("vhub_provider_id"); if (pid && pid === prov.id) { setReviewError("You cannot leave a review on your own business. Ask a satisfied customer to share their experience!"); return; } } catch(e) {}
     try {
-      const resp = await fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/submitReview", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...reviewForm, provider_id: prov.id }),
-      });
-      const data = await resp.json();
-      if (!resp.ok || data.error) {
-        setReviewError("There was a problem submitting your review: " + (data.error || "Please try again."));
-        return;
-      }
+      await ProviderReview.create({ ...reviewForm, provider_id: prov.id, is_approved: false, helpful_count: 0 });
       setReviewSaved(true); setShowReviewForm(false);
       setReviewForm({ customer_name: "", customer_village: "", rating: 5, review_text: "", service_used: "" });
     } catch(err) { console.error("Review submit error:", err); setReviewError("There was a problem submitting your review. Please try again."); }

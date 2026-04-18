@@ -1252,18 +1252,24 @@ function ClassifiedAdSection({ provider }) {
         </button>
       )}
 
-      {/* Pay to go live (first time / no subscription yet) */}
-      {!provider.classifieds_addon && !liveAd && queued.length > 0 && editingSlot === null && (
+      {/* Pay to go live — only show when provider has marked an ad as "Next Up" */}
+      {!provider.classifieds_addon && !liveAd && nextUp && editingSlot === null && (
         <div style={{ background: "#F9F3E3", border: "2px solid #2E7D32", borderRadius: 8, padding: "14px 16px", marginBottom: 14 }}>
-          <div style={{ fontSize: 13, fontWeight: 900, color: "#2E7D32", fontFamily: SERIF, marginBottom: 4 }}>✅ Ad Ready — Pay $10 to Go Live</div>
+          <div style={{ fontSize: 13, fontWeight: 900, color: "#2E7D32", fontFamily: SERIF, marginBottom: 4 }}>✅ Ready to Go Live!</div>
           <div style={{ fontSize: 12, color: INK, fontFamily: SANS, lineHeight: 1.7, marginBottom: 10 }}>
-            {nextUp ? <>Your next ad <strong>"{nextUp.headline}"</strong> is queued.</> : <>You have {queued.length} queued ad{queued.length !== 1 ? "s" : ""}.</>} Pay $10 to post it live for 7 days — visible to every visitor searching in your village.
+            Your ad <strong>"{nextUp.headline}"</strong> is marked as next. Pay $10 to post it live for 7 days — visible to every visitor searching in your village.
           </div>
-          <button disabled={checkoutLoading} onClick={() => handleCheckout(nextUp || queued[0])}
+          <button disabled={checkoutLoading} onClick={() => handleCheckout(nextUp)}
             style={{ background: "linear-gradient(180deg,#1A6B3C,#145530)", color: "#fff", border: "2px solid #1A6B3C", borderRadius: 6, padding: "11px 28px", fontSize: 13, fontWeight: 900, cursor: "pointer", fontFamily: SERIF }}>
-            {checkoutLoading ? "Redirecting…" : `💳 Pay $10 — Post for 7 Days →`}
+            {checkoutLoading ? "Redirecting…" : `💳 Pay $10 — Post "${nextUp.headline.slice(0,25)}…" Live →`}
           </button>
           {checkoutErr && <div style={{ marginTop: 8, fontSize: 12, color: "#c00", fontFamily: SANS }}>{checkoutErr}</div>}
+        </div>
+      )}
+      {/* Hint when they have queued ads but haven't picked one yet */}
+      {!provider.classifieds_addon && !liveAd && queued.length > 0 && !nextUp && editingSlot === null && (
+        <div style={{ background: "#EFF8FF", border: "2px solid #1565C0", borderRadius: 8, padding: "12px 16px", marginBottom: 14, fontSize: 12, color: "#1565C0", fontFamily: SANS, lineHeight: 1.7 }}>
+          ⏭ <strong>Ready to go live?</strong> Click <strong>"Set Next"</strong> on the ad you want to run first, then pay $10 to post it for 7 days.
         </div>
       )}
 

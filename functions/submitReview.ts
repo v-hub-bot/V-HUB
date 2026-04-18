@@ -1,6 +1,6 @@
 // submitReview — allows public (unauthenticated) users to post a review
-// Runs as service role so no auth is required from the submitter
-import { createClient } from "npm:@base44/sdk@0.8.25";
+// Uses asServiceRole so no auth token is required from the submitter
+import { createClientFromRequest } from "npm:@base44/sdk@0.8.25";
 
 Deno.serve(async (req: Request): Promise<Response> => {
   const corsHeaders = {
@@ -15,17 +15,16 @@ Deno.serve(async (req: Request): Promise<Response> => {
     const { provider_id, customer_name, customer_village, rating, review_text, service_used } = body;
 
     // Basic validation
-    if (!provider_id || !customer_name?.trim() || !customer_village || !service_used || !review_text?.trim() || !rating) {
-      return Response.json({ error: "Missing required fields" }, { status: 400, headers: corsHeaders });
-    }
+    if (!provider_id)          return Response.json({ error: "Missing provider_id" },   { status: 400, headers: corsHeaders });
+    if (!customer_name?.trim()) return Response.json({ error: "Missing customer_name" }, { status: 400, headers: corsHeaders });
+    if (!customer_village)     return Response.json({ error: "Missing customer_village" },{ status: 400, headers: corsHeaders });
+    if (!service_used)         return Response.json({ error: "Missing service_used" },   { status: 400, headers: corsHeaders });
+    if (!review_text?.trim())  return Response.json({ error: "Missing review_text" },    { status: 400, headers: corsHeaders });
+    if (!rating)               return Response.json({ error: "Missing rating" },          { status: 400, headers: corsHeaders });
 
-    // Use service role to bypass auth requirement on entity
-    const client = createClient({
-      appId: "69d062aca815ce8e697894b1",
-      apiKey: Deno.env.get("VHUB_SERVICE_API_KEY") || "",
-    });
+    const base44 = createClientFromRequest(req);
 
-    await client.asServiceRole.entities.ProviderReview.create({
+    await base44.asServiceRole.entities.ProviderReview.create({
       provider_id,
       customer_name: customer_name.trim(),
       customer_village,
