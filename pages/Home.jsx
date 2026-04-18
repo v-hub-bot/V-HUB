@@ -556,14 +556,13 @@ function ClassifiedAd({ p, onSel, svcs }) {
   const isFeatured = tier === "featured";
   const borderTop = isPremium ? `3px solid ${INK}` : isFeatured ? `2px solid ${BROWN_BTN}` : `1px solid ${PAPER_DK}`;
   return (
-    <div style={{ borderTop, borderBottom: `1px solid ${PAPER_DK}`, padding: "14px 0 12px", marginBottom: 2, background: isPremium ? "rgba(28,15,0,0.03)" : "transparent", cursor: onSel ? "pointer" : "default" }}>
+    <div style={{ borderTop, borderBottom: `1px solid ${PAPER_DK}`, padding: "14px 0 14px", marginBottom: 2, background: isPremium ? "rgba(28,15,0,0.03)" : "transparent" }}>
       {(isPremium || isFeatured) && <div style={{ marginBottom: 5 }}>{isPremium && <span style={{ background: INK, color: YELLOW, fontSize: 9, fontWeight: 900, letterSpacing: 1.5, padding: "2px 8px", borderRadius: 2, textTransform: "uppercase" }}>👑 Premium Listing</span>}{isFeatured && !isPremium && <span style={{ background: BROWN_BTN, color: PAPER, fontSize: 9, fontWeight: 900, letterSpacing: 1.5, padding: "2px 8px", borderRadius: 2, textTransform: "uppercase" }}>⭐ Featured</span>}</div>}
-      <div onClick={() => onSel && onSel(p)} style={{ fontSize: 20, fontWeight: 900, color: onSel ? BROWN_BTN : INK, fontFamily: "'Times New Roman', serif", lineHeight: 1.1, marginBottom: 6, textDecoration: onSel ? "underline" : "none", textDecorationStyle: "dotted" }}>{p.business_name}</div>
-      {p.provider_id && <div style={{ fontSize: 10, color: INK_FADE, fontStyle: "italic", marginBottom: 4, fontFamily: "Georgia, serif" }}>Provider ID: {p.provider_id}</div>}
+      <div style={{ fontSize: 20, fontWeight: 900, color: INK, fontFamily: "'Times New Roman', serif", lineHeight: 1.1, marginBottom: 6 }}>{p.business_name}</div>
       <div style={{ display: "flex", flexWrap: "wrap", gap: "4px 14px", marginBottom: 6 }}>
-        {p.phone && <a href={`tel:${p.phone}`} onClick={e => e.stopPropagation()} style={{ textDecoration: "none", color: INK, fontSize: 12, fontFamily: "'Times New Roman', serif", display: "flex", alignItems: "center", gap: 3 }}><span style={{ fontSize: 13 }}>📞</span> {p.phone}</a>}
-        {p.email && <a href={`mailto:${p.email}`} onClick={e => e.stopPropagation()} style={{ textDecoration: "none", color: BROWN_BTN, fontSize: 12, fontFamily: "'Times New Roman', serif", display: "flex", alignItems: "center", gap: 3, wordBreak: "break-all" }}><span style={{ fontSize: 11 }}>✉</span> {p.email}</a>}
-        {p.website && <a href={p.website.startsWith("http") ? p.website : `https://${p.website}`} target="_blank" rel="noreferrer" onClick={e => e.stopPropagation()} style={{ textDecoration: "none", color: "#0077B6", fontSize: 12, fontFamily: "'Times New Roman', serif", display: "flex", alignItems: "center", gap: 3, wordBreak: "break-all" }}><span style={{ fontSize: 11 }}>🌐</span> {p.website.replace(/^https?:\/\//, "")}</a>}
+        {p.phone && <a href={`tel:${p.phone}`} style={{ textDecoration: "none", color: INK, fontSize: 12, fontFamily: "'Times New Roman', serif", display: "flex", alignItems: "center", gap: 3 }}><span style={{ fontSize: 13 }}>📞</span> {p.phone}</a>}
+        {p.email && <a href={`mailto:${p.email}`} style={{ textDecoration: "none", color: BROWN_BTN, fontSize: 12, fontFamily: "'Times New Roman', serif", display: "flex", alignItems: "center", gap: 3, wordBreak: "break-all" }}><span style={{ fontSize: 11 }}>✉</span> {p.email}</a>}
+        {p.website && <a href={p.website.startsWith("http") ? p.website : `https://${p.website}`} target="_blank" rel="noreferrer" style={{ textDecoration: "none", color: "#0077B6", fontSize: 12, fontFamily: "'Times New Roman', serif", display: "flex", alignItems: "center", gap: 3, wordBreak: "break-all" }}><span style={{ fontSize: 11 }}>🌐</span> {p.website.replace(/^https?:\/\//, "")}</a>}
       </div>
       <ProviderRatingBadge providerId={p.id} googleRating={p.google_rating} googleReviewUrl={p.google_review_url} />
       {p.description && <div style={{ borderLeft: `3px solid ${PAPER_DK}`, paddingLeft: 10, marginTop: 4 }}><p style={{ margin: 0, fontSize: 12, color: INK_FADE, fontFamily: "Georgia, serif", lineHeight: 1.7, fontStyle: "italic" }}>{p.description}</p></div>}
@@ -574,9 +573,19 @@ function ClassifiedAd({ p, onSel, svcs }) {
         </div>
       )}
       {(p.years_in_business || p.license_number) && (
-        <div style={{ marginTop: 10, display: "flex", gap: 14, flexWrap: "wrap" }}>
+        <div style={{ marginTop: 8, display: "flex", gap: 14, flexWrap: "wrap" }}>
           {p.years_in_business && <span style={{ fontSize: 10, color: INK_FADE, fontStyle: "italic", fontFamily: "'Times New Roman', serif" }}>Est. {new Date().getFullYear() - Math.round(p.years_in_business)} · {p.years_in_business} yrs in business</span>}
           {p.license_number && <span style={{ fontSize: 10, color: INK_FADE, fontStyle: "italic", fontFamily: "'Times New Roman', serif" }}>Lic# {p.license_number}</span>}
+        </div>
+      )}
+      {onSel && (
+        <div style={{ marginTop: 12 }}>
+          <button
+            onClick={() => onSel(p)}
+            style={{ background: `linear-gradient(180deg,#9A6030,#7A4820)`, color: "#F5E8CC", border: `2px solid #1B3D6F`, borderRadius: 5, padding: "9px 20px", fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "'Times New Roman', serif", letterSpacing: 0.3 }}
+          >
+            📋 View Full Profile &amp; Reviews →
+          </button>
         </div>
       )}
     </div>
