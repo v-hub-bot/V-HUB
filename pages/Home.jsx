@@ -186,8 +186,12 @@ function ProvDetail({ prov, areas, cats, svcs, onBack }) {
   const [reviewSaved, setReviewSaved] = useState(false);
   const [reviewForm, setReviewForm] = useState({ customer_name: "", customer_village: "", rating: 5, review_text: "", service_used: "" });
   const [reviewError, setReviewError] = useState("");
-  const isOwnProfile = React.useMemo(() => {
-    try { const id = sessionStorage.getItem("vhub_provider_id"); return id && id === prov.id; } catch(e) { return false; }
+  const [isOwnProfile, setIsOwnProfile] = React.useState(false);
+  React.useEffect(() => {
+    try {
+      const id = sessionStorage.getItem("vhub_provider_id");
+      setIsOwnProfile(!!(id && id === prov.id));
+    } catch(e) { setIsOwnProfile(false); }
   }, [prov.id]);
   const cat = cats.find(c => c.id === prov.category_id);
   const RED_RULE = "#8B1A1A";
@@ -225,7 +229,7 @@ function ProvDetail({ prov, areas, cats, svcs, onBack }) {
     if (!reviewForm.review_text.trim()) { setReviewError("Please write your review before submitting."); return; }
     if (!reviewForm.rating) { setReviewError("Please select a star rating."); return; }
     // Prevent providers from reviewing their own listing
-    try { const pid = sessionStorage.getItem("vhub_provider_id"); if (pid && pid === prov.id) { setReviewError("You cannot leave a review on your own business. Ask a satisfied customer to share their experience!"); return; } } catch(e) {}
+    if (isOwnProfile) { setReviewError("You cannot leave a review on your own business listing."); return; }
     try {
       const resp = await fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/submitReview", {
         method: "POST",
@@ -356,11 +360,15 @@ function ProvDetail({ prov, areas, cats, svcs, onBack }) {
               <div style={{ fontSize: 12, color: INK_FADE, fontFamily: "Georgia, serif", marginTop: 2 }}>No reviews yet</div>
             )}
           </div>
-          {!showReviewForm && !reviewSaved && !isOwnProfile && (
-            <button onClick={() => { setShowReviewForm(true); setTimeout(() => document.getElementById("vhub-review-form")?.scrollIntoView({ behavior: "smooth", block: "start" }), 100); }}
-              style={{ background: `linear-gradient(180deg,#9A6030,#7A4820)`, color: "#F5E8CC", border: `2px solid #1B3D6F`, borderRadius: 5, padding: "9px 20px", fontSize: 12, fontWeight: 700, cursor: "pointer", fontFamily: "'Times New Roman', serif", whiteSpace: "nowrap" }}>
-              ✏ Write a Review
-            </button>
+          {!showReviewForm && !reviewSaved && (
+            isOwnProfile
+              ? <div style={{ fontSize: 11, color: "#8B1A1A", fontStyle: "italic", fontFamily: "Georgia, serif", background: "#FFF8E1", border: "1px solid #F5C842", borderRadius: 5, padding: "7px 14px", maxWidth: 240, textAlign: "center", lineHeight: 1.5 }}>
+                  You cannot review your own business listing.
+                </div>
+              : <button onClick={() => { setShowReviewForm(true); setTimeout(() => document.getElementById("vhub-review-form")?.scrollIntoView({ behavior: "smooth", block: "start" }), 100); }}
+                  style={{ background: `linear-gradient(180deg,#9A6030,#7A4820)`, color: "#F5E8CC", border: `2px solid #1B3D6F`, borderRadius: 5, padding: "9px 20px", fontSize: 12, fontWeight: 700, cursor: "pointer", fontFamily: "'Times New Roman', serif", whiteSpace: "nowrap" }}>
+                  ✏ Write a Review
+                </button>
           )}
         </div>
 
@@ -388,6 +396,8 @@ function ProvDetail({ prov, areas, cats, svcs, onBack }) {
                     ? provSvcNames.map(s => <option key={s} value={s}>{s}</option>)
                     : svcs.map(s => <option key={s.id} value={s.name}>{s.name}</option>)
                   }
+                  <option value="General Service">General Service</option>
+                  <option value="Other">Other</option>
                 </select>
               </div>
               <div style={{ gridColumn: "1/-1" }}>
