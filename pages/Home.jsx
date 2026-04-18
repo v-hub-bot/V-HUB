@@ -1,4 +1,5 @@
-// V-Hub Home — v2026-04-17c FORCE_REBUILD
+// build-1776538682 
+// V-Hub Home — v2026-04-18a FORCE_REBUILD_2
 import React, { useState, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { ServiceArea, Category, Service, Provider, ProviderReview, User } from "@/api/entities";
