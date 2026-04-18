@@ -1,8 +1,8 @@
-// build-1776543900 
+// build-1776544000 
 import React, { useState, useEffect } from "react";
 import { Provider, ProviderReview, LeadInquiry, ServiceSearchStat, Category, Service, ServiceArea } from "@/api/entities";
 
-const LOGO = "https://media.base44.com/images/public/69d062aca815ce8e697894b1/a9af95bc3_V-Hublogo.png";
+const BUILD_ID = "v2026-04-18-test-cache-bust-XYZ"; const LOGO = "https://media.base44.com/images/public/69d062aca815ce8e697894b1/a9af95bc3_V-Hublogo.png";
 const FN = "https://v-hub-697894b1.base44.app/functions/adminMagicLink";
 
 // SHA-256 for password hashing (used by admin Set Password feature)
