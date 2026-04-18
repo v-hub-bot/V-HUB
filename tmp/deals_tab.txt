@@ -1,0 +1,178 @@
+
+// ── DEALS TAB ─────────────────────────────────────────────────────────────────
+function DealsTab({ providers, classifiedAds }) {
+  // Compute per-provider ad info
+  const now = new Date();
+
+  function daysLeft(expiresAt) {
+    if (!expiresAt) return null;
+    const exp = new Date(expiresAt);
+    const diff = Math.ceil((exp - now) / (1000 * 60 * 60 * 24));
+    return diff;
+  }
+
+  // Build provider map for quick lookup
+  const provMap = {};
+  (providers || []).forEach(p => { provMap[p.id] = p; });
+
+  // Group ads by provider
+  const adsByProvider = {};
+  (classifiedAds || []).forEach(ad => {
+    const pid = ad.provider_id;
+    if (!adsByProvider[pid]) adsByProvider[pid] = { live: null, queued: [] };
+    if (ad.is_active) adsByProvider[pid].live = ad;
+    else adsByProvider[pid].queued.push(ad);
+  });
+
+  const providerIds = Object.keys(adsByProvider);
+  const liveAds  = (classifiedAds || []).filter(a => a.is_active && (daysLeft(a.deal_expires_at) === null || daysLeft(a.deal_expires_at) >= 0));
+  const expiredAds = (classifiedAds || []).filter(a => a.is_active && daysLeft(a.deal_expires_at) !== null && daysLeft(a.deal_expires_at) < 0);
+  const queuedAds  = (classifiedAds || []).filter(a => !a.is_active);
+  const totalRevenue = liveAds.length * 10;
+
+  return (
+    <div>
+      {/* Summary row */}
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 10, marginBottom: 18 }}>
+        {[
+          ["🟢 Live Now", liveAds.length, "#2E7D32", "#E8F5E9"],
+          ["⏰ Expired", expiredAds.length, "#E65100", "#FFF3E0"],
+          ["⏭ Queued", queuedAds.length, "#1565C0", "#EFF8FF"],
+          ["💰 This Week", `$${totalRevenue}`, "#1A6B3C", "#F1F8E9"],
+        ].map(([label, val, color, bg]) => (
+          <div key={label} style={{ background: bg, border: `2px solid ${color}`, borderRadius: 8, padding: "10px 12px", textAlign: "center" }}>
+            <div style={{ fontSize: 18, fontWeight: 900, color, fontFamily: T.font }}>{val}</div>
+            <div style={{ fontSize: 10, fontWeight: 700, color, fontFamily: T.sans, letterSpacing: 1, textTransform: "uppercase" }}>{label}</div>
+          </div>
+        ))}
+      </div>
+
+      {providerIds.length === 0 && (
+        <div style={{ textAlign: "center", padding: "32px 16px", color: "#999", fontFamily: T.sans, fontSize: 14 }}>
+          No classified ads in the system yet.
+        </div>
+      )}
+
+      {/* Per-provider ad cards */}
+      <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+        {providerIds.sort((a, b) => {
+          // Sort: live first, then queued, then expired
+          const aHasLive = adsByProvider[a].live && (daysLeft(adsByProvider[a].live.deal_expires_at) === null || daysLeft(adsByProvider[a].live.deal_expires_at) >= 0);
+          const bHasLive = adsByProvider[b].live && (daysLeft(adsByProvider[b].live.deal_expires_at) === null || daysLeft(adsByProvider[b].live.deal_expires_at) >= 0);
+          if (aHasLive && !bHasLive) return -1;
+          if (!aHasLive && bHasLive) return 1;
+          return 0;
+        }).map(pid => {
+          const prov = provMap[pid];
+          const { live, queued } = adsByProvider[pid];
+          const days = live ? daysLeft(live.deal_expires_at) : null;
+          const isExpired = days !== null && days < 0;
+          const nextUp = queued.find(a => a.is_queued_next);
+
+          return (
+            <div key={pid} style={{
+              background: "#fff",
+              border: live && !isExpired ? "2px solid #2E7D32" : isExpired ? "2px solid #E65100" : `2px solid ${T.border}`,
+              borderRadius: 10, padding: "12px 14px",
+            }}>
+              {/* Provider header */}
+              <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10, flexWrap: "wrap" }}>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontSize: 14, fontWeight: 900, color: T.ink, fontFamily: T.font }}>
+                    {prov?.business_name || pid}
+                    {prov?.vh_number && <span style={{ marginLeft: 8, fontSize: 11, color: "#888", fontFamily: T.sans }}>#{prov.vh_number}</span>}
+                  </div>
+                  <div style={{ fontSize: 11, color: "#666", fontFamily: T.sans }}>{prov?.email || prov?.login_email || ""}</div>
+                </div>
+                {/* Status badge */}
+                {live && !isExpired && (
+                  <span style={{ background: "#E8F5E9", color: "#2E7D32", border: "1.5px solid #2E7D32", borderRadius: 12, padding: "3px 10px", fontSize: 11, fontWeight: 700, fontFamily: T.sans, whiteSpace: "nowrap" }}>
+                    🟢 LIVE
+                  </span>
+                )}
+                {isExpired && (
+                  <span style={{ background: "#FFF3E0", color: "#E65100", border: "1.5px solid #E65100", borderRadius: 12, padding: "3px 10px", fontSize: 11, fontWeight: 700, fontFamily: T.sans, whiteSpace: "nowrap" }}>
+                    ⏰ EXPIRED
+                  </span>
+                )}
+                {!live && queued.length > 0 && (
+                  <span style={{ background: "#EFF8FF", color: "#1565C0", border: "1.5px solid #1565C0", borderRadius: 12, padding: "3px 10px", fontSize: 11, fontWeight: 700, fontFamily: T.sans, whiteSpace: "nowrap" }}>
+                    ⏭ QUEUED ONLY
+                  </span>
+                )}
+              </div>
+
+              {/* Live ad detail */}
+              {live && (
+                <div style={{ background: isExpired ? "#FFF3E0" : "#E8F5E9", borderRadius: 7, padding: "10px 12px", marginBottom: queued.length > 0 ? 8 : 0, display: "flex", gap: 10 }}>
+                  {live.image_url && (
+                    <img src={live.image_url} alt="" style={{ width: 60, height: 60, objectFit: "cover", borderRadius: 5, flexShrink: 0, border: "1.5px solid rgba(0,0,0,0.1)" }} />
+                  )}
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontSize: 13, fontWeight: 900, color: isExpired ? "#E65100" : "#1B5E20", fontFamily: T.font, marginBottom: 2 }}>
+                      {live.headline || "(no headline)"}
+                    </div>
+                    {live.body && <div style={{ fontSize: 11, color: "#555", fontFamily: T.sans, marginBottom: 4, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{live.body}</div>}
+                    <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
+                      {live.village && <span style={{ fontSize: 10, color: "#00836B", fontFamily: T.sans }}>📍 {live.village}</span>}
+                      {live.deal_expires_at && (
+                        <span style={{ fontSize: 10, fontFamily: T.sans, fontWeight: 700, color: isExpired ? "#E65100" : "#2E7D32" }}>
+                          {isExpired
+                            ? `⏰ Expired ${Math.abs(days)} day${Math.abs(days) !== 1 ? "s" : ""} ago`
+                            : days === 0
+                              ? "⚡ Expires today"
+                              : days === 1
+                                ? "⚡ 1 day left"
+                                : `✅ ${days} days left`
+                          }
+                        </span>
+                      )}
+                      <span style={{ fontSize: 10, fontFamily: T.sans, color: "#2E7D32", fontWeight: 700 }}>💰 $10 paid</span>
+                    </div>
+                    {live.deal_expires_at && (
+                      <div style={{ fontSize: 10, color: "#888", fontFamily: T.sans, marginTop: 2 }}>
+                        Runs through: {new Date(live.deal_expires_at).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric", year: "numeric" })}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Queued ads */}
+              {queued.length > 0 && (
+                <div style={{ marginTop: live ? 0 : 0 }}>
+                  <div style={{ fontSize: 10, fontWeight: 700, color: "#888", fontFamily: T.sans, letterSpacing: 1, textTransform: "uppercase", marginBottom: 5 }}>
+                    Queued ({queued.length}/3)
+                  </div>
+                  <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
+                    {queued.map(ad => (
+                      <div key={ad.id} style={{
+                        display: "flex", alignItems: "center", gap: 8,
+                        background: ad.is_queued_next ? "#EFF8FF" : T.parchmentMid,
+                        border: ad.is_queued_next ? "1.5px solid #1565C0" : `1px solid ${T.border}`,
+                        borderRadius: 6, padding: "6px 10px",
+                      }}>
+                        {ad.image_url && <img src={ad.image_url} alt="" style={{ width: 32, height: 32, objectFit: "cover", borderRadius: 3, flexShrink: 0 }} />}
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ fontSize: 12, fontWeight: 700, color: T.ink, fontFamily: T.font, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                            {ad.headline || "(no headline)"}
+                            {ad.is_queued_next && <span style={{ marginLeft: 6, fontSize: 9, background: "#1565C0", color: "#fff", borderRadius: 8, padding: "1px 5px", fontFamily: T.sans }}>NEXT</span>}
+                          </div>
+                          {ad.village && <div style={{ fontSize: 10, color: "#00836B", fontFamily: T.sans }}>📍 {ad.village}</div>}
+                        </div>
+                        {ad.saved_images?.length > 0 && (
+                          <span style={{ fontSize: 10, color: "#6B4090", fontFamily: T.sans, flexShrink: 0 }}>🖼 {ad.saved_images.length}</span>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
