@@ -1,6 +1,5 @@
 export default function Home() {
-  return <div style={{padding:20,fontFamily:'Arial'}}>
-    <h1>V-Hub Test Build XYZTEST123</h1>
-    <p>If you see this, the build is working.</p>
+  return <div style={{padding:20,fontFamily:'Arial',background:'red',color:'white',fontSize:40}}>
+    BUILD_TEST_ALPHA_999
   </div>;
 }
