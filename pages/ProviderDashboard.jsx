@@ -1389,20 +1389,18 @@ function ClassifiedAdSection({ provider }) {
           <div style={{ display: "flex", gap: 10, marginTop: 14, alignItems: "center", flexWrap: "wrap" }}>
             <button disabled={saving} onClick={handleSave}
               style={{ background: `linear-gradient(180deg,#9A6030,${BROWN_BTN})`, color: PAPER, border: `2px solid ${NAVY}`, borderRadius: 5, padding: "11px 24px", fontSize: 13, fontWeight: 900, cursor: saving ? "not-allowed" : "pointer", fontFamily: SERIF, opacity: saving ? 0.7 : 1 }}>
-              {saving ? "Saving…" : "💾 Save to Queue"}
+              {saving ? "Saving…" : saveMsg ? "✓ Saved!" : "💾 Save Ad"}
             </button>
             <button onClick={closeEdit} style={{ background: "none", border: `1.5px solid ${PAPER_DK}`, color: INK_FADE, borderRadius: 5, padding: "10px 16px", fontSize: 12, cursor: "pointer", fontFamily: SANS }}>Cancel</button>
-            {saveMsg && <span style={{ fontSize: 12, color: "#2E7D32", fontFamily: SANS, fontWeight: 700 }}>{saveMsg}</span>}
+            {saveMsg && (
+              <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+                <span style={{ fontSize: 12, color: "#2E7D32", fontFamily: SANS, fontWeight: 700 }}>{saveMsg}</span>
+                <button onClick={closeEdit} style={{ background: "linear-gradient(180deg,#1A6B3C,#145530)", color: "#fff", border: "none", borderRadius: 5, padding: "6px 16px", fontSize: 12, fontWeight: 700, cursor: "pointer", fontFamily: SANS }}>← Back to Queue</button>
+              </div>
+            )}
           </div>
 
-          {provider.classifieds_addon && currentRecord?.id && currentRecord?.headline && (
-            <div style={{ marginTop: 12, paddingTop: 12, borderTop: `1.5px solid ${PAPER_DK}` }}>
-              <button disabled={checkoutLoading} onClick={() => handleCheckout(currentRecord)}
-                style={{ background: "linear-gradient(180deg,#1A6B3C,#145530)", color: "#fff", border: "none", borderRadius: 6, padding: "10px 22px", fontSize: 12, fontWeight: 900, cursor: "pointer", fontFamily: SERIF }}>
-                {checkoutLoading ? "Redirecting…" : "🚀 Launch This Ad — $10 →"}
-              </button>
-            </div>
-          )}
+          {/* Launch button intentionally removed from editor — provider must Save first, then launch from the queue list */}
         </div>
       )}
 
