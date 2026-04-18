@@ -65,6 +65,33 @@ async function fetchAllProvidersWithRetry(db: any): Promise<any[]> {
   return all;
 }
 
+async function fetchAllApprovedReviews(db: any): Promise<any[]> {
+  const PAGE_SIZE = 200;
+  let all: any[] = [];
+  let skip = 0;
+  let pageNum = 0;
+
+  while (true) {
+    pageNum++;
+    if (pageNum > 20) break;
+    let page: any[] = [];
+    try {
+      page = await withRetry(() => db.ProviderReview.filter({ is_approved: true }, { limit: PAGE_SIZE, skip }), `reviews-page-${pageNum}`);
+    } catch {
+      try {
+        page = await withRetry(() => db.ProviderReview.list({ limit: PAGE_SIZE, skip }), `reviews-list-${pageNum}`);
+        page = (page || []).filter((r: any) => r.is_approved === true);
+      } catch { break; }
+    }
+    if (!page || page.length === 0) break;
+    all = all.concat(page);
+    if (page.length < PAGE_SIZE) break;
+    skip += PAGE_SIZE;
+  }
+  console.log(`[getProviders] fetched ${all.length} approved reviews`);
+  return all;
+}
+
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: CORS });
 
@@ -88,6 +115,32 @@ Deno.serve(async (req: Request) => {
         } catch (e: any) {
           console.log(`[getProviders] lookup_data error: ${e.message}`);
           return Response.json({ ok: false, error: e.message, categories: [], services: [], areas: [] }, { headers: CORS });
+        }
+      }
+
+      // ── GET REVIEWS FOR A SPECIFIC PROVIDER (public) ─────────────────
+      if (body?.get_reviews === true) {
+        const { provider_id } = body;
+        if (!provider_id) return Response.json({ error: "Missing provider_id" }, { status: 400, headers: CORS });
+        try {
+          const db = base44.asServiceRole.entities;
+          let reviews: any[] = [];
+          try {
+            reviews = await withRetry(() => db.ProviderReview.filter({ provider_id, is_approved: true }), "get-reviews-filter");
+          } catch {
+            const all = await withRetry(() => db.ProviderReview.list({ limit: 500 }), "get-reviews-list");
+            reviews = (all || []).filter((r: any) => r.provider_id === provider_id && r.is_approved === true);
+          }
+          // Sort by helpful_count desc, then created_date desc
+          reviews.sort((a: any, b: any) => {
+            const hDiff = (b.helpful_count || 0) - (a.helpful_count || 0);
+            if (hDiff !== 0) return hDiff;
+            return new Date(b.created_date || 0).getTime() - new Date(a.created_date || 0).getTime();
+          });
+          return Response.json({ success: true, reviews }, { headers: CORS });
+        } catch (e: any) {
+          console.log(`[getProviders] get_reviews error: ${e.message}`);
+          return Response.json({ success: false, error: e.message, reviews: [] }, { headers: CORS });
         }
       }
 
@@ -138,7 +191,7 @@ Deno.serve(async (req: Request) => {
         try {
           const prov = await withRetry(() => base44.asServiceRole.entities.Provider.get(provider_id), "session-restore");
           if (!prov) return Response.json({ success: false, error: "Not found" }, { status: 404, headers: CORS });
-          return Response.json({ success: true, provider: sanitize(prov) }, { status: 200, headers: CORS });
+          return Response.json({ success: true, provider: sanitize(prov) }, { headers: CORS });
         } catch (e: any) {
           return Response.json({ success: false, error: e.message }, { status: 500, headers: CORS });
         }
@@ -215,7 +268,41 @@ Deno.serve(async (req: Request) => {
       return Response.json({ error: `Fetch failed: ${e.message}`, providers: [], count: 0 }, { status: 500, headers: CORS });
     }
 
-    const sanitized = providers.map(sanitize);
+    // ── FETCH ALL APPROVED REVIEWS & ATTACH TO PROVIDERS ─────────────────
+    let allReviews: any[] = [];
+    try {
+      allReviews = await fetchAllApprovedReviews(base44.asServiceRole.entities);
+    } catch (e: any) {
+      console.log(`[getProviders] reviews fetch failed: ${e.message} — continuing without reviews`);
+    }
+
+    // Group reviews by provider_id
+    const reviewsByProvider: Record<string, any[]> = {};
+    for (const r of allReviews) {
+      if (!reviewsByProvider[r.provider_id]) reviewsByProvider[r.provider_id] = [];
+      reviewsByProvider[r.provider_id].push(r);
+    }
+
+    // Attach reviews to providers and sort providers by rating desc
+    const sanitized = providers.map(p => {
+      const s = sanitize(p);
+      const provReviews = (reviewsByProvider[p.id] || []).sort((a: any, b: any) => {
+        const hDiff = (b.helpful_count || 0) - (a.helpful_count || 0);
+        if (hDiff !== 0) return hDiff;
+        return new Date(b.created_date || 0).getTime() - new Date(a.created_date || 0).getTime();
+      });
+      s.reviews = provReviews;
+      return s;
+    });
+
+    // Sort providers by V-Hub rating descending, then by name
+    sanitized.sort((a: any, b: any) => {
+      const rA = typeof a.rating === 'number' ? a.rating : 0;
+      const rB = typeof b.rating === 'number' ? b.rating : 0;
+      if (rB !== rA) return rB - rA;
+      return (a.business_name || "").localeCompare(b.business_name || "");
+    });
+
     return Response.json({ providers: sanitized, count: sanitized.length }, { headers: CORS });
 
   } catch (error: any) {

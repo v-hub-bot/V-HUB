@@ -158,8 +158,13 @@ function ProvDetail({ prov, areas, cats, svcs, onBack }) {
   })();
 
   useEffect(() => {
-    ProviderReview.filter({ provider_id: prov.id })
-      .then(all => setReviews((all || []).filter(r => r.is_approved)))
+    // Load approved reviews via backend (public, no auth required)
+    fetch(API_BASE + "/getProviders", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ get_reviews: true, provider_id: prov.id }),
+    })
+      .then(r => r.json())
+      .then(d => setReviews(d.reviews || []))
       .catch(() => setReviews([]));
     // Track profile view
     fetch(API_BASE + "/trackEvent", {
