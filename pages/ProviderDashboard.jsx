@@ -2093,10 +2093,9 @@ export default function ProviderDashboard() {
       <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet" />
 
       <TopNav rightContent={
-        <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-          <button onClick={() => setView("account")} style={{ background: "transparent", border: `1.5px solid ${PAPER_DK}`, color: INK_FADE, borderRadius: 6, padding: "6px 14px", fontSize: 11, cursor: "pointer", fontFamily: SANS }}>⚙ Settings</button>
-          <button onClick={handleLogout} style={{ background: "transparent", border: `1.5px solid ${PAPER_DK}`, color: INK_FADE, borderRadius: 6, padding: "6px 14px", fontSize: 11, cursor: "pointer", fontFamily: SANS }}>Sign Out</button>
-        </div>
+        <a href="/" style={{ textDecoration: "none" }}>
+          <button style={{ background: `linear-gradient(180deg,#9A6030,${BROWN_BTN} 60%,#5A3010)`, border: `2px solid ${NAVY}`, borderRadius: 4, color: "#F5E8CC", fontFamily: SANS, fontWeight: 700, fontSize: 13, padding: "8px 18px", cursor: "pointer", whiteSpace: "nowrap" }}>« Home</button>
+        </a>
       } />
 
       {/* Masthead */}
@@ -2222,6 +2221,10 @@ export default function ProviderDashboard() {
           <button data-testid="edit-profile-btn" onClick={() => setView("edit")} style={{ background: `linear-gradient(180deg,#9A6030,${BROWN_BTN} 60%,#5A3010)`, color: PAPER, border: `3px solid ${YELLOW}`, boxShadow: `0 0 0 1.5px ${YELLOW}, 0 0 12px 3px rgba(255,220,0,0.25)`, borderRadius: 6, padding: "13px 40px", fontSize: 14, fontWeight: 900, cursor: "pointer", fontFamily: SERIF, letterSpacing: 2, textTransform: "uppercase" }}>
             ✏ Edit My Profile →
           </button>
+          <div style={{ display: "flex", justifyContent: "center", gap: 16, marginTop: 14 }}>
+            <button onClick={() => setView("account")} style={{ background: "transparent", border: `1.5px solid ${PAPER_DK}`, color: INK_FADE, borderRadius: 6, padding: "7px 16px", fontSize: 12, cursor: "pointer", fontFamily: SANS }}>⚙ Account Settings</button>
+            <button onClick={handleLogout} style={{ background: "transparent", border: `1.5px solid ${PAPER_DK}`, color: INK_FADE, borderRadius: 6, padding: "7px 16px", fontSize: 12, cursor: "pointer", fontFamily: SANS }}>Sign Out</button>
+          </div>
         </div>
 
         {/* ── CLASSIFIED AD SECTION ─────────────────────────── */}

@@ -571,18 +571,21 @@ function SvcDropdown({ open, cats, svcs, openCat, selSvc, setOpenCat, setSelSvc,
   const catRowRefs = React.useRef({});
   React.useEffect(() => {
     if (!openCat || !scrollRef.current) return;
+    // Give React time to render the expanded rows before measuring
     const timer = setTimeout(() => {
       const el = catRowRefs.current[openCat];
       const container = scrollRef.current;
       if (!el || !container) return;
-      // Scroll so the category row is near the top and sub-items are visible
       const elTop = el.offsetTop;
+      const elH = el.scrollHeight || 48;
       const containerH = container.clientHeight;
-      const elH = el.scrollHeight || 44;
-      // If the expanded category + its children might overflow, scroll up to show it
-      const targetScroll = Math.max(0, elTop - 16);
-      container.scrollTo({ top: targetScroll, behavior: "smooth" });
-    }, 80);
+      // Scroll so the category + all its sub-items are visible
+      // If the category is near the bottom, scroll it to the top of the container
+      if (elTop + elH > container.scrollTop + containerH - 20) {
+        const targetScroll = Math.max(0, elTop - 8);
+        container.scrollTo({ top: targetScroll, behavior: "smooth" });
+      }
+    }, 160);
     return () => clearTimeout(timer);
   }, [openCat]);
   if (!open) return null;
