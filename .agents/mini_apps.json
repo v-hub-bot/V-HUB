@@ -2,6 +2,15 @@
   "app_id": "69d06ada8019d7e9edf7f8e8",
   "slug": "v-hub-app-edf7f8e8",
   "pages": {
+    "Classifieds": {
+      "title": "Classifieds"
+    },
+    "Home": {
+      "title": "Home"
+    },
+    "HomeV2": {
+      "title": "HomeV2"
+    },
     "ListService": {
       "title": "ListService"
     },
@@ -16,15 +25,6 @@
     },
     "Wekcadmin": {
       "title": "Wekcadmin"
-    },
-    "HomeV2": {
-      "title": "HomeV2"
-    },
-    "Home": {
-      "title": "Home"
-    },
-    "Classifieds": {
-      "title": "Classifieds"
     }
   }
 }
