@@ -996,6 +996,7 @@ function ClassifiedAdSection({ provider }) {
   const [aiError, setAiError] = React.useState("");
   const [checkoutLoading, setCheckoutLoading] = React.useState(false);
   const [checkoutErr, setCheckoutErr] = React.useState("");
+  const [showPreview, setShowPreview] = React.useState(false);
 
   const loadAds = React.useCallback(async () => {
     if (!provider?.id) return;
@@ -1397,6 +1398,10 @@ function ClassifiedAdSection({ provider }) {
               style={{ background: `linear-gradient(180deg,#9A6030,${BROWN_BTN})`, color: PAPER, border: `2px solid ${NAVY}`, borderRadius: 5, padding: "11px 24px", fontSize: 13, fontWeight: 900, cursor: saving ? "not-allowed" : "pointer", fontFamily: SERIF, opacity: saving ? 0.7 : 1 }}>
               {saving ? "Saving…" : saveMsg ? "✓ Saved!" : "💾 Save Ad"}
             </button>
+            <button onClick={() => setShowPreview(true)}
+              style={{ background: PAPER, border: `2px solid ${TEAL}`, color: TEAL, borderRadius: 5, padding: "11px 18px", fontSize: 13, fontWeight: 900, cursor: "pointer", fontFamily: SERIF }}>
+              👁 Preview
+            </button>
             <button onClick={closeEdit} style={{ background: "none", border: `1.5px solid ${PAPER_DK}`, color: INK_FADE, borderRadius: 5, padding: "10px 16px", fontSize: 12, cursor: "pointer", fontFamily: SANS }}>Cancel</button>
             {saveMsg && (
               <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
@@ -1415,6 +1420,82 @@ function ClassifiedAdSection({ provider }) {
         <strong style={{ fontFamily: SERIF }}>How Deals of the Week works:</strong>{" "}
         Build up to 3 queued ads with images (uploaded or AI-generated) · Mark one "Next Up" · When your live ad ends, come back and pay $10 to launch the next one instantly · Each ad runs 7 days and is searchable by village + keyword on the Deals page
       </div>
+
+      {/* ── AD PREVIEW MODAL ── */}
+      {showPreview && (
+        <div onClick={() => setShowPreview(false)} style={{
+          position: "fixed", inset: 0, zIndex: 9999,
+          background: "rgba(0,0,0,0.72)",
+          display: "flex", alignItems: "flex-start", justifyContent: "center",
+          overflowY: "auto", padding: "24px 16px 48px",
+        }}>
+          <div onClick={e => e.stopPropagation()} style={{ width: "100%", maxWidth: 360 }}>
+            {/* Modal header */}
+            <div style={{ background: INK, color: PAPER, borderRadius: "8px 8px 0 0", padding: "10px 16px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <span style={{ fontSize: 12, fontWeight: 700, fontFamily: SANS, letterSpacing: 1, textTransform: "uppercase" }}>👁 Live Preview — How Visitors Will See Your Ad</span>
+              <button onClick={() => setShowPreview(false)} style={{ background: "none", border: "none", color: PAPER, fontSize: 20, cursor: "pointer", lineHeight: 1 }}>✕</button>
+            </div>
+            {/* Render ad card exactly like Classifieds page */}
+            {(() => {
+              const YELLOW_P = "#FFDB00";
+              const adData = {
+                headline:       form.headline || "Your Headline Goes Here",
+                body:           form.body     || "Your deal description will appear here.",
+                village:        form.village  || "",
+                address:        form.address  || "",
+                deal_expires_at: form.deal_expires_at || "",
+                image_url:      filePreview || form.image_url || "",
+                provider_name:  provider.business_name || provider.owner_name || "Your Business Name",
+              };
+              const days = adData.deal_expires_at ? Math.ceil((new Date(adData.deal_expires_at) - new Date().setHours(0,0,0,0)) / 86400000) : null;
+              const fmtD = d => new Date(d).toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"});
+              let badge = null;
+              if (days !== null) {
+                if (days < 0)   badge = <span style={{ display:"inline-block", marginTop:4, padding:"2px 8px", background:"#7B0000", color:"#fff", fontSize:9, fontWeight:700, borderRadius:2, letterSpacing:0.5, textTransform:"uppercase" }}>Expired</span>;
+                else if (days===0) badge = <span style={{ display:"inline-block", marginTop:4, padding:"2px 8px", background:"#C62828", color:"#fff", fontSize:9, fontWeight:700, borderRadius:2, letterSpacing:0.5, textTransform:"uppercase" }}>Ends Today!</span>;
+                else if (days<=3)  badge = <span style={{ display:"inline-block", marginTop:4, padding:"2px 8px", background:"#E65100", color:"#fff", fontSize:9, fontWeight:700, borderRadius:2, letterSpacing:0.5, textTransform:"uppercase" }}>Ends in {days} day{days!==1?"s":""}!</span>;
+                else if (days<=7)  badge = <span style={{ display:"inline-block", marginTop:4, padding:"2px 8px", background:"#F9A825", color:"#1C0F00", fontSize:9, fontWeight:700, borderRadius:2, letterSpacing:0.5, textTransform:"uppercase" }}>Thru {fmtD(adData.deal_expires_at)}</span>;
+                else               badge = <span style={{ display:"inline-block", marginTop:4, padding:"2px 8px", background:"#1A6B3C", color:"#fff", fontSize:9, fontWeight:700, borderRadius:2, letterSpacing:0.5, textTransform:"uppercase" }}>Good Thru {fmtD(adData.deal_expires_at)}</span>;
+              }
+              return (
+                <div style={{ background:"#F0E6C8", border:"2px solid #1C0F00", borderRadius:"0 0 2px 2px", display:"flex", flexDirection:"column", overflow:"hidden", boxShadow:"3px 3px 10px rgba(0,0,0,0.35)" }}>
+                  {/* Header strip */}
+                  <div style={{ background:"#1C0F00", padding:"10px 14px 9px", textAlign:"center" }}>
+                    <div style={{ fontSize:9, color:"#C8B07A", fontFamily:SANS, letterSpacing:2, textTransform:"uppercase", marginBottom:4 }}>✦ Deal of the Week ✦</div>
+                    <div style={{ fontSize:17, fontWeight:900, color:YELLOW_P, textTransform:"uppercase", letterSpacing:0.5, lineHeight:1.25, fontFamily:SERIF }}>
+                      {adData.headline}
+                    </div>
+                    {badge}
+                  </div>
+                  {/* Image */}
+                  {adData.image_url && (
+                    <img src={adData.image_url} alt={adData.headline} style={{ width:"100%", height:160, objectFit:"cover", display:"block", borderBottom:"1px solid #C8B07A" }} />
+                  )}
+                  {/* Body */}
+                  <div style={{ padding:"14px 16px 8px", fontSize:14, color:"#1C0F00", lineHeight:1.8, fontFamily:SERIF }}>
+                    {adData.body}
+                  </div>
+                  {/* Address */}
+                  {adData.address && (
+                    <div style={{ padding:"4px 16px 10px", fontSize:12, color:"#00836B", fontWeight:700, fontFamily:SANS }}>📍 {adData.address}</div>
+                  )}
+                  {/* Footer */}
+                  <div style={{ borderTop:"1px solid #C8B07A", background:"#E4D5A8", padding:"9px 14px", display:"flex", justifyContent:"space-between", alignItems:"center", gap:8, flexWrap:"wrap" }}>
+                    <div style={{ fontSize:13, fontWeight:900, color:"#1B3D6F", fontFamily:SANS }}>{adData.provider_name}</div>
+                    {adData.village && (
+                      <div style={{ fontSize:11, color:"#5C3A10", fontFamily:"'Times New Roman', Georgia, serif", fontStyle:"italic", background:"#C8B07A", borderRadius:2, padding:"2px 8px" }}>📌 {adData.village}</div>
+                    )}
+                  </div>
+                </div>
+              );
+            })()}
+            {/* Tip + close */}
+            <div style={{ background: "#EFF8FF", border: "1.5px solid #1565C0", borderRadius: "0 0 8px 8px", padding: "10px 14px", fontSize: 11, color: "#1565C0", fontFamily: SANS, lineHeight: 1.7 }}>
+              This is exactly how your ad will appear on the <strong>Deals of the Week</strong> page. Close this, make any edits, then <strong>Save</strong> when ready.
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
