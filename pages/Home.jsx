@@ -453,7 +453,7 @@ function ProvDetail({ prov, areas, cats, svcs, onBack }) {
               </div>
             )}
             <div style={{ fontSize: 13, color: INK, fontStyle: "italic", lineHeight: 1.75, fontFamily: "Georgia, serif", marginBottom: r.provider_reply ? 10 : 0 }}>
-              &ldquo;{r.review_text}&rdquo;
+              “{r.review_text}”
             </div>
             {/* Provider response — always visible to public */}
             {r.provider_reply && r.provider_reply.trim() && (
@@ -584,7 +584,7 @@ function ClassifiedAd({ p, onSel, svcs }) {
             onClick={() => onSel(p)}
             style={{ background: `linear-gradient(180deg,#9A6030,#7A4820)`, color: "#F5E8CC", border: `2px solid #1B3D6F`, borderRadius: 5, padding: "9px 20px", fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "'Times New Roman', serif", letterSpacing: 0.3 }}
           >
-            📋 View Full Profile &amp; Reviews →
+            📋 View Full Profile & Reviews →
           </button>
         </div>
       )}
