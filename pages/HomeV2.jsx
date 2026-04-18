@@ -1,6 +1,6 @@
 // V-Hub Home — PRODUCTION v2026-04-18-R2
 import React, { useState, useEffect, useRef } from "react";
-import { ServiceArea, Category, Service, Provider, ProviderReview, User } from "@/api/entities";
+import { User } from "@/api/entities";
 
 function useMeta({ title, description, canonical }) {
   useEffect(() => {
@@ -654,17 +654,21 @@ export default function HomeV2() {
   const [selCatR,  setSelCatR]  = useState(null);
 
   useEffect(() => {
+    // Load lookup data + providers from backend (public, no auth required)
     Promise.all([
-      ServiceArea.list(),
-      Category.list(),
-      Service.list(),
-      Provider.filter({ is_active: true, is_visible: true, subscription_status: true }),
+      fetch(API_BASE + "/getProviders", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ get_lookup_data: true }),
+      }).then(r => r.json()).catch(() => ({ categories: [], services: [], areas: [] })),
+      fetch(API_BASE + "/getProviders").then(r => r.json()).catch(() => ({ providers: [] })),
       User.me().catch(() => null),
-    ]).then(([a, c, s, p, u]) => {
-      setAreas(a || []);
-      setCats(c || []);
-      setSvcs(s || []);
-      setProviders(p || []);
+    ]).then(([lookup, provData, u]) => {
+      setAreas(lookup.areas || []);
+      setCats(lookup.categories || []);
+      setSvcs(lookup.services || []);
+      // Only show active + visible providers
+      const active = (provData.providers || []).filter(p => p.is_active && p.is_visible);
+      setProviders(active);
       setCurrentUser(u);
     }).catch(console.error).finally(() => setLoading(false));
   }, []);
