@@ -5,11 +5,11 @@
     "ProviderDashboard": {
       "title": "ProviderDashboard"
     },
-    "Wekcadmin": {
-      "title": "Wekcadmin"
-    },
     "Home": {
       "title": "Home"
+    },
+    "Wekcadmin": {
+      "title": "Wekcadmin"
     },
     "Terms": {
       "title": "Terms"

@@ -276,6 +276,25 @@ function ProvDetail({ prov, areas, cats, svcs, onBack }) {
 
         <Rule thick style={{ marginBottom: 10 }} />
 
+        {/* ── Quick Review CTA — always visible near top ── */}
+        {!isOwnProfile && !reviewSaved && (
+          <div style={{ background: "linear-gradient(135deg,#FFF8E1,#FFF3CD)", border: `2px solid #FFDB00`, borderRadius: 8, padding: "10px 14px", marginBottom: 14, display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 8 }}>
+            <div>
+              <div style={{ fontSize: 12, fontWeight: 900, color: INK, fontFamily: "'Times New Roman', serif" }}>⭐ Leave a Review</div>
+              <div style={{ fontSize: 11, color: INK_FADE, fontFamily: "Georgia, serif" }}>Help your fellow Villages residents!</div>
+            </div>
+            <button onClick={() => { setShowReviewForm(true); setTimeout(() => document.getElementById("vhub-review-form")?.scrollIntoView({ behavior: "smooth", block: "start" }), 100); }} style={{ background: `linear-gradient(180deg,#9A6030,#7A4820)`, color: "#F5E8CC", border: `2px solid #1B3D6F`, borderRadius: 5, padding: "8px 18px", fontSize: 12, fontWeight: 700, cursor: "pointer", fontFamily: "'Times New Roman', serif", whiteSpace: "nowrap" }}>+ Write a Review</button>
+          </div>
+        )}
+        {isOwnProfile && (
+          <div style={{ background: "#FFF3CD", border: "1.5px solid #FFDB00", borderRadius: 6, padding: "8px 14px", marginBottom: 14, fontSize: 11, color: INK_FADE, fontStyle: "italic", fontFamily: "Georgia, serif" }}>
+            Providers cannot review their own listing.
+          </div>
+        )}
+        {reviewSaved && (
+          <div style={{ background: "#E8F5E9", border: `1.5px solid #2E7D32`, borderRadius: 6, padding: "10px 14px", marginBottom: 14, fontSize: 12, color: "#2E7D32", fontStyle: "italic" }}>✓ Thank you! Your review will appear after admin approval.</div>
+        )}
+
         {prov.description && <p style={{ fontSize: 13, color: INK, lineHeight: 1.7, marginBottom: 12 }}>{prov.description}</p>}
 
         <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
@@ -327,15 +346,10 @@ function ProvDetail({ prov, areas, cats, svcs, onBack }) {
           V-Hub Reviews
         </div>
 
-        <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
-          {!showReviewForm && !reviewSaved && !isOwnProfile && (
-            <button data-testid="write-review-btn" onClick={() => setShowReviewForm(true)} style={{ background: BROWN_BTN, color: PAPER, border: "none", borderRadius: 4, padding: "4px 12px", fontSize: 11, cursor: "pointer", fontFamily: "'Times New Roman', serif", fontWeight: 700, letterSpacing: 1 }}>+ Write a Review</button>
-          )}
-          {isOwnProfile && <span style={{ fontSize: 10, color: INK_FADE, fontStyle: "italic" }}>Providers cannot review their own listing.</span>}
-        </div>
+
 
         {showReviewForm && (
-          <div style={{ background: PAPER_MID, border: `1.5px solid ${PAPER_DK}`, borderRadius: 6, padding: "14px 16px", marginBottom: 12 }}>
+          <div id="vhub-review-form" style={{ background: PAPER_MID, border: `1.5px solid ${PAPER_DK}`, borderRadius: 6, padding: "14px 16px", marginBottom: 12 }}>
             <div style={{ fontSize: 13, fontWeight: 900, color: INK, marginBottom: 10, textTransform: "uppercase", letterSpacing: 1 }}>Leave Your V-Hub Review</div>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px 14px", marginBottom: 8 }}>
               <div style={{ gridColumn: "1/-1" }}>
@@ -375,7 +389,7 @@ function ProvDetail({ prov, areas, cats, svcs, onBack }) {
           </div>
         )}
 
-        {reviewSaved && <div style={{ background: "#E8F5E9", border: `1.5px solid ${GREEN}`, borderRadius: 6, padding: "10px 14px", marginBottom: 12, fontSize: 12, color: GREEN, fontStyle: "italic" }}>✓ Thank you! Your review will appear after approval.</div>}
+
 
         {reviews.length === 0 && !showReviewForm && !reviewSaved && (
           <div style={{ fontSize: 12, color: INK_FADE, fontStyle: "italic", padding: "8px 0 14px" }}>No V-Hub reviews yet — be the first Villages resident to leave one!</div>
