@@ -1497,18 +1497,8 @@ function AddProviderTab({ onAdded, categories, services: allServices, serviceAre
       });
       const data = await res.json();
       if (data.error) throw new Error(data.error);
-      // If email was sent, immediately mark as Self-Managed — handoff is complete
-      if (data.email_sent && data.id) {
-        try {
-          await fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/providerLogin", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ action: "admin_update", pin: "1357", id: data.id, fields: { managed_by: "Self-Managed" } }),
-          });
-        } catch(_) {}
-      }
       setDone({ name: form.business_name, vh: data.vh_number, email: form.email, tempPass: data.temp_password, emailSent: data.email_sent, emailSkipped: data.email_skipped });
-      onAdded({ ...form, id: data.id, vh_number: data.vh_number, managed_by: data.email_sent ? "provider" : "vhub" });
+      onAdded({ ...form, id: data.id, vh_number: data.vh_number, managed_by: "Managed by V-Hub" });
       setForm(empty);
       setSvcSearch("");
       setOpenMacros({});
