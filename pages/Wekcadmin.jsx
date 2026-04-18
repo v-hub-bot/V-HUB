@@ -343,7 +343,7 @@ function ProvidersTab({ providers, setProviders, catMap, svcMap, areaMap, fullSv
       await fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/providerLogin", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "admin_update", pin: "1357", id: p.id, fields: { managed_by: "provider" } }),
+        body: JSON.stringify({ action: "admin_update", pin: "1357", id: p.id, fields: { managed_by: "Self-Managed" } }),
       });
 
       // Update local state — active, visible, trial started, Self-Managed
@@ -354,7 +354,7 @@ function ProvidersTab({ providers, setProviders, catMap, svcMap, areaMap, fullSv
         subscription_status: x.subscription_status || "trial",
         trial_start_date: x.trial_start_date || trialStartStr,
         trial_end_date: x.trial_end_date || trialEndStr,
-        managed_by: "provider",
+        managed_by: "Self-Managed",
       } : x));
 
       if (data.email_error) {
@@ -1325,7 +1325,7 @@ function AddProviderTab({ onAdded, categories, services: allServices, serviceAre
           await fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/providerLogin", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ action: "admin_update", pin: "1357", id: data.id, fields: { managed_by: "provider" } }),
+            body: JSON.stringify({ action: "admin_update", pin: "1357", id: data.id, fields: { managed_by: "Self-Managed" } }),
           });
         } catch(_) {}
       }
@@ -1663,6 +1663,18 @@ function Dashboard({ adminPin }) {
           <span style={{ fontSize: 20 }}>🔔</span>
           <span>{pendingProviders.length} new listing{pendingProviders.length > 1 ? "s" : ""} waiting for your review!</span>
           <span style={{ marginLeft: "auto", background: "rgba(255,255,255,0.25)", borderRadius: 20, padding: "2px 12px", fontSize: 13 }}>Tap to review →</span>
+        </div>
+      )}
+
+      {/* ── PENDING REVIEWS ALERT BANNER ── */}
+      {pendingReviews.length > 0 && (
+        <div
+          onClick={() => setTab("Reviews")}
+          style={{ background: "#5C4A1E", color: "#FFDB00", padding: "10px 16px", display: "flex", alignItems: "center", gap: 10, cursor: "pointer", fontFamily: T.sans, fontSize: 14, fontWeight: 700, borderBottom: "3px solid #3a2e0e" }}
+        >
+          <span style={{ fontSize: 20 }}>⭐</span>
+          <span>{pendingReviews.length} customer review{pendingReviews.length > 1 ? "s" : ""} awaiting approval</span>
+          <span style={{ marginLeft: "auto", background: "rgba(255,219,0,0.2)", borderRadius: 20, padding: "2px 12px", fontSize: 13, color: "#FFDB00" }}>Approve →</span>
         </div>
       )}
 

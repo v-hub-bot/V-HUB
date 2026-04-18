@@ -5,17 +5,17 @@
     "Home": {
       "title": "Home"
     },
-    "Privacy": {
-      "title": "Privacy"
-    },
-    "Terms": {
-      "title": "Terms"
-    },
     "ProviderDashboard": {
       "title": "ProviderDashboard"
     },
     "Wekcadmin": {
       "title": "Wekcadmin"
+    },
+    "Terms": {
+      "title": "Terms"
+    },
+    "Privacy": {
+      "title": "Privacy"
     },
     "ListService": {
       "title": "ListService"

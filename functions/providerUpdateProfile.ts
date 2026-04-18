@@ -1,5 +1,5 @@
 // providerUpdateProfile — secure self-service update for provider hub sessions
-// v15 - redeploy-1776395462
+// v16 - managed_by_fix-1776472782
 import { createClient } from "npm:@base44/sdk@0.8.25";
 
 const CORS_HEADERS = {
@@ -38,7 +38,7 @@ function sanitize(p: Record<string, unknown>): Record<string, unknown> {
   return safe;
 }
 
-const _DEPLOY_TS = 1776435816;
+const _DEPLOY_TS = 1776472782;
 const base44 = createClient({ appId: "69d062aca815ce8e697894b1" });
 const sr = base44.asServiceRole;
 
@@ -83,7 +83,7 @@ Deno.serve(async (req: Request) => {
       const updated = await sr.entities.Provider.update(provider_id, {
         login_password: hashed,
         password_changed: true,
-        managed_by: "provider",
+        managed_by: "Self-Managed",
       });
       console.log("✅ Password changed for:", provider_id);
       return new Response(JSON.stringify({ success: true, provider: sanitize(updated) }), { headers: CORS_HEADERS });
