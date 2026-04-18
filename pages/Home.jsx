@@ -567,7 +567,7 @@ function DropBtn({ label, isOpen, onClick, testId }) {
 function SvcDropdown({ open, cats, svcs, openCat, selSvc, setOpenCat, setSelSvc, setSOpen }) {
   const scrollRef = React.useRef(null);
   React.useEffect(() => { if (open && scrollRef.current) scrollRef.current.scrollTop = 0; }, [open]);
-  // Auto-scroll so expanded category children are visible — use setTimeout so DOM updates first
+  // Auto-scroll so expanded category + its children are fully visible
   const catRowRefs = React.useRef({});
   React.useEffect(() => {
     if (!openCat || !scrollRef.current) return;
@@ -575,13 +575,12 @@ function SvcDropdown({ open, cats, svcs, openCat, selSvc, setOpenCat, setSelSvc,
       const el = catRowRefs.current[openCat];
       const container = scrollRef.current;
       if (!el || !container) return;
+      // Scroll so the category row is near the top of the dropdown,
+      // giving space for the sub-items that appear below it
       const elTop = el.offsetTop;
-      const elBottom = elTop + el.offsetHeight + 160; // extra space for sub-items
-      const containerBottom = container.scrollTop + container.clientHeight;
-      if (elBottom > containerBottom) {
-        container.scrollTo({ top: elBottom - container.clientHeight + 20, behavior: "smooth" });
-      }
-    }, 50);
+      const targetScroll = Math.max(0, elTop - 20);
+      container.scrollTo({ top: targetScroll, behavior: "smooth" });
+    }, 60);
     return () => clearTimeout(timer);
   }, [openCat]);
   if (!open) return null;
