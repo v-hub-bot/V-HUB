@@ -1121,9 +1121,14 @@ export default function Home() {
           </div>
         </a>
 
-        <a href="/ListService" style={{ textDecoration: "none", display: "block", width: "100%" }}>
-          <div style={{ padding: "14px 8px", textAlign: "center", fontSize: 13, fontWeight: 900, letterSpacing: 2, color: "#FFFFFF", textTransform: "uppercase", background: `linear-gradient(180deg,#1B3D6F,#0d2447)`, border: `3px solid #1B3D6F`, boxShadow: `0 0 0 1.5px #1B3D6F, 0 2px 12px rgba(27,61,111,0.4)`, boxSizing: "border-box", cursor: "pointer", lineHeight: 1.4, width: "100%" }}>📋 List Your Service</div>
-        </a>
+        <div style={{ display: "flex", gap: 0, width: "100%" }}>
+          <a href="/ListService" style={{ textDecoration: "none", display: "block", flex: 1 }}>
+            <div style={{ padding: "14px 8px", textAlign: "center", fontSize: 13, fontWeight: 900, letterSpacing: 2, color: "#FFFFFF", textTransform: "uppercase", background: `linear-gradient(180deg,#1B3D6F,#0d2447)`, border: `3px solid #1B3D6F`, boxShadow: `0 0 0 1.5px #1B3D6F, 0 2px 12px rgba(27,61,111,0.4)`, boxSizing: "border-box", cursor: "pointer", lineHeight: 1.4, width: "100%" }}>📋 List Your Service</div>
+          </a>
+          <a href="/ProviderDashboard" style={{ textDecoration: "none", display: "block", flex: 1 }}>
+            <div style={{ padding: "14px 8px", textAlign: "center", fontSize: 13, fontWeight: 900, letterSpacing: 2, color: "#FFFFFF", textTransform: "uppercase", background: `linear-gradient(180deg,#0d2447,#1B3D6F)`, border: `3px solid #1B3D6F`, boxShadow: `0 0 0 1.5px #1B3D6F, 0 2px 12px rgba(27,61,111,0.4)`, boxSizing: "border-box", cursor: "pointer", lineHeight: 1.4, width: "100%" }}>🔑 Provider Hub</div>
+          </a>
+        </div>
 
         <Rule />
 
