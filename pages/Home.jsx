@@ -276,23 +276,11 @@ function ProvDetail({ prov, areas, cats, svcs, onBack }) {
 
         <Rule thick style={{ marginBottom: 10 }} />
 
-        {/* ── Quick Review CTA — always visible near top ── */}
-        {!isOwnProfile && !reviewSaved && (
-          <div style={{ background: "linear-gradient(135deg,#FFF8E1,#FFF3CD)", border: `2px solid #FFDB00`, borderRadius: 8, padding: "10px 14px", marginBottom: 14, display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 8 }}>
-            <div>
-              <div style={{ fontSize: 12, fontWeight: 900, color: INK, fontFamily: "'Times New Roman', serif" }}>⭐ Leave a Review</div>
-              <div style={{ fontSize: 11, color: INK_FADE, fontFamily: "Georgia, serif" }}>Help your fellow Villages residents!</div>
-            </div>
-            <button onClick={() => { setShowReviewForm(true); setTimeout(() => document.getElementById("vhub-review-form")?.scrollIntoView({ behavior: "smooth", block: "start" }), 100); }} style={{ background: `linear-gradient(180deg,#9A6030,#7A4820)`, color: "#F5E8CC", border: `2px solid #1B3D6F`, borderRadius: 5, padding: "8px 18px", fontSize: 12, fontWeight: 700, cursor: "pointer", fontFamily: "'Times New Roman', serif", whiteSpace: "nowrap" }}>+ Write a Review</button>
-          </div>
-        )}
-        {isOwnProfile && (
-          <div style={{ background: "#FFF3CD", border: "1.5px solid #FFDB00", borderRadius: 6, padding: "8px 14px", marginBottom: 14, fontSize: 11, color: INK_FADE, fontStyle: "italic", fontFamily: "Georgia, serif" }}>
-            Providers cannot review their own listing.
-          </div>
-        )}
+        {/* Review saved confirmation */}
         {reviewSaved && (
-          <div style={{ background: "#E8F5E9", border: `1.5px solid #2E7D32`, borderRadius: 6, padding: "10px 14px", marginBottom: 14, fontSize: 12, color: "#2E7D32", fontStyle: "italic" }}>✓ Thank you! Your review will appear after admin approval.</div>
+          <div style={{ background: "#E8F5E9", border: `2px solid #2E7D32`, borderRadius: 8, padding: "12px 16px", marginBottom: 14, fontSize: 13, color: "#1A6B3C", fontFamily: "Georgia, serif", fontWeight: 700 }}>
+            ✓ Thank you! Your review has been submitted and will appear after admin approval.
+          </div>
         )}
 
         {prov.description && <p style={{ fontSize: 13, color: INK, lineHeight: 1.7, marginBottom: 12 }}>{prov.description}</p>}
@@ -341,33 +329,52 @@ function ProvDetail({ prov, areas, cats, svcs, onBack }) {
 
         <Rule style={{ margin: "16px 0 12px" }} />
 
-        {/* ── Reviews Section ── */}
-        <div style={{ fontSize: 13, fontWeight: 900, color: INK, textTransform: "uppercase", letterSpacing: 1.5, marginBottom: 10 }}>
-          V-Hub Reviews
+        {/* ══════════════ REVIEWS SECTION ══════════════ */}
+        {/* Header with overall rating summary */}
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14, flexWrap: "wrap", gap: 8 }}>
+          <div>
+            <div style={{ fontSize: 15, fontWeight: 900, color: INK, textTransform: "uppercase", letterSpacing: 1.5, fontFamily: "'Times New Roman', serif" }}>⭐ V-Hub Reviews</div>
+            {reviews.length > 0 && vhubAvg !== null && (
+              <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 4 }}>
+                {[1,2,3,4,5].map(i => (
+                  <span key={i} style={{ fontSize: 20, color: i <= Math.round(vhubAvg) ? "#B8860B" : "#D9C9A8", lineHeight: 1 }}>★</span>
+                ))}
+                <span style={{ fontSize: 14, fontWeight: 900, color: "#7A4820", fontFamily: "'Times New Roman', serif", marginLeft: 4 }}>{vhubAvgStr} out of 5</span>
+                <span style={{ fontSize: 12, color: INK_FADE, fontFamily: "Georgia, serif" }}>· {reviews.length} verified review{reviews.length !== 1 ? "s" : ""}</span>
+              </div>
+            )}
+            {reviews.length === 0 && (
+              <div style={{ fontSize: 12, color: INK_FADE, fontFamily: "Georgia, serif", marginTop: 2 }}>No reviews yet</div>
+            )}
+          </div>
+          {!showReviewForm && !reviewSaved && !isOwnProfile && (
+            <button onClick={() => { setShowReviewForm(true); setTimeout(() => document.getElementById("vhub-review-form")?.scrollIntoView({ behavior: "smooth", block: "start" }), 100); }}
+              style={{ background: `linear-gradient(180deg,#9A6030,#7A4820)`, color: "#F5E8CC", border: `2px solid #1B3D6F`, borderRadius: 5, padding: "9px 20px", fontSize: 12, fontWeight: 700, cursor: "pointer", fontFamily: "'Times New Roman', serif", whiteSpace: "nowrap" }}>
+              ✏ Write a Review
+            </button>
+          )}
         </div>
 
-
-
+        {/* Review form */}
         {showReviewForm && (
-          <div id="vhub-review-form" style={{ background: PAPER_MID, border: `1.5px solid ${PAPER_DK}`, borderRadius: 6, padding: "14px 16px", marginBottom: 12 }}>
-            <div style={{ fontSize: 13, fontWeight: 900, color: INK, marginBottom: 10, textTransform: "uppercase", letterSpacing: 1 }}>Leave Your V-Hub Review</div>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px 14px", marginBottom: 8 }}>
+          <div id="vhub-review-form" style={{ background: PAPER_MID, border: `2px solid #B8860B`, borderRadius: 8, padding: "16px", marginBottom: 14 }}>
+            <div style={{ fontSize: 14, fontWeight: 900, color: INK, marginBottom: 12, fontFamily: "'Times New Roman', serif" }}>✏ Leave Your Review</div>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px 14px", marginBottom: 10 }}>
               <div style={{ gridColumn: "1/-1" }}>
-                <label style={lblS}>Your Name <span style={{fontSize:9,fontStyle:"italic",fontWeight:400,textTransform:"none",letterSpacing:0}}>(We will NOT display your name on any posted review)</span></label>
-                <input style={inputS} value={reviewForm.customer_name} onChange={e => setReviewForm(p => ({ ...p, customer_name: e.target.value }))} placeholder="e.g. Jim S." required />
-                <div style={{ fontSize: 10, color: INK_FADE, fontStyle: "italic", marginTop: 3, fontFamily: "Georgia, serif" }}>🔒 Your name will <strong>not</strong> be visible to others — it is used for admin verification only.</div>
+                <label style={lblS}>Your Name <span style={{fontSize:9,fontStyle:"italic",fontWeight:400,textTransform:"none",letterSpacing:0}}>(admin verification only — will NOT appear publicly)</span></label>
+                <input style={inputS} value={reviewForm.customer_name} onChange={e => setReviewForm(p => ({ ...p, customer_name: e.target.value }))} placeholder="e.g. Jim S." />
               </div>
               <div>
                 <label style={lblS}>Your Village</label>
                 <select style={inputS} value={reviewForm.customer_village} onChange={e => setReviewForm(p => ({ ...p, customer_village: e.target.value }))}>
-                  <option value="">— Select your village —</option>
+                  <option value="">— Select —</option>
                   {ALL_VILLAGES_LIST.map(v => <option key={v} value={v}>{v}</option>)}
                 </select>
               </div>
               <div>
                 <label style={lblS}>Service Used</label>
                 <select style={inputS} value={reviewForm.service_used} onChange={e => setReviewForm(p => ({ ...p, service_used: e.target.value }))}>
-                  <option value="">— Select a service —</option>
+                  <option value="">— Select —</option>
                   {provSvcNames.length > 0
                     ? provSvcNames.map(s => <option key={s} value={s}>{s}</option>)
                     : svcs.map(s => <option key={s.id} value={s.name}>{s.name}</option>)
@@ -375,42 +382,72 @@ function ProvDetail({ prov, areas, cats, svcs, onBack }) {
                 </select>
               </div>
               <div style={{ gridColumn: "1/-1" }}>
-                <label style={lblS}>Rating</label>
-                <select style={inputS} value={reviewForm.rating} onChange={e => setReviewForm(p => ({ ...p, rating: parseInt(e.target.value) }))}>{[5,4,3,2,1].map(n => <option key={n} value={n}>{n} Star{n > 1 ? "s" : ""} — {"★".repeat(n)}</option>)}</select>
+                <label style={lblS}>Star Rating</label>
+                <select style={inputS} value={reviewForm.rating} onChange={e => setReviewForm(p => ({ ...p, rating: parseInt(e.target.value) }))}>
+                  {[5,4,3,2,1].map(n => <option key={n} value={n}>{n} Star{n > 1 ? "s" : ""} — {"★".repeat(n)}</option>)}
+                </select>
+              </div>
+              <div style={{ gridColumn: "1/-1" }}>
+                <label style={lblS}>Your Review *</label>
+                <textarea style={{ ...inputS, minHeight: 80, resize: "vertical", lineHeight: 1.6 }} value={reviewForm.review_text} onChange={e => setReviewForm(p => ({ ...p, review_text: e.target.value }))} placeholder="Tell other residents about your experience…" />
               </div>
             </div>
-            <div style={{ marginBottom: 10 }}><label style={lblS}>Your Review *</label><textarea style={{ ...inputS, minHeight: 70, resize: "vertical", lineHeight: 1.6 }} value={reviewForm.review_text} onChange={e => setReviewForm(p => ({ ...p, review_text: e.target.value }))} placeholder="Tell other residents about your experience..." /></div>
-            {reviewError && <div style={{ background: "#FEE", border: "1.5px solid #c00", borderRadius: 5, padding: "8px 12px", marginBottom: 8, fontSize: 12, color: "#c00", fontFamily: "Georgia, serif" }}>⚠ {reviewError}</div>}
+            {reviewError && <div style={{ background: "#FEE", border: "1.5px solid #c00", borderRadius: 5, padding: "8px 12px", marginBottom: 10, fontSize: 12, color: "#c00" }}>⚠ {reviewError}</div>}
             <div style={{ display: "flex", gap: 8 }}>
-              <button data-testid="review-submit" onClick={handleReviewSubmit} style={{ background: `linear-gradient(180deg,#9A6030,${BROWN_BTN})`, color: PAPER, border: `2px solid ${YELLOW}`, borderRadius: 5, padding: "8px 20px", fontSize: 12, fontWeight: 700, cursor: "pointer", fontFamily: "'Times New Roman', serif" }}>Submit</button>
-              <button data-testid="review-cancel" onClick={() => setShowReviewForm(false)} style={{ background: PAPER, border: `1.5px solid ${PAPER_DK}`, color: INK_FADE, borderRadius: 5, padding: "8px 14px", fontSize: 12, cursor: "pointer", fontFamily: "'Times New Roman', serif" }}>Cancel</button>
+              <button onClick={handleReviewSubmit} style={{ background: `linear-gradient(180deg,#9A6030,#7A4820)`, color: "#F5E8CC", border: `2px solid ${YELLOW}`, borderRadius: 5, padding: "9px 22px", fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "'Times New Roman', serif" }}>Submit Review</button>
+              <button onClick={() => setShowReviewForm(false)} style={{ background: PAPER, border: `1.5px solid ${PAPER_DK}`, color: INK_FADE, borderRadius: 5, padding: "9px 16px", fontSize: 12, cursor: "pointer" }}>Cancel</button>
             </div>
-            <div style={{ fontSize: 10, color: INK_FADE, fontStyle: "italic", marginTop: 6 }}>Reviews are approved by Admin before appearing publicly.</div>
+            <div style={{ fontSize: 10, color: INK_FADE, fontStyle: "italic", marginTop: 8 }}>All reviews are verified by V-Hub admin before going public.</div>
           </div>
         )}
 
-
-
+        {/* Individual review cards */}
         {reviews.length === 0 && !showReviewForm && !reviewSaved && (
-          <div style={{ fontSize: 12, color: INK_FADE, fontStyle: "italic", padding: "8px 0 14px" }}>No V-Hub reviews yet — be the first Villages resident to leave one!</div>
+          <div style={{ fontSize: 13, color: INK_FADE, fontStyle: "italic", padding: "10px 0 16px", fontFamily: "Georgia, serif", lineHeight: 1.7 }}>
+            No reviews yet for this provider. Be the first Villages resident to share your experience!
+          </div>
         )}
 
         {reviews.map(r => (
-          <div key={r.id} style={{ background: PAPER_MID, border: `1.5px solid ${PAPER_DK}`, borderRadius: 6, padding: "12px 14px", marginBottom: 8 }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 4 }}>
+          <div key={r.id} style={{ background: PAPER, border: `1.5px solid ${PAPER_DK}`, borderRadius: 8, padding: "14px 16px", marginBottom: 10, boxShadow: "0 1px 4px rgba(28,15,0,0.06)" }}>
+            {/* Stars + village */}
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 6 }}>
               <div>
-                <span style={{ fontSize: 13, fontWeight: 900, color: INK }}>Villages Resident</span>
-                {r.customer_village && <span style={{ fontSize: 11, color: INK_FADE, fontStyle: "italic", marginLeft: 7 }}>📍 {r.customer_village}</span>}
+                <div style={{ display: "flex", gap: 1, marginBottom: 3 }}>
+                  {[1,2,3,4,5].map(i => (
+                    <span key={i} style={{ fontSize: 16, color: i <= (r.rating || 0) ? "#B8860B" : "#D9C9A8", lineHeight: 1 }}>★</span>
+                  ))}
+                  <span style={{ fontSize: 12, fontWeight: 700, color: "#7A4820", fontFamily: "'Times New Roman', serif", marginLeft: 6, alignSelf: "center" }}>{r.rating}/5</span>
+                </div>
+                {r.customer_village && (
+                  <div style={{ fontSize: 11, color: INK_FADE, fontStyle: "italic", fontFamily: "Georgia, serif" }}>📍 Village of {r.customer_village}</div>
+                )}
               </div>
-              <Stars rating={r.rating} size={13} />
+              <div style={{ fontSize: 10, color: INK_FADE, fontFamily: "Georgia, serif", textAlign: "right" }}>
+                {new Date(r.created_date).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                <div style={{ color: "#1A6B3C", fontWeight: 700, marginTop: 2 }}>✓ V-Hub Verified</div>
+              </div>
             </div>
-            {r.service_used && <div style={{ fontSize: 10, color: TEAL, fontWeight: 700, marginBottom: 4, textTransform: "uppercase", letterSpacing: 1 }}>Service: {r.service_used}</div>}
-            <div style={{ fontSize: 12, color: INK_FADE, fontStyle: "italic", lineHeight: 1.65 }}>&ldquo;{r.review_text}&rdquo;</div>
-            <div style={{ fontSize: 10, color: INK_FADE, marginTop: 5 }}>{new Date(r.created_date).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })} · V-Hub Verified Review</div>
+            {r.service_used && (
+              <div style={{ fontSize: 10, color: TEAL_COL, fontWeight: 700, marginBottom: 6, textTransform: "uppercase", letterSpacing: 1, fontFamily: "Georgia, serif" }}>
+                Service: {r.service_used}
+              </div>
+            )}
+            <div style={{ fontSize: 13, color: INK, fontStyle: "italic", lineHeight: 1.75, fontFamily: "Georgia, serif", marginBottom: r.provider_reply ? 10 : 0 }}>
+              &ldquo;{r.review_text}&rdquo;
+            </div>
+            {/* Provider response — always visible to public */}
             {r.provider_reply && r.provider_reply.trim() && (
-              <div style={{ background: "#E8F5E9", border: "1px solid #A5D6A7", borderRadius: 4, padding: "8px 10px", marginTop: 8 }}>
-                <div style={{ fontSize: 10, fontWeight: 700, color: "#2E7D32", textTransform: "uppercase", letterSpacing: 1, marginBottom: 3 }}>Response from Owner</div>
-                <div style={{ fontSize: 11, color: INK, lineHeight: 1.6, fontStyle: "italic" }}>{r.provider_reply}</div>
+              <div style={{ background: "#E8F5E9", border: "2px solid #A5D6A7", borderRadius: 6, padding: "10px 14px", marginTop: 8 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 5 }}>
+                  <span style={{ fontSize: 11, fontWeight: 900, color: "#1A6B3C", textTransform: "uppercase", letterSpacing: 1, fontFamily: "Georgia, serif" }}>💬 Response from {prov.business_name}</span>
+                  {r.provider_reply_date && (
+                    <span style={{ fontSize: 10, color: "#388E3C", fontFamily: "Georgia, serif" }}>
+                      · {new Date(r.provider_reply_date).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                    </span>
+                  )}
+                </div>
+                <div style={{ fontSize: 12, color: "#1C4A1C", lineHeight: 1.7, fontFamily: "Georgia, serif" }}>{r.provider_reply}</div>
               </div>
             )}
           </div>
