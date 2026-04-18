@@ -28,29 +28,21 @@
     "is_active": {
       "type": "boolean"
     },
+    "is_queued_next": {
+      "type": "boolean"
+    },
     "slot_number": {
       "type": "number"
     },
     "ai_prompt": {
       "type": "string"
     },
-    "next_headline": {
-      "type": "string"
-    },
-    "next_body": {
-      "type": "string"
-    },
-    "next_address": {
-      "type": "string"
-    },
-    "next_village": {
-      "type": "string"
-    },
-    "next_image_url": {
-      "type": "string"
-    },
-    "next_deal_expires_at": {
-      "type": "string"
+    "saved_images": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Up to 3 stored image URLs for this ad slot"
     }
   },
   "required": [],

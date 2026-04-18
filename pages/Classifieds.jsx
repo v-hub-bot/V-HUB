@@ -511,26 +511,20 @@ export default function Classifieds() {
         }
       </div>
 
-      {/* ════════ CAROUSEL SECTION ════════ */}
+      {/* ════════ ADS GRID ════════ */}
       <div style={{ padding: "16px 14px 48px", boxSizing: "border-box" }}>
 
         {/* Section rule */}
         <div style={{ marginBottom: 18 }}>
           <div style={{ borderTop: `3px double ${INK}` }} />
-          <div style={{
-            textAlign: "center", padding: "6px 0",
-            fontSize: 10, fontWeight: 700, letterSpacing: 2,
-            textTransform: "uppercase", color: INK_FADE, fontFamily: SANS,
-          }}>
+          <div style={{ textAlign: "center", padding: "6px 0", fontSize: 10, fontWeight: 700, letterSpacing: 2, textTransform: "uppercase", color: INK_FADE, fontFamily: SANS }}>
             ✦ This Week's Deals from Local Service Providers ✦
           </div>
           <div style={{ borderBottom: `3px double ${INK}` }} />
         </div>
 
         {loading && (
-          <div style={{ textAlign: "center", padding: 60, color: INK_FADE, fontSize: 14, fontStyle: "italic" }}>
-            Loading deals…
-          </div>
+          <div style={{ textAlign: "center", padding: 60, color: INK_FADE, fontSize: 14, fontStyle: "italic" }}>Loading deals…</div>
         )}
 
         {!loading && live.length === 0 && (
@@ -542,24 +536,21 @@ export default function Classifieds() {
             <div style={{ fontSize: 13, fontStyle: "italic", color: INK_FADE, fontFamily: SERIF, lineHeight: 1.8 }}>
               {search || village
                 ? "Try a different village or search term."
-                : "Local providers post their deals and specials here every week. Check back soon — new deals are added regularly!"}
+                : "Local providers post their deals and specials here every week. Check back soon!"}
             </div>
             {(search || village) && (
-              <button
-                onClick={() => { setSearch(""); setVillage(""); }}
-                style={{
-                  marginTop: 16, padding: "8px 18px", fontFamily: SANS,
-                  fontSize: 12, fontWeight: 700, cursor: "pointer",
-                  background: PAPER_MID, border: `2px solid ${INK}`,
-                  borderRadius: 3, color: INK,
-                }}
-              >Clear Filters</button>
+              <button onClick={() => { setSearch(""); setVillage(""); }}
+                style={{ marginTop: 16, padding: "8px 18px", fontFamily: SANS, fontSize: 12, fontWeight: 700, cursor: "pointer", background: PAPER_MID, border: `2px solid ${INK}`, borderRadius: 3, color: INK }}>
+                Clear Filters
+              </button>
             )}
           </div>
         )}
 
         {!loading && live.length > 0 && (
-          <DealsCarousel ads={live} />
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 16 }}>
+            {live.map(ad => <AdCard key={ad.id} ad={ad} />)}
+          </div>
         )}
 
         {/* ── Divider ── */}
@@ -568,33 +559,16 @@ export default function Classifieds() {
         </div>
 
         {/* ── CTA box ── */}
-        <div style={{
-          border: `2px solid ${INK}`, borderRadius: 2, padding: "20px 18px",
-          background: PAPER_MID, textAlign: "center",
-          boxShadow: "2px 2px 6px rgba(0,0,0,0.15)",
-        }}>
+        <div style={{ border: `2px solid ${INK}`, borderRadius: 2, padding: "20px 18px", background: PAPER_MID, textAlign: "center", boxShadow: "2px 2px 6px rgba(0,0,0,0.15)" }}>
           <div style={{ fontSize: 14, fontWeight: 900, letterSpacing: 2, textTransform: "uppercase", color: INK, fontFamily: SERIF, marginBottom: 8 }}>
             Are You a Local Provider?
           </div>
           <div style={{ fontSize: 12, fontStyle: "italic", color: INK_FADE, fontFamily: SERIF, lineHeight: 1.8, marginBottom: 14 }}>
             Reach thousands of Villages residents with your weekly deal or special offer.
-            Add the Deals of the Week feature to your V-Hub listing for just $10/week.
+            Log in to your Provider Hub to build and queue ads — pay just $10 when you're ready to go live.
           </div>
           <a href="/ProviderDashboard" style={{ textDecoration: "none" }}>
-            <button style={{
-              background: `linear-gradient(180deg,#9A6030,${BROWN_BTN} 60%,#5A2F10)`,
-              border: `3px solid ${NAVY}`,
-              borderRadius: 4,
-              color: "#F5E8CC",
-              fontFamily: SANS,
-              fontWeight: 700,
-              fontSize: 13,
-              letterSpacing: 1,
-              textTransform: "uppercase",
-              padding: "12px 24px",
-              cursor: "pointer",
-              boxShadow: `0 0 0 1.5px ${NAVY}`,
-            }}>
+            <button style={{ background: `linear-gradient(180deg,#9A6030,${BROWN_BTN} 60%,#5A2F10)`, border: `3px solid ${NAVY}`, borderRadius: 4, color: "#F5E8CC", fontFamily: SANS, fontWeight: 700, fontSize: 13, letterSpacing: 1, textTransform: "uppercase", padding: "12px 24px", cursor: "pointer", boxShadow: `0 0 0 1.5px ${NAVY}` }}>
               Post Your Deal → Provider Hub
             </button>
           </a>

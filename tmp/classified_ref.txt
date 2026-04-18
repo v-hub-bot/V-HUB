@@ -1,0 +1,7 @@
+        {/* ── CLASSIFIED AD SECTION ─────────────────────────── */}
+        <div style={{ ...shS, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <span>📰 Deals of the Week</span>
+          <span style={{ fontSize: 10, fontWeight: 400, color: INK_FADE, fontFamily: SANS, letterSpacing: 0.5 }}>$10/week · 7-day ad</span>
+        </div>
+        <ClassifiedAdSection provider={provider} />
+
