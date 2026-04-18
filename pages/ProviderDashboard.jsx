@@ -2354,9 +2354,9 @@ export default function ProviderDashboard() {
                   </div>
 
                   {/* Photo upload */}
-                  <div style={{ display: "flex", flexDirection: "column", justifyContent: "flex-end" }}>
-                    <label style={lbS}>Ad Photo</label>
-                    <input ref={classifiedImageRef} type="file" accept="image/*" style={{ display: "none" }}
+                  <div style={{ gridColumn: "1/-1" }}>
+                    <label style={lbS}>Ad Image <span style={{ fontSize: 10, fontWeight: 400, fontStyle: "italic", textTransform: "none", letterSpacing: 0 }}>— upload your own, export from Canva or Google Slides, or use AI below</span></label>
+                    <input ref={classifiedImageRef} type="file" accept="image/*,image/png,image/jpeg,image/webp" style={{ display: "none" }}
                       onChange={e => {
                         const file = e.target.files[0];
                         if (!file) return;
@@ -2368,8 +2368,11 @@ export default function ProviderDashboard() {
                       }} />
                     <button onClick={() => classifiedImageRef.current?.click()}
                       style={{ ...inS, cursor: "pointer", textAlign: "left", fontSize: 12, color: INK_FADE, padding: "8px 10px" }}>
-                      {classifiedImageFile ? `📎 ${classifiedImageFile.name}` : (classifiedForm.image_url ? "📷 Change Photo" : "📷 Upload Photo")}
+                      {classifiedImageFile ? `📎 ${classifiedImageFile.name}` : (classifiedForm.image_url ? "📷 Change / Replace Image" : "📷 Upload Ad Image (JPG, PNG, Canva export…)")}
                     </button>
+                    <div style={{ fontSize: 10, color: INK_FADE, fontFamily: SANS, marginTop: 3, lineHeight: 1.5 }}>
+                      Tip: Design in <strong>Canva</strong> or <strong>Google Slides</strong>, then export/download as a JPG or PNG and upload it here.
+                    </div>
                   </div>
                 </div>
 
@@ -2400,11 +2403,11 @@ export default function ProviderDashboard() {
                     🤖 AI Ad Image Generator
                   </div>
                   <div style={{ fontSize: 11, color: "#6B4090", fontFamily: SANS, marginBottom: 8, lineHeight: 1.5 }}>
-                    Describe what you want and AI will create a custom image for your ad.
+                    Describe the image you want — color, style, objects, text overlay, mood — and AI generates it instantly. You can edit your description and regenerate until it's perfect.
                   </div>
                   <textarea
                     style={{ ...inS, minHeight: 54, resize: "vertical", background: "#fff", fontSize: 12 }}
-                    placeholder="e.g. Pool cleaning service, blue water, tropical Florida, sunny day, professional…"
+                    placeholder="e.g. Red background, 3 tires in background, 1 in front, bold white text: Buy 3 Get 1 Free, tropical Florida feel…"
                     value={aiPrompt}
                     onChange={e => setAiPrompt(e.target.value)}
                   />
