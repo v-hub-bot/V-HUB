@@ -191,7 +191,7 @@ Deno.serve(async (req) => {
               <div style="font-size:13px;color:#1A0A00;margin-bottom:4px;"><strong>Email:</strong> ${displayLoginEmail}</div>
               ${passwordLine}
             </div>
-            <p style="color: #5A3010; font-size: 13px;">Once approved, log in at <a href="${APP_URL}/ProviderHub" style="color: #8B4513;">${APP_URL}/ProviderHub</a> to manage your listing.</p>
+            <div style="text-align:center;margin:20px 0 8px;"><a href="${APP_URL}/ProviderDashboard" style="display:inline-block;background:#1A6B3C;color:#ffffff;font-family:Georgia,serif;font-size:15px;font-weight:900;letter-spacing:2px;text-transform:uppercase;text-decoration:none;padding:14px 32px;border-radius:8px;border:2px solid #0d3d22;">🔑 Log In to Your Provider Hub →</a></div><p style="color:#5A3010;font-size:12px;text-align:center;margin-top:6px;">Your listing will appear once approved by our team.</p>
           </div>
           <div style="background: #1A0A00; padding: 14px; text-align: center;"><a href="https://www.v-hub.us" style="color:#E8431A;font-weight:700;text-decoration:none;font-size:13px;">🌴 www.v-hub.us</a><span style="color:rgba(245,232,204,0.4);font-size:11px;margin:0 8px;">·</span><a href="mailto:admin@v-hub.us" style="color:rgba(201,151,58,0.7);text-decoration:none;font-size:11px;">admin@v-hub.us</a><br/><span style="color:rgba(245,232,204,0.3);font-size:10px;">V-Hub · The Villages, Florida</span></div>
         </div>`;
