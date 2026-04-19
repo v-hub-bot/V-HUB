@@ -180,7 +180,6 @@ function ProvDetail({ prov, areas, cats, svcs, onBack }) {
 
   const handleSubmit = async () => {
     setReviewError("");
-    if (!form.customer_name.trim())  { setReviewError("Please enter your name."); return; }
     if (!form.customer_village)      { setReviewError("Please select your village."); return; }
     if (!form.service_used)          { setReviewError("Please select the service you used."); return; }
     if (!form.review_text.trim())    { setReviewError("Please write your review."); return; }
@@ -329,18 +328,12 @@ function ProvDetail({ prov, areas, cats, svcs, onBack }) {
           {showForm && (
             <div style={{ background: PAPER_MID, border: "2px solid " + PAPER_DK, borderRadius: 8, padding: 16, marginBottom: 16 }}>
               <div style={{ fontSize: 13, fontWeight: 900, color: INK, marginBottom: 12 }}>Share Your Experience</div>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 10 }}>
-                <div>
-                  <label style={lbl}>Your Name *</label>
-                  <input style={inp} value={form.customer_name} onChange={e => setForm(f => ({ ...f, customer_name: e.target.value }))} placeholder="First and Last Name" />
-                </div>
-                <div>
-                  <label style={lbl}>Your Village *</label>
-                  <select style={inp} value={form.customer_village} onChange={e => setForm(f => ({ ...f, customer_village: e.target.value }))}>
-                    <option value="">Select your village...</option>
-                    {ALL_VILLAGES.map(v => <option key={v} value={v}>{v}</option>)}
-                  </select>
-                </div>
+              <div style={{ marginBottom: 10 }}>
+                <label style={lbl}>Your Village *</label>
+                <select style={inp} value={form.customer_village} onChange={e => setForm(f => ({ ...f, customer_village: e.target.value }))}>
+                  <option value="">Select your village...</option>
+                  {ALL_VILLAGES.map(v => <option key={v} value={v}>{v}</option>)}
+                </select>
               </div>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 10 }}>
                 <div>
@@ -404,7 +397,6 @@ function ProvDetail({ prov, areas, cats, svcs, onBack }) {
             <div key={r.id || i} style={{ borderTop: "1px solid " + PAPER_DK, padding: "12px 0" }}>
               <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4, flexWrap: "wrap" }}>
                 <Stars rating={r.rating} size={13} />
-                <span style={{ fontWeight: 700, fontSize: 12, color: INK }}>{r.customer_name}</span>
                 <span style={{ fontSize: 10, color: INK_FADE }}>· {r.customer_village}</span>
                 {r.service_used && (
                   <span style={{ fontSize: 10, color: TEAL, background: "#E0F7F4", borderRadius: 10, padding: "1px 7px" }}>{r.service_used}</span>

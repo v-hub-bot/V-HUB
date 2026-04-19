@@ -137,7 +137,9 @@ Deno.serve(async (req: Request) => {
             if (hDiff !== 0) return hDiff;
             return new Date(b.created_date || 0).getTime() - new Date(a.created_date || 0).getTime();
           });
-          return Response.json({ success: true, reviews }, { headers: CORS });
+          // Strip customer_name — names are private, visible to admin only
+          const safeReviews = reviews.map(({ customer_name, ...r }: any) => r);
+          return Response.json({ success: true, reviews: safeReviews }, { headers: CORS });
         } catch (e: any) {
           console.log(`[getProviders] get_reviews error: ${e.message}`);
           return Response.json({ success: false, error: e.message, reviews: [] }, { headers: CORS });
@@ -291,7 +293,8 @@ Deno.serve(async (req: Request) => {
         if (hDiff !== 0) return hDiff;
         return new Date(b.created_date || 0).getTime() - new Date(a.created_date || 0).getTime();
       });
-      s.reviews = provReviews;
+      // Strip customer_name from public-facing reviews — admin only
+      s.reviews = provReviews.map(({ customer_name, ...r }: any) => r);
       return s;
     });
 

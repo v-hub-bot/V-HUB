@@ -1,5 +1,6 @@
 // submitReview — handles both review loading (get_reviews) and submission
 // Uses asServiceRole so no auth token is required from the submitter
+// NOTE: customer_name is stored privately but NEVER returned in get_reviews — admin only
 import { createClientFromRequest } from "npm:@base44/sdk@0.8.25";
 
 Deno.serve(async (req: Request): Promise<Response> => {
@@ -24,20 +25,26 @@ Deno.serve(async (req: Request): Promise<Response> => {
         is_approved: true,
       });
 
-      return Response.json({ reviews: reviews || [] }, { headers: corsHeaders });
+      // Strip customer_name before returning — names are private, admin-only
+      const safeReviews = (reviews || []).map(r => {
+        const { customer_name, ...rest } = r;
+        return rest;
+      });
+
+      return Response.json({ reviews: safeReviews }, { headers: corsHeaders });
     }
 
     // ── SUBMIT REVIEW MODE ────────────────────────────────────────────────────
     const { provider_id, customer_name, customer_village, rating, review_text, service_used } = body;
 
-    if (!provider_id)           return Response.json({ error: "Missing provider_id" },    { status: 400, headers: corsHeaders });
-    if (!customer_name?.trim()) return Response.json({ error: "Missing customer_name" },  { status: 400, headers: corsHeaders });
-    if (!review_text?.trim())   return Response.json({ error: "Missing review_text" },    { status: 400, headers: corsHeaders });
-    if (!rating)                return Response.json({ error: "Missing rating" },          { status: 400, headers: corsHeaders });
+    if (!provider_id)         return Response.json({ error: "Missing provider_id" },   { status: 400, headers: corsHeaders });
+    if (!review_text?.trim()) return Response.json({ error: "Missing review_text" },   { status: 400, headers: corsHeaders });
+    if (!rating)              return Response.json({ error: "Missing rating" },         { status: 400, headers: corsHeaders });
 
     await base44.asServiceRole.entities.ProviderReview.create({
       provider_id,
-      customer_name: customer_name.trim(),
+      // customer_name is optional and stored privately — never shown publicly
+      customer_name: customer_name?.trim() || "",
       customer_village: customer_village || "",
       rating: Number(rating),
       review_text: review_text.trim(),
