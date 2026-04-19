@@ -1,4 +1,5 @@
-// build-1776569294-CACHE-BUST
+// CACHE-BUST-1776573078
+// build-1776559362
 // build-1776539899-PROBE 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { ClassifiedAd, Provider } from "@/api/entities";
@@ -130,8 +131,8 @@ export default function Classifieds() {
         background: NAVY, color: WHITE, padding: "18px 20px 14px",
         textAlign: "center", borderBottom: `4px solid ${ORANGE}`,
       }}>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-start", gap: 10, marginBottom: 6 }}>
-          <a href="/" style={{ textDecoration: "none" }}><button style={{ background: "linear-gradient(180deg,#9A6030,#7A4820 60%,#5A3010)", border: "2px solid #1B3D6F", borderRadius: 4, color: "#F5E8CC", fontFamily: "Arial, sans-serif", fontWeight: 700, fontSize: 13, padding: "8px 16px", cursor: "pointer", whiteSpace: "nowrap" }}>« Home</button></a>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 10, marginBottom: 6 }}>
+          <a href="/Home" style={{ color: "rgba(255,255,255,0.6)", fontSize: 13, textDecoration: "none" }}>← Back to Home</a>
         </div>
         <div style={{ fontSize: 28, fontWeight: 900, letterSpacing: 1 }}>🔥 Deals of the Week!</div>
         <div style={{ fontSize: 13, opacity: 0.8, marginTop: 4 }}>

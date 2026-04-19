@@ -1,8 +1,9 @@
-// build-1776569294-CACHE-BUST
+// CACHE-BUST-1776573078
+// build-1776559362 
 // @build 2026-04-18-b
 // ProviderDashboard — REBUILD 1776411339
 import React, { useState, useEffect, useRef } from "react";
-const _BUILD = "1776568986"; // cache-bust
+const _BUILD = "1776475996"; // cache-bust
 import { Provider, ProviderReview, Service, ServiceArea, Category, ClassifiedAd, ProviderAnalytic } from "@/api/entities";
 
 // ── SEO ───────────────────────────────────────────────────────────────────
@@ -604,7 +605,7 @@ function ForcePasswordChangeScreen({ provider, onComplete }) {
             <span style={{ fontSize: 34, fontWeight: 900, color: INK, fontFamily: "'Times New Roman', serif", letterSpacing: -1, lineHeight: 1 }}>Hub</span>
           </a>
           <a href="/" style={{ textDecoration: "none" }}>
-            <button onClick={() => window.location.href = '/'} style={{ background: `linear-gradient(180deg,#9A6030,${BROWN_BTN} 60%,#5A3010)`, border: `2px solid #1B3D6F`, borderRadius: 4, color: "#FFFFFF", fontFamily: SANS, fontWeight: 700, fontSize: 13, padding: "8px 18px", cursor: "pointer", whiteSpace: "nowrap" }>{'\u00AB'} Home</button>
+            <button onClick={() => window.location.href = '/'} style={{ background: `linear-gradient(180deg,#9A6030,${BROWN_BTN} 60%,#5A3010)`, border: `2px solid #1B3D6F`, borderRadius: 4, color: "#F5E8CC", fontFamily: SANS, fontWeight: 700, fontSize: 13, padding: "8px 18px", cursor: "pointer", whiteSpace: "nowrap" }>{'\u00AB'} Home</button>
           </a>
         </div>
       </div>
@@ -724,7 +725,7 @@ function ForgotPasswordScreen({ onBack }) {
             <span style={{ fontSize: 34, fontWeight: 900, color: INK, fontFamily: "'Times New Roman', serif", letterSpacing: -1, lineHeight: 1 }}>Hub</span>
           </a>
           <a href="/" style={{ textDecoration: "none" }}>
-            <button onClick={() => window.location.href = '/'} style={{ background: `linear-gradient(180deg,#9A6030,${BROWN_BTN} 60%,#5A3010)`, border: `2px solid #1B3D6F`, borderRadius: 4, color: "#FFFFFF", fontFamily: SANS, fontWeight: 700, fontSize: 13, padding: "8px 18px", cursor: "pointer", whiteSpace: "nowrap" }>{'\u00AB'} Home</button>
+            <button onClick={() => window.location.href = '/'} style={{ background: `linear-gradient(180deg,#9A6030,${BROWN_BTN} 60%,#5A3010)`, border: `2px solid #1B3D6F`, borderRadius: 4, color: "#F5E8CC", fontFamily: SANS, fontWeight: 700, fontSize: 13, padding: "8px 18px", cursor: "pointer", whiteSpace: "nowrap" }>{'\u00AB'} Home</button>
           </a>
         </div>
       </div>
@@ -864,7 +865,7 @@ function LoginScreen({ onLogin, onForgot }) {
             <span style={{ fontSize: 34, fontWeight: 900, color: INK, fontFamily: "'Times New Roman', serif", letterSpacing: -1, lineHeight: 1 }}>Hub</span>
           </a>
           <a href="/" style={{ textDecoration: "none" }}>
-            <button onClick={() => window.location.href = '/'} style={{ background: `linear-gradient(180deg,#9A6030,${BROWN_BTN} 60%,#5A3010)`, border: `2px solid #1B3D6F`, borderRadius: 4, color: "#FFFFFF", fontFamily: SANS, fontWeight: 700, fontSize: 13, padding: "8px 18px", cursor: "pointer", whiteSpace: "nowrap" }>{'\u00AB'} Home</button>
+            <button onClick={() => window.location.href = '/'} style={{ background: `linear-gradient(180deg,#9A6030,${BROWN_BTN} 60%,#5A3010)`, border: `2px solid #1B3D6F`, borderRadius: 4, color: "#F5E8CC", fontFamily: SANS, fontWeight: 700, fontSize: 13, padding: "8px 18px", cursor: "pointer", whiteSpace: "nowrap" }>{'\u00AB'} Home</button>
           </a>
         </div>
       </div>
@@ -2458,18 +2459,20 @@ export default function ProviderDashboard() {
   if (authState === "force_change_password") return <ForcePasswordChangeScreen provider={provider} onComplete={(updatedProv) => { setProvider(updatedProv); seedForm(updatedProv); setAuthState("dashboard"); }} />;
 
   // ── TOP NAV (shared across dashboard/edit/account) ────────────────────
-  const NAV_BTN = { background: `linear-gradient(180deg,#9A6030,${BROWN_BTN} 60%,#5A3010)`, border: `2px solid #1B3D6F`, borderRadius: 4, color: "#FFFFFF", fontFamily: SANS, fontWeight: 700, fontSize: 12, padding: "7px 12px", cursor: "pointer", whiteSpace: "nowrap", letterSpacing: 0.3 };
   const TopNav = ({ rightContent }) => (
     <div style={{ background: PAPER, borderBottom: `3px double ${INK}`, position: "sticky", top: 0, zIndex: 50 }}>
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "8px 14px 6px", boxSizing: "border-box", flexWrap: "nowrap" }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 16px 8px", boxSizing: "border-box" }}>
         {/* Left — V-Hub wordmark links home */}
-        <a href="/" style={{ textDecoration: "none", display: "flex", alignItems: "baseline", flexShrink: 0 }}>
-          <span style={{ fontStyle: "italic", fontWeight: 700, fontFamily: "'Great Vibes', cursive", fontSize: 36, color: "#003366", lineHeight: 1 }}>V</span>
-          <span style={{ fontSize: 24, fontWeight: 900, color: INK, fontFamily: "'Times New Roman', serif", lineHeight: 1, margin: "0 1px" }}>-</span>
-          <span style={{ fontSize: 28, fontWeight: 900, color: INK, fontFamily: "'Times New Roman', serif", letterSpacing: -1, lineHeight: 1 }}>Hub</span>
+        <a href="/" style={{ textDecoration: "none", display: "flex", alignItems: "baseline" }}>
+          <span style={{ fontStyle: "italic", fontWeight: 700, fontFamily: "'Great Vibes', cursive", fontSize: 42, color: "#003366", lineHeight: 1 }}>V</span>
+          <span style={{ fontSize: 28, fontWeight: 900, color: INK, fontFamily: "'Times New Roman', serif", lineHeight: 1, margin: "0 2px" }}>-</span>
+          <span style={{ fontSize: 34, fontWeight: 900, color: INK, fontFamily: "'Times New Roman', serif", letterSpacing: -1, lineHeight: 1 }}>Hub</span>
         </a>
-        {/* Right — contextual action buttons */}
-        <div style={{ display: "flex", alignItems: "center", gap: 6, flexShrink: 0 }}>
+        {/* Right — Home always visible, plus any contextual action */}
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <a href="/" style={{ textDecoration: "none" }}>
+            <button style={{ background: `linear-gradient(180deg,#9A6030,${BROWN_BTN} 60%,#5A3010)`, border: `2px solid #1B3D6F`, borderRadius: 4, color: "#F5E8CC", fontFamily: SANS, fontWeight: 700, fontSize: 13, padding: "8px 16px", cursor: "pointer", whiteSpace: "nowrap" }}>« Home</button>
+          </a>
           {rightContent && rightContent}
         </div>
       </div>
@@ -2481,7 +2484,7 @@ export default function ProviderDashboard() {
   if (view === "edit") return (
     <div style={{ minHeight: "100vh", background: PAPER, backgroundImage: "repeating-linear-gradient(0deg,transparent,transparent 27px,rgba(28,15,0,0.03) 27px,rgba(28,15,0,0.03) 28px)", fontFamily: SERIF }}>
       <TopNav rightContent={
-        <button onClick={() => setView("dashboard")} style={{ background: `linear-gradient(180deg,#9A6030,${BROWN_BTN} 60%,#5A3010)`, border: `2px solid #1B3D6F`, borderRadius: 4, color: "#FFFFFF", fontFamily: SANS, fontWeight: 700, fontSize: 13, padding: "8px 16px", cursor: "pointer", whiteSpace: "nowrap" }}>« Back to Hub</button>
+        <button onClick={() => setView("dashboard")} style={{ background: "transparent", border: `1.5px solid ${PAPER_DK}`, color: INK_FADE, borderRadius: 6, padding: "7px 16px", fontSize: 12, cursor: "pointer", fontFamily: SANS }>{'\u00AB'} Back</button>
       } />
 
       <div style={{ maxWidth: 700, margin: "0 auto", padding: "24px 16px 60px" }}>
@@ -2543,7 +2546,7 @@ export default function ProviderDashboard() {
             {saving ? "Saving…" : "Save Changes →"}
           </button>
           <div style={{ fontSize: 11, color: INK_FADE, fontStyle: "italic", marginTop: 8, fontFamily: SANS }}>Changes go live immediately on your V-Hub listing.</div>
-          <button onClick={() => setView("dashboard")} style={{ marginTop: 16, background: `linear-gradient(180deg,#9A6030,${BROWN_BTN} 60%,#5A3010)`, border: `2px solid #1B3D6F`, borderRadius: 4, color: "#FFFFFF", fontFamily: SANS, fontWeight: 700, fontSize: 13, padding: "10px 28px", cursor: "pointer", whiteSpace: "nowrap" }}>« Return to Hub</button>
+          <button onClick={() => setView("dashboard")} style={{ marginTop: 16, background: "transparent", border: `1.5px solid ${PAPER_DK}`, color: INK_FADE, borderRadius: 6, padding: "10px 28px", fontSize: 13, cursor: "pointer", fontFamily: SANS }>{'\u00AB'} Return to Hub</button>
         </div>
       </div>
     </div>
@@ -2553,11 +2556,11 @@ export default function ProviderDashboard() {
   if (view === "account") return (
     <div style={{ minHeight: "100vh", background: PAPER, backgroundImage: "repeating-linear-gradient(0deg,transparent,transparent 27px,rgba(28,15,0,0.03) 27px,rgba(28,15,0,0.03) 28px)", fontFamily: SERIF }}>
       <TopNav rightContent={
-        <button onClick={handleLogout} style={{ background: `linear-gradient(180deg,#9A6030,${BROWN_BTN} 60%,#5A3010)`, border: `2px solid #1B3D6F`, borderRadius: 4, color: "#FFFFFF", fontFamily: SANS, fontWeight: 700, fontSize: 12, padding: "8px 14px", cursor: "pointer", whiteSpace: "nowrap" }}>Sign Out</button>
+        <button onClick={handleLogout} style={{ background: "rgba(255,255,255,0.1)", border: `1.5px solid ${PAPER_DK}`, color: PAPER, borderRadius: 6, padding: "7px 14px", fontSize: 12, cursor: "pointer", fontFamily: SANS }}>Sign Out</button>
       } />
 
       <div style={{ maxWidth: 560, margin: "0 auto", padding: "24px 16px 60px" }}>
-        <button onClick={() => setView("dashboard")} style={{ background: `linear-gradient(180deg,#9A6030,${BROWN_BTN} 60%,#5A3010)`, border: `2px solid #1B3D6F`, borderRadius: 4, color: "#FFFFFF", fontFamily: SANS, fontWeight: 700, fontSize: 12, padding: "8px 14px", cursor: "pointer", marginBottom: 20, whiteSpace: "nowrap" }}>« Back to Hub</button>
+        <button onClick={() => setView("dashboard")} style={{ background: "transparent", border: `1.5px solid ${PAPER_DK}`, color: INK_FADE, borderRadius: 6, padding: "7px 16px", fontSize: 12, cursor: "pointer", marginBottom: 20, fontFamily: SANS }>{'\u00AB'} Back to Hub</button>
 
         <div style={shS}>Account Settings</div>
 
@@ -2624,13 +2627,7 @@ export default function ProviderDashboard() {
       <link rel="preconnect" href="https://fonts.googleapis.com" />
       <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet" />
 
-      <TopNav rightContent={
-        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-          <a href="/" style={{ textDecoration: "none" }}><button style={{ background: `linear-gradient(180deg,#9A6030,${BROWN_BTN} 60%,#5A3010)`, border: `2px solid #1B3D6F`, borderRadius: 4, color: "#FFFFFF", fontFamily: SANS, fontWeight: 700, fontSize: 12, padding: "8px 14px", cursor: "pointer", whiteSpace: "nowrap" }}>« Home</button></a>
-          <button onClick={() => setView("account")} style={{ background: `linear-gradient(180deg,#9A6030,${BROWN_BTN} 60%,#5A3010)`, border: `2px solid #1B3D6F`, borderRadius: 4, color: "#FFFFFF", fontFamily: SANS, fontWeight: 700, fontSize: 12, padding: "8px 14px", cursor: "pointer", whiteSpace: "nowrap" }}>⚙ Account</button>
-          <button onClick={handleLogout} style={{ background: `linear-gradient(180deg,#9A6030,${BROWN_BTN} 60%,#5A3010)`, border: `2px solid #1B3D6F`, borderRadius: 4, color: "#FFFFFF", fontFamily: SANS, fontWeight: 700, fontSize: 12, padding: "8px 14px", cursor: "pointer", whiteSpace: "nowrap" }}>Sign Out</button>
-        </div>
-      } />
+      <TopNav />
 
       {/* Masthead */}
       <div style={{ textAlign: "center", padding: "24px 20px 18px", borderBottom: `3px double ${INK}` }}>
@@ -2755,7 +2752,10 @@ export default function ProviderDashboard() {
           <button data-testid="edit-profile-btn" onClick={() => setView("edit")} style={{ background: `linear-gradient(180deg,#9A6030,${BROWN_BTN} 60%,#5A3010)`, color: PAPER, border: `3px solid ${YELLOW}`, boxShadow: `0 0 0 1.5px ${YELLOW}, 0 0 12px 3px rgba(255,220,0,0.25)`, borderRadius: 6, padding: "13px 40px", fontSize: 14, fontWeight: 900, cursor: "pointer", fontFamily: SERIF, letterSpacing: 2, textTransform: "uppercase" }}>
             ✏ Edit My Profile →
           </button>
-
+          <div style={{ display: "flex", justifyContent: "center", gap: 16, marginTop: 14 }}>
+            <button onClick={() => setView("account")} style={{ background: "transparent", border: `1.5px solid ${PAPER_DK}`, color: INK_FADE, borderRadius: 6, padding: "7px 16px", fontSize: 12, cursor: "pointer", fontFamily: SANS }}>⚙ Account Settings</button>
+            <button onClick={handleLogout} style={{ background: "transparent", border: `1.5px solid ${PAPER_DK}`, color: INK_FADE, borderRadius: 6, padding: "7px 16px", fontSize: 12, cursor: "pointer", fontFamily: SANS }}>Sign Out</button>
+          </div>
         </div>
 
         {/* ── CLASSIFIED AD SECTION ─────────────────────────── */}
