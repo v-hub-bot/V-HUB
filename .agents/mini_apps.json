@@ -2,6 +2,9 @@
   "app_id": "69d062aca815ce8e697894b1",
   "slug": "v-hub-697894b1",
   "pages": {
+    "Home": {
+      "title": "Home"
+    },
     "ProviderDashboard": {
       "title": "ProviderDashboard"
     },
@@ -16,9 +19,6 @@
     },
     "Terms": {
       "title": "Terms"
-    },
-    "Home": {
-      "title": "Home"
     },
     "Classifieds": {
       "title": "Classifieds"
