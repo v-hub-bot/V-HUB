@@ -968,38 +968,58 @@ function LoginScreen({ onLogin, onForgot }) {
 
 // ── MAIN COMPONENT ────────────────────────────────────────────────────────
 
-// ── Classified Ad Section Component ──────────────────────────────────────
-
-// ── Classified Ad Section ─────────────────────────────────────────────────
-// Mental model:
 //   is_active=true  → LIVE ad (paid, visible on site for 7 days)
 //   is_active=false → QUEUED ad (pre-built, up to 3 in queue)
 //   is_queued_next=true → marked as the next one to launch
 //   saved_images[]  → up to 3 stored image URLs per ad
 //
-// Flow: Build ad → save to queue → mark "next" → current ad expires →
-//       come back, confirm (or swap) next ad → pay $10 → goes live immediately.
+// Flow: Build ad → save to queue → preview it → mark "next" →
+//       pay $10 via Stripe → goes live immediately for 7 days.
+//       NOT charged again until they manually launch another ad.
 
 function ClassifiedAdSection({ provider }) {
-  const [adSlots, setAdSlots] = React.useState([]);
-  const [liveAd, setLiveAd] = React.useState(null);
-  const [loading, setLoading] = React.useState(true);
-  const [editingSlot, setEditingSlot] = React.useState(null); // ClassifiedAd record or "new"
-  const [form, setForm] = React.useState({ headline: "", body: "", village: "", address: "", deal_expires_at: "", image_url: "" });
-  const [saving, setSaving] = React.useState(false);
+  const [adSlots, setAdSlots]         = React.useState([]);
+  const [liveAd, setLiveAd]           = React.useState(null);
+  const [loading, setLoading]         = React.useState(true);
+  const [editingSlot, setEditingSlot] = React.useState(null); // record obj | "new" | null
+  const [previewAd, setPreviewAd]     = React.useState(null); // ad to preview (can be queued or form data)
+  const [previewFromEditor, setPreviewFromEditor] = React.useState(false);
+
+  const [form, setForm] = React.useState({ headline: "", body: "", village: "", address: "", image_url: "" });
+  const [saving, setSaving]   = React.useState(false);
   const [saveMsg, setSaveMsg] = React.useState("");
   const [saveErr, setSaveErr] = React.useState("");
-  const fileRef = React.useRef(null);
-  const [filePreview, setFilePreview] = React.useState(null);
-  const [fileObj, setFileObj] = React.useState(null);
-  const [showImagePicker, setShowImagePicker] = React.useState(false);
-  const [aiPrompt, setAiPrompt] = React.useState("");
-  const [aiGenerating, setAiGenerating] = React.useState(false);
-  const [aiError, setAiError] = React.useState("");
-  const [checkoutLoading, setCheckoutLoading] = React.useState(false);
-  const [checkoutErr, setCheckoutErr] = React.useState("");
-  const [showPreview, setShowPreview] = React.useState(false);
 
+  const fileRef               = React.useRef(null);
+  const [filePreview, setFilePreview] = React.useState(null);
+  const [fileObj, setFileObj]         = React.useState(null);
+  const [uploading, setUploading]     = React.useState(false);
+
+  const [showImagePicker, setShowImagePicker] = React.useState(false);
+  const [aiPrompt, setAiPrompt]   = React.useState("");
+  const [aiGenerating, setAiGenerating] = React.useState(false);
+  const [aiError, setAiError]     = React.useState("");
+
+  const [checkoutLoading, setCheckoutLoading] = React.useState(false);
+  const [checkoutErr, setCheckoutErr]         = React.useState("");
+
+  // ── Styles (local constants matching dashboard palette) ──────────────────
+  const SERIF     = "'Times New Roman', Georgia, serif";
+  const SANS      = "'Helvetica Neue', Arial, sans-serif";
+  const PAPER     = "#F5EDD6";
+  const PAPER_MID = "#EDE0BE";
+  const PAPER_DK  = "#C8B89A";
+  const INK       = "#1C0F00";
+  const INK_FADE  = "#6B5744";
+  const TEAL      = "#00897B";
+  const NAVY      = "#1B3D6F";
+  const GREEN     = "#1A6B3C";
+  const BROWN_BTN = "#7A4820";
+  const YELLOW    = "#FFDB00";
+  const lbS = { display: "block", fontSize: 11, fontWeight: 700, color: INK_FADE, fontFamily: SANS, letterSpacing: 0.5, textTransform: "uppercase", marginBottom: 4 };
+  const inS = { width: "100%", boxSizing: "border-box", background: "#FFFDF5", border: `1.5px solid ${PAPER_DK}`, borderRadius: 5, padding: "9px 10px", fontSize: 13, color: INK, fontFamily: SANS, outline: "none" };
+
+  // ── Load ─────────────────────────────────────────────────────────────────
   const loadAds = React.useCallback(async () => {
     if (!provider?.id) return;
     setLoading(true);
@@ -1014,18 +1034,18 @@ function ClassifiedAdSection({ provider }) {
 
   React.useEffect(() => { loadAds(); }, [loadAds]);
 
-  const queued = adSlots.filter(a => !a.is_active);
-  const nextUp = queued.find(a => a.is_queued_next) || null;
+  const queued      = adSlots.filter(a => !a.is_active);
+  const nextUp      = queued.find(a => a.is_queued_next) || null;
   const liveExpired = liveAd?.deal_expires_at && new Date(liveAd.deal_expires_at) < new Date();
 
+  // ── Open editor ──────────────────────────────────────────────────────────
   const openEdit = (slot) => {
     setEditingSlot(slot || "new");
     setForm({
-      headline: slot?.headline || "",
-      body: slot?.body || "",
-      village: slot?.village || "",
-      address: slot?.address || "",
-      deal_expires_at: slot?.deal_expires_at ? slot.deal_expires_at.slice(0,10) : "",
+      headline:  slot?.headline || "",
+      body:      slot?.body     || "",
+      village:   slot?.village  || "",
+      address:   slot?.address  || "",
       image_url: slot?.image_url || "",
     });
     setFilePreview(null); setFileObj(null);
@@ -1033,9 +1053,62 @@ function ClassifiedAdSection({ provider }) {
     setAiError(""); setSaveErr(""); setSaveMsg("");
     setShowImagePicker(false);
   };
-
   const closeEdit = () => { setEditingSlot(null); setFilePreview(null); setFileObj(null); setSaveErr(""); setSaveMsg(""); };
 
+  // ── File upload ──────────────────────────────────────────────────────────
+  const handleFileChange = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setFileObj(file);
+    const reader = new FileReader();
+    reader.onload = ev => setFilePreview(ev.target.result);
+    reader.readAsDataURL(file);
+    // Upload immediately so we have a real URL
+    setUploading(true);
+    try {
+      const fd = new FormData();
+      fd.append("file", file);
+      const upResp = await fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/storage/upload", { method: "POST", body: fd });
+      const upData = await upResp.json();
+      if (upData.url) {
+        setForm(p => ({ ...p, image_url: upData.url }));
+        setFilePreview(upData.url);
+        setFileObj(null);
+      }
+    } catch { /* keep filePreview, will re-upload on save */ }
+    finally { setUploading(false); }
+  };
+
+  // ── AI image ─────────────────────────────────────────────────────────────
+  const handleGenerateAI = async () => {
+    if (!aiPrompt.trim()) return;
+    setAiError(""); setAiGenerating(true);
+    try {
+      const resp = await fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/generateAdImage", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ prompt: aiPrompt, provider_id: provider.id }),
+      });
+      const data = await resp.json();
+      if (data.url) {
+        setForm(p => ({ ...p, image_url: data.url }));
+        setFilePreview(null); setFileObj(null);
+        // Persist to saved_images on existing record
+        const existingRecord = editingSlot !== "new" ? editingSlot : null;
+        if (existingRecord?.id) {
+          const existingSaved = existingRecord.saved_images || [];
+          const newSaved = [data.url, ...existingSaved.filter(u => u !== data.url)].slice(0, 3);
+          await ClassifiedAd.update(existingRecord.id, { ai_prompt: aiPrompt, image_url: data.url, saved_images: newSaved });
+          await loadAds();
+          const fresh = await ClassifiedAd.filter({ provider_id: provider.id });
+          const updated = fresh.find(a => a.id === existingRecord.id);
+          if (updated) setEditingSlot(updated);
+        }
+      } else { setAiError("Generation failed: " + (data.error || "unknown error")); }
+    } catch { setAiError("Error generating. Please try again."); }
+    finally { setAiGenerating(false); }
+  };
+
+  // ── Save draft ───────────────────────────────────────────────────────────
   const handleSave = async () => {
     if (!form.headline.trim()) { setSaveErr("Please enter a headline."); return; }
     if (!form.body.trim()) { setSaveErr("Please enter a description."); return; }
@@ -1054,20 +1127,18 @@ function ClassifiedAdSection({ provider }) {
       const newSaved = imageUrl && !existingSaved.includes(imageUrl)
         ? [imageUrl, ...existingSaved].slice(0, 3)
         : existingSaved.slice(0, 3);
-
       const data = {
-        provider_id: provider.id,
+        provider_id:   provider.id,
         provider_name: provider.business_name,
-        headline: form.headline,
-        body: form.body,
-        village: form.village,
-        address: form.address,
-        deal_expires_at: form.deal_expires_at || null,
+        headline:  form.headline,
+        body:      form.body,
+        village:   form.village,
+        address:   form.address,
         image_url: imageUrl || "",
         ai_prompt: aiPrompt,
         saved_images: newSaved,
-        is_active: existingRecord?.is_active || false,
-        slot_number: existingRecord?.slot_number || (queued.length + 2),
+        is_active:    existingRecord?.is_active || false,
+        slot_number:  existingRecord?.slot_number || (queued.length + 2),
       };
       if (existingRecord?.id) {
         await ClassifiedAd.update(existingRecord.id, data);
@@ -1075,43 +1146,13 @@ function ClassifiedAdSection({ provider }) {
         await ClassifiedAd.create(data);
       }
       await loadAds();
-      setSaveMsg("✓ Ad saved!");
+      setSaveMsg("✓ Ad saved! Now mark it "Next Up" from the queue, then pay $10 to launch.");
       setFileObj(null); setFilePreview(null);
     } catch { setSaveErr("Error saving. Please try again."); }
     finally { setSaving(false); }
   };
 
-  const handleGenerateAI = async () => {
-    if (!aiPrompt.trim()) return;
-    setAiError(""); setAiGenerating(true);
-    try {
-      const resp = await fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/generateAdImage", {
-        method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt: aiPrompt, provider_id: provider.id }),
-      });
-      const data = await resp.json();
-      if (data.url) {
-        setForm(p => ({ ...p, image_url: data.url }));
-        setFileObj(null); setFilePreview(null);
-        // Persist to saved_images immediately if editing an existing record
-        const existingRecord = editingSlot !== "new" ? editingSlot : null;
-        if (existingRecord?.id) {
-          const existingSaved = existingRecord.saved_images || [];
-          const newSaved = [data.url, ...existingSaved.filter(u => u !== data.url)].slice(0, 3);
-          await ClassifiedAd.update(existingRecord.id, { ai_prompt: aiPrompt, image_url: data.url, saved_images: newSaved });
-          await loadAds();
-          // Refresh editingSlot reference
-          const fresh = await ClassifiedAd.filter({ provider_id: provider.id });
-          const updated = fresh.find(a => a.id === existingRecord.id);
-          if (updated) setEditingSlot(updated);
-        }
-      } else {
-        setAiError("Generation failed: " + (data.error || "unknown error"));
-      }
-    } catch { setAiError("Error generating. Please try again."); }
-    finally { setAiGenerating(false); }
-  };
-
+  // ── Mark Next Up ─────────────────────────────────────────────────────────
   const handleMarkNext = async (ad) => {
     for (const a of queued) {
       if (a.id !== ad.id && a.is_queued_next) await ClassifiedAd.update(a.id, { is_queued_next: false });
@@ -1126,6 +1167,7 @@ function ClassifiedAdSection({ provider }) {
     await loadAds();
   };
 
+  // ── Stripe Checkout — ALWAYS required to go live ─────────────────────────
   const handleCheckout = async (adToActivate) => {
     setCheckoutErr(""); setCheckoutLoading(true);
     try {
@@ -1133,33 +1175,71 @@ function ClassifiedAdSection({ provider }) {
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           provider_record_id: provider.id,
-          provider_email: provider.login_email || provider.email,
-          provider_name: provider.business_name,
-          ad_id_to_activate: adToActivate?.id || null,
+          provider_email:     provider.login_email || provider.email,
+          provider_name:      provider.business_name,
+          ad_id_to_activate:  adToActivate?.id || null,
         }),
       });
       const data = await resp.json();
       if (data.url) window.location.href = data.url;
       else setCheckoutErr("Could not start checkout: " + (data.error || "unknown error"));
-    } catch { setCheckoutErr("Error. Please try again."); }
+    } catch { setCheckoutErr("Error connecting to Stripe. Please try again."); }
     finally { setCheckoutLoading(false); }
   };
 
+  // ── Preview modal data ───────────────────────────────────────────────────
+  const openPreviewFromEditor = () => {
+    setPreviewAd({
+      headline:      form.headline || "Your Headline Here",
+      body:          form.body     || "Your deal description here.",
+      village:       form.village  || "",
+      address:       form.address  || "",
+      image_url:     filePreview   || form.image_url || "",
+      provider_name: provider.business_name || "",
+      deal_expires_at: null, // not yet set — webhook sets this at payment time
+    });
+    setPreviewFromEditor(true);
+  };
+
+  const openPreviewQueued = (ad) => {
+    setPreviewAd(ad);
+    setPreviewFromEditor(false);
+  };
+
   const currentRecord = editingSlot !== "new" && editingSlot !== null ? editingSlot : null;
-  const pickerImages = currentRecord?.saved_images || [];
-  const displayImage = filePreview || form.image_url;
+  const pickerImages  = currentRecord?.saved_images || [];
+  const displayImage  = filePreview || form.image_url;
 
   if (loading) return <div style={{ padding: 16, fontSize: 13, color: INK_FADE, fontFamily: SANS }}>Loading ads…</div>;
 
   return (
     <div style={{ marginBottom: 24 }}>
 
+      {/* ── STEP INDICATOR (when no live ad and nothing in queue) ── */}
+      {!liveAd && queued.length === 0 && editingSlot === null && (
+        <div style={{ background: PAPER_MID, border: `2px dashed ${PAPER_DK}`, borderRadius: 10, padding: "20px 16px", textAlign: "center", marginBottom: 14 }}>
+          <div style={{ fontSize: 22, marginBottom: 8 }}>📣</div>
+          <div style={{ fontSize: 14, fontWeight: 900, color: INK, fontFamily: SERIF, marginBottom: 6 }}>Advertise on Deals of the Week</div>
+          <div style={{ fontSize: 12, color: INK_FADE, fontFamily: SANS, lineHeight: 1.8, marginBottom: 14 }}>
+            <span style={{ color: NAVY, fontWeight: 700 }}>Step 1</span> — Build your ad (headline, image, description)<br/>
+            <span style={{ color: NAVY, fontWeight: 700 }}>Step 2</span> — Preview it exactly as visitors will see it<br/>
+            <span style={{ color: NAVY, fontWeight: 700 }}>Step 3</span> — Pay <strong>$10</strong> via Stripe · runs 7 days · no auto-charge
+          </div>
+          <button onClick={() => openEdit(null)} style={{ background: `linear-gradient(180deg,#9A6030,${BROWN_BTN})`, color: PAPER, border: `2px solid ${NAVY}`, borderRadius: 6, padding: "11px 28px", fontSize: 13, fontWeight: 900, cursor: "pointer", fontFamily: SERIF }}>
+            ✚ Create My First Ad
+          </button>
+        </div>
+      )}
+
       {/* ── LIVE AD STATUS ── */}
       {liveAd && !liveExpired && (
         <div style={{ background: "#E8F5E9", border: "2px solid #2E7D32", borderRadius: 8, padding: "12px 16px", marginBottom: 14 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4, flexWrap: "wrap" }}>
-            <span style={{ fontSize: 13, fontWeight: 900, color: "#1B5E20", fontFamily: SERIF }}>🟢 Live Now:</span>
-            <span style={{ fontSize: 13, color: "#2E7D32", fontFamily: SANS, fontWeight: 700 }}>{liveAd.headline}</span>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 8, marginBottom: 4 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <span style={{ fontSize: 13, fontWeight: 900, color: "#1B5E20", fontFamily: SERIF }}>🟢 Live Now:</span>
+              <span style={{ fontSize: 13, color: "#2E7D32", fontFamily: SANS, fontWeight: 700 }}>{liveAd.headline}</span>
+            </div>
+            <button onClick={() => openPreviewQueued(liveAd)} style={{ background: "none", border: `1.5px solid ${TEAL}`, color: TEAL, borderRadius: 4, padding: "4px 10px", fontSize: 11, cursor: "pointer", fontFamily: SANS, fontWeight: 700 }}>👁 Preview</button>
           </div>
           {liveAd.deal_expires_at && (
             <div style={{ fontSize: 11, color: "#388E3C", fontFamily: SANS }}>
@@ -1168,40 +1248,23 @@ function ClassifiedAdSection({ provider }) {
           )}
           {nextUp && (
             <div style={{ marginTop: 6, fontSize: 11, color: "#1A6B3C", fontFamily: SANS, fontStyle: "italic" }}>
-              ⏭ Next up: <strong>{nextUp.headline}</strong>
+              ⏭ Queued next: <strong>{nextUp.headline}</strong>
             </div>
           )}
         </div>
       )}
 
-      {/* ── EXPIRED — RENEW ── */}
+      {/* ── EXPIRED — need new payment to relaunch ── */}
       {liveExpired && (
         <div style={{ background: "#FFF3E0", border: "2px solid #E65100", borderRadius: 8, padding: "14px 16px", marginBottom: 14 }}>
           <div style={{ fontSize: 13, fontWeight: 900, color: "#E65100", fontFamily: SERIF, marginBottom: 6 }}>⏰ Your Ad Has Ended</div>
           <div style={{ fontSize: 12, color: INK, fontFamily: SANS, lineHeight: 1.7, marginBottom: 10 }}>
-            <strong>"{liveAd.headline}"</strong> has expired.
-            {nextUp ? <> <strong>"{nextUp.headline}"</strong> is queued as your next ad — pay $10 to launch it now.</> : <> Pick a queued ad below or build a new one, then pay $10 to go live.</>}
+            <strong>"{liveAd.headline}"</strong> has expired.{" "}
+            {nextUp
+              ? <>Pick <strong>"{nextUp.headline}"</strong> below and pay <strong>$10</strong> to go live for another 7 days.</>
+              : <>Build a new ad or mark a queued one "Next Up", then pay <strong>$10</strong> to go live.</>}
           </div>
-          {nextUp && (
-            <button disabled={checkoutLoading} onClick={() => handleCheckout(nextUp)}
-              style={{ background: "linear-gradient(180deg,#E65100,#BF360C)", color: "#fff", border: "2px solid #E65100", borderRadius: 6, padding: "11px 24px", fontSize: 13, fontWeight: 900, cursor: "pointer", fontFamily: SERIF }}>
-              {checkoutLoading ? "Redirecting…" : `💳 Launch "${nextUp.headline.slice(0,28)}…" — $10 →`}
-            </button>
-          )}
           {checkoutErr && <div style={{ marginTop: 8, fontSize: 12, color: "#c00", fontFamily: SANS }}>{checkoutErr}</div>}
-        </div>
-      )}
-
-      {/* ── NO ADS YET ── */}
-      {adSlots.length === 0 && editingSlot === null && (
-        <div style={{ background: PAPER_MID, border: `1.5px dashed ${PAPER_DK}`, borderRadius: 8, padding: "18px 16px", textAlign: "center", marginBottom: 14 }}>
-          <div style={{ fontSize: 13, fontWeight: 900, color: INK, fontFamily: SERIF, marginBottom: 6 }}>Build your first Deal of the Week ad</div>
-          <div style={{ fontSize: 12, color: INK_FADE, fontFamily: SANS, lineHeight: 1.7, marginBottom: 12 }}>
-            Write a headline, describe your deal, upload or AI-generate an image.<br/>Save it, then pay $10 to post it live for 7 days.
-          </div>
-          <button onClick={() => openEdit(null)} style={{ background: `linear-gradient(180deg,#9A6030,${BROWN_BTN})`, color: PAPER, border: `2px solid ${NAVY}`, borderRadius: 6, padding: "11px 24px", fontSize: 13, fontWeight: 900, cursor: "pointer", fontFamily: SERIF }}>
-            ✚ Create First Ad
-          </button>
         </div>
       )}
 
@@ -1209,7 +1272,7 @@ function ClassifiedAdSection({ provider }) {
       {queued.length > 0 && editingSlot === null && (
         <div style={{ marginBottom: 14 }}>
           <div style={{ fontSize: 11, fontWeight: 700, color: INK_FADE, fontFamily: SANS, letterSpacing: 1, textTransform: "uppercase", marginBottom: 8 }}>
-            Your Queue ({queued.length}/3) — pre-built, ready to launch
+            Your Ad Queue ({queued.length}/3) — pre-built, not yet live
           </div>
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
             {queued.map(ad => (
@@ -1219,27 +1282,27 @@ function ClassifiedAdSection({ provider }) {
                 borderRadius: 8, padding: "10px 12px",
                 display: "flex", alignItems: "flex-start", gap: 10,
               }}>
+                {/* Thumbnail */}
                 {ad.image_url
                   ? <img src={ad.image_url} alt="" style={{ width: 56, height: 56, objectFit: "cover", borderRadius: 4, flexShrink: 0, border: `1.5px solid ${PAPER_DK}` }} />
                   : <div style={{ width: 56, height: 56, background: PAPER_MID, borderRadius: 4, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22 }}>📄</div>
                 }
+                {/* Info */}
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ fontSize: 13, fontWeight: 900, color: INK, fontFamily: SERIF, marginBottom: 2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                     {ad.headline}
-                    {ad.is_queued_next && <span style={{ marginLeft: 8, fontSize: 10, background: "#1565C0", color: "#fff", borderRadius: 10, padding: "2px 7px", fontFamily: SANS }}>⏭ NEXT</span>}
+                    {ad.is_queued_next && <span style={{ marginLeft: 8, fontSize: 10, background: "#1565C0", color: "#fff", borderRadius: 10, padding: "2px 7px", fontFamily: SANS }}>⏭ NEXT UP</span>}
                   </div>
                   <div style={{ fontSize: 11, color: INK_FADE, fontFamily: SANS, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{ad.body}</div>
                   {ad.village && <div style={{ fontSize: 10, color: TEAL, fontFamily: SANS, marginTop: 2 }}>📍 {ad.village}</div>}
-                  {ad.saved_images?.length > 0 && <div style={{ fontSize: 10, color: "#6B4090", fontFamily: SANS }}>🖼 {ad.saved_images.length} saved image{ad.saved_images.length !== 1 ? "s" : ""}</div>}
                 </div>
+                {/* Actions */}
                 <div style={{ display: "flex", flexDirection: "column", gap: 4, flexShrink: 0 }}>
+                  <button onClick={() => openPreviewQueued(ad)} style={{ background: PAPER, border: `1.5px solid ${TEAL}`, color: TEAL, borderRadius: 4, padding: "4px 10px", fontSize: 10, cursor: "pointer", fontFamily: SANS, fontWeight: 700 }}>👁 Preview</button>
                   <button onClick={() => openEdit(ad)} style={{ background: PAPER, border: `1.5px solid ${PAPER_DK}`, color: INK_FADE, borderRadius: 4, padding: "4px 10px", fontSize: 10, cursor: "pointer", fontFamily: SANS, fontWeight: 700 }}>✏ Edit</button>
                   <button onClick={() => handleMarkNext(ad)} style={{ background: ad.is_queued_next ? "#1565C0" : PAPER, color: ad.is_queued_next ? "#fff" : "#1565C0", border: "1.5px solid #1565C0", borderRadius: 4, padding: "4px 10px", fontSize: 10, cursor: "pointer", fontFamily: SANS, fontWeight: 700 }}>
-                    {ad.is_queued_next ? "✓ Next" : "⏭ Set Next"}
+                    {ad.is_queued_next ? "✓ Next Up" : "⏭ Set Next"}
                   </button>
-                  {provider.classifieds_addon && (
-                    <button disabled={checkoutLoading} onClick={() => handleCheckout(ad)} style={{ background: GREEN, color: "#fff", border: "none", borderRadius: 4, padding: "4px 10px", fontSize: 10, cursor: "pointer", fontFamily: SANS, fontWeight: 700 }}>🚀 Launch</button>
-                  )}
                   <button onClick={() => handleDeleteQueued(ad)} style={{ background: "transparent", border: "1.5px solid #c00", color: "#c00", borderRadius: 4, padding: "4px 8px", fontSize: 10, cursor: "pointer", fontFamily: SANS }}>🗑</button>
                 </div>
               </div>
@@ -1248,42 +1311,38 @@ function ClassifiedAdSection({ provider }) {
         </div>
       )}
 
-      {/* Add to queue button */}
-      {queued.length < 3 && editingSlot === null && adSlots.length > 0 && (
-        <button onClick={() => openEdit(null)} style={{ width: "100%", background: PAPER, border: `1.5px dashed ${PAPER_DK}`, color: INK_FADE, borderRadius: 6, padding: "9px", fontSize: 12, cursor: "pointer", fontFamily: SANS, marginBottom: 14 }}>
-          ✚ Queue Another Ad ({queued.length}/3 slots used)
-        </button>
-      )}
-
-      {/* Pay to go live — only show when provider has marked an ad as "Next Up" */}
-      {!provider.classifieds_addon && !liveAd && nextUp && editingSlot === null && (
-        <div style={{ background: "#F9F3E3", border: "2px solid #2E7D32", borderRadius: 8, padding: "14px 16px", marginBottom: 14 }}>
-          <div style={{ fontSize: 13, fontWeight: 900, color: "#2E7D32", fontFamily: SERIF, marginBottom: 4 }}>✅ Ready to Go Live!</div>
-          <div style={{ fontSize: 12, color: INK, fontFamily: SANS, lineHeight: 1.7, marginBottom: 10 }}>
-            Your ad <strong>"{nextUp.headline}"</strong> is marked as next. Pay $10 to post it live for 7 days — visible to every visitor searching in your village.
+      {/* ── PAY TO GO LIVE — shown when an ad is marked Next Up ── */}
+      {nextUp && editingSlot === null && (
+        <div style={{ background: "#F0FBF4", border: "2px solid #2E7D32", borderRadius: 8, padding: "14px 16px", marginBottom: 14 }}>
+          <div style={{ fontSize: 13, fontWeight: 900, color: "#2E7D32", fontFamily: SERIF, marginBottom: 4 }}>
+            ✅ Ready to Launch — <span style={{ color: INK }}>"{nextUp.headline}"</span>
           </div>
-          <button disabled={checkoutLoading} onClick={() => handleCheckout(nextUp)}
-            style={{ background: "linear-gradient(180deg,#1A6B3C,#145530)", color: "#fff", border: "2px solid #1A6B3C", borderRadius: 6, padding: "11px 28px", fontSize: 13, fontWeight: 900, cursor: "pointer", fontFamily: SERIF }}>
-            {checkoutLoading ? "Redirecting…" : `💳 Pay $10 — Post "${nextUp.headline.slice(0,25)}…" Live →`}
-          </button>
+          <div style={{ fontSize: 12, color: INK_FADE, fontFamily: SANS, lineHeight: 1.7, marginBottom: 10 }}>
+            Pay <strong style={{ color: INK }}>$10</strong> to go live for <strong style={{ color: INK }}>7 days</strong>. You won't be charged again unless you launch another ad.
+          </div>
+          <div style={{ display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center" }}>
+            <button disabled={checkoutLoading} onClick={() => handleCheckout(nextUp)}
+              style={{ background: "linear-gradient(180deg,#1A6B3C,#145530)", color: "#fff", border: "2px solid #1A6B3C", borderRadius: 6, padding: "11px 28px", fontSize: 13, fontWeight: 900, cursor: checkoutLoading ? "not-allowed" : "pointer", fontFamily: SERIF, opacity: checkoutLoading ? 0.7 : 1 }}>
+              {checkoutLoading ? "Redirecting to Stripe…" : `💳 Pay $10 — Launch Ad for 7 Days →`}
+            </button>
+            <button onClick={() => openPreviewQueued(nextUp)} style={{ background: "none", border: `1.5px solid ${TEAL}`, color: TEAL, borderRadius: 6, padding: "10px 16px", fontSize: 12, cursor: "pointer", fontFamily: SANS, fontWeight: 700 }}>👁 Preview First</button>
+          </div>
           {checkoutErr && <div style={{ marginTop: 8, fontSize: 12, color: "#c00", fontFamily: SANS }}>{checkoutErr}</div>}
         </div>
       )}
-      {/* Hint when they have queued ads but haven't picked one yet */}
-      {!provider.classifieds_addon && !liveAd && queued.length > 0 && !nextUp && editingSlot === null && (
-        <div style={{ background: "#EFF8FF", border: "2px solid #1565C0", borderRadius: 8, padding: "12px 16px", marginBottom: 14, fontSize: 12, color: "#1565C0", fontFamily: SANS, lineHeight: 1.7 }}>
-          ⏭ <strong>Ready to go live?</strong> Click <strong>"Set Next"</strong> on the ad you want to run first, then pay $10 to post it for 7 days.
+
+      {/* Hint: they have queued ads but haven't marked one Next */}
+      {queued.length > 0 && !nextUp && editingSlot === null && (
+        <div style={{ background: "#EFF8FF", border: "1.5px solid #1565C0", borderRadius: 8, padding: "10px 14px", marginBottom: 14, fontSize: 12, color: "#1565C0", fontFamily: SANS, lineHeight: 1.7 }}>
+          ⏭ <strong>Ready to go live?</strong> Click <strong>"Set Next"</strong> on the ad you want to run, then pay $10 to launch it for 7 days.
         </div>
       )}
 
-      {/* Subscribed + active but expired — renew with next queued */}
-      {provider.classifieds_addon && liveExpired && queued.length > 0 && editingSlot === null && !nextUp && (
-        <div style={{ background: "#FFF8E1", border: "2px solid #F9A825", borderRadius: 8, padding: "14px 16px", marginBottom: 14 }}>
-          <div style={{ fontSize: 13, fontWeight: 900, color: "#E65100", fontFamily: SERIF, marginBottom: 4 }}>🔄 Choose Your Next Ad</div>
-          <div style={{ fontSize: 12, color: INK, fontFamily: SANS, lineHeight: 1.7, marginBottom: 8 }}>
-            Click "⏭ Set Next" on the ad you want to run, then pay $10 to launch it for 7 more days.
-          </div>
-        </div>
+      {/* Add another to queue button */}
+      {queued.length > 0 && queued.length < 3 && editingSlot === null && (
+        <button onClick={() => openEdit(null)} style={{ width: "100%", background: PAPER, border: `1.5px dashed ${PAPER_DK}`, color: INK_FADE, borderRadius: 6, padding: "9px", fontSize: 12, cursor: "pointer", fontFamily: SANS, marginBottom: 14 }}>
+          ✚ Queue Another Ad ({queued.length}/3 slots used)
+        </button>
       )}
 
       {/* ── AD EDITOR ── */}
@@ -1291,24 +1350,24 @@ function ClassifiedAdSection({ provider }) {
         <div style={{ background: PAPER_MID, border: `2px solid ${PAPER_DK}`, borderRadius: 10, padding: "16px 14px", marginBottom: 14 }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
             <div style={{ fontSize: 13, fontWeight: 900, color: INK, fontFamily: SERIF }}>
-              {currentRecord ? "✏ Edit Queued Ad" : "✚ New Queued Ad"}
+              {currentRecord ? "✏ Edit Ad" : "✚ Build New Ad"}
             </div>
             <button onClick={closeEdit} style={{ background: "none", border: "none", fontSize: 20, cursor: "pointer", color: INK_FADE }}>✕</button>
           </div>
 
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px 14px" }}>
             <div style={{ gridColumn: "1/-1" }}>
-              <label style={lbS}>Headline * <span style={{ fontSize: 10, fontWeight: 400 }}>(max 80 chars)</span></label>
+              <label style={lbS}>Headline * <span style={{ fontSize: 10, fontWeight: 400, textTransform: "none" }}>(max 80 chars)</span></label>
               <input style={inS} placeholder="e.g. Buy 3 Tires Get 1 Free — This Week Only"
                 value={form.headline} onChange={e => setForm(p => ({ ...p, headline: e.target.value.slice(0,80) }))} />
-              <div style={{ fontSize: 10, color: INK_FADE, fontFamily: SANS }}>{form.headline.length}/80</div>
+              <div style={{ fontSize: 10, color: INK_FADE, fontFamily: SANS, textAlign: "right" }}>{form.headline.length}/80</div>
             </div>
             <div style={{ gridColumn: "1/-1" }}>
-              <label style={lbS}>Deal Description * <span style={{ fontSize: 10, fontWeight: 400 }}>(max 300 chars)</span></label>
+              <label style={lbS}>Deal Description * <span style={{ fontSize: 10, fontWeight: 400, textTransform: "none" }}>(max 300 chars)</span></label>
               <textarea style={{ ...inS, minHeight: 80, resize: "vertical", lineHeight: 1.6 }}
-                placeholder="Describe your deal in detail…"
+                placeholder="Describe your deal — what it is, how to redeem it, any conditions…"
                 value={form.body} onChange={e => setForm(p => ({ ...p, body: e.target.value.slice(0,300) }))} />
-              <div style={{ fontSize: 10, color: INK_FADE, fontFamily: SANS }}>{form.body.length}/300</div>
+              <div style={{ fontSize: 10, color: INK_FADE, fontFamily: SANS, textAlign: "right" }}>{form.body.length}/300</div>
             </div>
             <div>
               <label style={lbS}>Village / Area</label>
@@ -1318,182 +1377,158 @@ function ClassifiedAdSection({ provider }) {
               <label style={lbS}>Business Address</label>
               <input style={inS} placeholder="123 Main St" value={form.address} onChange={e => setForm(p => ({ ...p, address: e.target.value }))} />
             </div>
-            <div>
-              <label style={lbS}>Deal Expires On</label>
-              <input type="date" style={inS} value={form.deal_expires_at} onChange={e => setForm(p => ({ ...p, deal_expires_at: e.target.value }))} />
-            </div>
           </div>
 
-          {/* Image section */}
-          <div style={{ marginTop: 14, background: PAPER, border: `1.5px solid ${PAPER_DK}`, borderRadius: 8, padding: "12px" }}>
-            <div style={{ fontSize: 11, fontWeight: 700, color: INK, fontFamily: SANS, letterSpacing: 1, textTransform: "uppercase", marginBottom: 8 }}>Ad Image</div>
+          {/* ── Image Section ── */}
+          <div style={{ marginTop: 14, background: PAPER, border: `1.5px solid ${PAPER_DK}`, borderRadius: 8, padding: "12px 14px" }}>
+            <label style={{ ...lbS, marginBottom: 8 }}>Ad Image <span style={{ fontSize: 10, fontWeight: 400, textTransform: "none" }}>(upload or AI-generate)</span></label>
 
+            {/* Current image preview */}
             {displayImage && (
-              <div style={{ position: "relative", marginBottom: 10, borderRadius: 6, overflow: "hidden", border: `1.5px solid ${PAPER_DK}` }}>
-                <img src={displayImage} alt="Ad" style={{ width: "100%", maxHeight: 180, objectFit: "cover", display: "block" }} />
-                <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, background: "rgba(0,0,0,0.45)", padding: "4px 8px", fontSize: 10, color: "#fff", fontFamily: SANS }}>Current image</div>
-                <button onClick={() => { setForm(p => ({ ...p, image_url: "" })); setFilePreview(null); setFileObj(null); if (fileRef.current) fileRef.current.value = ""; }}
-                  style={{ position: "absolute", top: 5, right: 5, background: "rgba(0,0,0,0.6)", color: "#fff", border: "none", borderRadius: "50%", width: 22, height: 22, fontSize: 12, cursor: "pointer" }}>✕</button>
+              <div style={{ marginBottom: 10, position: "relative", display: "inline-block" }}>
+                <img src={displayImage} alt="Ad" style={{ width: "100%", maxWidth: 280, height: 140, objectFit: "cover", borderRadius: 6, border: `2px solid ${TEAL}`, display: "block" }} />
+                <button onClick={() => { setForm(p => ({ ...p, image_url: "" })); setFilePreview(null); setFileObj(null); }}
+                  style={{ position: "absolute", top: 4, right: 4, background: "rgba(0,0,0,0.6)", color: "#fff", border: "none", borderRadius: "50%", width: 22, height: 22, fontSize: 13, cursor: "pointer", lineHeight: "22px", textAlign: "center", padding: 0 }}>✕</button>
               </div>
             )}
 
-            <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 10 }}>
-              <input ref={fileRef} type="file" accept="image/*" style={{ display: "none" }}
-                onChange={e => {
-                  const file = e.target.files?.[0];
-                  if (!file) return;
-                  setFileObj(file);
-                  const reader = new FileReader();
-                  reader.onload = ev => { setFilePreview(ev.target.result); setForm(p => ({ ...p, image_url: "" })); };
-                  reader.readAsDataURL(file);
-                }} />
-              <button onClick={() => fileRef.current?.click()} style={{ background: PAPER, border: `1.5px solid ${PAPER_DK}`, color: INK_FADE, borderRadius: 5, padding: "8px 12px", fontSize: 11, cursor: "pointer", fontFamily: SANS, fontWeight: 700 }}>
-                📷 Upload Image
+            {/* Upload button */}
+            <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center", marginBottom: 10 }}>
+              <button onClick={() => fileRef.current?.click()} disabled={uploading}
+                style={{ background: PAPER_MID, border: `1.5px solid ${PAPER_DK}`, color: INK, borderRadius: 5, padding: "7px 14px", fontSize: 12, cursor: uploading ? "not-allowed" : "pointer", fontFamily: SANS, fontWeight: 700 }}>
+                {uploading ? "Uploading…" : "📁 Upload Image"}
               </button>
+              <input ref={fileRef} type="file" accept="image/*" style={{ display: "none" }} onChange={handleFileChange} />
               {pickerImages.length > 0 && (
-                <button onClick={() => setShowImagePicker(p => !p)} style={{ background: PAPER, border: "1.5px solid #7B3FA0", color: "#4A0080", borderRadius: 5, padding: "8px 12px", fontSize: 11, cursor: "pointer", fontFamily: SANS, fontWeight: 700 }}>
-                  🖼 Saved Images ({pickerImages.length}/3) {showImagePicker ? "▲" : "▼"}
+                <button onClick={() => setShowImagePicker(p => !p)}
+                  style={{ background: PAPER_MID, border: `1.5px solid ${PAPER_DK}`, color: INK, borderRadius: 5, padding: "7px 14px", fontSize: 12, cursor: "pointer", fontFamily: SANS, fontWeight: 700 }}>
+                  🖼 Saved Images ({pickerImages.length})
                 </button>
               )}
             </div>
 
+            {/* Saved image picker */}
             {showImagePicker && pickerImages.length > 0 && (
-              <div style={{ marginBottom: 10, padding: "10px", background: "#F0E8FF", borderRadius: 6, border: "1.5px solid #C8A0E0" }}>
-                <div style={{ fontSize: 11, color: "#4A0080", fontFamily: SANS, fontWeight: 700, marginBottom: 8 }}>Tap to select an image for this ad:</div>
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 6 }}>
-                  {pickerImages.map((url, i) => (
-                    <div key={i} onClick={() => { setForm(p => ({ ...p, image_url: url })); setFileObj(null); setFilePreview(null); setShowImagePicker(false); }}
-                      style={{ position: "relative", cursor: "pointer", borderRadius: 5, overflow: "hidden", border: form.image_url === url ? "2.5px solid #7B3FA0" : "1.5px solid #C8A0E0" }}>
-                      <img src={url} alt="" style={{ width: "100%", height: 70, objectFit: "cover", display: "block" }} />
-                      {form.image_url === url && (
-                        <div style={{ position: "absolute", inset: 0, background: "rgba(123,63,160,0.3)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                          <span style={{ background: "#7B3FA0", color: "#fff", borderRadius: 10, padding: "2px 7px", fontSize: 10, fontWeight: 700 }}>✓ Using</span>
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-                <div style={{ fontSize: 10, color: "#6B4090", fontFamily: SANS, marginTop: 6 }}>Up to 3 images stored per ad slot. New ones push out the oldest.</div>
+              <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 10 }}>
+                {pickerImages.map((url, i) => (
+                  <div key={i} onClick={() => { setForm(p => ({ ...p, image_url: url })); setFilePreview(null); setFileObj(null); setShowImagePicker(false); }}
+                    style={{ cursor: "pointer", border: form.image_url === url ? `3px solid ${TEAL}` : `2px solid ${PAPER_DK}`, borderRadius: 5, overflow: "hidden" }}>
+                    <img src={url} alt="" style={{ width: 72, height: 72, objectFit: "cover", display: "block" }} />
+                  </div>
+                ))}
               </div>
             )}
 
             {/* AI generator */}
-            <div style={{ background: "#F0E8FF", border: "1.5px solid #7B3FA0", borderRadius: 6, padding: "10px 12px" }}>
-              <div style={{ fontSize: 11, fontWeight: 700, color: "#4A0080", fontFamily: SANS, marginBottom: 4 }}>🤖 AI Image Generator</div>
-              <div style={{ fontSize: 11, color: "#6B4090", fontFamily: SANS, marginBottom: 6, lineHeight: 1.5 }}>
-                Describe what you want — colors, objects, text overlay, mood. Each generated image is saved (up to 3). Regenerate until perfect.
+            <div style={{ borderTop: `1px solid ${PAPER_DK}`, paddingTop: 10, marginTop: 4 }}>
+              <label style={{ ...lbS, marginBottom: 6 }}>✨ AI Image Generator</label>
+              <div style={{ display: "flex", gap: 8 }}>
+                <input style={{ ...inS, flex: 1 }} placeholder="e.g. Pool cleaning service, sunny Florida backyard"
+                  value={aiPrompt} onChange={e => setAiPrompt(e.target.value)}
+                  onKeyDown={e => e.key === "Enter" && handleGenerateAI()} />
+                <button onClick={handleGenerateAI} disabled={aiGenerating || !aiPrompt.trim()}
+                  style={{ background: `linear-gradient(180deg,#9A6030,${BROWN_BTN})`, color: PAPER, border: `1.5px solid ${NAVY}`, borderRadius: 5, padding: "8px 14px", fontSize: 12, fontWeight: 700, cursor: aiGenerating || !aiPrompt.trim() ? "not-allowed" : "pointer", fontFamily: SANS, whiteSpace: "nowrap", opacity: aiGenerating ? 0.7 : 1 }}>
+                  {aiGenerating ? "Generating…" : "✨ Generate"}
+                </button>
               </div>
-              <textarea style={{ ...inS, minHeight: 48, resize: "vertical", background: "#fff", fontSize: 12 }}
-                placeholder="e.g. Tropical red background, a tire in foreground, bold white text: Buy 3 Get 1 Free"
-                value={aiPrompt} onChange={e => setAiPrompt(e.target.value)} />
-              <button disabled={aiGenerating || !aiPrompt.trim()} onClick={handleGenerateAI}
-                style={{ marginTop: 7, background: aiGenerating ? "#888" : "linear-gradient(180deg,#8B4FC8,#5A1A90)", color: "#fff", border: "none", borderRadius: 5, padding: "8px 16px", fontSize: 11, fontWeight: 700, cursor: aiGenerating || !aiPrompt.trim() ? "not-allowed" : "pointer", fontFamily: SANS }}>
-                {aiGenerating ? "✨ Generating…" : (pickerImages.length > 0 ? "🔄 Regenerate Image" : "✨ Generate Image")}
-              </button>
-              {aiError && <div style={{ marginTop: 7, background: "#FEE", border: "1.5px solid #c00", borderRadius: 4, padding: "6px 10px", fontSize: 11, color: "#c00", fontFamily: SANS }}>⚠ {aiError}</div>}
+              {aiGenerating && <div style={{ marginTop: 6, fontSize: 11, color: INK_FADE, fontFamily: SANS }}>Creating your image — takes ~10 seconds…</div>}
+              {aiError && <div style={{ marginTop: 6, fontSize: 11, color: "#c00", fontFamily: SANS }}>{aiError}</div>}
             </div>
           </div>
 
-          {saveErr && <div style={{ background: "#FEE", border: "1.5px solid #c00", borderRadius: 5, padding: "8px 12px", marginTop: 10, fontSize: 12, color: "#c00", fontFamily: SANS }}>⚠ {saveErr}</div>}
-          <div style={{ display: "flex", gap: 10, marginTop: 14, alignItems: "center", flexWrap: "wrap" }}>
-            <button disabled={saving} onClick={handleSave}
+          {/* Save + Preview buttons */}
+          {saveErr && <div style={{ marginTop: 10, fontSize: 12, color: "#c00", fontFamily: SANS }}>{saveErr}</div>}
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center", marginTop: 14 }}>
+            <button onClick={handleSave} disabled={saving}
               style={{ background: `linear-gradient(180deg,#9A6030,${BROWN_BTN})`, color: PAPER, border: `2px solid ${NAVY}`, borderRadius: 5, padding: "11px 24px", fontSize: 13, fontWeight: 900, cursor: saving ? "not-allowed" : "pointer", fontFamily: SERIF, opacity: saving ? 0.7 : 1 }}>
-              {saving ? "Saving…" : saveMsg ? "✓ Saved!" : "💾 Save Ad"}
+              {saving ? "Saving…" : "💾 Save Ad"}
             </button>
-            <button onClick={() => setShowPreview(true)}
+            <button onClick={openPreviewFromEditor}
               style={{ background: PAPER, border: `2px solid ${TEAL}`, color: TEAL, borderRadius: 5, padding: "11px 18px", fontSize: 13, fontWeight: 900, cursor: "pointer", fontFamily: SERIF }}>
-              👁 Preview
+              👁 Preview Ad
             </button>
             <button onClick={closeEdit} style={{ background: "none", border: `1.5px solid ${PAPER_DK}`, color: INK_FADE, borderRadius: 5, padding: "10px 16px", fontSize: 12, cursor: "pointer", fontFamily: SANS }}>Cancel</button>
-            {saveMsg && (
-              <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
-                <span style={{ fontSize: 12, color: "#2E7D32", fontFamily: SANS, fontWeight: 700 }}>{saveMsg}</span>
-                <button onClick={closeEdit} style={{ background: "linear-gradient(180deg,#1A6B3C,#145530)", color: "#fff", border: "none", borderRadius: 5, padding: "6px 16px", fontSize: 12, fontWeight: 700, cursor: "pointer", fontFamily: SANS }}>← Back to Queue</button>
-              </div>
-            )}
           </div>
-
-          {/* Launch button intentionally removed from editor — provider must Save first, then launch from the queue list */}
+          {saveMsg && (
+            <div style={{ marginTop: 8, background: "#E8F5E9", border: "1.5px solid #2E7D32", borderRadius: 6, padding: "8px 12px", fontSize: 12, color: "#1B5E20", fontFamily: SANS, lineHeight: 1.7 }}>
+              {saveMsg}
+            </div>
+          )}
         </div>
       )}
 
-      {/* How it works blurb */}
-      <div style={{ fontSize: 11, color: INK_FADE, fontFamily: SANS, lineHeight: 1.8, background: PAPER, border: `1px solid ${PAPER_DK}`, borderRadius: 6, padding: "8px 12px" }}>
-        <strong style={{ fontFamily: SERIF }}>How Deals of the Week works:</strong>{" "}
-        Build up to 3 queued ads with images (uploaded or AI-generated) · Mark one "Next Up" · When your live ad ends, come back and pay $10 to launch the next one instantly · Each ad runs 7 days and is searchable by village + keyword on the Deals page
-      </div>
+      {/* ── HOW IT WORKS ── */}
+      {editingSlot === null && (
+        <div style={{ fontSize: 11, color: INK_FADE, fontFamily: SANS, lineHeight: 1.9, background: PAPER, border: `1px solid ${PAPER_DK}`, borderRadius: 6, padding: "8px 12px" }}>
+          <strong style={{ fontFamily: SERIF, color: INK }}>How Deals of the Week works:</strong>{" "}
+          Build up to 3 ads · Upload your own image or use AI to generate one · Preview exactly how it will look · Mark one "Next Up" · Pay <strong>$10</strong> → runs live for <strong>7 days</strong> · You're never auto-charged again
+        </div>
+      )}
 
       {/* ── AD PREVIEW MODAL ── */}
-      {showPreview && (
-        <div onClick={() => setShowPreview(false)} style={{
+      {previewAd && (
+        <div onClick={() => setPreviewAd(null)} style={{
           position: "fixed", inset: 0, zIndex: 9999,
-          background: "rgba(0,0,0,0.72)",
+          background: "rgba(0,0,0,0.75)",
           display: "flex", alignItems: "flex-start", justifyContent: "center",
           overflowY: "auto", padding: "24px 16px 48px",
         }}>
-          <div onClick={e => e.stopPropagation()} style={{ width: "100%", maxWidth: 360 }}>
+          <div onClick={e => e.stopPropagation()} style={{ width: "100%", maxWidth: 380 }}>
             {/* Modal header */}
             <div style={{ background: INK, color: PAPER, borderRadius: "8px 8px 0 0", padding: "10px 16px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <span style={{ fontSize: 12, fontWeight: 700, fontFamily: SANS, letterSpacing: 1, textTransform: "uppercase" }}>👁 Live Preview — How Visitors Will See Your Ad</span>
-              <button onClick={() => setShowPreview(false)} style={{ background: "none", border: "none", color: PAPER, fontSize: 20, cursor: "pointer", lineHeight: 1 }}>✕</button>
+              <span style={{ fontSize: 12, fontWeight: 700, fontFamily: SANS, letterSpacing: 0.5 }}>👁 Preview — How Visitors Will See Your Ad</span>
+              <button onClick={() => setPreviewAd(null)} style={{ background: "none", border: "none", color: PAPER, fontSize: 20, cursor: "pointer", lineHeight: 1 }}>✕</button>
             </div>
-            {/* Render ad card exactly like Classifieds page */}
+            {/* Ad card — exact same style as Classifieds page */}
             {(() => {
-              const YELLOW_P = "#FFDB00";
-              const adData = {
-                headline:       form.headline || "Your Headline Goes Here",
-                body:           form.body     || "Your deal description will appear here.",
-                village:        form.village  || "",
-                address:        form.address  || "",
-                deal_expires_at: form.deal_expires_at || "",
-                image_url:      filePreview || form.image_url || "",
-                provider_name:  provider.business_name || provider.owner_name || "Your Business Name",
-              };
-              const days = adData.deal_expires_at ? Math.ceil((new Date(adData.deal_expires_at) - new Date().setHours(0,0,0,0)) / 86400000) : null;
+              const ad = previewAd;
               const fmtD = d => new Date(d).toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"});
+              const days = ad.deal_expires_at ? Math.ceil((new Date(ad.deal_expires_at) - new Date().setHours(0,0,0,0)) / 86400000) : null;
               let badge = null;
               if (days !== null) {
-                if (days < 0)   badge = <span style={{ display:"inline-block", marginTop:4, padding:"2px 8px", background:"#7B0000", color:"#fff", fontSize:9, fontWeight:700, borderRadius:2, letterSpacing:0.5, textTransform:"uppercase" }}>Expired</span>;
+                if (days < 0)    badge = <span style={{ display:"inline-block", marginTop:4, padding:"2px 8px", background:"#7B0000", color:"#fff", fontSize:9, fontWeight:700, borderRadius:2, letterSpacing:0.5, textTransform:"uppercase" }}>Expired</span>;
                 else if (days===0) badge = <span style={{ display:"inline-block", marginTop:4, padding:"2px 8px", background:"#C62828", color:"#fff", fontSize:9, fontWeight:700, borderRadius:2, letterSpacing:0.5, textTransform:"uppercase" }}>Ends Today!</span>;
-                else if (days<=3)  badge = <span style={{ display:"inline-block", marginTop:4, padding:"2px 8px", background:"#E65100", color:"#fff", fontSize:9, fontWeight:700, borderRadius:2, letterSpacing:0.5, textTransform:"uppercase" }}>Ends in {days} day{days!==1?"s":""}!</span>;
-                else if (days<=7)  badge = <span style={{ display:"inline-block", marginTop:4, padding:"2px 8px", background:"#F9A825", color:"#1C0F00", fontSize:9, fontWeight:700, borderRadius:2, letterSpacing:0.5, textTransform:"uppercase" }}>Thru {fmtD(adData.deal_expires_at)}</span>;
-                else               badge = <span style={{ display:"inline-block", marginTop:4, padding:"2px 8px", background:"#1A6B3C", color:"#fff", fontSize:9, fontWeight:700, borderRadius:2, letterSpacing:0.5, textTransform:"uppercase" }}>Good Thru {fmtD(adData.deal_expires_at)}</span>;
+                else if (days<=3) badge = <span style={{ display:"inline-block", marginTop:4, padding:"2px 8px", background:"#E65100", color:"#fff", fontSize:9, fontWeight:700, borderRadius:2, letterSpacing:0.5, textTransform:"uppercase" }}>Ends in {days} day{days!==1?"s":""}!</span>;
+                else              badge = <span style={{ display:"inline-block", marginTop:4, padding:"2px 8px", background:"#1A6B3C", color:"#fff", fontSize:9, fontWeight:700, borderRadius:2, letterSpacing:0.5, textTransform:"uppercase" }}>Thru {fmtD(ad.deal_expires_at)}</span>;
               }
               return (
-                <div style={{ background:"#F0E6C8", border:"2px solid #1C0F00", borderRadius:"0 0 2px 2px", display:"flex", flexDirection:"column", overflow:"hidden", boxShadow:"3px 3px 10px rgba(0,0,0,0.35)" }}>
-                  {/* Header strip */}
+                <div style={{ background:"#F0E6C8", border:"2px solid #1C0F00", display:"flex", flexDirection:"column", overflow:"hidden", boxShadow:"3px 3px 12px rgba(0,0,0,0.4)" }}>
                   <div style={{ background:"#1C0F00", padding:"10px 14px 9px", textAlign:"center" }}>
                     <div style={{ fontSize:9, color:"#C8B07A", fontFamily:SANS, letterSpacing:2, textTransform:"uppercase", marginBottom:4 }}>✦ Deal of the Week ✦</div>
-                    <div style={{ fontSize:17, fontWeight:900, color:YELLOW_P, textTransform:"uppercase", letterSpacing:0.5, lineHeight:1.25, fontFamily:SERIF }}>
-                      {adData.headline}
-                    </div>
+                    <div style={{ fontSize:17, fontWeight:900, color:YELLOW, textTransform:"uppercase", letterSpacing:0.5, lineHeight:1.25, fontFamily:SERIF }}>{ad.headline || "Your Headline Here"}</div>
                     {badge}
                   </div>
-                  {/* Image */}
-                  {adData.image_url && (
-                    <img src={adData.image_url} alt={adData.headline} style={{ width:"100%", height:160, objectFit:"cover", display:"block", borderBottom:"1px solid #C8B07A" }} />
+                  {ad.image_url && (
+                    <img src={ad.image_url} alt={ad.headline} style={{ width:"100%", height:160, objectFit:"cover", display:"block", borderBottom:"1px solid #C8B07A" }} />
                   )}
-                  {/* Body */}
-                  <div style={{ padding:"14px 16px 8px", fontSize:14, color:"#1C0F00", lineHeight:1.8, fontFamily:SERIF }}>
-                    {adData.body}
-                  </div>
-                  {/* Address */}
-                  {adData.address && (
-                    <div style={{ padding:"4px 16px 10px", fontSize:12, color:"#00836B", fontWeight:700, fontFamily:SANS }}>📍 {adData.address}</div>
+                  {!ad.image_url && (
+                    <div style={{ width:"100%", height:100, background:PAPER_MID, display:"flex", alignItems:"center", justifyContent:"center", fontSize:13, color:INK_FADE, fontFamily:SANS, fontStyle:"italic" }}>No image selected</div>
                   )}
-                  {/* Footer */}
+                  <div style={{ padding:"14px 16px 8px", fontSize:14, color:"#1C0F00", lineHeight:1.8, fontFamily:SERIF }}>{ad.body || "Your deal description will appear here."}</div>
+                  {ad.address && <div style={{ padding:"4px 16px 10px", fontSize:12, color:"#00836B", fontWeight:700, fontFamily:SANS }}>📍 {ad.address}</div>}
                   <div style={{ borderTop:"1px solid #C8B07A", background:"#E4D5A8", padding:"9px 14px", display:"flex", justifyContent:"space-between", alignItems:"center", gap:8, flexWrap:"wrap" }}>
-                    <div style={{ fontSize:13, fontWeight:900, color:"#1B3D6F", fontFamily:SANS }}>{adData.provider_name}</div>
-                    {adData.village && (
-                      <div style={{ fontSize:11, color:"#5C3A10", fontFamily:"'Times New Roman', Georgia, serif", fontStyle:"italic", background:"#C8B07A", borderRadius:2, padding:"2px 8px" }}>📌 {adData.village}</div>
-                    )}
+                    <div style={{ fontSize:13, fontWeight:900, color:NAVY, fontFamily:SANS }}>{ad.provider_name || provider.business_name}</div>
+                    {ad.village && <div style={{ fontSize:11, color:"#5C3A10", fontFamily:SERIF, fontStyle:"italic", background:"#C8B07A", borderRadius:2, padding:"2px 8px" }}>📌 {ad.village}</div>}
                   </div>
                 </div>
               );
             })()}
-            {/* Tip + close */}
-            <div style={{ background: "#EFF8FF", border: "1.5px solid #1565C0", borderRadius: "0 0 8px 8px", padding: "10px 14px", fontSize: 11, color: "#1565C0", fontFamily: SANS, lineHeight: 1.7 }}>
-              This is exactly how your ad will appear on the <strong>Deals of the Week</strong> page. Close this, make any edits, then <strong>Save</strong> when ready.
+            {/* Actions under preview */}
+            <div style={{ background: "#1C0F00", borderRadius: "0 0 8px 8px", padding: "12px 14px", display: "flex", gap: 10, flexWrap: "wrap", justifyContent: "center" }}>
+              {previewFromEditor ? (
+                <button onClick={() => setPreviewAd(null)} style={{ background: "none", border: `1.5px solid ${PAPER_DK}`, color: PAPER, borderRadius: 6, padding: "8px 20px", fontSize: 12, cursor: "pointer", fontFamily: SANS }}>← Back to Editor</button>
+              ) : (
+                <>
+                  {/* If this is the nextUp ad, show Pay button right from preview */}
+                  {nextUp?.id === previewAd.id && (
+                    <button disabled={checkoutLoading} onClick={() => { setPreviewAd(null); handleCheckout(previewAd); }}
+                      style={{ background: "linear-gradient(180deg,#1A6B3C,#145530)", color: "#fff", border: "2px solid #1A6B3C", borderRadius: 6, padding: "10px 22px", fontSize: 13, fontWeight: 900, cursor: "pointer", fontFamily: SERIF }}>
+                      {checkoutLoading ? "Redirecting…" : "💳 Looks good — Pay $10 & Go Live →"}
+                    </button>
+                  )}
+                  <button onClick={() => setPreviewAd(null)} style={{ background: "none", border: `1.5px solid ${PAPER_DK}`, color: PAPER, borderRadius: 6, padding: "8px 18px", fontSize: 12, cursor: "pointer", fontFamily: SANS }}>✕ Close</button>
+                </>
+              )}
             </div>
           </div>
         </div>
@@ -1501,7 +1536,6 @@ function ClassifiedAdSection({ provider }) {
     </div>
   );
 }
-
 // ── Reviews Section — provider reads & responds, cannot self-review ──────────
 function ReviewsSection({ provider }) {
   const [allReviews, setAllReviews] = useState([]);
