@@ -2095,10 +2095,22 @@ export default function ProviderDashboard() {
     if (paymentResult === "success") {
       setPaymentSuccess(true);
       window.history.replaceState({}, "", window.location.pathname);
-      // Re-fetch provider so subscription_status reflects Stripe webhook update
+      // Poll for a few seconds to give the Stripe webhook time to update subscription_status
       const acctId = urlParams.get("acct") || sessionStorage.getItem("vhub_provider_id");
       if (acctId) {
-        fetchProviderById(acctId).then(p => { if (p && p.id) { setProvider(p); seedForm(p); } }).catch(() => {});
+        const pollSub = async () => {
+          for (let i = 0; i < 6; i++) {
+            await new Promise(r => setTimeout(r, 2000));
+            try {
+              const p = await fetchProviderById(acctId);
+              if (p && p.id) {
+                setProvider(p); seedForm(p);
+                if (p.subscription_status === "trial" || p.subscription_status === "active") break;
+              }
+            } catch (_) {}
+          }
+        };
+        pollSub();
       }
     } else if (paymentResult === "portal_return") {
       // Returned from Stripe billing portal — re-fetch provider to get updated status

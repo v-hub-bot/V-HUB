@@ -302,7 +302,8 @@ Deno.serve(async (req) => {
 
     // ── SUBSCRIPTION CHECKOUT ─────────────────────────────────────────────
     if (session.mode === "subscription") {
-      const providerRecordId = session.metadata?.provider_record_id || "";
+      // Support both old key (provider_id) and new key (provider_record_id) for backwards compat
+      const providerRecordId = session.metadata?.provider_record_id || session.metadata?.provider_id || "";
       const addonType = session.metadata?.addon_type || "";
       const subscriptionId = session.subscription as string;
 
@@ -357,7 +358,9 @@ Deno.serve(async (req) => {
 
     const periodStart = formatDate(invoice.period_start);
     const periodEnd   = formatDate(invoice.period_end);
-    const isFirstPayment = invoice.billing_reason === "subscription_cycle" || invoice.billing_reason === "subscription_create";
+    // Only send receipt when money was actually charged (skip $0 trial-start invoices)
+    if (invoice.amount_paid === 0) return new Response("ok", { status: 200 });
+    const isFirstPayment = invoice.billing_reason === "subscription_cycle";
 
     try {
       let provider: any = null;

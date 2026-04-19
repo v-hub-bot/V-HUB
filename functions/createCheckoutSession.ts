@@ -63,9 +63,9 @@ Deno.serve(async (req) => {
 
     // ── Session metadata includes trial_end_date so webhook email is accurate
     const sessionMetadata: Record<string, string> = {
-      provider_id:   provider_id   || "",
-      provider_name: provider_name || "",
-      business_name: business_name || "",
+      provider_record_id: provider_id   || "",   // must match what webhook reads
+      provider_name:      provider_name || "",
+      business_name:      business_name || "",
     };
     if (trialEndIso) {
       sessionMetadata.trial_end_date = trialEndIso;
