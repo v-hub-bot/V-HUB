@@ -821,6 +821,15 @@ You can resend manually from the Email button.`);
                 )}
                 {/* Action buttons */}
                 <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 8 }}>
+                  {p.subscription_status === "pending" && (
+                    <button
+                      onClick={() => approveAndNotify(p)}
+                      disabled={approving === p.id}
+                      style={{ ...S.btn("#2e7d32"), fontWeight: 900, fontSize: 13, opacity: approving === p.id ? 0.7 : 1 }}
+                    >
+                      {approving === p.id ? "Approving…" : "✅ Approve & Activate"}
+                    </button>
+                  )}
                   <button onClick={() => toggleActive(p)} style={S.btn(p.is_active ? "#8B4513" : "#2e7d32")}>{p.is_active ? "Deactivate" : "Activate"}</button>
                   <button onClick={() => toggleVisible(p)} style={S.btn(T.teal)}>{p.is_visible === false ? "Make Visible" : "Hide Listing"}</button>
                   <button onClick={() => startEdit(p)} style={S.btn("#5a3010")}>✏️ Edit Details</button>
