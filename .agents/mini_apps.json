@@ -2,14 +2,17 @@
   "app_id": "69d062aca815ce8e697894b1",
   "slug": "v-hub-697894b1",
   "pages": {
-    "Wekcadmin": {
-      "title": "Wekcadmin"
+    "Classifieds": {
+      "title": "Classifieds"
     },
     "Home": {
       "title": "Home"
     },
-    "Classifieds": {
-      "title": "Classifieds"
+    "ListService": {
+      "title": "ListService"
+    },
+    "Privacy": {
+      "title": "Privacy"
     },
     "ProviderDashboard": {
       "title": "ProviderDashboard"
@@ -17,11 +20,8 @@
     "Terms": {
       "title": "Terms"
     },
-    "Privacy": {
-      "title": "Privacy"
-    },
-    "ListService": {
-      "title": "ListService"
+    "Wekcadmin": {
+      "title": "Wekcadmin"
     }
   }
 }
