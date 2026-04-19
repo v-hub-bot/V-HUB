@@ -613,7 +613,7 @@ export default function ListService() {
 
           <a href="/" style={{ textDecoration: "none" }}>
             <button style={{ background: BROWN_BTN, color: PAPER, border: "none", borderRadius: 5, padding: isMobile ? "15px 36px" : "13px 32px", fontSize: isMobile ? 15 : 14, fontWeight: 700, cursor: "pointer", fontFamily: "'Times New Roman', serif", letterSpacing: 2, textTransform: "uppercase" }}>
-              ← Back to Home
+              « Home
             </button>
           </a>
         </div>
@@ -632,7 +632,7 @@ export default function ListService() {
         {/* Header */}
         <div style={{ background: INK, padding: "12px 16px", display: "flex", alignItems: "center", justifyContent: "space-between", position: "sticky", top: 0, zIndex: 50 }}>
           <a href="/" style={{ textDecoration: "none" }}>
-            <button style={{ background: "rgba(255,255,255,0.10)", border: `1.5px solid ${PAPER_DK}`, color: PAPER, borderRadius: 6, padding: "9px 16px", fontSize: 14, cursor: "pointer", fontFamily: "'Times New Roman', serif", fontWeight: 700 }}>← Home</button>
+            <button style={{ background: "linear-gradient(180deg,#9A6030,#7A4820 60%,#5A3010)", border: "2px solid #1B3D6F", borderRadius: 4, color: "#F5E8CC", padding: "9px 16px", fontSize: 14, cursor: "pointer", fontFamily: "Arial, sans-serif", fontWeight: 700 }}>← Home</button>
           </a>
           <div style={{ color: PAPER, fontSize: 22, fontWeight: 900, fontFamily: "'Times New Roman', serif", letterSpacing: 1 }}>🌴 V-Hub</div>
           <ListBurger isMobile={isMobile} />
@@ -957,7 +957,7 @@ export default function ListService() {
       {/* Header */}
       <div style={{ background: INK, padding: "10px 20px", display: "flex", alignItems: "center", justifyContent: "space-between", position: "sticky", top: 0, zIndex: 50 }}>
         <a href="/" style={{ textDecoration: "none" }}>
-          <button style={{ background: "rgba(255,255,255,0.10)", border: `1.5px solid ${PAPER_DK}`, color: PAPER, borderRadius: 6, padding: "7px 16px", fontSize: 13, cursor: "pointer", fontFamily: "'Times New Roman', serif", fontWeight: 700 }}>← Home</button>
+          <button style={{ background: "linear-gradient(180deg,#9A6030,#7A4820 60%,#5A3010)", border: "2px solid #1B3D6F", borderRadius: 4, color: "#F5E8CC", padding: "7px 16px", fontSize: 13, cursor: "pointer", fontFamily: "Arial, sans-serif", fontWeight: 700 }}>← Home</button>
         </a>
         <div style={{ color: PAPER, fontSize: 24, fontWeight: 900, fontFamily: "'Times New Roman', serif", letterSpacing: 1, display: "flex", alignItems: "center", gap: 8 }}>
           🌴 <span style={{ fontSize: 26 }}>V</span>-Hub
