@@ -5,6 +5,9 @@
     "Wekcadmin": {
       "title": "Wekcadmin"
     },
+    "Home": {
+      "title": "Home"
+    },
     "Classifieds": {
       "title": "Classifieds"
     },
@@ -19,9 +22,6 @@
     },
     "ListService": {
       "title": "ListService"
-    },
-    "Home": {
-      "title": "Home"
     }
   }
 }
