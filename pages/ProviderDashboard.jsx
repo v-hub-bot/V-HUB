@@ -2555,11 +2555,11 @@ export default function ProviderDashboard() {
   if (view === "account") return (
     <div style={{ minHeight: "100vh", background: PAPER, backgroundImage: "repeating-linear-gradient(0deg,transparent,transparent 27px,rgba(28,15,0,0.03) 27px,rgba(28,15,0,0.03) 28px)", fontFamily: SERIF }}>
       <TopNav rightContent={
-        <button onClick={handleLogout} style={{ background: "rgba(255,255,255,0.1)", border: `1.5px solid ${PAPER_DK}`, color: PAPER, borderRadius: 6, padding: "7px 14px", fontSize: 12, cursor: "pointer", fontFamily: SANS }}>Sign Out</button>
+        <button onClick={handleLogout} style={{ background: `linear-gradient(180deg,#9A6030,${BROWN_BTN} 60%,#5A3010)`, border: `2px solid #1B3D6F`, borderRadius: 4, color: "#F5E8CC", fontFamily: SANS, fontWeight: 700, fontSize: 12, padding: "8px 14px", cursor: "pointer", whiteSpace: "nowrap" }}>Sign Out</button>
       } />
 
       <div style={{ maxWidth: 560, margin: "0 auto", padding: "24px 16px 60px" }}>
-        <button onClick={() => setView("dashboard")} style={{ background: "transparent", border: `1.5px solid ${PAPER_DK}`, color: INK_FADE, borderRadius: 6, padding: "7px 16px", fontSize: 12, cursor: "pointer", marginBottom: 20, fontFamily: SANS }>{'\u00AB'} Back to Hub</button>
+        <button onClick={() => setView("dashboard")} style={{ background: `linear-gradient(180deg,#9A6030,${BROWN_BTN} 60%,#5A3010)`, border: `2px solid #1B3D6F`, borderRadius: 4, color: "#F5E8CC", fontFamily: SANS, fontWeight: 700, fontSize: 12, padding: "8px 14px", cursor: "pointer", marginBottom: 20, whiteSpace: "nowrap" }}>« Back to Hub</button>
 
         <div style={shS}>Account Settings</div>
 
@@ -2626,7 +2626,12 @@ export default function ProviderDashboard() {
       <link rel="preconnect" href="https://fonts.googleapis.com" />
       <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet" />
 
-      <TopNav />
+      <TopNav rightContent={
+        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+          <button onClick={() => setView("account")} style={{ background: `linear-gradient(180deg,#9A6030,${BROWN_BTN} 60%,#5A3010)`, border: `2px solid #1B3D6F`, borderRadius: 4, color: "#F5E8CC", fontFamily: SANS, fontWeight: 700, fontSize: 12, padding: "8px 14px", cursor: "pointer", whiteSpace: "nowrap" }}>⚙ Account</button>
+          <button onClick={handleLogout} style={{ background: `linear-gradient(180deg,#9A6030,${BROWN_BTN} 60%,#5A3010)`, border: `2px solid #1B3D6F`, borderRadius: 4, color: "#F5E8CC", fontFamily: SANS, fontWeight: 700, fontSize: 12, padding: "8px 14px", cursor: "pointer", whiteSpace: "nowrap" }}>Sign Out</button>
+        </div>
+      } />
 
       {/* Masthead */}
       <div style={{ textAlign: "center", padding: "24px 20px 18px", borderBottom: `3px double ${INK}` }}>
@@ -2751,10 +2756,7 @@ export default function ProviderDashboard() {
           <button data-testid="edit-profile-btn" onClick={() => setView("edit")} style={{ background: `linear-gradient(180deg,#9A6030,${BROWN_BTN} 60%,#5A3010)`, color: PAPER, border: `3px solid ${YELLOW}`, boxShadow: `0 0 0 1.5px ${YELLOW}, 0 0 12px 3px rgba(255,220,0,0.25)`, borderRadius: 6, padding: "13px 40px", fontSize: 14, fontWeight: 900, cursor: "pointer", fontFamily: SERIF, letterSpacing: 2, textTransform: "uppercase" }}>
             ✏ Edit My Profile →
           </button>
-          <div style={{ display: "flex", justifyContent: "center", gap: 16, marginTop: 14 }}>
-            <button onClick={() => setView("account")} style={{ background: "transparent", border: `1.5px solid ${PAPER_DK}`, color: INK_FADE, borderRadius: 6, padding: "7px 16px", fontSize: 12, cursor: "pointer", fontFamily: SANS }}>⚙ Account Settings</button>
-            <button onClick={handleLogout} style={{ background: "transparent", border: `1.5px solid ${PAPER_DK}`, color: INK_FADE, borderRadius: 6, padding: "7px 16px", fontSize: 12, cursor: "pointer", fontFamily: SANS }}>Sign Out</button>
-          </div>
+
         </div>
 
         {/* ── CLASSIFIED AD SECTION ─────────────────────────── */}
