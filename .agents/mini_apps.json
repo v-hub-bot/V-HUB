@@ -1,28 +1,13 @@
 {
-  "app_id": "69d06ada8019d7e9edf7f8e8",
-  "slug": "v-hub-app-edf7f8e8",
+  "app_id": "69d062aca815ce8e697894b1",
+  "slug": "v-hub-app",
   "pages": {
-    "ProviderDashboard": {
-      "title": "ProviderDashboard"
-    },
-    "Home": {
-      "title": "Home"
-    },
-    "ListService": {
-      "title": "ListService"
-    },
-    "Classifieds": {
-      "title": "Classifieds"
-    },
-    "Wekcadmin": {
-      "title": "Wekcadmin"
-    },
-    "Terms": {
-      "title": "Terms"
-    },
-    "Privacy": {
-      "title": "Privacy"
-    }
-  },
-  "build_timestamp": "1776573262"
+    "ProviderDashboard": { "title": "ProviderDashboard" },
+    "Home": { "title": "Home" },
+    "Wekcadmin": { "title": "Wekcadmin" },
+    "ListService": { "title": "ListService" },
+    "Terms": { "title": "Terms" },
+    "Classifieds": { "title": "Classifieds" },
+    "Privacy": { "title": "Privacy" }
+  }
 }
