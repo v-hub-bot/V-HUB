@@ -5,14 +5,11 @@
     "ProviderDashboard": {
       "title": "ProviderDashboard"
     },
-    "Home": {
-      "title": "Home"
-    },
     "ListService": {
       "title": "ListService"
     },
-    "Classifieds": {
-      "title": "Classifieds"
+    "Privacy": {
+      "title": "Privacy"
     },
     "Wekcadmin": {
       "title": "Wekcadmin"
@@ -20,8 +17,11 @@
     "Terms": {
       "title": "Terms"
     },
-    "Privacy": {
-      "title": "Privacy"
+    "Home": {
+      "title": "Home"
+    },
+    "Classifieds": {
+      "title": "Classifieds"
     }
   }
 }
