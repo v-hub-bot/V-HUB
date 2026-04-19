@@ -623,9 +623,9 @@ function ServiceDropdown({ cats, svcs, value, onChange }) {
       {open && (
         <div style={{ position: "absolute", top: "calc(100% + 4px)", left: 0, right: 0, zIndex: 300, background: PAPER, border: "2px solid " + YELLOW, borderRadius: 6, boxShadow: "0 8px 28px rgba(0,0,0,0.22)", overflow: "hidden" }}>
 
-          {/* Category list (macro) — always visible, scrollable */}
+          {/* Category list (macro) — all 9 visible, no scroll needed */}
           {!activeCat && (
-            <div style={{ maxHeight: 320, overflowY: "auto", WebkitOverflowScrolling: "touch" }}>
+            <div style={{ maxHeight: "none", overflowY: "visible" }}>
               <div style={{ padding: "5px 10px 3px", fontSize: 9, color: INK_FADE, textTransform: "uppercase", letterSpacing: 1, borderBottom: "1px solid " + PAPER_DK }}>
                 Tap a category to see services
               </div>
