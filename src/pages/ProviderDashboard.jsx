@@ -605,7 +605,7 @@ function ForcePasswordChangeScreen({ provider, onComplete }) {
             <span style={{ fontSize: 34, fontWeight: 900, color: INK, fontFamily: "'Times New Roman', serif", letterSpacing: -1, lineHeight: 1 }}>Hub</span>
           </a>
           <a href="/" style={{ textDecoration: "none" }}>
-            <button onClick={() => window.location.href = '/'} style={{ background: `linear-gradient(180deg,#9A6030,${BROWN_BTN} 60%,#5A3010)`, border: `2px solid #1B3D6F`, borderRadius: 4, color: "#F5E8CC", fontFamily: SANS, fontWeight: 700, fontSize: 13, padding: "8px 18px", cursor: "pointer", whiteSpace: "nowrap" }>{'\u00AB'} Home</button>
+            <button onClick={() => window.location.href = '/'} style={{ background: `linear-gradient(180deg,#9A6030,${BROWN_BTN} 60%,#5A3010)`, border: `2px solid #1B3D6F`, borderRadius: 4, color: "#F5E8CC", fontFamily: SANS, fontWeight: 700, fontSize: 13, padding: "8px 18px", cursor: "pointer", whiteSpace: "nowrap" }}>{"<<"} Home</button>
           </a>
         </div>
       </div>
@@ -725,7 +725,7 @@ function ForgotPasswordScreen({ onBack }) {
             <span style={{ fontSize: 34, fontWeight: 900, color: INK, fontFamily: "'Times New Roman', serif", letterSpacing: -1, lineHeight: 1 }}>Hub</span>
           </a>
           <a href="/" style={{ textDecoration: "none" }}>
-            <button onClick={() => window.location.href = '/'} style={{ background: `linear-gradient(180deg,#9A6030,${BROWN_BTN} 60%,#5A3010)`, border: `2px solid #1B3D6F`, borderRadius: 4, color: "#F5E8CC", fontFamily: SANS, fontWeight: 700, fontSize: 13, padding: "8px 18px", cursor: "pointer", whiteSpace: "nowrap" }>{'\u00AB'} Home</button>
+            <button onClick={() => window.location.href = '/'} style={{ background: `linear-gradient(180deg,#9A6030,${BROWN_BTN} 60%,#5A3010)`, border: `2px solid #1B3D6F`, borderRadius: 4, color: "#F5E8CC", fontFamily: SANS, fontWeight: 700, fontSize: 13, padding: "8px 18px", cursor: "pointer", whiteSpace: "nowrap" }}>{"<<"} Home</button>
           </a>
         </div>
       </div>
@@ -865,7 +865,7 @@ function LoginScreen({ onLogin, onForgot }) {
             <span style={{ fontSize: 34, fontWeight: 900, color: INK, fontFamily: "'Times New Roman', serif", letterSpacing: -1, lineHeight: 1 }}>Hub</span>
           </a>
           <a href="/" style={{ textDecoration: "none" }}>
-            <button onClick={() => window.location.href = '/'} style={{ background: `linear-gradient(180deg,#9A6030,${BROWN_BTN} 60%,#5A3010)`, border: `2px solid #1B3D6F`, borderRadius: 4, color: "#F5E8CC", fontFamily: SANS, fontWeight: 700, fontSize: 13, padding: "8px 18px", cursor: "pointer", whiteSpace: "nowrap" }>{'\u00AB'} Home</button>
+            <button onClick={() => window.location.href = '/'} style={{ background: `linear-gradient(180deg,#9A6030,${BROWN_BTN} 60%,#5A3010)`, border: `2px solid #1B3D6F`, borderRadius: 4, color: "#F5E8CC", fontFamily: SANS, fontWeight: 700, fontSize: 13, padding: "8px 18px", cursor: "pointer", whiteSpace: "nowrap" }}>{"<<"} Home</button>
           </a>
         </div>
       </div>
@@ -2533,7 +2533,7 @@ export default function ProviderDashboard() {
         {/* Right — Home always visible, plus any contextual action */}
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
           <a href="/" style={{ textDecoration: "none" }}>
-            <button style={{ background: `linear-gradient(180deg,#9A6030,${BROWN_BTN} 60%,#5A3010)`, border: `2px solid #1B3D6F`, borderRadius: 4, color: "#F5E8CC", fontFamily: SANS, fontWeight: 700, fontSize: 13, padding: "8px 16px", cursor: "pointer", whiteSpace: "nowrap" }}>« Home</button>
+            <button style={{ background: `linear-gradient(180deg,#9A6030,${BROWN_BTN} 60%,#5A3010)`, border: `2px solid #1B3D6F`, borderRadius: 4, color: "#F5E8CC", fontFamily: SANS, fontWeight: 700, fontSize: 13, padding: "8px 16px", cursor: "pointer", whiteSpace: "nowrap" }}>{"<<"} Home</button>
           </a>
           {rightContent && rightContent}
         </div>
@@ -2546,7 +2546,7 @@ export default function ProviderDashboard() {
   if (view === "edit") return (
     <div style={{ minHeight: "100vh", background: PAPER, backgroundImage: "repeating-linear-gradient(0deg,transparent,transparent 27px,rgba(28,15,0,0.03) 27px,rgba(28,15,0,0.03) 28px)", fontFamily: SERIF }}>
       <TopNav rightContent={
-        <button onClick={() => setView("dashboard")} style={{ background: "transparent", border: `1.5px solid ${PAPER_DK}`, color: INK_FADE, borderRadius: 6, padding: "7px 16px", fontSize: 12, cursor: "pointer", fontFamily: SANS }>{'\u00AB'} Back</button>
+        <button onClick={() => setView("dashboard")} style={{ background: "transparent", border: `1.5px solid ${PAPER_DK}`, color: INK_FADE, borderRadius: 6, padding: "7px 16px", fontSize: 12, cursor: "pointer", fontFamily: SANS }}>{"<<"} Back</button>
       } />
 
       <div style={{ maxWidth: 700, margin: "0 auto", padding: "24px 16px 60px" }}>
@@ -2608,7 +2608,7 @@ export default function ProviderDashboard() {
             {saving ? "Saving…" : "Save Changes →"}
           </button>
           <div style={{ fontSize: 11, color: INK_FADE, fontStyle: "italic", marginTop: 8, fontFamily: SANS }}>Changes go live immediately on your V-Hub listing.</div>
-          <button onClick={() => setView("dashboard")} style={{ marginTop: 16, background: "transparent", border: `1.5px solid ${PAPER_DK}`, color: INK_FADE, borderRadius: 6, padding: "10px 28px", fontSize: 13, cursor: "pointer", fontFamily: SANS }>{'\u00AB'} Return to Hub</button>
+          <button onClick={() => setView("dashboard")} style={{ marginTop: 16, background: "transparent", border: `1.5px solid ${PAPER_DK}`, color: INK_FADE, borderRadius: 6, padding: "10px 28px", fontSize: 13, cursor: "pointer", fontFamily: SANS }}>{"<<"} Return to Hub</button>
         </div>
       </div>
     </div>
@@ -2622,7 +2622,7 @@ export default function ProviderDashboard() {
       } />
 
       <div style={{ maxWidth: 560, margin: "0 auto", padding: "24px 16px 60px" }}>
-        <button onClick={() => setView("dashboard")} style={{ background: "transparent", border: `1.5px solid ${PAPER_DK}`, color: INK_FADE, borderRadius: 6, padding: "7px 16px", fontSize: 12, cursor: "pointer", marginBottom: 20, fontFamily: SANS }>{'\u00AB'} Back to Hub</button>
+        <button onClick={() => setView("dashboard")} style={{ background: "transparent", border: `1.5px solid ${PAPER_DK}`, color: INK_FADE, borderRadius: 6, padding: "7px 16px", fontSize: 12, cursor: "pointer", marginBottom: 20, fontFamily: SANS }}>{"<<"} Back to Hub</button>
 
         <div style={shS}>Account Settings</div>
 
