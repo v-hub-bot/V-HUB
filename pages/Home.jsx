@@ -577,18 +577,36 @@ function VillageDropdown({ areas, value, onChange }) {
 // ── Service Dropdown ────────────────────────────────────────────────────────
 // Two-level: tap a category (macro) → see its services (micro) → tap service → closes & displays choice
 function ServiceDropdown({ cats, svcs, value, onChange }) {
-  const [open, setOpen]         = useState(false);
-  const [activeCat, setActiveCat] = useState(null); // which macro is expanded
-  const ref = useRef(null);
+  const [open, setOpen]           = useState(false);
+  const [activeCat, setActiveCat] = useState(null);
+  const [rect, setRect]           = useState(null);
+  const btnRef = useRef(null);
+  const panelRef = useRef(null);
+
+  // Measure button position for fixed-position portal
+  const openDropdown = () => {
+    if (btnRef.current) {
+      const r = btnRef.current.getBoundingClientRect();
+      setRect(r);
+    }
+    setOpen(true);
+  };
 
   useEffect(() => {
-    const h = e => { if (ref.current && !ref.current.contains(e.target)) { setOpen(false); setActiveCat(null); } };
+    if (!open) return;
+    const h = e => {
+      if (panelRef.current && !panelRef.current.contains(e.target) &&
+          btnRef.current && !btnRef.current.contains(e.target)) {
+        setOpen(false); setActiveCat(null);
+      }
+    };
     document.addEventListener("mousedown", h);
-    return () => document.removeEventListener("mousedown", h);
-  }, []);
+    document.addEventListener("touchstart", h);
+    return () => { document.removeEventListener("mousedown", h); document.removeEventListener("touchstart", h); };
+  }, [open]);
 
-  const sortedCats   = cats.filter(c => c.is_active !== false);
-  const selectedSvc  = value ? svcs.find(s => s.id === value) : null;
+  const sortedCats    = cats.filter(c => c.is_active !== false);
+  const selectedSvc   = value ? svcs.find(s => s.id === value) : null;
   const selectedLabel = selectedSvc
     ? (cats.find(c => c.id === selectedSvc.category_id)?.name
         ? cats.find(c => c.id === selectedSvc.category_id).name + " › " + selectedSvc.name
@@ -607,10 +625,27 @@ function ServiceDropdown({ cats, svcs, value, onChange }) {
     setActiveCat(null);
   };
 
+  // Portal panel style — fixed to viewport so nothing clips it
+  const panelStyle = rect ? {
+    position: "fixed",
+    top: rect.bottom + 4,
+    left: rect.left,
+    width: rect.width,
+    zIndex: 9999,
+    background: PAPER,
+    border: "2px solid " + YELLOW,
+    borderRadius: 6,
+    boxShadow: "0 8px 28px rgba(0,0,0,0.22)",
+    maxHeight: "60vh",
+    overflowY: "auto",
+    WebkitOverflowScrolling: "touch",
+  } : {};
+
   return (
-    <div ref={ref} style={{ position: "relative", flex: 1, minWidth: 0 }}>
+    <div style={{ position: "relative", flex: 1, minWidth: 0 }}>
       {/* Trigger button */}
-      <button onClick={() => { setOpen(o => !o); if (open) setActiveCat(null); }}
+      <button ref={btnRef}
+        onClick={() => { if (open) { setOpen(false); setActiveCat(null); } else { openDropdown(); } }}
         style={{ width: "100%", background: PAPER, border: "2.5px solid " + YELLOW, boxShadow: "0 0 0 1.5px " + YELLOW + "55", borderRadius: 6, padding: "11px 13px", fontSize: 14, fontFamily: "'Times New Roman', serif", color: value ? INK : INK_FADE, cursor: "pointer", textAlign: "left", display: "flex", justifyContent: "space-between", alignItems: "center", gap: 6 }}>
         <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", flex: 1 }}>{selectedLabel || "Select a Service..."}</span>
         {value
@@ -619,14 +654,14 @@ function ServiceDropdown({ cats, svcs, value, onChange }) {
         }
       </button>
 
-      {/* Dropdown panel */}
-      {open && (
-        <div style={{ position: "absolute", top: "calc(100% + 4px)", left: 0, right: 0, zIndex: 300, background: PAPER, border: "2px solid " + YELLOW, borderRadius: 6, boxShadow: "0 8px 28px rgba(0,0,0,0.22)", overflowX: "hidden" }}>
+      {/* Fixed-position dropdown panel — escapes all overflow clipping */}
+      {open && rect && (
+        <div ref={panelRef} style={panelStyle}>
 
-          {/* Category list (macro) — all 9 visible, no scroll needed */}
+          {/* Category list (macro) */}
           {!activeCat && (
-            <div style={{ maxHeight: "70vh", overflowY: "auto", WebkitOverflowScrolling: "touch" }}>
-              <div style={{ padding: "5px 10px 3px", fontSize: 9, color: INK_FADE, textTransform: "uppercase", letterSpacing: 1, borderBottom: "1px solid " + PAPER_DK }}>
+            <>
+              <div style={{ padding: "5px 10px 3px", fontSize: 9, color: INK_FADE, textTransform: "uppercase", letterSpacing: 1, borderBottom: "1px solid " + PAPER_DK, position: "sticky", top: 0, background: PAPER, zIndex: 1 }}>
                 Tap a category to see services
               </div>
               {sortedCats.map(cat => {
@@ -635,21 +670,20 @@ function ServiceDropdown({ cats, svcs, value, onChange }) {
                 return (
                   <div key={cat.id}
                     onClick={() => handleCatClick(cat)}
-                    style={{ padding: "9px 14px", cursor: "pointer", fontSize: 13, fontWeight: 700, color: INK, background: "transparent", display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid " + PAPER_DK + "88" }}>
+                    style={{ padding: "10px 14px", cursor: "pointer", fontSize: 13, fontWeight: 700, color: INK, background: "transparent", display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid " + PAPER_DK + "88" }}>
                     <span>{cat.icon} {cat.name}</span>
                     <span style={{ fontSize: 11, color: BROWN }}>▶</span>
                   </div>
                 );
               })}
-            </div>
+            </>
           )}
 
-          {/* Services list (micro) — shown after tapping a category */}
+          {/* Services list (micro) */}
           {activeCat && (
-            <div style={{ maxHeight: 320, overflowY: "auto", WebkitOverflowScrolling: "touch", display: "flex", flexDirection: "column" }}>
-              {/* Back button */}
+            <>
               <div onClick={() => setActiveCat(null)}
-                style={{ padding: "10px 14px", cursor: "pointer", fontSize: 12, fontWeight: 700, color: NAVY, background: PAPER_MID, borderBottom: "2px solid " + YELLOW, display: "flex", alignItems: "center", gap: 6, flexShrink: 0 }}>
+                style={{ padding: "10px 14px", cursor: "pointer", fontSize: 12, fontWeight: 700, color: NAVY, background: PAPER_MID, borderBottom: "2px solid " + YELLOW, display: "flex", alignItems: "center", gap: 6, position: "sticky", top: 0, zIndex: 1 }}>
                 <span style={{ fontSize: 14 }}>◀</span> {activeCat.icon} {activeCat.name}
               </div>
               {svcs.filter(s => s.category_id === activeCat.id && s.is_active !== false).map(s => (
@@ -660,7 +694,7 @@ function ServiceDropdown({ cats, svcs, value, onChange }) {
                   {value === s.id && <span style={{ marginLeft: 6, color: BROWN }}>✓</span>}
                 </div>
               ))}
-            </div>
+            </>
           )}
         </div>
       )}
