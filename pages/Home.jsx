@@ -1,6 +1,5 @@
 // V-Hub Home — RESTORED-APR18 1776572500
 import React, { useState, useEffect, useRef } from "react";
-import { createPortal } from "react-dom";
 import { User } from "@/api/entities";
 
 // ── SEO Meta Tags ──────────────────────────────────────────────────────────
@@ -584,7 +583,7 @@ function ClassifiedAd({ p, onSel, svcs }) {
             onClick={() => onSel(p)}
             style={{ background: `linear-gradient(180deg,#9A6030,#7A4820)`, color: "#F5E8CC", border: `2px solid #1B3D6F`, borderRadius: 5, padding: "9px 20px", fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "'Times New Roman', serif", letterSpacing: 0.3 }}
           >
-            📋 View Full Profile &amp; Reviews →
+            📋 View Full Profile & Reviews →
           </button>
         </div>
       )}
