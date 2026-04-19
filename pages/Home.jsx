@@ -625,7 +625,7 @@ function ServiceDropdown({ cats, svcs, value, onChange }) {
 
           {/* Category list (macro) — all 9 visible, no scroll needed */}
           {!activeCat && (
-            <div style={{ maxHeight: "none", overflowY: "visible" }}>
+            <div style={{ maxHeight: "70vh", overflowY: "auto", WebkitOverflowScrolling: "touch" }}>
               <div style={{ padding: "5px 10px 3px", fontSize: 9, color: INK_FADE, textTransform: "uppercase", letterSpacing: 1, borderBottom: "1px solid " + PAPER_DK }}>
                 Tap a category to see services
               </div>
@@ -635,7 +635,7 @@ function ServiceDropdown({ cats, svcs, value, onChange }) {
                 return (
                   <div key={cat.id}
                     onClick={() => handleCatClick(cat)}
-                    style={{ padding: "12px 14px", cursor: "pointer", fontSize: 14, fontWeight: 700, color: INK, background: "transparent", display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid " + PAPER_DK + "88" }}>
+                    style={{ padding: "9px 14px", cursor: "pointer", fontSize: 13, fontWeight: 700, color: INK, background: "transparent", display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid " + PAPER_DK + "88" }}>
                     <span>{cat.icon} {cat.name}</span>
                     <span style={{ fontSize: 11, color: BROWN }}>▶</span>
                   </div>
