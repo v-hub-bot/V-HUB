@@ -803,13 +803,32 @@ export default function Home() {
           <img src="https://media.base44.com/images/public/69d062aca815ce8e697894b1/1148d0041_V-HublocalservicesinTheVillages.png" alt="V-Hub The Villages" style={{ width: "100%", height: 220, objectFit: "cover" }} />
         </div>
 
-        {/* Deals of the Week */}
+        {/* Deals of the Week — sale tag style */}
         <div style={{ marginBottom: 18, textAlign: "center" }}>
           <a href="/Classifieds" style={{ textDecoration: "none" }}>
-            <div style={{ background: "linear-gradient(135deg," + INK + ",#3A2010)", border: "4px solid " + GREEN, borderRadius: 8, padding: "14px 20px", display: "inline-block", minWidth: 240 }}>
-              <div style={{ color: YELLOW, fontSize: 11, letterSpacing: 3, textTransform: "uppercase", marginBottom: 4 }}>This Week</div>
-              <div style={{ color: "#fff", fontSize: 22, fontWeight: 900, fontFamily: "'Times New Roman', serif", letterSpacing: 1 }}>Deals of the Week</div>
-              <div style={{ color: PAPER_DK, fontSize: 10, fontStyle: "italic", marginTop: 4 }}>Special offers from local providers</div>
+            <div style={{
+              background: "linear-gradient(160deg, #D10000 0%, #FF1A1A 45%, #B80000 100%)",
+              border: "3px solid #8B0000",
+              borderRadius: 6,
+              padding: "14px 28px 16px",
+              display: "inline-block",
+              minWidth: 260,
+              boxShadow: "0 4px 18px rgba(180,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.15)",
+              position: "relative",
+              overflow: "visible"
+            }}>
+              {/* "LIMITED TIME" ribbon label */}
+              <div style={{ color: "#FFE066", fontSize: 10, fontWeight: 900, letterSpacing: 4, textTransform: "uppercase", marginBottom: 6, fontFamily: "Arial, sans-serif" }}>
+                🔥 LIMITED TIME ONLY 🔥
+              </div>
+              {/* Main deal text */}
+              <div style={{ color: "#FFFFFF", fontSize: 26, fontWeight: 900, fontFamily: "Arial Black, Arial, sans-serif", letterSpacing: 0, lineHeight: 1.1, textTransform: "uppercase", textShadow: "0 2px 6px rgba(0,0,0,0.4)" }}>
+                DEALS OF THE WEEK
+              </div>
+              {/* Sub-label */}
+              <div style={{ color: "#FFCCCC", fontSize: 11, fontWeight: 700, fontFamily: "Arial, sans-serif", marginTop: 7, letterSpacing: 1, textTransform: "uppercase" }}>
+                Local Specials &amp; Offers — Don&apos;t Miss Out!
+              </div>
             </div>
           </a>
         </div>
