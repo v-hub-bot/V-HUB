@@ -625,10 +625,16 @@ function ServiceDropdown({ cats, svcs, value, onChange }) {
     setActiveCat(null);
   };
 
-  // Portal panel style — fixed to viewport so nothing clips it
+  // Portal panel style — fixed to viewport, flips upward if near bottom of screen
+  const PANEL_MAX_H = Math.min(window.innerHeight * 0.6, 380);
+  const spaceBelow = rect ? window.innerHeight - rect.bottom - 8 : 999;
+  const spaceAbove = rect ? rect.top - 8 : 999;
+  const openUpward = rect && spaceBelow < PANEL_MAX_H && spaceAbove > spaceBelow;
   const panelStyle = rect ? {
     position: "fixed",
-    top: rect.bottom + 4,
+    ...(openUpward
+      ? { bottom: window.innerHeight - rect.top + 4, top: "auto" }
+      : { top: rect.bottom + 4, bottom: "auto" }),
     left: rect.left,
     width: rect.width,
     zIndex: 9999,
@@ -636,7 +642,7 @@ function ServiceDropdown({ cats, svcs, value, onChange }) {
     border: "2px solid " + YELLOW,
     borderRadius: 6,
     boxShadow: "0 8px 28px rgba(0,0,0,0.22)",
-    maxHeight: "60vh",
+    maxHeight: PANEL_MAX_H,
     overflowY: "auto",
     WebkitOverflowScrolling: "touch",
   } : {};
