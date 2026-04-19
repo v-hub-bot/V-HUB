@@ -14,9 +14,6 @@
     "Classifieds": {
       "title": "Classifieds"
     },
-    "HomeV2": {
-      "title": "HomeV2"
-    },
     "ProviderDashboard": {
       "title": "ProviderDashboard"
     },
@@ -26,6 +23,5 @@
     "Terms": {
       "title": "Terms"
     }
-  },
-  "build_ts": 1776543954
+  }
 }
