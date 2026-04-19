@@ -231,7 +231,7 @@ Deno.serve(async (req: Request) => {
       return new Response(JSON.stringify({ error: "Missing identifier or password" }), { status: 400, headers: CORS });
     }
 
-    const isVH = /^vh-?\d{3,6}$/i.test(identifier);
+    const isVH = /^VH-/i.test(identifier);
     let rows: Record<string, unknown>[] = [];
     if (isVH) {
       const vhNorm = identifier.toUpperCase().replace(/^VH(\d)/, "VH-$1");
