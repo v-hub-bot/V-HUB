@@ -625,16 +625,10 @@ function ServiceDropdown({ cats, svcs, value, onChange }) {
     setActiveCat(null);
   };
 
-  // Portal panel style — fixed to viewport, flips upward if near bottom of screen
-  const PANEL_MAX_H = Math.min(window.innerHeight * 0.6, 380);
-  const spaceBelow = rect ? window.innerHeight - rect.bottom - 8 : 999;
-  const spaceAbove = rect ? rect.top - 8 : 999;
-  const openUpward = rect && spaceBelow < PANEL_MAX_H && spaceAbove > spaceBelow;
+  // Portal panel style — fixed to viewport, always opens downward, tall enough for all 9 categories
   const panelStyle = rect ? {
     position: "fixed",
-    ...(openUpward
-      ? { bottom: window.innerHeight - rect.top + 4, top: "auto" }
-      : { top: rect.bottom + 4, bottom: "auto" }),
+    top: rect.bottom + 4,
     left: rect.left,
     width: rect.width,
     zIndex: 9999,
@@ -642,7 +636,7 @@ function ServiceDropdown({ cats, svcs, value, onChange }) {
     border: "2px solid " + YELLOW,
     borderRadius: 6,
     boxShadow: "0 8px 28px rgba(0,0,0,0.22)",
-    maxHeight: PANEL_MAX_H,
+    maxHeight: Math.min(window.innerHeight - rect.bottom - 10, 520),
     overflowY: "auto",
     WebkitOverflowScrolling: "touch",
   } : {};
@@ -667,7 +661,7 @@ function ServiceDropdown({ cats, svcs, value, onChange }) {
           {/* Category list (macro) */}
           {!activeCat && (
             <>
-              <div style={{ padding: "5px 10px 3px", fontSize: 9, color: INK_FADE, textTransform: "uppercase", letterSpacing: 1, borderBottom: "1px solid " + PAPER_DK, position: "sticky", top: 0, background: PAPER, zIndex: 1 }}>
+              <div style={{ padding: "4px 10px 3px", fontSize: 9, color: INK_FADE, textTransform: "uppercase", letterSpacing: 1, borderBottom: "1px solid " + PAPER_DK, position: "sticky", top: 0, background: PAPER, zIndex: 1 }}>
                 Tap a category to see services
               </div>
               {sortedCats.map(cat => {
@@ -676,7 +670,7 @@ function ServiceDropdown({ cats, svcs, value, onChange }) {
                 return (
                   <div key={cat.id}
                     onClick={() => handleCatClick(cat)}
-                    style={{ padding: "10px 14px", cursor: "pointer", fontSize: 13, fontWeight: 700, color: INK, background: "transparent", display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid " + PAPER_DK + "88" }}>
+                    style={{ padding: "7px 12px", cursor: "pointer", fontSize: 12, fontWeight: 700, color: INK, background: "transparent", display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid " + PAPER_DK + "88" }}>
                     <span>{cat.icon} {cat.name}</span>
                     <span style={{ fontSize: 11, color: BROWN }}>▶</span>
                   </div>
