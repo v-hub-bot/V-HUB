@@ -46,7 +46,7 @@ function sanitizeProviderFields(fields: Record<string, unknown>, cors: Record<st
   return { safe, error: null };
 }
 
-const srClient = createClient({ appId: "69d062aca815ce8e697894b1" }).asServiceRole;
+const srClient = createClient({ appId: "69d06ada8019d7e9edf7f8e8" }).asServiceRole;
 
 async function sha256hex(plain: string): Promise<string> {
   const enc = new TextEncoder();
