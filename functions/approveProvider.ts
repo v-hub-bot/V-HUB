@@ -264,7 +264,7 @@ Deno.serve(async (req) => {
         <tr><td style="padding:7px 0;color:#555;">VH Account #:</td><td><strong style="font-family:'Courier New',monospace;font-size:15px;">${vh_number || 'See Dashboard'}</strong> <span style="font-size:11px;color:#5C6BC0;">(use this or your email to log in)</span></td></tr>
       </table>
       <div style="text-align:center;margin-bottom:10px;">
-        <a href="${APP_URL}/ProviderDashboard" style="display:inline-block;background:#3F51B5;color:#fff;text-decoration:none;padding:13px 28px;border-radius:8px;font-weight:700;font-size:14px;letter-spacing:1px;">🔑 Log In to Your Provider Hub &rarr;</a>
+        <a href="${APP_URL}/ProviderDashboard" style="display:inline-block;background:#1A6B3C;color:#ffffff;font-family:Georgia,serif;font-size:16px;font-weight:900;letter-spacing:2px;text-transform:uppercase;text-decoration:none;padding:16px 36px;border-radius:8px;border:2px solid #0d3d22;">🔑 Log In to Your Provider Hub &rarr;</a>
       </div>
       <div style="font-size:12px;color:#5C6BC0;text-align:center;">Forgot your password? Use the "Forgot Password" link on the login page.</div>
     </div>
@@ -308,8 +308,9 @@ Deno.serve(async (req) => {
     </div>
 
     <!-- View Homepage CTA -->
-    <div style="text-align:center;margin-bottom:24px;">
-      <a href="${APP_URL}" style="display:inline-block;background:#E8431A;color:#fff;text-decoration:none;padding:14px 32px;border-radius:8px;font-weight:700;font-size:15px;letter-spacing:1px;">🌴 Visit the V-Hub Directory</a>
+    <div style="text-align:center;margin-bottom:24px;display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+      <a href="${APP_URL}/ProviderDashboard" style="display:inline-block;background:#1A6B3C;color:#ffffff;font-family:Georgia,serif;font-size:15px;font-weight:900;letter-spacing:2px;text-transform:uppercase;text-decoration:none;padding:14px 28px;border-radius:8px;border:2px solid #0d3d22;">🔑 Go to Provider Hub &rarr;</a>
+      <a href="${APP_URL}" style="display:inline-block;background:#E8431A;color:#ffffff;font-family:Georgia,serif;font-size:15px;font-weight:900;letter-spacing:2px;text-transform:uppercase;text-decoration:none;padding:14px 28px;border-radius:8px;border:2px solid #b02e10;">🌴 Return to Home &rarr;</a>
     </div>
 
     <p style="font-size:13px;color:#8B5E3C;text-align:center;margin:0 0 6px;">
