@@ -1829,7 +1829,9 @@ function Dashboard({ adminPin }) {
         </div>
         <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
           <button onClick={load} style={{ background: "rgba(255,255,255,0.15)", border: "1px solid rgba(255,255,255,0.3)", color: "#fff", borderRadius: 6, padding: "5px 10px", fontSize: 12, cursor: "pointer", fontFamily: T.sans }}>↻ Refresh</button>
-          <a href="/" style={{ color: "rgba(255,255,255,0.85)", fontSize: 13, textDecoration: "none", fontFamily: T.sans }}>View Site →</a>
+          <a href="/" style={{ textDecoration: "none" }}>
+            <button style={{ background: "linear-gradient(180deg,#9A6030,#7A4820 60%,#5A3010)", border: "2px solid #1B3D6F", borderRadius: 6, color: "#F5E8CC", fontFamily: T.sans, fontWeight: 700, fontSize: 13, padding: "8px 16px", cursor: "pointer", whiteSpace: "nowrap" }}>« Home</button>
+          </a>
         </div>
       </div>
 
