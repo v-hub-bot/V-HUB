@@ -2,26 +2,26 @@
   "app_id": "69e42569087dbf90fd6b1bec",
   "slug": "v-hub-app-fd6b1bec",
   "pages": {
-    "ProviderDashboard": {
-      "title": "ProviderDashboard"
-    },
-    "Privacy": {
-      "title": "Privacy"
-    },
-    "Terms": {
-      "title": "Terms"
-    },
     "Classifieds": {
       "title": "Classifieds"
     },
     "ListService": {
       "title": "ListService"
     },
-    "Home": {
-      "title": "Home"
+    "Privacy": {
+      "title": "Privacy"
+    },
+    "ProviderDashboard": {
+      "title": "ProviderDashboard"
+    },
+    "Terms": {
+      "title": "Terms"
     },
     "Wekcadmin": {
       "title": "Wekcadmin"
+    },
+    "Home": {
+      "title": "Home"
     }
   }
 }

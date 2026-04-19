@@ -1,7 +1,7 @@
-// V-Hub Home — RESTORED-APR18 1776572500
+// V-Hub Home — v2026-04-17c FORCE_REBUILD
 import React, { useState, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
-import { User } from "@/api/entities";
+import { ServiceArea, Category, Service, Provider, ProviderReview, User } from "@/api/entities";
 
 // ── SEO Meta Tags ──────────────────────────────────────────────────────────
 function useMeta({ title, description, keywords, ogTitle, ogDescription, ogImage, canonical }) {
@@ -206,10 +206,12 @@ function ProvDetail({ prov, areas, cats, svcs, onBack }) {
   const provSvcNames = (prov.services || []).map(sid => { const f = svcs.find(s => s.id === sid); return f ? f.name : null; }).filter(Boolean);
 
   useEffect(() => {
-    fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/getProviders", {
-      method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ get_reviews: true, provider_id: prov.id }),
-    }).then(r => r.json()).then(d => setReviews(d.reviews || [])).catch(() => setReviews([]));
+    ProviderReview.filter({ provider_id: prov.id })
+      .then(all => setReviews((all || []).filter(r => r.is_approved)))
+      .catch(() => setReviews([]));
+    Provider.get(prov.id).then(fresh => {
+      Provider.update(prov.id, { profile_views: (fresh.profile_views || 0) + 1 }).catch(() => {});
+    }).catch(() => { Provider.update(prov.id, { profile_views: (prov.profile_views || 0) + 1 }).catch(() => {}); });
     fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/trackEvent", {
       method: "POST", headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ provider_id: prov.id, event_type: "profile_view", source: "homepage" }),
@@ -499,16 +501,14 @@ function ProviderRatingBadge({ providerId, googleRating, googleReviewUrl }) {
   const [vhubRating, setVhubRating] = React.useState(null);
   const [count, setCount] = React.useState(0);
   React.useEffect(() => {
-    fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/getProviders", {
-      method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ get_reviews: true, provider_id: providerId }),
-    }).then(r => r.json()).then(d => {
-      const approved = d.reviews || [];
-      if (approved.length > 0) {
-        const avg = approved.reduce((s, r) => s + (r.rating || 0), 0) / approved.length;
-        setVhubRating(avg); setCount(approved.length);
-      }
-    }).catch(() => {});
+    ProviderReview.filter({ provider_id: providerId, is_approved: true })
+      .then(revs => {
+        const approved = (revs || []);
+        if (approved.length > 0) {
+          const avg = approved.reduce((s, r) => s + (r.rating || 0), 0) / approved.length;
+          setVhubRating(avg); setCount(approved.length);
+        }
+      }).catch(() => {});
   }, [providerId]);
 
   const hasGoogle = typeof googleRating === "number" && googleRating > 0;
