@@ -621,7 +621,7 @@ function ServiceDropdown({ cats, svcs, value, onChange }) {
 
       {/* Dropdown panel */}
       {open && (
-        <div style={{ position: "absolute", top: "calc(100% + 4px)", left: 0, right: 0, zIndex: 300, background: PAPER, border: "2px solid " + YELLOW, borderRadius: 6, boxShadow: "0 8px 28px rgba(0,0,0,0.22)", overflow: "hidden" }}>
+        <div style={{ position: "absolute", top: "calc(100% + 4px)", left: 0, right: 0, zIndex: 300, background: PAPER, border: "2px solid " + YELLOW, borderRadius: 6, boxShadow: "0 8px 28px rgba(0,0,0,0.22)", overflowX: "hidden" }}>
 
           {/* Category list (macro) — all 9 visible, no scroll needed */}
           {!activeCat && (
@@ -778,7 +778,7 @@ export default function Home() {
 
       <div style={{ maxWidth: 860, margin: "0 auto", padding: "0 12px" }}>
         {/* Find Services box */}
-        <div style={{ margin: "18px 0", border: "4px solid " + GREEN, borderRadius: 8, background: PAPER_MID, overflow: "hidden" }}>
+        <div style={{ margin: "18px 0", border: "4px solid " + GREEN, borderRadius: 8, background: PAPER_MID, overflow: "visible" }}>
           <div style={{ background: INK, padding: "8px 14px", textAlign: "center" }}>
             <div style={{ color: PAPER, fontWeight: 900, fontSize: 15, textTransform: "uppercase", letterSpacing: 3 }}>Find Services</div>
             <div style={{ color: PAPER_DK, fontSize: 10, fontStyle: "italic", marginTop: 1 }}>Search by service and village</div>
