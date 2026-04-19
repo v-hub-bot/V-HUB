@@ -33,7 +33,7 @@ async function withRetry<T>(fn: () => Promise<T>, label = "op", maxAttempts = 4)
     } catch (e: any) {
       lastErr = e;
       const msg = String(e?.message || "");
-      const isRetryable = msg.includes("403") || msg.includes("429") || msg.includes("auth_required") || msg.includes("private");
+      const isRetryable = msg.includes("403") || msg.includes("401") || msg.includes("429") || msg.includes("auth_required") || msg.includes("private") || msg.includes("Authentication");
       if (isRetryable && attempt < maxAttempts) {
         const delay = attempt * 500;
         console.log(`[getProviders] ${label} attempt ${attempt} failed (${msg.slice(0,60)}), retrying in ${delay}ms`);
@@ -254,15 +254,19 @@ Deno.serve(async (req: Request) => {
     let providers: any[] = [];
 
     try {
-      try {
-        providers = await withRetry(() => base44.asServiceRole.entities.Provider.filter({ is_active: true }), "filter-active");
-        console.log(`[getProviders] filter(active) got ${providers.length} providers`);
-        const inactive = await withRetry(() => base44.asServiceRole.entities.Provider.filter({ is_active: false }), "filter-inactive").catch(() => []);
-        providers = [...providers, ...(inactive || [])];
-        console.log(`[getProviders] total with inactive: ${providers.length}`);
-      } catch (filterErr: any) {
-        console.log(`[getProviders] filter failed (${filterErr.message}), trying list...`);
-        providers = await fetchAllProvidersWithRetry(base44.asServiceRole.entities);
+      // Use .list() as primary — more reliable than .filter() for service role
+      providers = await fetchAllProvidersWithRetry(base44.asServiceRole.entities);
+      console.log(`[getProviders] fetched ${providers.length} providers via list()`);
+      if (providers.length === 0) {
+        // Fallback: try filter
+        try {
+          const active = await withRetry(() => base44.asServiceRole.entities.Provider.filter({ is_active: true }), "filter-active-fallback");
+          const inactive = await withRetry(() => base44.asServiceRole.entities.Provider.filter({ is_active: false }), "filter-inactive-fallback").catch(() => []);
+          providers = [...(active || []), ...(inactive || [])];
+          console.log(`[getProviders] fallback filter got ${providers.length} providers`);
+        } catch (filterErr: any) {
+          console.log(`[getProviders] fallback filter also failed: ${filterErr.message}`);
+        }
       }
       console.log(`[getProviders] final count: ${providers.length}`);
     } catch (e: any) {
