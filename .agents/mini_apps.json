@@ -5,11 +5,14 @@
     "ProviderDashboard": {
       "title": "ProviderDashboard"
     },
-    "Privacy": {
-      "title": "Privacy"
+    "Home": {
+      "title": "Home"
     },
     "Wekcadmin": {
       "title": "Wekcadmin"
+    },
+    "ListService": {
+      "title": "ListService"
     },
     "Terms": {
       "title": "Terms"
@@ -17,11 +20,8 @@
     "Classifieds": {
       "title": "Classifieds"
     },
-    "ListService": {
-      "title": "ListService"
-    },
-    "Home": {
-      "title": "Home"
+    "Privacy": {
+      "title": "Privacy"
     }
   },
   "build_timestamp": "1776573262"

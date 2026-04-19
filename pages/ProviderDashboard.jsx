@@ -989,6 +989,7 @@ function ClassifiedAdSection({ provider }) {
   const [saving, setSaving]   = React.useState(false);
   const [saveMsg, setSaveMsg] = React.useState("");
   const [saveErr, setSaveErr] = React.useState("");
+  const [savedAdRecord, setSavedAdRecord] = React.useState(null); // last saved ad — for inline pay button
 
   const fileRef               = React.useRef(null);
   const [filePreview, setFilePreview] = React.useState(null);
@@ -1050,10 +1051,10 @@ function ClassifiedAdSection({ provider }) {
     });
     setFilePreview(null); setFileObj(null);
     setAiPrompt(slot?.ai_prompt || "");
-    setAiError(""); setSaveErr(""); setSaveMsg("");
+    setAiError(""); setSaveErr(""); setSaveMsg(""); setSavedAdRecord(null);
     setShowImagePicker(false);
   };
-  const closeEdit = () => { setEditingSlot(null); setFilePreview(null); setFileObj(null); setSaveErr(""); setSaveMsg(""); };
+  const closeEdit = () => { setEditingSlot(null); setFilePreview(null); setFileObj(null); setSaveErr(""); setSaveMsg(""); setSavedAdRecord(null); };
 
   // ── File upload ──────────────────────────────────────────────────────────
   const handleFileChange = async (e) => {
@@ -1145,8 +1146,13 @@ function ClassifiedAdSection({ provider }) {
       } else {
         await ClassifiedAd.create(data);
       }
+      const freshAds = await ClassifiedAd.filter({ provider_id: provider.id });
+      const justSaved = existingRecord?.id
+        ? freshAds.find(a => a.id === existingRecord.id)
+        : [...freshAds].sort((a,b) => new Date(b.created_date)-new Date(a.created_date))[0];
+      setSavedAdRecord(justSaved || null);
       await loadAds();
-      setSaveMsg("✓ Ad saved! Now mark it "Next Up" from the queue, then pay $10 to launch.");
+      setSaveMsg("saved");
       setFileObj(null); setFilePreview(null);
     } catch { setSaveErr("Error saving. Please try again."); }
     finally { setSaving(false); }
@@ -1438,20 +1444,42 @@ function ClassifiedAdSection({ provider }) {
 
           {/* Save + Preview buttons */}
           {saveErr && <div style={{ marginTop: 10, fontSize: 12, color: "#c00", fontFamily: SANS }}>{saveErr}</div>}
-          <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center", marginTop: 14 }}>
-            <button onClick={handleSave} disabled={saving}
-              style={{ background: `linear-gradient(180deg,#9A6030,${BROWN_BTN})`, color: PAPER, border: `2px solid ${NAVY}`, borderRadius: 5, padding: "11px 24px", fontSize: 13, fontWeight: 900, cursor: saving ? "not-allowed" : "pointer", fontFamily: SERIF, opacity: saving ? 0.7 : 1 }}>
-              {saving ? "Saving…" : "💾 Save Ad"}
-            </button>
-            <button onClick={openPreviewFromEditor}
-              style={{ background: PAPER, border: `2px solid ${TEAL}`, color: TEAL, borderRadius: 5, padding: "11px 18px", fontSize: 13, fontWeight: 900, cursor: "pointer", fontFamily: SERIF }}>
-              👁 Preview Ad
-            </button>
-            <button onClick={closeEdit} style={{ background: "none", border: `1.5px solid ${PAPER_DK}`, color: INK_FADE, borderRadius: 5, padding: "10px 16px", fontSize: 12, cursor: "pointer", fontFamily: SANS }}>Cancel</button>
-          </div>
-          {saveMsg && (
-            <div style={{ marginTop: 8, background: "#E8F5E9", border: "1.5px solid #2E7D32", borderRadius: 6, padding: "8px 12px", fontSize: 12, color: "#1B5E20", fontFamily: SANS, lineHeight: 1.7 }}>
-              {saveMsg}
+          {saveMsg !== "saved" && (
+            <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center", marginTop: 14 }}>
+              <button onClick={handleSave} disabled={saving}
+                style={{ background: `linear-gradient(180deg,#9A6030,${BROWN_BTN})`, color: PAPER, border: `2px solid ${NAVY}`, borderRadius: 5, padding: "11px 24px", fontSize: 13, fontWeight: 900, cursor: saving ? "not-allowed" : "pointer", fontFamily: SERIF, opacity: saving ? 0.7 : 1 }}>
+                {saving ? "Saving…" : "💾 Save Ad"}
+              </button>
+              <button onClick={openPreviewFromEditor}
+                style={{ background: PAPER, border: `2px solid ${TEAL}`, color: TEAL, borderRadius: 5, padding: "11px 18px", fontSize: 13, fontWeight: 900, cursor: "pointer", fontFamily: SERIF }}>
+                👁 Preview Ad
+              </button>
+              <button onClick={closeEdit} style={{ background: "none", border: `1.5px solid ${PAPER_DK}`, color: INK_FADE, borderRadius: 5, padding: "10px 16px", fontSize: 12, cursor: "pointer", fontFamily: SANS }}>Cancel</button>
+            </div>
+          )}
+          {saveMsg === "saved" && savedAdRecord && (
+            <div style={{ marginTop: 12, background: "#F0FBF4", border: "2px solid #2E7D32", borderRadius: 8, padding: "14px 16px" }}>
+              <div style={{ fontSize: 13, fontWeight: 900, color: "#1B5E20", fontFamily: SERIF, marginBottom: 6 }}>✅ Ad saved!</div>
+              <div style={{ fontSize: 12, color: INK_FADE, fontFamily: SANS, lineHeight: 1.8, marginBottom: 12 }}>
+                Your ad <strong style={{ color: INK }}>"{savedAdRecord.headline}"</strong> is ready.<br/>
+                Preview it first, then pay <strong style={{ color: INK }}>$10</strong> to post it live for <strong style={{ color: INK }}>7 days</strong>.<br/>
+                <span style={{ fontSize: 11 }}>You won't be charged again unless you manually launch another ad.</span>
+              </div>
+              <div style={{ display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center" }}>
+                <button disabled={checkoutLoading} onClick={() => { closeEdit(); handleCheckout(savedAdRecord); }}
+                  style={{ background: "linear-gradient(180deg,#1A6B3C,#145530)", color: "#fff", border: "2px solid #1A6B3C", borderRadius: 6, padding: "11px 24px", fontSize: 13, fontWeight: 900, cursor: checkoutLoading ? "not-allowed" : "pointer", fontFamily: SERIF, opacity: checkoutLoading ? 0.7 : 1 }}>
+                  {checkoutLoading ? "Redirecting to Stripe…" : "💳 Pay $10 — Post Live for 7 Days →"}
+                </button>
+                <button onClick={() => { setPreviewAd({ ...savedAdRecord, image_url: filePreview || savedAdRecord.image_url }); setPreviewFromEditor(false); }}
+                  style={{ background: "none", border: `1.5px solid ${TEAL}`, color: TEAL, borderRadius: 6, padding: "10px 16px", fontSize: 12, cursor: "pointer", fontFamily: SANS, fontWeight: 700 }}>
+                  👁 Preview First
+                </button>
+                <button onClick={closeEdit}
+                  style={{ background: "none", border: `1.5px solid ${PAPER_DK}`, color: INK_FADE, borderRadius: 5, padding: "10px 14px", fontSize: 12, cursor: "pointer", fontFamily: SANS }}>
+                  Save for Later
+                </button>
+              </div>
+              {checkoutErr && <div style={{ marginTop: 8, fontSize: 12, color: "#c00", fontFamily: SANS }}>{checkoutErr}</div>}
             </div>
           )}
         </div>
