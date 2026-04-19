@@ -742,12 +742,14 @@ export default function Home() {
   }, []);
 
   const handleSearch = () => {
-    if (!selSvc || !selArea) return;
-    const isMacro = MACRO_AREAS.includes(selArea.name);
-    const targetName = selArea.name.includes(" — ") ? selArea.name.split(" — ").pop().trim() : selArea.name;
+    if (!selSvc) return;  // service is required; village is optional
+    const isMacro = selArea ? MACRO_AREAS.includes(selArea.name) : false;
+    const targetName = selArea && selArea.name.includes(" — ") ? selArea.name.split(" — ").pop().trim() : (selArea?.name || "");
 
     const matched = providers.filter(p => {
       if (!(p.services || []).includes(selSvc)) return false;
+      // If no area selected — show all providers for that service
+      if (!selArea) return true;
       const pAreas = p.service_areas || [];
       if (pAreas.includes(selArea.id)) return true;
       return pAreas.some(aid => {
@@ -770,7 +772,7 @@ export default function Home() {
 
     fetch(API_BASE + "/trackEvent", {
       method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ event_type: "search", service_id: selSvc, area_id: selArea.id }),
+      body: JSON.stringify({ event_type: "search", service_id: selSvc, area_id: selArea?.id || null }),
     }).catch(() => {});
 
     setResults(matched);
@@ -784,7 +786,7 @@ export default function Home() {
   if (selProv) return <ProvDetail prov={selProv} areas={areas} cats={cats} svcs={svcs} onBack={() => setSelProv(null)} />;
   if (searched) return <Results results={results} areas={areas} cats={cats} svcs={svcs} onReset={reset} onSel={setSelProv} selArea={selAreaR} selCatId={selCatR} />;
 
-  const bothSelected = !!(selSvc && selArea);
+  const svcSelected = !!selSvc;  // village is optional — only service required to search
 
   return (
     <div style={{ minHeight: "100vh", background: PAPER, backgroundImage: "repeating-linear-gradient(0deg,transparent,transparent 27px,rgba(28,15,0,0.04) 27px,rgba(28,15,0,0.04) 28px)", fontFamily: "'Times New Roman', serif" }}>
@@ -815,7 +817,7 @@ export default function Home() {
         <div style={{ margin: "18px 0", border: "4px solid " + GREEN, borderRadius: 8, background: PAPER_MID, overflow: "visible" }}>
           <div style={{ background: INK, padding: "8px 14px", textAlign: "center" }}>
             <div style={{ color: PAPER, fontWeight: 900, fontSize: 15, textTransform: "uppercase", letterSpacing: 3 }}>Find Services</div>
-            <div style={{ color: PAPER_DK, fontSize: 10, fontStyle: "italic", marginTop: 1 }}>Search by service and village</div>
+            <div style={{ color: PAPER_DK, fontSize: 10, fontStyle: "italic", marginTop: 1 }}>Select a service · village is optional</div>
           </div>
           <div style={{ padding: "14px 12px" }}>
             <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginBottom: 10 }}>
@@ -824,8 +826,8 @@ export default function Home() {
             </div>
             <button
               onClick={handleSearch}
-              disabled={!bothSelected}
-              style={{ width: "100%", background: bothSelected ? "linear-gradient(180deg,#2E7D32," + GREEN + ")" : PAPER_DK, color: bothSelected ? "#fff" : INK_FADE, border: "3px solid " + (bothSelected ? GREEN : PAPER_DK), borderRadius: 6, padding: "13px 0", fontSize: 15, fontWeight: 900, cursor: bothSelected ? "pointer" : "not-allowed", fontFamily: "'Times New Roman', serif", letterSpacing: 2, textTransform: "uppercase" }}
+              disabled={!svcSelected}
+              style={{ width: "100%", background: svcSelected ? "linear-gradient(180deg,#2E7D32," + GREEN + ")" : PAPER_DK, color: svcSelected ? "#fff" : INK_FADE, border: "3px solid " + (svcSelected ? GREEN : PAPER_DK), borderRadius: 6, padding: "13px 0", fontSize: 15, fontWeight: 900, cursor: svcSelected ? "pointer" : "not-allowed", fontFamily: "'Times New Roman', serif", letterSpacing: 2, textTransform: "uppercase" }}
             >
               Find Services
             </button>
