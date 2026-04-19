@@ -180,7 +180,6 @@ function ProvDetail({ prov, areas, cats, svcs, onBack }) {
 
   const handleSubmit = async () => {
     setReviewError("");
-    if (!form.customer_name.trim())  { setReviewError("Please enter your name."); return; }
     if (!form.customer_village)      { setReviewError("Please select your village."); return; }
     if (!form.service_used)          { setReviewError("Please select the service you used."); return; }
     if (!form.review_text.trim())    { setReviewError("Please write your review."); return; }
@@ -329,18 +328,12 @@ function ProvDetail({ prov, areas, cats, svcs, onBack }) {
           {showForm && (
             <div style={{ background: PAPER_MID, border: "2px solid " + PAPER_DK, borderRadius: 8, padding: 16, marginBottom: 16 }}>
               <div style={{ fontSize: 13, fontWeight: 900, color: INK, marginBottom: 12 }}>Share Your Experience</div>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 10 }}>
-                <div>
-                  <label style={lbl}>Your Name *</label>
-                  <input style={inp} value={form.customer_name} onChange={e => setForm(f => ({ ...f, customer_name: e.target.value }))} placeholder="First and Last Name" />
-                </div>
-                <div>
-                  <label style={lbl}>Your Village *</label>
-                  <select style={inp} value={form.customer_village} onChange={e => setForm(f => ({ ...f, customer_village: e.target.value }))}>
-                    <option value="">Select your village...</option>
-                    {ALL_VILLAGES.map(v => <option key={v} value={v}>{v}</option>)}
-                  </select>
-                </div>
+              <div style={{ marginBottom: 10 }}>
+                <label style={lbl}>Your Village *</label>
+                <select style={inp} value={form.customer_village} onChange={e => setForm(f => ({ ...f, customer_village: e.target.value }))}>
+                  <option value="">Select your village...</option>
+                  {ALL_VILLAGES.map(v => <option key={v} value={v}>{v}</option>)}
+                </select>
               </div>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 10 }}>
                 <div>
@@ -404,7 +397,6 @@ function ProvDetail({ prov, areas, cats, svcs, onBack }) {
             <div key={r.id || i} style={{ borderTop: "1px solid " + PAPER_DK, padding: "12px 0" }}>
               <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4, flexWrap: "wrap" }}>
                 <Stars rating={r.rating} size={13} />
-                <span style={{ fontWeight: 700, fontSize: 12, color: INK }}>{r.customer_name}</span>
                 <span style={{ fontSize: 10, color: INK_FADE }}>· {r.customer_village}</span>
                 {r.service_used && (
                   <span style={{ fontSize: 10, color: TEAL, background: "#E0F7F4", borderRadius: 10, padding: "1px 7px" }}>{r.service_used}</span>
@@ -583,51 +575,93 @@ function VillageDropdown({ areas, value, onChange }) {
 }
 
 // ── Service Dropdown ────────────────────────────────────────────────────────
+// Two-level: tap a category (macro) → see its services (micro) → tap service → closes & displays choice
 function ServiceDropdown({ cats, svcs, value, onChange }) {
-  const [open, setOpen]       = useState(false);
-  const [openCats, setOpenCats] = useState({});
+  const [open, setOpen]         = useState(false);
+  const [activeCat, setActiveCat] = useState(null); // which macro is expanded
   const ref = useRef(null);
 
   useEffect(() => {
-    const h = e => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
+    const h = e => { if (ref.current && !ref.current.contains(e.target)) { setOpen(false); setActiveCat(null); } };
     document.addEventListener("mousedown", h);
     return () => document.removeEventListener("mousedown", h);
   }, []);
 
-  const activeCats    = cats.filter(c => c.is_active !== false);
-  const selectedLabel = value ? (svcs.find(s => s.id === value) || {}).name : null;
+  const sortedCats   = cats.filter(c => c.is_active !== false);
+  const selectedSvc  = value ? svcs.find(s => s.id === value) : null;
+  const selectedLabel = selectedSvc
+    ? (cats.find(c => c.id === selectedSvc.category_id)?.name
+        ? cats.find(c => c.id === selectedSvc.category_id).name + " › " + selectedSvc.name
+        : selectedSvc.name)
+    : null;
+
+  const handleCatClick = (cat) => {
+    const catSvcs = svcs.filter(s => s.category_id === cat.id && s.is_active !== false);
+    if (!catSvcs.length) return;
+    setActiveCat(prev => prev?.id === cat.id ? null : cat);
+  };
+
+  const handleSvcClick = (svcId) => {
+    onChange(svcId);
+    setOpen(false);
+    setActiveCat(null);
+  };
 
   return (
     <div ref={ref} style={{ position: "relative", flex: 1, minWidth: 0 }}>
-      <button onClick={() => setOpen(o => !o)}
-        style={{ width: "100%", background: PAPER, border: "2.5px solid " + YELLOW, boxShadow: "0 0 0 1.5px " + YELLOW + "55", borderRadius: 6, padding: "11px 13px", fontSize: 14, fontFamily: "'Times New Roman', serif", color: value ? INK : INK_FADE, cursor: "pointer", textAlign: "left", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <span>{selectedLabel || "Select a Service..."}</span>
-        {value && <span onClick={e => { e.stopPropagation(); onChange(null); }} style={{ fontSize: 14, color: INK_FADE }}>x</span>}
+      {/* Trigger button */}
+      <button onClick={() => { setOpen(o => !o); if (open) setActiveCat(null); }}
+        style={{ width: "100%", background: PAPER, border: "2.5px solid " + YELLOW, boxShadow: "0 0 0 1.5px " + YELLOW + "55", borderRadius: 6, padding: "11px 13px", fontSize: 14, fontFamily: "'Times New Roman', serif", color: value ? INK : INK_FADE, cursor: "pointer", textAlign: "left", display: "flex", justifyContent: "space-between", alignItems: "center", gap: 6 }}>
+        <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", flex: 1 }}>{selectedLabel || "Select a Service..."}</span>
+        {value
+          ? <span onClick={e => { e.stopPropagation(); onChange(null); setActiveCat(null); }} style={{ fontSize: 14, color: INK_FADE, flexShrink: 0, lineHeight: 1 }}>✕</span>
+          : <span style={{ fontSize: 10, color: INK_FADE, flexShrink: 0 }}>{open ? "▲" : "▼"}</span>
+        }
       </button>
+
+      {/* Dropdown panel */}
       {open && (
-        <div style={{ position: "absolute", top: "100%", left: 0, right: 0, zIndex: 200, background: PAPER, border: "2px solid " + YELLOW, borderRadius: 6, boxShadow: "0 6px 24px rgba(0,0,0,0.18)", maxHeight: 340, display: "flex", flexDirection: "column" }}>
-          <div style={{ overflowY: "auto", flex: 1 }}>
-            {activeCats.map(cat => {
-              const catSvcs = svcs.filter(s => s.category_id === cat.id && s.is_active !== false);
-              if (!catSvcs.length) return null;
-              const isOpen = openCats[cat.id];
-              return (
-                <div key={cat.id}>
-                  <div onClick={() => setOpenCats(o => ({ ...o, [cat.id]: !o[cat.id] }))}
-                    style={{ padding: "9px 12px", cursor: "pointer", fontSize: 13, fontWeight: 700, color: INK, background: PAPER_MID, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <div style={{ position: "absolute", top: "calc(100% + 4px)", left: 0, right: 0, zIndex: 300, background: PAPER, border: "2px solid " + YELLOW, borderRadius: 6, boxShadow: "0 8px 28px rgba(0,0,0,0.22)", overflow: "hidden" }}>
+
+          {/* Category list (macro) — always visible, scrollable */}
+          {!activeCat && (
+            <div style={{ maxHeight: 320, overflowY: "auto", WebkitOverflowScrolling: "touch" }}>
+              <div style={{ padding: "5px 10px 3px", fontSize: 9, color: INK_FADE, textTransform: "uppercase", letterSpacing: 1, borderBottom: "1px solid " + PAPER_DK }}>
+                Tap a category to see services
+              </div>
+              {sortedCats.map(cat => {
+                const catSvcs = svcs.filter(s => s.category_id === cat.id && s.is_active !== false);
+                if (!catSvcs.length) return null;
+                return (
+                  <div key={cat.id}
+                    onClick={() => handleCatClick(cat)}
+                    style={{ padding: "12px 14px", cursor: "pointer", fontSize: 14, fontWeight: 700, color: INK, background: "transparent", display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid " + PAPER_DK + "88" }}>
                     <span>{cat.icon} {cat.name}</span>
-                    <span style={{ fontSize: 10, color: INK_FADE }}>{isOpen ? "▲" : "▼"}</span>
+                    <span style={{ fontSize: 11, color: BROWN }}>▶</span>
                   </div>
-                  {isOpen && catSvcs.map(s => (
-                    <div key={s.id} onClick={() => { onChange(s.id); setOpen(false); }}
-                      style={{ padding: "7px 12px 7px 24px", cursor: "pointer", fontSize: 12, color: value === s.id ? BROWN : INK, background: value === s.id ? PAPER_MID : "transparent", borderLeft: "3px solid " + PAPER_DK }}>
-                      {s.name}
-                    </div>
-                  ))}
+                );
+              })}
+            </div>
+          )}
+
+          {/* Services list (micro) — shown after tapping a category */}
+          {activeCat && (
+            <div style={{ maxHeight: 320, overflowY: "auto", WebkitOverflowScrolling: "touch", display: "flex", flexDirection: "column" }}>
+              {/* Back button */}
+              <div onClick={() => setActiveCat(null)}
+                style={{ padding: "10px 14px", cursor: "pointer", fontSize: 12, fontWeight: 700, color: NAVY, background: PAPER_MID, borderBottom: "2px solid " + YELLOW, display: "flex", alignItems: "center", gap: 6, flexShrink: 0 }}>
+                <span style={{ fontSize: 14 }}>◀</span> {activeCat.icon} {activeCat.name}
+              </div>
+              {svcs.filter(s => s.category_id === activeCat.id && s.is_active !== false).map(s => (
+                <div key={s.id}
+                  onClick={() => handleSvcClick(s.id)}
+                  style={{ padding: "11px 16px 11px 22px", cursor: "pointer", fontSize: 13, color: value === s.id ? BROWN : INK, fontWeight: value === s.id ? 700 : 400, background: value === s.id ? PAPER_MID : "transparent", borderBottom: "1px solid " + PAPER_DK + "55" }}>
+                  {s.name}
+                  {value === s.id && <span style={{ marginLeft: 6, color: BROWN }}>✓</span>}
                 </div>
-              );
-            })}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
     </div>

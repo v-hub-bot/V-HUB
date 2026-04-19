@@ -1637,11 +1637,12 @@ function ReviewsSection({ provider }) {
             ⏳ Pending Admin Approval
           </div>
         )}
-        {/* Reviewer info + stars */}
+        {/* Reviewer info + stars — name is private, village shown as anonymous location */}
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 4 }}>
           <div>
-            <span style={{ fontSize: 14, fontWeight: 900, color: INK, fontFamily: SERIF }}>{r.customer_name}</span>
-            {r.customer_village && <span style={{ fontSize: 12, color: INK_FADE, fontStyle: "italic", marginLeft: 8, fontFamily: SERIF }}>📍 {r.customer_village}</span>}
+            <span style={{ fontSize: 13, color: INK_FADE, fontStyle: "italic", fontFamily: SERIF }}>
+              {r.customer_village ? <>📍 {r.customer_village}</> : "Anonymous Reviewer"}
+            </span>
           </div>
           <div style={{ display: "flex", gap: 1 }}>
             {[1,2,3,4,5].map(i => <span key={i} style={{ fontSize: 14, color: i <= (r.rating||0) ? "#B8860B" : PAPER_DK }}>★</span>)}
@@ -2036,7 +2037,7 @@ export default function ProviderDashboard() {
   // Review form
   const [showReviewForm, setShowReviewForm] = useState(false);
   const [reviewSaved, setReviewSaved]       = useState(false);
-  const [reviewForm, setReviewForm]         = useState({ customer_name: "", customer_village: "", rating: 5, review_text: "", service_used: "" });
+  const [reviewForm, setReviewForm]         = useState({ customer_village: "", rating: 5, review_text: "", service_used: "" });
 
   // ── Check for existing session on mount ───────────────────────────────
   useEffect(() => {
@@ -2389,7 +2390,7 @@ export default function ProviderDashboard() {
   };
 
   const handleReviewSubmit = async () => {
-    if (!reviewForm.customer_name || !reviewForm.review_text) return;
+    if (!reviewForm.review_text) return;
     await ProviderReview.create({ ...reviewForm, provider_id: provider.id, is_approved: false, helpful_count: 0 });
     setReviewSaved(true);
     setShowReviewForm(false);
