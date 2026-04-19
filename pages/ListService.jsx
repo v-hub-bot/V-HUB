@@ -1,4 +1,4 @@
-// build-1776538682 
+// build-1776559362
 import { useState, useEffect, useRef } from "react"; // v3-static-fix
 import { Provider, Category, Service, ServiceArea } from "@/api/entities";
 
