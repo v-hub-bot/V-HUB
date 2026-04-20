@@ -1003,6 +1003,20 @@ function ClassifiedAdSection({ provider }) {
 
   const [checkoutLoading, setCheckoutLoading] = React.useState(false);
   const [checkoutErr, setCheckoutErr]         = React.useState("");
+  const [dealTypeStep, setDealTypeStep]       = React.useState(false); // show deal type picker
+  const [selectedDealType, setSelectedDealType] = React.useState(null);
+
+  // ── Deal type options ─────────────────────────────────────────────────────
+  const DEAL_TYPES = [
+    { id: "discount",    emoji: "💰", label: "Discount / % Off",        headline: "Save {X}% — This Week Only at {BIZ}",        prompt: "Professional promotional flyer, bold percentage discount offer, bright colors, Florida sunshine, local business advertisement" },
+    { id: "bogo",        emoji: "🎁", label: "Buy One Get One",          headline: "BOGO — Buy One Get One Free This Week!",       prompt: "Vibrant BOGO promotional image, buy one get one free deal, eye-catching retail advertisement, tropical Florida colors" },
+    { id: "newcustomer", emoji: "👋", label: "New Customer Special",     headline: "New Customers: {X}% Off Your First Visit",    prompt: "Welcoming new customer discount flyer, friendly and professional, Florida community feel, warm colors, special offer badge" },
+    { id: "seasonal",    emoji: "🌴", label: "Seasonal Special",         headline: "Summer Special — Limited Time Offer!",         prompt: "Seasonal Florida summer special promotion, palm trees, bright sunshine, bold text, professional service advertisement" },
+    { id: "bundle",      emoji: "📦", label: "Bundle / Package Deal",    headline: "Bundle & Save — Get More for Less This Week", prompt: "Bundle package deal promotion flyer, multiple services combined offer, clean professional design, Florida local business" },
+    { id: "flash",       emoji: "⚡", label: "Flash Sale / Limited Time", headline: "FLASH SALE — This Week Only, Don't Miss Out!", prompt: "Urgent flash sale promotional image, lightning bolt graphic, time-limited offer, bold red and yellow colors, excitement" },
+    { id: "referral",    emoji: "🤝", label: "Refer a Friend",           headline: "Refer a Friend & You Both Save!",              prompt: "Referral program promotion, two smiling people, community connection, friendly warm Florida neighborhood feel" },
+    { id: "custom",      emoji: "✏️",  label: "Write My Own",             headline: "",                                             prompt: "" },
+  ];
 
   // ── Styles (local constants matching dashboard palette) ──────────────────
   const SERIF     = "'Times New Roman', Georgia, serif";
@@ -1040,17 +1054,20 @@ function ClassifiedAdSection({ provider }) {
   const liveExpired = liveAd?.deal_expires_at && new Date(liveAd.deal_expires_at) < new Date();
 
   // ── Open editor ──────────────────────────────────────────────────────────
-  const openEdit = (slot) => {
+  const openEdit = (slot, dealType) => {
     setEditingSlot(slot || "new");
+    const dt = dealType || null;
+    setSelectedDealType(dt);
+    setDealTypeStep(false);
     setForm({
-      headline:  slot?.headline || "",
+      headline:  slot?.headline || (dt && dt.id !== "custom" ? dt.headline.replace("{BIZ}", provider.business_name || "").replace("{X}", "10") : ""),
       body:      slot?.body     || "",
       village:   slot?.village  || "",
       address:   slot?.address  || "",
       image_url: slot?.image_url || "",
     });
     setFilePreview(null); setFileObj(null);
-    setAiPrompt(slot?.ai_prompt || "");
+    setAiPrompt(slot?.ai_prompt || (dt && dt.prompt ? dt.prompt + ", " + (provider.business_name || "local business") + ", The Villages FL" : ""));
     setAiError(""); setSaveErr(""); setSaveMsg(""); setSavedAdRecord(null);
     setShowImagePicker(false);
   };
@@ -1231,7 +1248,7 @@ function ClassifiedAdSection({ provider }) {
             <span style={{ color: NAVY, fontWeight: 700 }}>Step 2</span> — Preview it exactly as visitors will see it<br/>
             <span style={{ color: NAVY, fontWeight: 700 }}>Step 3</span> — Pay <strong>$10</strong> via Stripe · runs 7 days · no auto-charge
           </div>
-          <button data-testid="create-first-ad-btn" onClick={() => openEdit(null)} style={{ background: `linear-gradient(180deg,#9A6030,${BROWN_BTN})`, color: PAPER, border: `2px solid ${NAVY}`, borderRadius: 6, padding: "11px 28px", fontSize: 13, fontWeight: 900, cursor: "pointer", fontFamily: SERIF }}>
+          <button data-testid="create-first-ad-btn" onClick={() => setDealTypeStep(true)} style={{ background: `linear-gradient(180deg,#9A6030,${BROWN_BTN})`, color: PAPER, border: `2px solid ${NAVY}`, borderRadius: 6, padding: "11px 28px", fontSize: 13, fontWeight: 900, cursor: "pointer", fontFamily: SERIF }}>
             ✚ Create My First Ad
           </button>
         </div>
@@ -1346,17 +1363,45 @@ function ClassifiedAdSection({ provider }) {
 
       {/* Add another to queue button */}
       {queued.length > 0 && queued.length < 3 && editingSlot === null && (
-        <button onClick={() => openEdit(null)} style={{ width: "100%", background: PAPER, border: `1.5px dashed ${PAPER_DK}`, color: INK_FADE, borderRadius: 6, padding: "9px", fontSize: 12, cursor: "pointer", fontFamily: SANS, marginBottom: 14 }}>
+        <button onClick={() => setDealTypeStep(true)} style={{ width: "100%", background: PAPER, border: `1.5px dashed ${PAPER_DK}`, color: INK_FADE, borderRadius: 6, padding: "9px", fontSize: 12, cursor: "pointer", fontFamily: SANS, marginBottom: 14 }}>
           ✚ Queue Another Ad ({queued.length}/3 slots used)
         </button>
+      )}
+
+      {/* ── DEAL TYPE PICKER ── */}
+      {dealTypeStep && editingSlot === null && (
+        <div style={{ background: PAPER_MID, border: `2px solid ${PAPER_DK}`, borderRadius: 10, padding: "18px 14px", marginBottom: 14 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
+            <div style={{ fontSize: 14, fontWeight: 900, color: INK, fontFamily: SERIF }}>📣 What kind of deal do you want to run?</div>
+            <button onClick={() => setDealTypeStep(false)} style={{ background: "none", border: "none", fontSize: 20, cursor: "pointer", color: INK_FADE }}>✕</button>
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+            {DEAL_TYPES.map(dt => (
+              <button key={dt.id} onClick={() => openEdit(null, dt)}
+                style={{ background: PAPER, border: `2px solid ${PAPER_DK}`, borderRadius: 8, padding: "12px 10px", textAlign: "left", cursor: "pointer", fontFamily: SANS, transition: "border-color 0.15s" }}
+                onMouseEnter={e => e.currentTarget.style.borderColor = NAVY}
+                onMouseLeave={e => e.currentTarget.style.borderColor = PAPER_DK}>
+                <div style={{ fontSize: 20, marginBottom: 4 }}>{dt.emoji}</div>
+                <div style={{ fontSize: 12, fontWeight: 700, color: INK, lineHeight: 1.3 }}>{dt.label}</div>
+              </button>
+            ))}
+          </div>
+        </div>
       )}
 
       {/* ── AD EDITOR ── */}
       {editingSlot !== null && (
         <div style={{ background: PAPER_MID, border: `2px solid ${PAPER_DK}`, borderRadius: 10, padding: "16px 14px", marginBottom: 14 }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
-            <div style={{ fontSize: 13, fontWeight: 900, color: INK, fontFamily: SERIF }}>
-              {currentRecord ? "✏ Edit Ad" : "✚ Build New Ad"}
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <div style={{ fontSize: 13, fontWeight: 900, color: INK, fontFamily: SERIF }}>
+                {currentRecord ? "✏ Edit Ad" : "✚ Build Your Ad"}
+              </div>
+              {selectedDealType && selectedDealType.id !== "custom" && (
+                <span style={{ fontSize: 11, background: NAVY, color: "#fff", borderRadius: 12, padding: "3px 10px", fontFamily: SANS, fontWeight: 700 }}>
+                  {selectedDealType.emoji} {selectedDealType.label}
+                </span>
+              )}
             </div>
             <button onClick={closeEdit} style={{ background: "none", border: "none", fontSize: 20, cursor: "pointer", color: INK_FADE }}>✕</button>
           </div>
@@ -1428,6 +1473,11 @@ function ClassifiedAdSection({ provider }) {
             {/* AI generator */}
             <div style={{ borderTop: `1px solid ${PAPER_DK}`, paddingTop: 10, marginTop: 4 }}>
               <label style={{ ...lbS, marginBottom: 6 }}>✨ AI Image Generator</label>
+              {selectedDealType && selectedDealType.id !== "custom" && !aiGenerating && !form.image_url && (
+                <div style={{ fontSize: 11, color: TEAL, fontFamily: SANS, marginBottom: 6, fontStyle: "italic" }}>
+                  💡 We pre-filled a prompt based on your "{selectedDealType.label}" deal — just hit Generate or customize it first!
+                </div>
+              )}
               <div style={{ display: "flex", gap: 8 }}>
                 <input style={{ ...inS, flex: 1 }} placeholder="e.g. Pool cleaning service, sunny Florida backyard"
                   value={aiPrompt} onChange={e => setAiPrompt(e.target.value)}
