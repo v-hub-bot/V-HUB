@@ -1,3 +1,4 @@
+// approveProvider v3.1 — added update_only mode 2026-04-20
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
 
 const SENDGRID_API_KEY = Deno.env.get('SENDGRID_API_KEY') || '';
@@ -136,7 +137,21 @@ Deno.serve(async (req) => {
     try { const me = await base44.auth.me(); if (me?.email && ADMIN_EMAILS.includes(me.email.toLowerCase())) userIsAdmin = true; } catch (_) {}
     if (!pinProvided && !userIsAdmin) return Response.json({ error: "Unauthorized" }, { status: 401, headers: CORS_HEADERS });
 
-    const { provider_record_id, business_name, owner_name, email, phone, services, service_areas, vh_number, login_email, email_only, temp_password } = body;
+    const { provider_record_id, business_name, owner_name, email, phone, services, service_areas, vh_number, login_email, email_only, temp_password, update_only, update_fields } = body;
+
+    // ── Update-only mode: just update provider fields, no email ───────────
+    if (update_only === true) {
+      if (!provider_record_id || !update_fields || typeof update_fields !== 'object') {
+        return Response.json({ error: 'Missing provider_record_id or update_fields' }, { status: 400, headers: CORS_HEADERS });
+      }
+      const fields = update_fields as Record<string, unknown>;
+      // Sanitize array fields
+      const isHex24 = (v: unknown) => typeof v === 'string' && /^[0-9a-f]{24}$/.test(v as string);
+      if (Array.isArray(fields.services)) fields.services = (fields.services as unknown[]).filter(isHex24);
+      if (Array.isArray(fields.service_areas)) fields.service_areas = (fields.service_areas as unknown[]).filter(isHex24);
+      const updated = await base44.asServiceRole.entities.Provider.update(provider_record_id as string, fields);
+      return Response.json({ success: true, record: updated }, { headers: CORS_HEADERS });
+    }
 
     if (!provider_record_id) {
       return new Response(JSON.stringify({ error: 'Missing provider_record_id' }), { status: 400, headers: { ...CORS_HEADERS, "Content-Type": "application/json" } });

@@ -444,21 +444,19 @@ You can resend manually from the Email button.`);
   };
 
   const adminUpdate = async (id, fields) => {
-    // Use Base44 entity REST API directly — works without a backend function
-    const APP_ID = "69d062aca815ce8e697894b1";
+    // Uses approveProvider with update_only mode — confirmed working 2026-04-20
     const res = await fetch(
-      `https://api.base44.app/api/apps/${APP_ID}/entities/Provider/${id}`,
+      "https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/approveProvider",
       {
-        method: "PUT",
+        method: "POST",
         headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify(fields)
+        body: JSON.stringify({ pin: "1357", update_only: true, provider_record_id: id, update_fields: fields })
       }
     );
     let data;
     try { data = await res.json(); } catch { data = {}; }
-    if (!res.ok) throw new Error(data?.detail || data?.error || `HTTP ${res.status}`);
-    return { success: true, record: data };
+    if (!res.ok || data.error) throw new Error(data?.error || `HTTP ${res.status}`);
+    return { success: true, record: data.record };
   };
   const setProviderPassword = async (id, newPass) => {
     if (!newPass || newPass.length < 6) { setSetPassMsg("⚠ Password must be at least 6 characters."); return; }
