@@ -3,7 +3,8 @@
 import React, { useState, useEffect } from "react";
 import { Provider, ProviderReview, LeadInquiry, ServiceSearchStat, Category, Service, ServiceArea } from "@/api/entities";
 
-const BUILD_ID = "v2026-04-19-debug-save-1776645719"; const LOGO = "https://media.base44.com/images/public/69d062aca815ce8e697894b1/a9af95bc3_V-Hublogo.png";
+const BUILD_ID = "v2026-04-20-toast-save"; const LOGO = "https://media.base44.com/images/public/69d062aca815ce8e697894b1/a9af95bc3_V-Hublogo.png";
+const API_BASE = "https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions";
 const FN = "https://v-hub-697894b1.base44.app/functions/adminMagicLink";
 
 // SHA-256 for password hashing (used by admin Set Password feature)
@@ -274,7 +275,7 @@ function Overview({ providers, reviews, leads, fullAreaMap }) {
 }
 
 // ── PROVIDERS TAB ─────────────────────────────────────────────────────────────
-function ProvidersTab({ providers, setProviders, catMap, svcMap, areaMap, fullSvcMap, fullAreaMap, adminPin, allCategories, allServices, allAreas }) {
+function ProvidersTab({ providers, setProviders, catMap, svcMap, areaMap, fullSvcMap, fullAreaMap, adminPin, allCategories, allServices, allAreas, showToast }) {
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("all");
   const [expanded, setExpanded] = useState(null);
@@ -360,12 +361,12 @@ function ProvidersTab({ providers, setProviders, catMap, svcMap, areaMap, fullSv
       } : x));
 
       if (data.email_error) {
-        alert(`⚠️ Account activated and marked Self-Managed, but email failed: ${data.email_error}`);
+        showToast(`⚠️ Activated but email failed: ${data.email_error}`, "error");
       } else {
-        alert(`✅ Done! ${p.business_name} has been activated, marked as Self-Managed, and their login email was sent to ${p.email}.`);
+        showToast(`✅ ${p.business_name} activated! Email sent to ${p.email}`, "success");
       }
     } catch(e) {
-      alert("❌ Error: " + e.message);
+      showToast("❌ Error: " + e.message, "error");
     }
     setHanding(null);
   };
@@ -387,9 +388,9 @@ function ProvidersTab({ providers, setProviders, catMap, svcMap, areaMap, fullSv
         reminder_sent: false,
       });
       setProviders(prev => prev.map(x => x.id === p.id ? { ...x, subscription_status: "trial", is_active: true, is_visible: true, trial_start_date: now.toISOString().split('T')[0], trial_end_date: trialEnd.toISOString().split('T')[0], grace_period_end_date: null, reminder_sent: false } : x));
-      alert(`✅ ${p.business_name} has been reactivated with a new 45-day trial!`);
+      showToast(`✅ ${p.business_name} reactivated with a new 45-day trial!`, "success");
     } catch(e) {
-      alert("Error reactivating: " + e.message);
+      showToast("Error reactivating: " + e.message, "error");
     }
     setReactivating(null);
   };
@@ -432,27 +433,22 @@ function ProvidersTab({ providers, setProviders, catMap, svcMap, areaMap, fullSv
       } : x));
 
       if (data.email_error) {
-        alert(`⚠️ ${p.business_name} is now ACTIVE, but the welcome email failed: ${data.email_error}
-You can resend manually from the Email button.`);
+        showToast(`⚠️ ${p.business_name} activated — email failed. Resend manually.`, "error");
       } else {
-        alert(`✅ ${p.business_name} is now ACTIVE and a welcome email has been sent to ${p.email}!`);
+        showToast(`✅ ${p.business_name} activated! Welcome email sent to ${p.email}`, "success");
       }
     } catch (e) {
-      alert("❌ Error: " + e.message);
+      showToast("❌ Error: " + e.message, "error");
     }
     setApproving(null);
   };
 
   const adminUpdate = async (id, fields) => {
-    // Uses approveProvider with update_only mode — confirmed working 2026-04-20
-    const res = await fetch(
-      "https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/approveProvider",
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ pin: "1357", update_only: true, provider_record_id: id, update_fields: fields })
-      }
-    );
+    const res = await fetch(`${API_BASE}/adminUpdateProvider`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ pin: "1357", id, fields })
+    });
     let data;
     try { data = await res.json(); } catch { data = {}; }
     if (!res.ok || data.error) throw new Error(data?.error || `HTTP ${res.status}`);
@@ -466,7 +462,7 @@ You can resend manually from the Email button.`);
     setSetPassId(null);
     setSetPassVal("");
     setSetPassMsg("");
-    alert("✅ Password set! Provider can now log into Provider Hub.");
+    showToast("✅ Password set! Provider can now log into Provider Hub.", "success");
   };
 
   const adminDelete = async (id) => {
@@ -507,7 +503,6 @@ You can resend manually from the Email button.`);
 
   const saveEdit = async (id) => {
     setEditSaving(true);
-    console.log("[saveEdit] called for id:", id, "editForm:", editForm);
     const payload = {
       business_name: editForm.business_name,
       owner_name: editForm.owner_name,
@@ -529,16 +524,13 @@ You can resend manually from the Email button.`);
       services: editForm.services,
       service_areas: editForm.service_areas,
     };
-    console.log("[saveEdit] payload:", JSON.stringify(payload));
     try {
-      const result = await adminUpdate(id, payload);
-      console.log("[saveEdit] SUCCESS:", result);
+      await adminUpdate(id, payload);
       setProviders(prev => prev.map(x => x.id === id ? { ...x, ...payload } : x));
       setEditId(null);
-      alert("✅ Saved successfully!");
+      showToast("✅ Changes saved!", "success");
     } catch (e) {
-      console.error("[saveEdit] ERROR:", e);
-      alert("❌ Save failed: " + (e.message || JSON.stringify(e)));
+      showToast("❌ Save failed: " + (e.message || "Unknown error"), "error");
     }
     setEditSaving(false);
   };
@@ -1786,6 +1778,11 @@ function Dashboard({ adminPin }) {
   const [serviceAreas, setServiceAreas] = useState([]);
   const [tab, setTab] = useState("Overview");
   const [loading, setLoading] = useState(true);
+  const [toast, setToast] = useState(null); // { msg, type: "success"|"error" }
+  const showToast = (msg, type = "success") => {
+    setToast({ msg, type });
+    setTimeout(() => setToast(null), 3500);
+  };
 
   const load = async () => {
     setLoading(true);
@@ -1837,6 +1834,20 @@ function Dashboard({ adminPin }) {
 
   return (
     <div style={S.page}>
+      {/* ── TOAST NOTIFICATION ── */}
+      {toast && (
+        <div style={{
+          position: "fixed", top: 20, left: "50%", transform: "translateX(-50%)",
+          zIndex: 9999, padding: "12px 24px", borderRadius: 8, fontFamily: T.sans,
+          fontSize: 14, fontWeight: 700, boxShadow: "0 4px 20px rgba(0,0,0,0.25)",
+          background: toast.type === "success" ? "#1B5E20" : "#B71C1C",
+          color: "#fff", minWidth: 260, textAlign: "center",
+          animation: "fadeSlideIn 0.25s ease",
+          pointerEvents: "none",
+        }}>
+          {toast.msg}
+        </div>
+      )}
       <div style={S.hdr}>
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           <img src={LOGO} style={{ height: 42, borderRadius: 8 }} alt="" />
@@ -1900,7 +1911,7 @@ function Dashboard({ adminPin }) {
 
       <div style={{ padding: 14, maxWidth: 800, margin: "0 auto" }}>
         {tab === "Overview" && <Overview providers={providers} reviews={reviews} leads={leads} fullAreaMap={fullAreaMap} />}
-        {tab === "Providers" && <ProvidersTab providers={providers} setProviders={setProviders} catMap={catMap} svcMap={svcMap} areaMap={areaMap} fullSvcMap={fullSvcMap} fullAreaMap={fullAreaMap} adminPin={adminPin} allCategories={categories} allServices={services} allAreas={serviceAreas} />}
+        {tab === "Providers" && <ProvidersTab providers={providers} setProviders={setProviders} catMap={catMap} svcMap={svcMap} areaMap={areaMap} fullSvcMap={fullSvcMap} fullAreaMap={fullAreaMap} adminPin={adminPin} allCategories={categories} allServices={services} allAreas={serviceAreas} showToast={showToast} />}
         {tab === "Reviews" && <ReviewsTab reviews={reviews} setReviews={setReviews} providers={providers} adminPin={adminPin} />}
         {tab === "Leads" && <LeadsTab leads={leads} providers={providers} />}
         {tab === "Deals" && <DealsTab providers={providers} classifiedAds={classifiedAds} />}
