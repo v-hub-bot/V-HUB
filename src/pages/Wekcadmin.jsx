@@ -1052,14 +1052,22 @@ function ReviewsTab({ reviews, setReviews, providers, adminPin }) {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ pin: "1357", id: r.id, fields: { is_approved: true } }),
     });
+    // Immediately recalc provider rating so it's reflected now, not at 4am
+    fetch(`https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/recalcProviderRatings`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}',
+    }).catch(() => {});
     setReviews(p => p.map(x => x.id === r.id ? { ...x, is_approved: true } : x));
   };
   const remove = async (r) => {
-    if (!window.confirm("Delete?")) return;
+    if (!window.confirm("Delete this review?")) return;
     await fetch(`https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/adminUpdateReview`, {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ pin: "1357", id: r.id, delete: true }),
     });
+    // Recalc provider rating after deletion
+    fetch(`https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/recalcProviderRatings`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}',
+    }).catch(() => {});
     setReviews(p => p.filter(x => x.id !== r.id));
   };
   return (
