@@ -342,7 +342,7 @@ function ProvidersTab({ providers, setProviders, catMap, svcMap, areaMap, fullSv
       if (data.error) throw new Error(data.error);
 
       // Also mark as Self-Managed
-      await fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/providerLogin", {
+      await fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/adminUpdateProvider", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action: "admin_update", pin: "1357", id: p.id, fields: { managed_by: "Self-Managed" } }),
@@ -444,7 +444,7 @@ You can resend manually from the Email button.`);
   };
 
   const adminUpdate = async (id, fields) => {
-    const res = await fetch(`https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/providerLogin`, {
+    const res = await fetch(`https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/adminUpdateProvider`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ action: "admin_update", pin: "1357", id, fields }),
@@ -465,7 +465,7 @@ You can resend manually from the Email button.`);
   };
 
   const adminDelete = async (id) => {
-    const res = await fetch(`https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/providerLogin`, {
+    const res = await fetch(`https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/adminUpdateProvider`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ action: "admin_update", pin: "1357", id, delete: true }),
@@ -529,9 +529,13 @@ You can resend manually from the Email button.`);
       services: editForm.services,
       service_areas: editForm.service_areas,
     };
-    await adminUpdate(id, payload);
-    setProviders(prev => prev.map(x => x.id === id ? { ...x, ...payload } : x));
-    setEditId(null);
+    try {
+      await adminUpdate(id, payload);
+      setProviders(prev => prev.map(x => x.id === id ? { ...x, ...payload } : x));
+      setEditId(null);
+    } catch (e) {
+      alert("Save failed: " + e.message);
+    }
     setEditSaving(false);
   };
 

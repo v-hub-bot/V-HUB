@@ -47,3 +47,4 @@ export const syncGoogleRatings = base44.functions.syncGoogleRatings;
 export const recalcProviderRatings = base44.functions.recalcProviderRatings;
 export const generateAdImage = base44.functions.generateAdImage;
 export const submitReview = base44.functions.submitReview;
+export const notifyNewProviderListing = base44.functions.notifyNewProviderListing;
