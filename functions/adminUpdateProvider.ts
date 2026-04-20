@@ -1,7 +1,7 @@
 // adminUpdateProvider v6.1 — force redeploy 2026-04-16T22:30 — clean redeploy 2026-04-16T09:50
 import { createClientFromRequest, createClient } from 'npm:@base44/sdk@0.8.25';
 
-const ALLOWED_ORIGINS = ["https://www.v-hub.us", "https://v-hub-app-edf7f8e8.base44.app"];
+const ALLOWED_ORIGINS = ["https://www.v-hub.us", "https://v-hub-app-edf7f8e8.base44.app", "https://v-hub-697894b1.base44.app"];
 
 function getCorsHeaders(req: Request) {
   const origin = req.headers.get("origin") || "";

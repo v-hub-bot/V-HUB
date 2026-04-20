@@ -1,9 +1,9 @@
-// CACHE-BUST-1776573078
-// build-1776559362 
+// CACHE-BUST-1776644777
+// build-1776644777 
 import React, { useState, useEffect } from "react";
 import { Provider, ProviderReview, LeadInquiry, ServiceSearchStat, Category, Service, ServiceArea } from "@/api/entities";
 
-const BUILD_ID = "v2026-04-18-test-cache-bust-XYZ"; const LOGO = "https://media.base44.com/images/public/69d062aca815ce8e697894b1/a9af95bc3_V-Hublogo.png";
+const BUILD_ID = "v2026-04-19-sdk-save-fix"; const LOGO = "https://media.base44.com/images/public/69d062aca815ce8e697894b1/a9af95bc3_V-Hublogo.png";
 const FN = "https://v-hub-697894b1.base44.app/functions/adminMagicLink";
 
 // SHA-256 for password hashing (used by admin Set Password feature)
@@ -444,14 +444,8 @@ You can resend manually from the Email button.`);
   };
 
   const adminUpdate = async (id, fields) => {
-    const res = await fetch(`https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/adminUpdateProvider`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: "admin_update", pin: "1357", id, fields }),
-    });
-    const data = await res.json();
-    if (data.error) throw new Error(data.error);
-    return data;
+    const updated = await Provider.update(id, fields);
+    return { success: true, record: updated };
   };
   const setProviderPassword = async (id, newPass) => {
     if (!newPass || newPass.length < 6) { setSetPassMsg("⚠ Password must be at least 6 characters."); return; }
@@ -465,14 +459,8 @@ You can resend manually from the Email button.`);
   };
 
   const adminDelete = async (id) => {
-    const res = await fetch(`https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/adminUpdateProvider`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: "admin_update", pin: "1357", id, delete: true }),
-    });
-    const data = await res.json();
-    if (data.error) throw new Error(data.error);
-    return data;
+    await Provider.delete(id);
+    return { success: true };
   };
   const toggleActive = async (p) => { await adminUpdate(p.id, { is_active: !p.is_active }); setProviders(prev => prev.map(x => x.id === p.id ? { ...x, is_active: !p.is_active } : x)); };
   const toggleVisible = async (p) => { await adminUpdate(p.id, { is_visible: !p.is_visible }); setProviders(prev => prev.map(x => x.id === p.id ? { ...x, is_visible: !p.is_visible } : x)); };
