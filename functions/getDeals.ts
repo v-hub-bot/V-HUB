@@ -1,4 +1,6 @@
 // Public endpoint — returns all active ClassifiedAd records for the Deals of the Week page
+// Ads become visible the INSTANT payment is confirmed (webhook sets is_active=true + deal_expires_at)
+// Ads expire exactly 7 days after payment (precise timestamp comparison, not date-only)
 import { createClientFromRequest } from "npm:@base44/sdk@0.8.23";
 
 const CORS = {
@@ -13,7 +15,7 @@ Deno.serve(async (req: Request) => {
   try {
     const base44 = createClientFromRequest(req);
 
-    // Try filter first, fall back to list
+    // Fetch all active ads
     let all: any[] = [];
     try {
       all = await base44.asServiceRole.entities.ClassifiedAd.filter({ is_active: true });
@@ -28,24 +30,27 @@ Deno.serve(async (req: Request) => {
       }
     }
 
-    // Filter expired on our side
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    // Use exact timestamp comparison — ad is live until the millisecond it expires
+    const now = new Date();
 
     const live = all.filter(ad => {
       if (!ad.is_active) return false;
       if (ad.deal_expires_at) {
-        const exp = new Date(ad.deal_expires_at);
-        exp.setHours(0, 0, 0, 0);
-        if (exp < today) return false;
+        // Compare exact timestamps — don't strip time
+        if (new Date(ad.deal_expires_at) <= now) return false;
       }
       return true;
     });
 
-    // Sort A-Z by provider name
-    live.sort((a, b) => (a.provider_name || "").localeCompare(b.provider_name || ""));
+    // Sort: slot_number ascending first (featured slots), then A-Z by provider name
+    live.sort((a, b) => {
+      const slotA = a.slot_number ?? 99;
+      const slotB = b.slot_number ?? 99;
+      if (slotA !== slotB) return slotA - slotB;
+      return (a.provider_name || "").localeCompare(b.provider_name || "");
+    });
 
-    console.log("returning live ads:", live.length);
+    console.log("returning live ads:", live.length, "at", now.toISOString());
     return Response.json({ ads: live }, { headers: CORS });
   } catch (err: any) {
     console.error("getDeals error:", err);

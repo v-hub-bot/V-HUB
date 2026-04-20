@@ -1,9 +1,9 @@
-// CACHE-BUST-1776704157
+// CACHE-BUST-1776721368
 // build-1776559362 
 // @build 2026-04-18-b
 // ProviderDashboard — REBUILD 1776411339
 import React, { useState, useEffect, useRef } from "react";
-const _BUILD = "1776704157"; // cache-bust
+const _BUILD = "1776721368"; // cache-bust
 import { Provider, ProviderReview, Service, ServiceArea, Category, ClassifiedAd, ProviderAnalytic } from "@/api/entities";
 
 // ── SEO ───────────────────────────────────────────────────────────────────
@@ -976,7 +976,7 @@ function LoginScreen({ onLogin, onForgot }) {
 //       pay $10 via Stripe → goes live immediately for 7 days.
 //       NOT charged again until they manually launch another ad.
 
-function ClassifiedAdSection({ provider }) {
+function ClassifiedAdSection({ provider, refreshKey = 0 }) {
   const [adSlots, setAdSlots]         = React.useState([]);
   const [liveAd, setLiveAd]           = React.useState(null);
   const [loading, setLoading]         = React.useState(true);
@@ -1046,7 +1046,7 @@ function ClassifiedAdSection({ provider }) {
     finally { setLoading(false); }
   }, [provider?.id]);
 
-  React.useEffect(() => { loadAds(); }, [loadAds]);
+  React.useEffect(() => { loadAds(); }, [loadAds, refreshKey]);
 
   const queued      = adSlots.filter(a => !a.is_active);
   const nextUp      = queued.find(a => a.is_queued_next) || null;
@@ -2078,6 +2078,8 @@ export default function ProviderDashboard() {
   const [cancelLoading, setCancelLoading]   = useState(false);
   const [paymentError, setPaymentError]     = useState("");
   const [paymentSuccess, setPaymentSuccess] = useState(false);
+  const [classifiedsSuccess, setClassifiedsSuccess] = useState(false);
+  const [adsRefreshKey, setAdsRefreshKey]             = useState(0);
   const [cancelSuccess, setCancelSuccess]   = useState(false);
   const [cancelError, setCancelError]       = useState("");
   const [cancelAccessUntil, setCancelAccessUntil] = useState("");
@@ -2177,19 +2179,23 @@ export default function ProviderDashboard() {
     const classifiedsResult = urlParams.get("classifieds_payment");
     if (classifiedsResult === "success") {
       window.history.replaceState({}, "", window.location.pathname);
+      setClassifiedsSuccess(true);
+      setAdsRefreshKey(k => k + 1); // force ClassifiedAdSection to reload immediately
       const acctId = urlParams.get("acct") || sessionStorage.getItem("vhub_provider_id");
       if (acctId) {
-        // Poll for a few seconds to give the Stripe webhook time to activate classifieds_addon
+        // Poll up to 12s to give the Stripe webhook time to activate the ad
         const poll = async () => {
-          for (let i = 0; i < 5; i++) {
-            await new Promise(r => setTimeout(r, 1500));
+          for (let i = 0; i < 6; i++) {
+            await new Promise(r => setTimeout(r, 2000));
             try {
               const p = await fetchProviderById(acctId);
               if (p && p.id) {
                 setProvider(p);
                 seedForm(p);
-                if (p.classifieds_addon) break;
               }
+              // Bump refresh key each poll so ClassifiedAdSection re-fetches
+              setAdsRefreshKey(k => k + 1);
+              if (p && p.classifieds_addon) break;
             } catch (_) {}
           }
         };
@@ -2780,6 +2786,16 @@ export default function ProviderDashboard() {
             <button onClick={() => setPaymentSuccess(false)} style={{ marginLeft: "auto", background: "transparent", border: "none", color: "#888", fontSize: 18, cursor: "pointer" }}>✕</button>
           </div>
         )}
+        {classifiedsSuccess && (
+          <div style={{ background: "#E8F5E9", border: "2px solid #2E7D32", borderRadius: 10, padding: "16px 18px", marginBottom: 20, display: "flex", alignItems: "center", gap: 12 }}>
+            <div style={{ fontSize: 28 }}>📣</div>
+            <div>
+              <div style={{ fontWeight: 900, color: "#1B5E20", fontSize: 15, fontFamily: SERIF }}>Ad Payment Successful — You're Live!</div>
+              <div style={{ fontSize: 13, color: "#2E7D32", fontFamily: SANS, marginTop: 3 }}>Your Deals of the Week ad is now visible to residents. It will run for 7 days from today.</div>
+            </div>
+            <button onClick={() => setClassifiedsSuccess(false)} style={{ marginLeft: "auto", background: "transparent", border: "none", color: "#888", fontSize: 18, cursor: "pointer" }}>✕</button>
+          </div>
+        )}
         {cancelSuccess && (
           <div style={{
             position: "fixed", top: 24, left: "50%", transform: "translateX(-50%)",
@@ -2895,7 +2911,7 @@ export default function ProviderDashboard() {
           <span>📰 Deals of the Week</span>
           <span style={{ fontSize: 10, fontWeight: 400, color: INK_FADE, fontFamily: SANS, letterSpacing: 0.5 }}>$10/week · 7-day ad</span>
         </div>
-        <ClassifiedAdSection provider={provider} />
+        <ClassifiedAdSection provider={provider} refreshKey={adsRefreshKey} />
 
         {/* Reviews — provider reads & responds, cannot self-review */}
         <ReviewsSection provider={provider} />
