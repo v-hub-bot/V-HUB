@@ -48,3 +48,4 @@ export const generateAdImage = base44.functions.generateAdImage;
 export const submitReview = base44.functions.submitReview;
 export const notifyNewProviderListing = base44.functions.notifyNewProviderListing;
 export const adminUpdateProvider = base44.functions.adminUpdateProvider;
+export const saveProviderAdmin = base44.functions.saveProviderAdmin;

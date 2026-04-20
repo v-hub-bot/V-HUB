@@ -444,18 +444,9 @@ You can resend manually from the Email button.`);
   };
 
   const adminUpdate = async (id, fields) => {
-    // Use backend function with PIN — no Base44 user session required
-    const res = await fetch(
-      "https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/adminUpdateProvider",
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ pin: "1357", id, fields })
-      }
-    );
-    const data = await res.json();
-    if (!res.ok || data.error) throw new Error(data.error || `HTTP ${res.status}`);
-    return { success: true, record: data.record };
+    // Direct entity SDK call — most reliable, no backend function dependency
+    const updated = await Provider.update(id, fields);
+    return { success: true, record: updated };
   };
   const setProviderPassword = async (id, newPass) => {
     if (!newPass || newPass.length < 6) { setSetPassMsg("⚠ Password must be at least 6 characters."); return; }
