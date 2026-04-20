@@ -49,7 +49,7 @@ Deno.serve(async (req) => {
 
     const sr = base44.asServiceRole;
 
-    const [providers, reviews, leads, stats, categories, services, serviceAreas, classifiedAds] = await Promise.all([
+    const [providers, reviews, leads, stats, categories, services, serviceAreas, classifiedAds, analytics] = await Promise.all([
       sr.entities.Provider.list(),
       sr.entities.ProviderReview.list(),
       sr.entities.LeadInquiry.list(),
@@ -58,10 +58,29 @@ Deno.serve(async (req) => {
       sr.entities.Service.list(),
       sr.entities.ServiceArea.list(),
       sr.entities.ClassifiedAd.list(),
+      sr.entities.ProviderAnalytic.list(),
     ]);
 
+    // Roll up analytics into per-provider counts
+    const viewCounts: Record<string, number> = {};
+    const searchCounts: Record<string, number> = {};
+    for (const a of (analytics || [])) {
+      if (a.event_type === 'profile_view') {
+        viewCounts[a.provider_id] = (viewCounts[a.provider_id] || 0) + 1;
+      } else if (a.event_type === 'search_appearance') {
+        searchCounts[a.provider_id] = (searchCounts[a.provider_id] || 0) + 1;
+      }
+    }
+
+    // Inject analytics counts into provider records
+    const enrichedProviders = (providers || []).map((p: any) => ({
+      ...p,
+      profile_views: viewCounts[p.id] || 0,
+      search_appearances: searchCounts[p.id] || 0,
+    }));
+
     return Response.json({
-      providers: providers || [],
+      providers: enrichedProviders,
       reviews: reviews || [],
       leads: leads || [],
       stats: stats || [],
