@@ -1,9 +1,9 @@
-// CACHE-BUST-1776573078
+// CACHE-BUST-1776704157
 // build-1776559362 
 // @build 2026-04-18-b
 // ProviderDashboard — REBUILD 1776411339
 import React, { useState, useEffect, useRef } from "react";
-const _BUILD = "1776475996"; // cache-bust
+const _BUILD = "1776704157"; // cache-bust
 import { Provider, ProviderReview, Service, ServiceArea, Category, ClassifiedAd, ProviderAnalytic } from "@/api/entities";
 
 // ── SEO ───────────────────────────────────────────────────────────────────
@@ -13,6 +13,11 @@ function useMeta(title) {
     let el = document.querySelector('meta[name="robots"]');
     if (!el) { el = document.createElement("meta"); el.name = "robots"; document.head.appendChild(el); }
     el.content = "noindex, nofollow";
+    // Inject Google Fonts if not already present
+    if (!document.querySelector('link[href*="Great+Vibes"]')) {
+      const pre = document.createElement("link"); pre.rel = "preconnect"; pre.href = "https://fonts.googleapis.com"; document.head.appendChild(pre);
+      const lk = document.createElement("link"); lk.rel = "stylesheet"; lk.href = "https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap"; document.head.appendChild(lk);
+    }
   }, [title]);
 }
 
@@ -595,8 +600,6 @@ function ForcePasswordChangeScreen({ provider, onComplete }) {
 
   return (
     <div style={{ minHeight: "100vh", background: PAPER, backgroundImage: "repeating-linear-gradient(0deg,transparent,transparent 27px,rgba(28,15,0,0.03) 27px,rgba(28,15,0,0.03) 28px)", fontFamily: SERIF }}>
-      <link rel="preconnect" href="https://fonts.googleapis.com" />
-      <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet" />
       <div style={{ background: PAPER, borderBottom: `3px double ${INK}` }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 16px 8px", boxSizing: "border-box" }}>
           <a href="/" style={{ textDecoration: "none", display: "flex", alignItems: "baseline" }}>
@@ -605,7 +608,7 @@ function ForcePasswordChangeScreen({ provider, onComplete }) {
             <span style={{ fontSize: 34, fontWeight: 900, color: INK, fontFamily: "'Times New Roman', serif", letterSpacing: -1, lineHeight: 1 }}>Hub</span>
           </a>
           <a href="/" style={{ textDecoration: "none" }}>
-            <button onClick={() => window.location.href = '/'} style={{ background: `linear-gradient(180deg,#9A6030,${BROWN_BTN} 60%,#5A3010)`, border: `2px solid #1B3D6F`, borderRadius: 4, color: "#F5E8CC", fontFamily: SANS, fontWeight: 700, fontSize: 13, padding: "8px 18px", cursor: "pointer", whiteSpace: "nowrap" }}>{"<<"} Home</button>
+            <button onClick={() => window.location.href = '/'} style={{ background: `linear-gradient(180deg,#9A6030,${BROWN_BTN} 60%,#5A3010)`, border: `2px solid #1B3D6F`, borderRadius: 4, color: "#F5E8CC", fontFamily: SANS, fontWeight: 700, fontSize: 13, padding: "8px 18px", cursor: "pointer", whiteSpace: "nowrap" }}>← Home</button>
           </a>
         </div>
       </div>
@@ -715,8 +718,6 @@ function ForgotPasswordScreen({ onBack }) {
 
   return (
     <div style={{ minHeight: "100vh", background: PAPER, backgroundImage: "repeating-linear-gradient(0deg,transparent,transparent 27px,rgba(28,15,0,0.03) 27px,rgba(28,15,0,0.03) 28px)", fontFamily: SERIF }}>
-      <link rel="preconnect" href="https://fonts.googleapis.com" />
-      <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet" />
       <div style={{ background: PAPER, borderBottom: `3px double ${INK}` }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 16px 8px", boxSizing: "border-box" }}>
           <a href="/" style={{ textDecoration: "none", display: "flex", alignItems: "baseline" }}>
@@ -725,7 +726,7 @@ function ForgotPasswordScreen({ onBack }) {
             <span style={{ fontSize: 34, fontWeight: 900, color: INK, fontFamily: "'Times New Roman', serif", letterSpacing: -1, lineHeight: 1 }}>Hub</span>
           </a>
           <a href="/" style={{ textDecoration: "none" }}>
-            <button onClick={() => window.location.href = '/'} style={{ background: `linear-gradient(180deg,#9A6030,${BROWN_BTN} 60%,#5A3010)`, border: `2px solid #1B3D6F`, borderRadius: 4, color: "#F5E8CC", fontFamily: SANS, fontWeight: 700, fontSize: 13, padding: "8px 18px", cursor: "pointer", whiteSpace: "nowrap" }}>{"<<"} Home</button>
+            <button onClick={() => window.location.href = '/'} style={{ background: `linear-gradient(180deg,#9A6030,${BROWN_BTN} 60%,#5A3010)`, border: `2px solid #1B3D6F`, borderRadius: 4, color: "#F5E8CC", fontFamily: SANS, fontWeight: 700, fontSize: 13, padding: "8px 18px", cursor: "pointer", whiteSpace: "nowrap" }}>← Home</button>
           </a>
         </div>
       </div>
@@ -854,8 +855,6 @@ function LoginScreen({ onLogin, onForgot }) {
 
   return (
     <div style={{ minHeight: "100vh", background: PAPER, backgroundImage: "repeating-linear-gradient(0deg,transparent,transparent 27px,rgba(28,15,0,0.03) 27px,rgba(28,15,0,0.03) 28px)", fontFamily: SERIF }}>
-      <link rel="preconnect" href="https://fonts.googleapis.com" />
-      <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet" />
       {/* Masthead — matches homepage style */}
       <div style={{ background: PAPER, borderBottom: `3px double ${INK}` }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 16px 8px", boxSizing: "border-box" }}>
@@ -865,7 +864,7 @@ function LoginScreen({ onLogin, onForgot }) {
             <span style={{ fontSize: 34, fontWeight: 900, color: INK, fontFamily: "'Times New Roman', serif", letterSpacing: -1, lineHeight: 1 }}>Hub</span>
           </a>
           <a href="/" style={{ textDecoration: "none" }}>
-            <button onClick={() => window.location.href = '/'} style={{ background: `linear-gradient(180deg,#9A6030,${BROWN_BTN} 60%,#5A3010)`, border: `2px solid #1B3D6F`, borderRadius: 4, color: "#F5E8CC", fontFamily: SANS, fontWeight: 700, fontSize: 13, padding: "8px 18px", cursor: "pointer", whiteSpace: "nowrap" }}>{"<<"} Home</button>
+            <button onClick={() => window.location.href = '/'} style={{ background: `linear-gradient(180deg,#9A6030,${BROWN_BTN} 60%,#5A3010)`, border: `2px solid #1B3D6F`, borderRadius: 4, color: "#F5E8CC", fontFamily: SANS, fontWeight: 700, fontSize: 13, padding: "8px 18px", cursor: "pointer", whiteSpace: "nowrap" }}>← Home</button>
           </a>
         </div>
       </div>
@@ -2593,12 +2592,12 @@ export default function ProviderDashboard() {
           <span style={{ fontSize: 28, fontWeight: 900, color: INK, fontFamily: "'Times New Roman', serif", lineHeight: 1, margin: "0 2px" }}>-</span>
           <span style={{ fontSize: 34, fontWeight: 900, color: INK, fontFamily: "'Times New Roman', serif", letterSpacing: -1, lineHeight: 1 }}>Hub</span>
         </a>
-        {/* Right — Home always visible, plus any contextual action */}
+        {/* Right — single Home button + optional context */}
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <a href="/" style={{ textDecoration: "none" }}>
-            <button style={{ background: `linear-gradient(180deg,#9A6030,${BROWN_BTN} 60%,#5A3010)`, border: `2px solid #1B3D6F`, borderRadius: 4, color: "#F5E8CC", fontFamily: SANS, fontWeight: 700, fontSize: 13, padding: "8px 16px", cursor: "pointer", whiteSpace: "nowrap" }}>{"<<"} Home</button>
-          </a>
           {rightContent && rightContent}
+          <a href="/" style={{ textDecoration: "none" }}>
+            <button style={{ background: `linear-gradient(180deg,#9A6030,${BROWN_BTN} 60%,#5A3010)`, border: `2px solid #1B3D6F`, borderRadius: 6, color: "#F5E8CC", fontFamily: SANS, fontWeight: 700, fontSize: 13, padding: "9px 18px", cursor: "pointer", whiteSpace: "nowrap", letterSpacing: 0.5 }}>← Home</button>
+          </a>
         </div>
       </div>
     </div>
@@ -2749,9 +2748,6 @@ export default function ProviderDashboard() {
 
   return (
     <div style={{ minHeight: "100vh", background: PAPER, backgroundImage: "repeating-linear-gradient(0deg,transparent,transparent 27px,rgba(28,15,0,0.03) 27px,rgba(28,15,0,0.03) 28px)", fontFamily: SERIF }}>
-      <link rel="preconnect" href="https://fonts.googleapis.com" />
-      <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet" />
-
       <TopNav />
 
       {/* Masthead */}
