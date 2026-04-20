@@ -1,5 +1,5 @@
-// CACHE-BUST-1776645719
-// build-1776645719 
+// CACHE-BUST-1776648334
+// build-1776648334 
 import React, { useState, useEffect } from "react";
 import { Provider, ProviderReview, LeadInquiry, ServiceSearchStat, Category, Service, ServiceArea } from "@/api/entities";
 
@@ -444,15 +444,9 @@ function ProvidersTab({ providers, setProviders, catMap, svcMap, areaMap, fullSv
   };
 
   const adminUpdate = async (id, fields) => {
-    const res = await fetch(`${API_BASE}/adminUpdateProvider`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ pin: "1357", id, fields })
-    });
-    let data;
-    try { data = await res.json(); } catch { data = {}; }
-    if (!res.ok || data.error) throw new Error(data?.error || `HTTP ${res.status}`);
-    return { success: true, record: data.record };
+    // Direct entity SDK — bypasses backend function (more reliable)
+    const record = await Provider.update(id, fields);
+    return { success: true, record };
   };
   const setProviderPassword = async (id, newPass) => {
     if (!newPass || newPass.length < 6) { setSetPassMsg("⚠ Password must be at least 6 characters."); return; }
