@@ -1,9 +1,9 @@
-// CACHE-BUST-1776644777
-// build-1776644777 
+// CACHE-BUST-1776645719
+// build-1776645719 
 import React, { useState, useEffect } from "react";
 import { Provider, ProviderReview, LeadInquiry, ServiceSearchStat, Category, Service, ServiceArea } from "@/api/entities";
 
-const BUILD_ID = "v2026-04-19-sdk-save-fix"; const LOGO = "https://media.base44.com/images/public/69d062aca815ce8e697894b1/a9af95bc3_V-Hublogo.png";
+const BUILD_ID = "v2026-04-19-debug-save-1776645719"; const LOGO = "https://media.base44.com/images/public/69d062aca815ce8e697894b1/a9af95bc3_V-Hublogo.png";
 const FN = "https://v-hub-697894b1.base44.app/functions/adminMagicLink";
 
 // SHA-256 for password hashing (used by admin Set Password feature)
@@ -496,6 +496,7 @@ You can resend manually from the Email button.`);
 
   const saveEdit = async (id) => {
     setEditSaving(true);
+    console.log("[saveEdit] called for id:", id, "editForm:", editForm);
     const payload = {
       business_name: editForm.business_name,
       owner_name: editForm.owner_name,
@@ -517,12 +518,16 @@ You can resend manually from the Email button.`);
       services: editForm.services,
       service_areas: editForm.service_areas,
     };
+    console.log("[saveEdit] payload:", JSON.stringify(payload));
     try {
-      await adminUpdate(id, payload);
+      const result = await adminUpdate(id, payload);
+      console.log("[saveEdit] SUCCESS:", result);
       setProviders(prev => prev.map(x => x.id === id ? { ...x, ...payload } : x));
       setEditId(null);
+      alert("✅ Saved successfully!");
     } catch (e) {
-      alert("Save failed: " + e.message);
+      console.error("[saveEdit] ERROR:", e);
+      alert("❌ Save failed: " + (e.message || JSON.stringify(e)));
     }
     setEditSaving(false);
   };
