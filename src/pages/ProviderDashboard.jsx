@@ -2778,9 +2778,20 @@ export default function ProviderDashboard() {
               {provider.description}
             </div>
           )}
-          {provider.google_review_url && (
-            <div style={{ marginTop: 10 }}>
-              <a href={provider.google_review_url} target="_blank" rel="noreferrer" style={{ fontSize: 12, color: TEAL, fontFamily: SANS }}>⭐ View Google Reviews →</a>
+          {(provider.google_rating > 0 || provider.google_review_url) && (
+            <div style={{ marginTop: 10, display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+              {provider.google_rating > 0 && (
+                <span style={{ display: "inline-flex", alignItems: "center", gap: 4, background: "#fff", border: "1.5px solid #dadce0", borderRadius: 20, padding: "3px 10px 3px 7px", boxShadow: "0 1px 3px rgba(0,0,0,0.10)" }}>
+                  <span style={{ fontWeight: 900, fontSize: 12, fontFamily: "Arial, sans-serif", letterSpacing: -0.5 }}>
+                    <span style={{ color: "#4285F4" }}>G</span><span style={{ color: "#EA4335" }}>o</span><span style={{ color: "#FBBC05" }}>o</span><span style={{ color: "#4285F4" }}>g</span><span style={{ color: "#34A853" }}>l</span><span style={{ color: "#EA4335" }}>e</span>
+                  </span>
+                  <span style={{ fontSize: 13, color: "#FBBC05" }}>★</span>
+                  <span style={{ fontSize: 12, color: "#3c4043", fontWeight: 700, fontFamily: "Arial, sans-serif" }}>{provider.google_rating.toFixed(1)}</span>
+                </span>
+              )}
+              {provider.google_review_url && (
+                <a href={provider.google_review_url} target="_blank" rel="noreferrer" style={{ fontSize: 12, color: "#4285F4", fontFamily: SANS, textDecoration: "underline" }}>See Google Reviews →</a>
+              )}
             </div>
           )}
         </div>

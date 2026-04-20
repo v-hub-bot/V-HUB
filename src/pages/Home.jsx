@@ -238,10 +238,13 @@ function ProvDetail({ prov, areas, cats, svcs, onBack }) {
               </div>
             )}
             {hasGoogle && (
-              <div style={{ display: "flex", alignItems: "center", gap: 5, marginTop: 3 }}>
-                <span style={{ fontSize: 13, color: "#F9A825" }}>{"★".repeat(Math.round(prov.google_rating))}{"☆".repeat(5 - Math.round(prov.google_rating))}</span>
-                <span style={{ fontSize: 11, color: "#4285F4", fontWeight: 700 }}>{prov.google_rating.toFixed(1)} Google</span>
-                {prov.google_review_url && <a href={prov.google_review_url} target="_blank" rel="noreferrer" style={{ fontSize: 10, color: "#4285F4" }}>See reviews</a>}
+              <div style={{ display: "inline-flex", alignItems: "center", gap: 5, marginTop: 4, background: "#fff", border: "1.5px solid #dadce0", borderRadius: 20, padding: "3px 10px 3px 6px", boxShadow: "0 1px 3px rgba(0,0,0,0.10)" }}>
+                <span style={{ fontWeight: 900, fontSize: 13, fontFamily: "Arial, sans-serif", letterSpacing: -0.5 }}>
+                  <span style={{ color: "#4285F4" }}>G</span><span style={{ color: "#EA4335" }}>o</span><span style={{ color: "#FBBC05" }}>o</span><span style={{ color: "#4285F4" }}>g</span><span style={{ color: "#34A853" }}>l</span><span style={{ color: "#EA4335" }}>e</span>
+                </span>
+                <span style={{ fontSize: 13, color: "#FBBC05", letterSpacing: -1 }}>{"★".repeat(Math.round(prov.google_rating))}{"☆".repeat(5 - Math.round(prov.google_rating))}</span>
+                <span style={{ fontSize: 12, color: "#3c4043", fontWeight: 700, fontFamily: "Arial, sans-serif" }}>{prov.google_rating.toFixed(1)}</span>
+                {prov.google_review_url && <a href={prov.google_review_url} target="_blank" rel="noreferrer" onClick={e => e.stopPropagation()} style={{ fontSize: 10, color: "#4285F4", fontFamily: "Arial, sans-serif", textDecoration: "underline" }}>See reviews</a>}
               </div>
             )}
           </div>
@@ -443,7 +446,13 @@ function ProvCard({ p, onSel, svcs }) {
           <span style={{ fontSize: 11, color: INK_FADE }}><Stars rating={p.rating} size={11} /> {p.rating.toFixed(1)} V-Hub</span>
         )}
         {typeof p.google_rating === "number" && p.google_rating > 0 && (
-          <span style={{ fontSize: 11, color: "#4285F4" }}>{"★".repeat(Math.round(p.google_rating))} {p.google_rating.toFixed(1)} Google</span>
+          <span style={{ display: "inline-flex", alignItems: "center", gap: 3, background: "#fff", border: "1px solid #dadce0", borderRadius: 20, padding: "2px 8px 2px 5px", boxShadow: "0 1px 2px rgba(0,0,0,0.08)" }}>
+            <span style={{ fontWeight: 900, fontSize: 10, fontFamily: "Arial, sans-serif", letterSpacing: -0.5 }}>
+              <span style={{ color: "#4285F4" }}>G</span><span style={{ color: "#EA4335" }}>o</span><span style={{ color: "#FBBC05" }}>o</span><span style={{ color: "#4285F4" }}>g</span><span style={{ color: "#34A853" }}>l</span><span style={{ color: "#EA4335" }}>e</span>
+            </span>
+            <span style={{ fontSize: 10, color: "#FBBC05" }}>★</span>
+            <span style={{ fontSize: 10, color: "#3c4043", fontWeight: 700, fontFamily: "Arial, sans-serif" }}>{p.google_rating.toFixed(1)}</span>
+          </span>
         )}
       </div>
 
