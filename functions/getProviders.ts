@@ -107,10 +107,11 @@ Deno.serve(async (req: Request) => {
         try {
           const db = base44.asServiceRole.entities;
           const [cats, svcs, areas] = await Promise.all([
-            withRetry(() => db.Category.list(), "categories"),
-            withRetry(() => db.Service.list(), "services"),
-            withRetry(() => db.ServiceArea.list(), "areas"),
+            withRetry(() => db.Category.list({ limit: 200 }), "categories"),
+            withRetry(() => db.Service.list({ limit: 500 }), "services"),
+            withRetry(() => db.ServiceArea.list({ limit: 500 }), "areas"),
           ]);
+          console.log(`[getProviders] lookup_data: cats=${(cats||[]).length} svcs=${(svcs||[]).length} areas=${(areas||[]).length}`);
           return Response.json({ ok: true, categories: cats || [], services: svcs || [], areas: areas || [] }, { headers: CORS });
         } catch (e: any) {
           console.log(`[getProviders] lookup_data error: ${e.message}`);
