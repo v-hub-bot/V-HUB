@@ -2099,6 +2099,13 @@ export default function ProviderDashboard() {
     if (!autoId && window.location.hash.startsWith("#auto=")) {
       autoId = window.location.hash.slice(6);
     }
+    // If returning from Stripe (classifieds or subscription payment), use acct param to restore session
+    const stripeReturnParams = new URLSearchParams(window.location.search);
+    const stripeAcct = stripeReturnParams.get("acct");
+    const stripePaymentResult = stripeReturnParams.get("classifieds_payment") || stripeReturnParams.get("payment");
+    if (!autoId && stripeAcct && stripePaymentResult) {
+      autoId = stripeAcct; // treat acct= as auto-login on Stripe return
+    }
     if (autoId) {
       window.history.replaceState({}, "", window.location.pathname);
       sessionStorage.setItem("vhub_provider_id", autoId);
