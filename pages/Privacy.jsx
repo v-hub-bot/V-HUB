@@ -19,7 +19,7 @@ export default function Privacy() {
       <div style={{ background: INK, padding: "16px 24px", display: "flex", alignItems: "center", gap: 16 }}>
         <a href="/" style={{ textDecoration: "none" }}><button style={{ background: "linear-gradient(180deg,#9A6030,#7A4820 60%,#5A3010)", border: "2px solid #1B3D6F", borderRadius: 4, color: "#F5E8CC", fontFamily: T.sans, fontWeight: 700, fontSize: 13, padding: "8px 16px", cursor: "pointer", whiteSpace: "nowrap" }}>« Home</button></a>
         <div style={{ flex: 1, textAlign: "center" }}>
-          <img src="https://media.base44.com/images/public/69d062aca815ce8e697894b1/a9af95bc3_V-Hublogo.png" style={{ height: 48, borderRadius: 8 }} alt="V-Hub" />
+          <img src="https://media.base44.com/images/public/69d06ada8019d7e9edf7f8e8/a9af95bc3_V-Hublogo.png" style={{ height: 48, borderRadius: 8 }} alt="V-Hub" />
         </div>
         <div style={{ width: 80 }} />
       </div>
