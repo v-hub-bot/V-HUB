@@ -1,5 +1,6 @@
 // providerLogin v9 - adds admin_update action for provider management
-import { createClientFromRequest } from "npm:@base44/sdk@0.8.25";
+import { createClientFromRequest, createClient } from "npm:@base44/sdk@0.8.25";
+const srStatic = createClient({ appId: '69d06ada8019d7e9edf7f8e8' }).asServiceRole;
 
 async function sleep(ms: number): Promise<void> {
   return new Promise(r => setTimeout(r, ms));
@@ -90,6 +91,22 @@ Deno.serve(async (req: Request) => {
     const sr = base44.asServiceRole;
 
     const action = (body.action as string || "").trim();
+
+    // ── LOOKUP DATA (categories, services, areas) ─────────────────────────
+    if (body.get_lookup_data === true) {
+      try {
+        const [cats, svcs, areas] = await Promise.all([
+          withRetry(() => srStatic.entities.Category.list({ limit: 200 }), "cats"),
+          withRetry(() => srStatic.entities.Service.list({ limit: 500 }), "svcs"),
+          withRetry(() => srStatic.entities.ServiceArea.list({ limit: 500 }), "areas"),
+        ]);
+        console.log(`[providerLogin] lookup: cats=${(cats||[]).length} svcs=${(svcs||[]).length} areas=${(areas||[]).length}`);
+        return new Response(JSON.stringify({ ok: true, categories: cats||[], services: svcs||[], areas: areas||[] }), { headers: CORS });
+      } catch (e: unknown) {
+        const msg = e instanceof Error ? e.message : String(e);
+        return new Response(JSON.stringify({ ok: false, error: msg, categories: [], services: [], areas: [] }), { headers: CORS });
+      }
+    }
 
     // ── SESSION RESTORE ──────────────────────────────────────────────────
     if (action === "restore" || body.restore_id) {
