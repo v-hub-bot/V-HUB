@@ -2205,26 +2205,22 @@ export default function ProviderDashboard() {
       }
     }
 
-    // Load entity data via backend (service role — works without Base44 auth)
+    // Load entity data via entity SDK (client-side, no backend needed)
     const loadLookupData = () => {
       setLookupLoading(true);
       setLookupError(false);
-      fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/getProviders", {
-        method: "POST",
-        headers: { "Content-Type": "application/json", "x-base44-app-id": "69d062aca815ce8e697894b1" },
-        body: JSON.stringify({ get_lookup_data: true }),
-      })
-        .then(r => r.json())
-        .then(data => {
-          const cats  = data.categories || [];
-          const svcs  = data.services   || [];
-          const areas = data.areas      || [];
-          setDbCategories(cats);
-          setDbServices(svcs);
-          setDbAreas(areas);
-          const sm = {}; svcs.forEach(s => { sm[s.id] = s.name; });
+      Promise.all([
+        Category.list({ limit: 200 }),
+        Service.list({ limit: 500 }),
+        ServiceArea.list({ limit: 500 }),
+      ])
+        .then(([cats, svcs, areas]) => {
+          setDbCategories(cats || []);
+          setDbServices(svcs || []);
+          setDbAreas(areas || []);
+          const sm = {}; (svcs || []).forEach(s => { sm[s.id] = s.name; });
           setSvcMap(sm);
-          const am = {}; areas.forEach(a => {
+          const am = {}; (areas || []).forEach(a => {
             am[a.id] = a.name.includes(" — ") ? a.name.split(" — ").pop().trim() : a.name;
           });
           setAreaMap(am);
@@ -2328,12 +2324,12 @@ export default function ProviderDashboard() {
     let areas = dbAreas;
     if (!mapsReady || svcs.length === 0 || areas.length === 0) {
       try {
-        const lkup = await fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/getProviders", {
-          method: "POST", headers: { "Content-Type": "application/json", "x-base44-app-id": "69d062aca815ce8e697894b1" },
-          body: JSON.stringify({ get_lookup_data: true }),
-        }).then(r => r.json());
-        svcs  = lkup.services || [];
-        areas = lkup.areas    || [];
+        const [freshSvcs, freshAreas] = await Promise.all([
+          Service.list({ limit: 500 }),
+          ServiceArea.list({ limit: 500 }),
+        ]);
+        svcs  = freshSvcs  || [];
+        areas = freshAreas || [];
         setDbServices(svcs);
         setDbAreas(areas);
         setMapsReady(true);

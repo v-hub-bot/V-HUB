@@ -1,6 +1,6 @@
 // V-Hub Home — PRODUCTION v2026-04-20-R4-CDN-BUST
 import React, { useState, useEffect, useRef } from "react";
-import { User } from "@/api/entities";
+import { User, Category, Service, ServiceArea, Provider, ProviderReview } from "@/api/entities";
 
 function useMeta({ title, description, canonical }) {
   useEffect(() => {
@@ -236,13 +236,16 @@ function ProvDetail({ prov, areas, cats, svcs, onBack }) {
   })();
 
   useEffect(() => {
-    // Load approved reviews via backend (public, no auth required)
-    fetch(API_BASE + "/getProviders", {
-      method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ get_reviews: true, provider_id: prov.id }),
-    })
-      .then(r => r.json())
-      .then(d => setReviews(d.reviews || []))
+    // Load approved reviews via entity SDK (client-side)
+    ProviderReview.filter({ provider_id: prov.id, is_approved: true })
+      .then(data => {
+        const sorted = (data || []).sort((a, b) => {
+          const h = (b.helpful_count || 0) - (a.helpful_count || 0);
+          return h !== 0 ? h : new Date(b.created_date || 0) - new Date(a.created_date || 0);
+        });
+        // Strip customer_name for privacy
+        setReviews(sorted.map(({ customer_name, ...r }) => r));
+      })
       .catch(() => setReviews([]));
     // Track profile view
     fetch(API_BASE + "/trackEvent", {
@@ -809,20 +812,29 @@ export default function Home() {
   const [selCatR,  setSelCatR]  = useState(null);
 
   useEffect(() => {
-    // Load lookup data + providers from backend (public, no auth required)
+    // Load lookup data + providers via entity SDK (client-side, no backend needed)
     Promise.all([
-      fetch(API_BASE + "/getProviders", {
-        method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ get_lookup_data: true }),
-      }).then(r => r.json()).catch(() => ({ categories: [], services: [], areas: [] })),
-      fetch(API_BASE + "/getProviders").then(r => r.json()).catch(() => ({ providers: [] })),
+      Category.list({ limit: 200 }).catch(() => []),
+      Service.list({ limit: 500 }).catch(() => []),
+      ServiceArea.list({ limit: 500 }).catch(() => []),
+      (async () => {
+        let all = [], skip = 0;
+        while (true) {
+          const page = await Provider.list({ limit: 500, skip }).catch(() => []);
+          if (!page || page.length === 0) break;
+          all = all.concat(page);
+          if (page.length < 500) break;
+          skip += 500;
+        }
+        return all;
+      })().catch(() => []),
       User.me().catch(() => null),
-    ]).then(([lookup, provData, u]) => {
-      setAreas(lookup.areas || []);
-      setCats(lookup.categories || []);
-      setSvcs(lookup.services || []);
+    ]).then(([cats, svcs, areas, allProviders, u]) => {
+      setAreas(areas || []);
+      setCats(cats || []);
+      setSvcs(svcs || []);
       // Only show active + visible providers
-      const active = (provData.providers || []).filter(p => p.is_active && p.is_visible);
+      const active = (allProviders || []).filter(p => p.is_active && p.is_visible);
       setProviders(active);
       setCurrentUser(u);
     }).catch(console.error).finally(() => setLoading(false));
