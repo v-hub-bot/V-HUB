@@ -1,10 +1,10 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
-import Classifieds from './pages/Classifieds';
 import Terms from './pages/Terms';
-import Privacy from './pages/Privacy';
-import ListService from './pages/ListService';
 import Wekcadmin from './pages/Wekcadmin';
+import Privacy from './pages/Privacy';
 import Home from './pages/Home';
+import Classifieds from './pages/Classifieds';
+import ListService from './pages/ListService';
 import ProviderDashboard from './pages/ProviderDashboard';
 
 function App() {
@@ -12,12 +12,12 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Navigate to="/Home" replace />} />
-        <Route path="/Classifieds" element={<Classifieds />} />
         <Route path="/Terms" element={<Terms />} />
-        <Route path="/Privacy" element={<Privacy />} />
-        <Route path="/ListService" element={<ListService />} />
         <Route path="/Wekcadmin" element={<Wekcadmin />} />
+        <Route path="/Privacy" element={<Privacy />} />
         <Route path="/Home" element={<Home />} />
+        <Route path="/Classifieds" element={<Classifieds />} />
+        <Route path="/ListService" element={<ListService />} />
         <Route path="/ProviderDashboard" element={<ProviderDashboard />} />
       </Routes>
     </BrowserRouter>
