@@ -2060,8 +2060,6 @@ export default function ProviderDashboard() {
   const [dbServices, setDbServices]     = useState([]);
   const [dbAreas, setDbAreas]           = useState([]);
   const [mapsReady, setMapsReady]       = useState(false);
-  const [lookupLoading, setLookupLoading] = useState(true);
-  const [lookupError, setLookupError]     = useState(false);
 
   // Edit form state
   const [form, setForm]             = useState({});
@@ -2205,39 +2203,33 @@ export default function ProviderDashboard() {
       }
     }
 
-    // Load entity data via entity SDK (client-side, no backend needed)
-    const loadLookupData = () => {
-      setLookupLoading(true);
-      setLookupError(false);
-      Promise.all([
-        Category.list({ limit: 200 }),
-        Service.list({ limit: 500 }),
-        ServiceArea.list({ limit: 500 }),
-      ])
-        .then(([cats, svcs, areas]) => {
-          setDbCategories(cats || []);
-          setDbServices(svcs || []);
-          setDbAreas(areas || []);
-          const sm = {}; (svcs || []).forEach(s => { sm[s.id] = s.name; });
-          setSvcMap(sm);
-          const am = {}; (areas || []).forEach(a => {
-            am[a.id] = a.name.includes(" — ") ? a.name.split(" — ").pop().trim() : a.name;
-          });
-          setAreaMap(am);
-          setMapsReady(true);
-          setLookupLoading(false);
-          setLookupError(false);
-        })
-        .catch(err => {
-          console.error("Lookup data load failed:", err);
-          setMapsReady(true);
-          setLookupLoading(false);
-          setLookupError(true);
+    // Load entity data via backend (service role — works without Base44 auth)
+    fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/getProviders", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ get_lookup_data: true }),
+    })
+      .then(r => r.json())
+      .then(data => {
+        const cats  = data.categories || [];
+        const svcs  = data.services   || [];
+        const areas = data.areas      || [];
+        setDbCategories(cats);
+        setDbServices(svcs);
+        setDbAreas(areas);
+        const sm = {}; svcs.forEach(s => { sm[s.id] = s.name; });
+        setSvcMap(sm);
+        const am = {}; areas.forEach(a => {
+          am[a.id] = a.name.includes(" — ") ? a.name.split(" — ").pop().trim() : a.name;
         });
-    };
-    // Store retry fn on window so edit-profile view can call it
-    window.__vhubReloadLookup = loadLookupData;
-    loadLookupData();
+        setAreaMap(am);
+        setMapsReady(true);
+      })
+      .catch(err => {
+        console.error("Lookup data load failed:", err);
+        // Still mark ready so UI doesn't stay stuck on "Loading..."
+        setMapsReady(true);
+      });
   }, []);
 
   const loadClassified = async (pid) => {
@@ -2324,12 +2316,12 @@ export default function ProviderDashboard() {
     let areas = dbAreas;
     if (!mapsReady || svcs.length === 0 || areas.length === 0) {
       try {
-        const [freshSvcs, freshAreas] = await Promise.all([
-          Service.list({ limit: 500 }),
-          ServiceArea.list({ limit: 500 }),
-        ]);
-        svcs  = freshSvcs  || [];
-        areas = freshAreas || [];
+        const lkup = await fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/getProviders", {
+          method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ get_lookup_data: true }),
+        }).then(r => r.json());
+        svcs  = lkup.services || [];
+        areas = lkup.areas    || [];
         setDbServices(svcs);
         setDbAreas(areas);
         setMapsReady(true);
@@ -2664,33 +2656,17 @@ export default function ProviderDashboard() {
 
         <div style={shS}>Section 2 — Services You Offer</div>
         <div style={{ marginBottom: 24 }}>
-          {lookupLoading
-            ? <div style={{ fontSize: 13, color: INK_FADE, fontStyle: "italic", fontFamily: SANS, padding: "12px 0" }}>⏳ Loading services…</div>
-            : lookupError
-              ? <div style={{ fontSize: 13, color: RED_RULE, fontFamily: SANS, padding: "12px 0" }}>
-                  ⚠ Could not load services. <button onClick={() => { if (window.__vhubReloadLookup) window.__vhubReloadLookup(); }} style={{ background: "none", border: "none", color: TEAL, textDecoration: "underline", cursor: "pointer", fontSize: 13, fontFamily: SANS }}>Tap to retry</button>
-                </div>
-              : dbServices.length > 0
-                ? <><SvcAccordion selSvcs={selSvcs} setSelSvcs={setSelSvcs} dbCategories={dbCategories} dbServices={dbServices} />{selSvcs.length > 0 && <div style={{ marginTop: 8, fontSize: 12, color: TEAL, fontFamily: SANS }}>✓ {selSvcs.length} service{selSvcs.length > 1 ? "s" : ""} selected</div>}</>
-                : <div style={{ fontSize: 13, color: RED_RULE, fontFamily: SANS, padding: "12px 0" }}>
-                    ⚠ No services loaded. <button onClick={() => { if (window.__vhubReloadLookup) window.__vhubReloadLookup(); }} style={{ background: "none", border: "none", color: TEAL, textDecoration: "underline", cursor: "pointer", fontSize: 13, fontFamily: SANS }}>Tap to retry</button>
-                  </div>
+          {dbServices.length > 0
+            ? <><SvcAccordion selSvcs={selSvcs} setSelSvcs={setSelSvcs} dbCategories={dbCategories} dbServices={dbServices} />{selSvcs.length > 0 && <div style={{ marginTop: 8, fontSize: 12, color: TEAL, fontFamily: SANS }}>✓ {selSvcs.length} service{selSvcs.length > 1 ? "s" : ""} selected</div>}</>
+            : <div style={{ fontSize: 13, color: INK_FADE, fontStyle: "italic", fontFamily: SANS, padding: "12px 0" }}>Loading services...</div>
           }
         </div>
 
         <div style={shS}>Section 3 — Villages You Serve</div>
         <div style={{ marginBottom: 28 }}>
-          {lookupLoading
-            ? <div style={{ fontSize: 13, color: INK_FADE, fontStyle: "italic", fontFamily: SANS, padding: "12px 0" }}>⏳ Loading villages…</div>
-            : lookupError
-              ? <div style={{ fontSize: 13, color: RED_RULE, fontFamily: SANS, padding: "12px 0" }}>
-                  ⚠ Could not load villages. <button onClick={() => { if (window.__vhubReloadLookup) window.__vhubReloadLookup(); }} style={{ background: "none", border: "none", color: TEAL, textDecoration: "underline", cursor: "pointer", fontSize: 13, fontFamily: SANS }}>Tap to retry</button>
-                </div>
-              : dbAreas.length > 0
-                ? <VillageSelect selAreas={selAreas} setSelAreas={setSelAreas} dbAreas={dbAreas} areaMap={mergedAreaMap} />
-                : <div style={{ fontSize: 13, color: RED_RULE, fontFamily: SANS, padding: "12px 0" }}>
-                    ⚠ No villages loaded. <button onClick={() => { if (window.__vhubReloadLookup) window.__vhubReloadLookup(); }} style={{ background: "none", border: "none", color: TEAL, textDecoration: "underline", cursor: "pointer", fontSize: 13, fontFamily: SANS }}>Tap to retry</button>
-                  </div>
+          {dbAreas.length > 0
+            ? <VillageSelect selAreas={selAreas} setSelAreas={setSelAreas} dbAreas={dbAreas} areaMap={mergedAreaMap} />
+            : <div style={{ fontSize: 13, color: INK_FADE, fontStyle: "italic", fontFamily: SANS, padding: "12px 0" }}>Loading villages...</div>
           }
         </div>
 
@@ -2903,8 +2879,8 @@ export default function ProviderDashboard() {
               <span key={s} style={{ background: BROWN_BTN, color: PAPER, borderRadius: 20, padding: "5px 14px", fontSize: 12, fontFamily: SANS }}>{s}</span>
             ))}
           </div>
-        ) : lookupLoading ? (
-          <div style={{ fontSize: 13, color: INK_FADE, fontStyle: "italic", marginBottom: 24, fontFamily: SANS }}>⏳ Loading services…</div>
+        ) : dbServices.length === 0 ? (
+          <div style={{ fontSize: 13, color: INK_FADE, fontStyle: "italic", marginBottom: 24, fontFamily: SANS }}>Loading services...</div>
         ) : (
           <div style={{ fontSize: 13, color: INK_FADE, fontStyle: "italic", marginBottom: 24, fontFamily: SANS }}>No services listed yet.</div>
         )}
@@ -2917,8 +2893,8 @@ export default function ProviderDashboard() {
               <span key={a} style={{ background: TEAL, color: "#fff", borderRadius: 20, padding: "5px 12px", fontSize: 12, fontFamily: SANS }}>📍 {a}</span>
             ))}
           </div>
-        ) : lookupLoading ? (
-          <div style={{ fontSize: 13, color: INK_FADE, fontStyle: "italic", marginBottom: 24, fontFamily: SANS }}>⏳ Loading villages…</div>
+        ) : dbAreas.length === 0 ? (
+          <div style={{ fontSize: 13, color: INK_FADE, fontStyle: "italic", marginBottom: 24, fontFamily: SANS }}>Loading villages...</div>
         ) : (
           <div style={{ fontSize: 13, color: INK_FADE, fontStyle: "italic", marginBottom: 24, fontFamily: SANS }}>No service areas listed yet.</div>
         )}
