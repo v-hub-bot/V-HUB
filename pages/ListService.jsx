@@ -24,12 +24,12 @@ function useMeta({ title, description, keywords, ogTitle, ogDescription, ogImage
     setMeta("og:url", canonical || "https://www.v-hub.us/", true);
     setMeta("og:title", ogTitle || title || "V-Hub | The Villages, FL Local Services", true);
     setMeta("og:description", ogDescription || description || "Find trusted local service providers in The Villages, Florida.", true);
-    setMeta("og:image", ogImage || "https://media.base44.com/images/public/69d06ada8019d7e9edf7f8e8/a9af95bc3_V-Hublogo.png", true);
+    setMeta("og:image", ogImage || "https://media.base44.com/images/public/69d062aca815ce8e697894b1/a9af95bc3_V-Hublogo.png", true);
     // Twitter card
     setMeta("twitter:card", "summary_large_image");
     setMeta("twitter:title", ogTitle || title || "V-Hub | The Villages, FL");
     setMeta("twitter:description", description || "Find trusted local service providers in The Villages, Florida.");
-    setMeta("twitter:image", ogImage || "https://media.base44.com/images/public/69d06ada8019d7e9edf7f8e8/a9af95bc3_V-Hublogo.png");
+    setMeta("twitter:image", ogImage || "https://media.base44.com/images/public/69d062aca815ce8e697894b1/a9af95bc3_V-Hublogo.png");
     if (canonical) {
       let link = document.querySelector('link[rel="canonical"]');
       if (!link) { link = document.createElement("link"); link.rel = "canonical"; document.head.appendChild(link); }
@@ -540,7 +540,7 @@ export default function ListService() {
       const catObj = dbCategories.find(c => c.id === selCatId);
       const catName = catObj ? catObj.name : "";
 
-      const res = await fetch("https://api.base44.app/api/apps/69d06ada8019d7e9edf7f8e8/functions/submitListing", {
+      const res = await fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/submitListing", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

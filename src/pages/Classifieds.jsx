@@ -20,7 +20,7 @@ const WHITE   = "#ffffff";
 const GREEN   = "#1A6B3C";
 const RED     = "#CC0000";
 
-const API_BASE = "https://api.base44.app/api/apps/69d06ada8019d7e9edf7f8e8/functions";
+const API_BASE = "https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions";
 
 // ── tiny helpers ──────────────────────────────────────────────────
 function fmt(d) {

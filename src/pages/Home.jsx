@@ -33,7 +33,7 @@ const NAVY      = "#1B3D6F";
 const GREEN     = "#1A6B3C";
 const TEAL      = "#00BFA5";
 
-const API_BASE = "https://api.base44.app/api/apps/69d06ada8019d7e9edf7f8e8/functions";
+const API_BASE = "https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions";
 
 const ALL_VILLAGES = [
   "Altamonte","Altoona","Amelia","Antrim","Arlington","Ashland","Autumn Glen","Bayside",
@@ -806,7 +806,7 @@ export default function Home() {
       <div style={{ background: PAPER, borderBottom: "3px double " + INK, padding: "8px 14px 6px" }}>
         <div style={{ maxWidth: 860, margin: "0 auto", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <a href="/" style={{ textDecoration: "none", display: "flex", alignItems: "center", gap: 8 }}>
-            <img src="https://media.base44.com/images/public/69d06ada8019d7e9edf7f8e8/a9af95bc3_V-Hublogo.png" alt="V-Hub" style={{ height: 48, width: 48, objectFit: "contain" }} />
+            <img src="https://media.base44.com/images/public/69d062aca815ce8e697894b1/a9af95bc3_V-Hublogo.png" alt="V-Hub" style={{ height: 48, width: 48, objectFit: "contain" }} />
             <div>
               <div style={{ fontFamily: "'Great Vibes', cursive", fontSize: 32, color: TEAL, lineHeight: 1 }}>V</div>
               <div style={{ fontFamily: "'Times New Roman', serif", fontSize: 13, fontWeight: 900, color: INK, letterSpacing: 3, lineHeight: 1, textTransform: "uppercase" }}>Hub</div>
@@ -845,7 +845,7 @@ export default function Home() {
 
         {/* Hero image */}
         <div style={{ borderRadius: 8, overflow: "hidden", marginBottom: 18, border: "2px solid " + PAPER_DK, maxHeight: 220 }}>
-          <img src="https://media.base44.com/images/public/69d06ada8019d7e9edf7f8e8/1148d0041_V-HublocalservicesinTheVillages.png" alt="V-Hub The Villages" style={{ width: "100%", height: 220, objectFit: "cover" }} />
+          <img src="https://media.base44.com/images/public/69d062aca815ce8e697894b1/1148d0041_V-HublocalservicesinTheVillages.png" alt="V-Hub The Villages" style={{ width: "100%", height: 220, objectFit: "cover" }} />
         </div>
 
         {/* Deals of the Week — sale tag style */}
