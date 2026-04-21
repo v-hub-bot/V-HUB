@@ -2754,12 +2754,7 @@ export default function ProviderDashboard() {
 
   return (
     <div style={{ minHeight: "100vh", background: PAPER, backgroundImage: "repeating-linear-gradient(0deg,transparent,transparent 27px,rgba(28,15,0,0.03) 27px,rgba(28,15,0,0.03) 28px)", fontFamily: SERIF }}>
-      <TopNav rightContent={
-        <div style={{ display: "flex", gap: 8 }}>
-          <button onClick={() => setView("account")} style={{ background: "transparent", border: `1.5px solid ${PAPER_DK}`, color: INK, borderRadius: 6, padding: "7px 14px", fontSize: 12, cursor: "pointer", fontFamily: SANS, fontWeight: 600 }}>⚙ Account</button>
-          <button onClick={handleLogout} style={{ background: "transparent", border: `1.5px solid ${PAPER_DK}`, color: INK, borderRadius: 6, padding: "7px 14px", fontSize: 12, cursor: "pointer", fontFamily: SANS, fontWeight: 600 }}>Sign Out</button>
-        </div>
-      } />
+      <TopNav />
 
       {/* Masthead */}
       <div style={{ textAlign: "center", padding: "24px 20px 18px", borderBottom: `3px double ${INK}` }}>
