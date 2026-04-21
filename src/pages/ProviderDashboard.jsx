@@ -460,7 +460,7 @@ function ResetPasswordScreen({ token, providerId, onSuccess }) {
     if (pass !== pass2) { setError("Passwords don't match."); return; }
     setLoading(true); setError("");
     try {
-      const res = await fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/resetPassword", {
+      const res = await fetch("https://api.base44.app/api/apps/69d06ada8019d7e9edf7f8e8/functions/resetPassword", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ provider_id: providerId, token, new_password: pass }),
@@ -478,7 +478,7 @@ function ResetPasswordScreen({ token, providerId, onSuccess }) {
     <div style={{ minHeight: "100vh", background: PAPER, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: 24, fontFamily: SERIF }}>
       <div style={{ width: "100%", maxWidth: 400 }}>
         <a href="/" style={{ textDecoration: "none" }}>
-          <img src="https://media.base44.com/images/public/69d062aca815ce8e697894b1/a9af95bc3_V-Hublogo.png" style={{ height: 60, display: "block", margin: "0 auto 24px", borderRadius: 10 }} alt="V-Hub" />
+          <img src="https://media.base44.com/images/public/69d06ada8019d7e9edf7f8e8/a9af95bc3_V-Hublogo.png" style={{ height: 60, display: "block", margin: "0 auto 24px", borderRadius: 10 }} alt="V-Hub" />
         </a>
         <div style={{ background: PAPER_MID, border: `2px solid ${BROWN_BTN}`, borderRadius: 12, padding: 28, boxShadow: "0 4px 24px rgba(0,0,0,0.18)" }}>
           <div style={{ fontSize: 20, fontWeight: 900, color: INK, letterSpacing: 1, marginBottom: 6, textAlign: "center" }}>Set New Password</div>
@@ -570,7 +570,7 @@ function ForcePasswordChangeScreen({ provider, onComplete }) {
     let fresh = null;
     try {
       // Use backend function — works for unauthenticated visitors
-      const res = await fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/providerLogin", {
+      const res = await fetch("https://api.base44.app/api/apps/69d06ada8019d7e9edf7f8e8/functions/providerLogin", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action: "save_password", provider_id: provider.id, vh_number: provider.vh_number, new_password: newPass }),
@@ -702,7 +702,7 @@ function ForgotPasswordScreen({ onBack }) {
     if (!val) { setError("Please enter your email address."); return; }
     setLoading(true); setError("");
     try {
-      const res = await fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/requestPasswordReset", {
+      const res = await fetch("https://api.base44.app/api/apps/69d06ada8019d7e9edf7f8e8/functions/requestPasswordReset", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: val }),
@@ -826,7 +826,7 @@ function LoginScreen({ onLogin, onForgot }) {
     setLoading(true);
     try {
       // Use backend function so entity reads work for unauthenticated visitors
-      const res = await fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/providerLogin", {
+      const res = await fetch("https://api.base44.app/api/apps/69d06ada8019d7e9edf7f8e8/functions/providerLogin", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ identifier: emailVal, password: passVal }),
@@ -1085,7 +1085,7 @@ function ClassifiedAdSection({ provider, refreshKey = 0 }) {
     try {
       const fd = new FormData();
       fd.append("file", file);
-      const upResp = await fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/storage/upload", { method: "POST", body: fd });
+      const upResp = await fetch("https://api.base44.app/api/apps/69d06ada8019d7e9edf7f8e8/storage/upload", { method: "POST", body: fd });
       const upData = await upResp.json();
       if (upData.url) {
         setForm(p => ({ ...p, image_url: upData.url }));
@@ -1101,7 +1101,7 @@ function ClassifiedAdSection({ provider, refreshKey = 0 }) {
     if (!aiPrompt.trim()) return;
     setAiError(""); setAiGenerating(true);
     try {
-      const resp = await fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/generateAdImage", {
+      const resp = await fetch("https://api.base44.app/api/apps/69d06ada8019d7e9edf7f8e8/functions/generateAdImage", {
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ prompt: aiPrompt, provider_id: provider.id }),
       });
@@ -1135,7 +1135,7 @@ function ClassifiedAdSection({ provider, refreshKey = 0 }) {
       if (fileObj) {
         const fd = new FormData();
         fd.append("file", fileObj);
-        const upResp = await fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/storage/upload", { method: "POST", body: fd });
+        const upResp = await fetch("https://api.base44.app/api/apps/69d06ada8019d7e9edf7f8e8/storage/upload", { method: "POST", body: fd });
         const upData = await upResp.json();
         imageUrl = upData.url || imageUrl;
       }
@@ -1193,7 +1193,7 @@ function ClassifiedAdSection({ provider, refreshKey = 0 }) {
   const handleCheckout = async (adToActivate) => {
     setCheckoutErr(""); setCheckoutLoading(true);
     try {
-      const resp = await fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/createClassifiedsCheckout", {
+      const resp = await fetch("https://api.base44.app/api/apps/69d06ada8019d7e9edf7f8e8/functions/createClassifiedsCheckout", {
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           provider_record_id: provider.id,
@@ -2022,7 +2022,7 @@ export default function ProviderDashboard() {
 
   // Helper: fetch provider by ID via backend (works for unauthenticated visitors)
   const fetchProviderById = async (id) => {
-    const res = await fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/providerLogin", {
+    const res = await fetch("https://api.base44.app/api/apps/69d06ada8019d7e9edf7f8e8/functions/providerLogin", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ restore_id: id }),
@@ -2113,7 +2113,7 @@ export default function ProviderDashboard() {
     const savedId = sessionStorage.getItem("vhub_provider_id");
     if (savedId) {
       // Restore session via backend function (works for unauthenticated visitors)
-      fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/providerLogin", {
+      fetch("https://api.base44.app/api/apps/69d06ada8019d7e9edf7f8e8/functions/providerLogin", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ restore_id: savedId }),
@@ -2211,7 +2211,7 @@ export default function ProviderDashboard() {
     }
 
     // Load entity data via backend (service role — works without Base44 auth)
-    fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/getProviders", {
+    fetch("https://api.base44.app/api/apps/69d06ada8019d7e9edf7f8e8/functions/getProviders", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ get_lookup_data: true }),
@@ -2323,7 +2323,7 @@ export default function ProviderDashboard() {
     let areas = dbAreas;
     if (!mapsReady || svcs.length === 0 || areas.length === 0) {
       try {
-        const lkup = await fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/getProviders", {
+        const lkup = await fetch("https://api.base44.app/api/apps/69d06ada8019d7e9edf7f8e8/functions/getProviders", {
           method: "POST", headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ get_lookup_data: true }),
         }).then(r => r.json());
@@ -2364,7 +2364,7 @@ export default function ProviderDashboard() {
       let json = null;
       for (let attempt = 1; attempt <= 3; attempt++) {
         try {
-          const res = await fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/getProviders", {
+          const res = await fetch("https://api.base44.app/api/apps/69d06ada8019d7e9edf7f8e8/functions/getProviders", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
@@ -2428,7 +2428,7 @@ export default function ProviderDashboard() {
       // For email-only changes with no password, use entity SDK directly
       if (newPass) {
         // Password change — needs backend for hashing (save_account action)
-        const res = await fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/providerLogin", {
+        const res = await fetch("https://api.base44.app/api/apps/69d06ada8019d7e9edf7f8e8/functions/providerLogin", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -2474,7 +2474,7 @@ export default function ProviderDashboard() {
     setPaymentLoading(true);
     setPaymentError("");
     try {
-      const res = await fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/createCheckoutSession", {
+      const res = await fetch("https://api.base44.app/api/apps/69d06ada8019d7e9edf7f8e8/functions/createCheckoutSession", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -2501,7 +2501,7 @@ export default function ProviderDashboard() {
     setBillingLoading(true);
     setPaymentError("");
     try {
-      const res = await fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/createBillingPortal", {
+      const res = await fetch("https://api.base44.app/api/apps/69d06ada8019d7e9edf7f8e8/functions/createBillingPortal", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ provider_id: provider.id }),
@@ -2523,7 +2523,7 @@ export default function ProviderDashboard() {
     setCancelLoading(true);
     setCancelError("");
     try {
-      const res = await fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/cancelSubscription", {
+      const res = await fetch("https://api.base44.app/api/apps/69d06ada8019d7e9edf7f8e8/functions/cancelSubscription", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ provider_id: provider.id }),
