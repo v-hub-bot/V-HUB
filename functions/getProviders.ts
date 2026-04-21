@@ -1,4 +1,7 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.23';
+import { createClientFromRequest, createClient } from 'npm:@base44/sdk@0.8.25';
+
+// Pre-built service-role client for public endpoints (v2)
+const srPublic = createClient({ appId: '69d06ada8019d7e9edf7f8e8' }).asServiceRole;
 
 const SENSITIVE_FIELDS = ['login_email', 'login_password', 'stripe_customer_id', 'stripe_subscription_id', 'notes', 'classifieds_stripe_subscription_id'];
 
@@ -105,7 +108,8 @@ Deno.serve(async (req: Request) => {
       // ── PUBLIC LOOKUP DATA (categories, services, areas) ─────────────
       if (body?.get_lookup_data === true) {
         try {
-          const db = base44.asServiceRole.entities;
+          // Use pre-built service-role client (no user auth needed for public lookup data)
+          const db = srPublic.entities;
           const [cats, svcs, areas] = await Promise.all([
             withRetry(() => db.Category.list({ limit: 200 }), "categories"),
             withRetry(() => db.Service.list({ limit: 500 }), "services"),
@@ -124,7 +128,7 @@ Deno.serve(async (req: Request) => {
         const { provider_id } = body;
         if (!provider_id) return Response.json({ error: "Missing provider_id" }, { status: 400, headers: CORS });
         try {
-          const db = base44.asServiceRole.entities;
+          const db = srPublic.entities;
           let reviews: any[] = [];
           try {
             reviews = await withRetry(() => db.ProviderReview.filter({ provider_id, is_approved: true }), "get-reviews-filter");
@@ -153,7 +157,7 @@ Deno.serve(async (req: Request) => {
         if (!provider_id || !vh_number || !fields) {
           return Response.json({ error: "Missing provider_id, vh_number, or fields" }, { status: 400, headers: CORS });
         }
-        const db = base44.asServiceRole.entities;
+        const db = srPublic.entities;
         let rec: any = null;
         try { rec = await withRetry(() => db.Provider.get(provider_id), "get-provider-update"); } catch {}
         if (!rec) return Response.json({ error: "Provider not found" }, { status: 404, headers: CORS });
@@ -192,7 +196,7 @@ Deno.serve(async (req: Request) => {
         const { provider_id } = body;
         if (!provider_id) return Response.json({ error: "Missing provider_id" }, { status: 400, headers: CORS });
         try {
-          const prov = await withRetry(() => base44.asServiceRole.entities.Provider.get(provider_id), "session-restore");
+          const prov = await withRetry(() => srPublic.entities.Provider.get(provider_id), "session-restore");
           if (!prov) return Response.json({ success: false, error: "Not found" }, { status: 404, headers: CORS });
           return Response.json({ success: true, provider: sanitize(prov) }, { headers: CORS });
         } catch (e: any) {
@@ -207,7 +211,7 @@ Deno.serve(async (req: Request) => {
           return Response.json({ error: "Missing credentials" }, { status: 400, headers: CORS });
         }
 
-        const db = base44.asServiceRole.entities;
+        const db = srPublic.entities;
         const inp = identifier.trim();
         const isVH = /^vh-?\d{4}$/i.test(inp);
         let results: any[] = [];
@@ -256,13 +260,13 @@ Deno.serve(async (req: Request) => {
 
     try {
       // Use .list() as primary — more reliable than .filter() for service role
-      providers = await fetchAllProvidersWithRetry(base44.asServiceRole.entities);
+      providers = await fetchAllProvidersWithRetry(srPublic.entities);
       console.log(`[getProviders] fetched ${providers.length} providers via list()`);
       if (providers.length === 0) {
         // Fallback: try filter
         try {
-          const active = await withRetry(() => base44.asServiceRole.entities.Provider.filter({ is_active: true }), "filter-active-fallback");
-          const inactive = await withRetry(() => base44.asServiceRole.entities.Provider.filter({ is_active: false }), "filter-inactive-fallback").catch(() => []);
+          const active = await withRetry(() => srPublic.entities.Provider.filter({ is_active: true }), "filter-active-fallback");
+          const inactive = await withRetry(() => srPublic.entities.Provider.filter({ is_active: false }), "filter-inactive-fallback").catch(() => []);
           providers = [...(active || []), ...(inactive || [])];
           console.log(`[getProviders] fallback filter got ${providers.length} providers`);
         } catch (filterErr: any) {
@@ -278,7 +282,7 @@ Deno.serve(async (req: Request) => {
     // ── FETCH ALL APPROVED REVIEWS & ATTACH TO PROVIDERS ─────────────────
     let allReviews: any[] = [];
     try {
-      allReviews = await fetchAllApprovedReviews(base44.asServiceRole.entities);
+      allReviews = await fetchAllApprovedReviews(srPublic.entities);
     } catch (e: any) {
       console.log(`[getProviders] reviews fetch failed: ${e.message} — continuing without reviews`);
     }

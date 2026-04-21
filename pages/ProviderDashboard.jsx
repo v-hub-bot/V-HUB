@@ -2211,7 +2211,7 @@ export default function ProviderDashboard() {
       setLookupError(false);
       fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/getProviders", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", "x-base44-app-id": "69d062aca815ce8e697894b1" },
         body: JSON.stringify({ get_lookup_data: true }),
       })
         .then(r => r.json())
@@ -2329,7 +2329,7 @@ export default function ProviderDashboard() {
     if (!mapsReady || svcs.length === 0 || areas.length === 0) {
       try {
         const lkup = await fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/getProviders", {
-          method: "POST", headers: { "Content-Type": "application/json" },
+          method: "POST", headers: { "Content-Type": "application/json", "x-base44-app-id": "69d062aca815ce8e697894b1" },
           body: JSON.stringify({ get_lookup_data: true }),
         }).then(r => r.json());
         svcs  = lkup.services || [];
