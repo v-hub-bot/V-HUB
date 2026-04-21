@@ -5,7 +5,7 @@ import { Provider, ProviderReview, LeadInquiry, ServiceSearchStat, Category, Ser
 
 const BUILD_ID = "v2026-04-20-toast-save"; const LOGO = "https://media.base44.com/images/public/69d062aca815ce8e697894b1/a9af95bc3_V-Hublogo.png";
 const API_BASE = "https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions";
-const FN = "https://v-hub-697894b1.base44.app/functions/adminMagicLink";
+const FN = "https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/adminMagicLink";
 
 // SHA-256 for password hashing (used by admin Set Password feature)
 async function sha256(plain) {
