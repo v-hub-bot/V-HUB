@@ -1,6 +1,6 @@
 import { createClientFromRequest, createClient } from 'npm:@base44/sdk@0.8.25';
 
-// srPublic: hardcoded app-id service role — works without user auth [326a0f1a]
+// srPublic: hardcoded app-id service role — works without user auth [326a0f1a-redeploy]
 const srPublic = createClient({ appId: '69d06ada8019d7e9edf7f8e8' }).asServiceRole;
 
 const SENSITIVE_FIELDS = ['login_email', 'login_password', 'stripe_customer_id', 'stripe_subscription_id', 'notes', 'classifieds_stripe_subscription_id'];
