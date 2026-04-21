@@ -4,21 +4,99 @@ import { User } from "@/api/entities";
 
 function useMeta({ title, description, canonical }) {
   useEffect(() => {
-    document.title = title || "V-Hub | The Villages, FL Local Services Directory";
+    const t = title || "V-Hub | The Villages, FL Local Services Directory";
+    const d = description || "Find trusted local service providers in The Villages, FL. Search HVAC, lawn care, golf cart repair, pet services, and more — all in one place.";
+    const url = canonical || "https://www.v-hub.us/";
+    const img = "https://media.base44.com/images/public/69d062aca815ce8e697894b1/a9af95bc3_V-Hublogo.png";
+
+    document.title = t;
+
     const setMeta = (name, content, prop = false) => {
       const attr = prop ? "property" : "name";
       let el = document.querySelector(`meta[${attr}="${name}"]`);
       if (!el) { el = document.createElement("meta"); el.setAttribute(attr, name); document.head.appendChild(el); }
       el.setAttribute("content", content);
     };
-    setMeta("description", description || "V-Hub connects The Villages, Florida residents with trusted local service providers.");
+    const setLink = (rel, href) => {
+      let el = document.querySelector(`link[rel="${rel}"]`);
+      if (!el) { el = document.createElement("link"); el.rel = rel; document.head.appendChild(el); }
+      el.href = href;
+    };
+
+    // Core
+    setMeta("description", d);
     setMeta("robots", "index, follow");
-    setMeta("viewport", "width=device-width, initial-scale=1.0, maximum-scale=1.0");
-    if (canonical) {
-      let link = document.querySelector('link[rel="canonical"]');
-      if (!link) { link = document.createElement("link"); link.rel = "canonical"; document.head.appendChild(link); }
-      link.href = canonical;
-    }
+    setMeta("viewport", "width=device-width, initial-scale=1.0");
+    setMeta("keywords", "The Villages FL services, local contractors The Villages, home services The Villages Florida, golf cart repair, lawn care, HVAC The Villages, pet services, local directory");
+    setMeta("author", "V-Hub");
+
+    // Canonical
+    setLink("canonical", url);
+
+    // Open Graph (Facebook, Google rich results, messaging previews)
+    setMeta("og:type", "website", true);
+    setMeta("og:url", url, true);
+    setMeta("og:site_name", "V-Hub", true);
+    setMeta("og:title", t, true);
+    setMeta("og:description", d, true);
+    setMeta("og:image", img, true);
+    setMeta("og:image:width", "1200", true);
+    setMeta("og:image:height", "630", true);
+    setMeta("og:locale", "en_US", true);
+
+    // Twitter Card
+    setMeta("twitter:card", "summary_large_image");
+    setMeta("twitter:title", t);
+    setMeta("twitter:description", d);
+    setMeta("twitter:image", img);
+    setMeta("twitter:site", "@vhubvillages");
+
+    // Mobile / PWA hints
+    setMeta("theme-color", "#E8431A");
+    setMeta("mobile-web-app-capable", "yes");
+    setMeta("apple-mobile-web-app-capable", "yes");
+    setMeta("apple-mobile-web-app-title", "V-Hub");
+    setMeta("apple-mobile-web-app-status-bar-style", "default");
+    setLink("apple-touch-icon", img);
+
+    // Google / Bing verification hint
+    setMeta("geo.region", "US-FL");
+    setMeta("geo.placename", "The Villages, Florida");
+
+    // JSON-LD Structured Data
+    const existing = document.querySelector('script[data-vh-ld]');
+    if (existing) existing.remove();
+    const ld = document.createElement("script");
+    ld.type = "application/ld+json";
+    ld.setAttribute("data-vh-ld", "1");
+    ld.textContent = JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "V-Hub",
+      "url": "https://www.v-hub.us/",
+      "description": d,
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": "https://www.v-hub.us/?q={search_term_string}",
+        "query-input": "required name=search_term_string"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "V-Hub",
+        "url": "https://www.v-hub.us/",
+        "logo": {
+          "@type": "ImageObject",
+          "url": img
+        },
+        "areaServed": {
+          "@type": "City",
+          "name": "The Villages",
+          "addressRegion": "FL",
+          "addressCountry": "US"
+        }
+      }
+    });
+    document.head.appendChild(ld);
   }, [title]);
 }
 
@@ -713,7 +791,7 @@ function ServiceDropdown({ cats, svcs, value, onChange }) {
 
 // ── MAIN EXPORT ─────────────────────────────────────────────────────────────
 export default function Home() {
-  useMeta({ title: "V-Hub | The Villages, FL Local Services Directory", canonical: "https://www.v-hub.us/" });
+  useMeta({ title: "V-Hub | The Villages, FL Local Services Directory", description: "Find trusted local service providers in The Villages, FL. Search HVAC, lawn care, golf cart repair, pet services, cleaning, and more — all in one place.", canonical: "https://www.v-hub.us/" });
 
   const [areas,     setAreas]     = useState([]);
   const [cats,      setCats]      = useState([]);
