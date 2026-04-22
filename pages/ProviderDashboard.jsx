@@ -845,13 +845,14 @@ function LoginScreen({ onLogin, onForgot }) {
         setLoading(false);
         return;
       }
+      setLoading(false);
       sessionStorage.setItem("vhub_provider_id", prov.id);
       onLogin(prov);
     } catch (err) {
       console.error("Login error:", err);
       setError("Something went wrong. Please try again.");
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   return (
