@@ -1217,11 +1217,15 @@ function ClassifiedAdSection({ provider, refreshKey = 0 }) {
     setPreviewAd({
       headline:      form.headline || "Your Headline Here",
       body:          form.body     || "Your deal description here.",
-      village:       form.village  || "",
-      address:       form.address  || "",
+      village:       "",
+      address:       provider.address || "",
       image_url:     filePreview   || form.image_url || "",
       provider_name: provider.business_name || "",
       deal_expires_at: null, // not yet set — webhook sets this at payment time
+      // enriched location fields (mirroring what getDeals returns)
+      _provider_is_mobile: !!provider.is_mobile,
+      _provider_address:   provider.address || null,
+      _provider_areas:     areaNames,
     });
     setPreviewFromEditor(true);
   };
@@ -1422,13 +1426,26 @@ function ClassifiedAdSection({ provider, refreshKey = 0 }) {
                 value={form.body} onChange={e => setForm(p => ({ ...p, body: e.target.value.slice(0,300) }))} />
               <div style={{ fontSize: 10, color: INK_FADE, fontFamily: SANS, textAlign: "right" }}>{form.body.length}/300</div>
             </div>
-            <div>
-              <label style={lbS}>Village / Area</label>
-              <input style={inS} placeholder="e.g. Brownwood" value={form.village} onChange={e => setForm(p => ({ ...p, village: e.target.value }))} />
-            </div>
-            <div>
-              <label style={lbS}>Business Address</label>
-              <input style={inS} placeholder="123 Main St" value={form.address} onChange={e => setForm(p => ({ ...p, address: e.target.value }))} />
+            {/* Location info — auto-sourced from provider profile */}
+            <div style={{ gridColumn: "1/-1" }}>
+              <label style={lbS}>Your Location on Ad <span style={{ fontSize: 10, fontWeight: 400, textTransform: "none" }}>(pulled from your profile)</span></label>
+              <div style={{ ...inS, background: "#f0ede4", color: MUTED, fontSize: 12, minHeight: 36, display: "flex", flexDirection: "column", gap: 4, justifyContent: "center", cursor: "default" }}>
+                {provider && provider.is_mobile && areaNames.length > 0 && (
+                  <span>🗺️ <strong>Serves:</strong> {areaNames.join(" · ")}</span>
+                )}
+                {provider && !provider.is_mobile && provider.address && (
+                  <span>📍 <strong>Located at:</strong> {provider.address}</span>
+                )}
+                {provider && provider.is_mobile && provider.address && (
+                  <span>📍 <strong>Also at:</strong> {provider.address}</span>
+                )}
+                {(!provider || (!provider.is_mobile && !provider.address && (!Array.isArray(provider.service_areas) || !provider.service_areas.length))) && (
+                  <span style={{ color: "#b0906a", fontStyle: "italic" }}>No location set — update your profile to show location on your ad.</span>
+                )}
+              </div>
+              <div style={{ fontSize: 10, color: MUTED, fontFamily: SANS, marginTop: 3 }}>
+                To change this, update your profile. <span style={{ color: ORANGE, cursor: "pointer", textDecoration: "underline" }} onClick={() => setActiveTab("profile")}>Go to Profile →</span>
+              </div>
             </div>
           </div>
 
@@ -1585,10 +1602,20 @@ function ClassifiedAdSection({ provider, refreshKey = 0 }) {
                     <div style={{ width:"100%", height:100, background:PAPER_MID, display:"flex", alignItems:"center", justifyContent:"center", fontSize:13, color:INK_FADE, fontFamily:SANS, fontStyle:"italic" }}>No image selected</div>
                   )}
                   <div style={{ padding:"14px 16px 8px", fontSize:14, color:"#1C0F00", lineHeight:1.8, fontFamily:SERIF }}>{ad.body || "Your deal description will appear here."}</div>
-                  {ad.address && <div style={{ padding:"4px 16px 10px", fontSize:12, color:"#00836B", fontWeight:700, fontFamily:SANS }}>📍 {ad.address}</div>}
+                  {/* Location info — smart display based on mobile/B&M/hybrid */}
+                  <div style={{ padding:"2px 16px 10px", display:"flex", flexDirection:"column", gap:3 }}>
+                    {ad._provider_is_mobile && Array.isArray(ad._provider_areas) && ad._provider_areas.length > 0 && (
+                      <div style={{ fontSize:12, color:"#00836B", fontWeight:700, fontFamily:SANS }}>🗺️ Serves: {ad._provider_areas.join(" · ")}</div>
+                    )}
+                    {!ad._provider_is_mobile && ad._provider_address && (
+                      <div style={{ fontSize:12, color:"#00836B", fontWeight:700, fontFamily:SANS }}>📍 Located at: {ad._provider_address}</div>
+                    )}
+                    {ad._provider_is_mobile && ad._provider_address && (
+                      <div style={{ fontSize:12, color:"#5C7A6B", fontFamily:SANS }}>📍 Also at: {ad._provider_address}</div>
+                    )}
+                  </div>
                   <div style={{ borderTop:"1px solid #C8B07A", background:"#E4D5A8", padding:"9px 14px", display:"flex", justifyContent:"space-between", alignItems:"center", gap:8, flexWrap:"wrap" }}>
                     <div style={{ fontSize:13, fontWeight:900, color:NAVY, fontFamily:SANS }}>{ad.provider_name || provider.business_name}</div>
-                    {ad.village && <div style={{ fontSize:11, color:"#5C3A10", fontFamily:SERIF, fontStyle:"italic", background:"#C8B07A", borderRadius:2, padding:"2px 8px" }}>📌 {ad.village}</div>}
                   </div>
                 </div>
               );

@@ -88,15 +88,36 @@ function AdCard({ ad }) {
           {ad.body}
         </div>
 
-        {/* village + expiry */}
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 8 }}>
-          {ad.village && (
-            <span style={{ fontSize: 11, color: MUTED }}>📍 {ad.village}</span>
+        {/* location info + expiry */}
+        <div style={{ marginTop: 8, display: "flex", flexDirection: "column", gap: 4 }}>
+          {/* Mobile provider: show service areas */}
+          {ad._provider_is_mobile && ad._provider_areas && ad._provider_areas.length > 0 && (
+            <div style={{ fontSize: 11, color: TEAL, fontWeight: 600 }}>
+              🗺️ Serves: {ad._provider_areas.join(" · ")}
+            </div>
+          )}
+          {/* Brick & mortar: show address */}
+          {!ad._provider_is_mobile && ad._provider_address && (
+            <div style={{ fontSize: 11, color: MUTED }}>
+              📍 {ad._provider_address}
+            </div>
+          )}
+          {/* Both mobile AND has a location (hybrid) */}
+          {ad._provider_is_mobile && ad._provider_address && (
+            <div style={{ fontSize: 11, color: MUTED }}>
+              📍 Also at: {ad._provider_address}
+            </div>
+          )}
+          {/* Fallback: manual village field if no provider data enrichment */}
+          {!ad._provider_is_mobile && !ad._provider_address && ad.village && (
+            <div style={{ fontSize: 11, color: MUTED }}>
+              📍 {ad.village}
+            </div>
           )}
           {ad.deal_expires_at && !expired && (
-            <span style={{ fontSize: 11, color: RED, fontWeight: 700 }}>
+            <div style={{ fontSize: 11, color: RED, fontWeight: 700 }}>
               Expires {fmt(ad.deal_expires_at)}
-            </span>
+            </div>
           )}
         </div>
       </div>
