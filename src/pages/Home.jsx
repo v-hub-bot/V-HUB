@@ -737,7 +737,7 @@ export default function Home() {
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ get_lookup_data: true }),
       }).then(r => r.json()).catch(() => ({ categories: [], services: [], areas: [] })),
-      fetch(API_BASE + "/getProviders").then(r => r.json()).catch(() => ({ providers: [] })),
+      fetch(API_BASE + "/getProviders", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({}) }).then(r => r.json()).catch(() => ({ providers: [] })),
       User.me().catch(() => null),
     ]).then(([lookup, provData, u]) => {
       setAreas(lookup.areas || []);
