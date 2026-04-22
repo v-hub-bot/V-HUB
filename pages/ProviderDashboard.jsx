@@ -1877,7 +1877,7 @@ function AnalyticsDashboard({ provider, reviews }) {
   const maxTrend = analytics ? Math.max(1, ...analytics.trend.map(([, v]) => v)) : 1;
 
   return (
-    <div ref={sectionRef} style={{ marginBottom: 24 }}>
+    <div style={{ marginBottom: 24 }}>
       {/* Header row */}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14, flexWrap: "wrap", gap: 8 }}>
         <div style={{ ...shS, marginBottom: 0, borderBottom: "none", paddingBottom: 0 }}>📊 Your Activity Report</div>
