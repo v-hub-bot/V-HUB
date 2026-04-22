@@ -1417,7 +1417,7 @@ function ClassifiedAdSection({ provider, refreshKey = 0 }) {
             </div>
             <div style={{ gridColumn: "1/-1" }}>
               <label style={lbS}>Deal Description * <span style={{ fontSize: 10, fontWeight: 400, textTransform: "none" }}>(max 300 chars)</span></label>
-              <textarea style={{ ...inS, minHeight: 80, resize: "vertical", lineHeight: 1.6 }}
+              <textarea data-testid="ad-body-input" style={{ ...inS, minHeight: 80, resize: "vertical", lineHeight: 1.6 }}
                 placeholder="Describe your deal — what it is, how to redeem it, any conditions…"
                 value={form.body} onChange={e => setForm(p => ({ ...p, body: e.target.value.slice(0,300) }))} />
               <div style={{ fontSize: 10, color: INK_FADE, fontFamily: SANS, textAlign: "right" }}>{form.body.length}/300</div>
