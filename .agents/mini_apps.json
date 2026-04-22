@@ -5,6 +5,9 @@
     "ProviderDashboard": {
       "title": "ProviderDashboard"
     },
+    "Home": {
+      "title": "Home"
+    },
     "Wekcadmin": {
       "title": "Wekcadmin"
     },
@@ -13,9 +16,6 @@
     },
     "Privacy": {
       "title": "Privacy"
-    },
-    "Home": {
-      "title": "Home"
     },
     "Terms": {
       "title": "Terms"
