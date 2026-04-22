@@ -39,7 +39,7 @@ function sanitize(p: Record<string, unknown>): Record<string, unknown> {
 }
 
 const _DEPLOY_TS = 1776472782;
-const base44 = createClient({ appId: "69d06ada8019d7e9edf7f8e8" });
+const base44 = createClient({ appId: "69d062aca815ce8e697894b1" });
 const sr = base44.asServiceRole;
 
 Deno.serve(async (req: Request) => {

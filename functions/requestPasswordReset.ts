@@ -81,7 +81,7 @@ Deno.serve(async (req) => {
     const html = `
       <div style="font-family: Georgia, serif; max-width: 580px; margin: 0 auto; background: #F5E8CC; border: 2px solid #8B4513; border-radius: 12px; overflow: hidden;">
         <div style="background: #1A0A00; padding: 20px 24px; text-align: center;">
-          <img src="https://media.base44.com/images/public/69d06ada8019d7e9edf7f8e8/a9af95bc3_V-Hublogo.png" style="height: 54px; border-radius: 8px;" />
+          <img src="https://media.base44.com/images/public/69d062aca815ce8e697894b1/a9af95bc3_V-Hublogo.png" style="height: 54px; border-radius: 8px;" />
           <div style="color: #F5E8CC; font-size: 20px; font-weight: 900; letter-spacing: 2px; margin-top: 10px;">Reset Your Password</div>
         </div>
         <div style="padding: 28px 24px;">

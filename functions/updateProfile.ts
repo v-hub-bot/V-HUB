@@ -19,7 +19,7 @@ const badIds = (a: unknown) => Array.isArray(a) ? (a as unknown[]).filter(v => !
 
 const ADMIN_EMAILS = ["kimberlycook1980@gmail.com","5bebegurlz@gmail.com"];
 
-const sr = createClient({ appId: "69d06ada8019d7e9edf7f8e8" }).asServiceRole;
+const sr = createClient({ appId: "69d062aca815ce8e697894b1" }).asServiceRole;
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: CORS });

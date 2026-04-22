@@ -7,7 +7,7 @@ const ADMIN_EMAILS = [
 ];
 const ALERT_EMAILS = ["kimberlycook1980@gmail.com", "5bebegurlz@gmail.com"];
 const APP_URL = "https://www.v-hub.us";
-const LOGO = "https://media.base44.com/images/public/69d06ada8019d7e9edf7f8e8/a9af95bc3_V-Hublogo.png";
+const LOGO = "https://media.base44.com/images/public/69d062aca815ce8e697894b1/a9af95bc3_V-Hublogo.png";
 
 function randomToken(len = 48) {
   const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";

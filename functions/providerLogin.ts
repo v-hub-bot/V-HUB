@@ -1,6 +1,6 @@
-// providerLogin v9 - adds admin_update action for provider management
+// providerLogin v10 - fixed app ID [1776826785]
 import { createClientFromRequest, createClient } from "npm:@base44/sdk@0.8.25";
-const srStatic = createClient({ appId: '69d06ada8019d7e9edf7f8e8' }).asServiceRole;
+const srStatic = createClient({ appId: '69d062aca815ce8e697894b1' }).asServiceRole;
 
 async function sleep(ms: number): Promise<void> {
   return new Promise(r => setTimeout(r, ms));
