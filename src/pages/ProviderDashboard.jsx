@@ -2204,7 +2204,7 @@ export default function ProviderDashboard() {
     }
 
     // Load entity data via backend (service role — works without Base44 auth)
-    fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/getProviders", {
+    fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/providerLogin", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ get_lookup_data: true }),
@@ -2316,7 +2316,7 @@ export default function ProviderDashboard() {
     let areas = dbAreas;
     if (!mapsReady || svcs.length === 0 || areas.length === 0) {
       try {
-        const lkup = await fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/getProviders", {
+        const lkup = await fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/providerLogin", {
           method: "POST", headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ get_lookup_data: true }),
         }).then(r => r.json());
@@ -2353,15 +2353,15 @@ export default function ProviderDashboard() {
       updates.service_areas = areasToSave;
       console.log("[V-Hub Save] services:", svcsToSave, "areas:", areasToSave, "updates:", updates);
 
-      // Save via getProviders provider_update path (service role, no auth needed)
+      // Save via providerLogin action:save_profile (service role, no auth needed)
       let json = null;
       for (let attempt = 1; attempt <= 3; attempt++) {
         try {
-          const res = await fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/getProviders", {
+          const res = await fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/providerLogin", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-              provider_update: true,
+              action: "save_profile",
               provider_id: provider.id,
               vh_number: provider.vh_number,
               fields: updates,
@@ -2376,7 +2376,7 @@ export default function ProviderDashboard() {
       }
 
       if (!json || !json.success) throw new Error((json && json.error) || "Save failed — please try again.");
-      const saved = json.record;
+      const saved = json.record || json.provider;
       // Update local state immediately so changes are visible without a page reload
       setProvider(prev => ({ ...prev, ...saved }));
       setSelSvcs(Array.isArray(saved.services) ? saved.services : svcsToSave);

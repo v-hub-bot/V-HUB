@@ -48,5 +48,6 @@ export const submitReview = base44.functions.submitReview;
 export const notifyNewProviderListing = base44.functions.notifyNewProviderListing;
 export const saveProviderAdmin = base44.functions.saveProviderAdmin;
 export const adminUpdateProvider = base44.functions.adminUpdateProvider;
-export const getProviders = base44.functions.getProviders;
 export const getProvidersV2 = base44.functions.getProvidersV2;
+export const getProviders = base44.functions.getProviders;
+export const vhubProviderApi = base44.functions.vhubProviderApi;
