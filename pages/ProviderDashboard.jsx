@@ -1538,46 +1538,71 @@ function ClassifiedAdSection({ provider, refreshKey = 0 }) {
             </div>
           </div>
 
-          {/* Save + Preview buttons */}
-          {saveErr && <div style={{ marginTop: 10, fontSize: 12, color: "#c00", fontFamily: SANS }}>{saveErr}</div>}
-          {saveMsg !== "saved" && (
-            <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center", marginTop: 14 }}>
-              <button data-testid="save-ad-btn" onClick={handleSave} disabled={saving}
-                style={{ background: `linear-gradient(180deg,#9A6030,${BROWN_BTN})`, color: PAPER, border: `2px solid ${NAVY}`, borderRadius: 5, padding: "11px 24px", fontSize: 13, fontWeight: 900, cursor: saving ? "not-allowed" : "pointer", fontFamily: SERIF, opacity: saving ? 0.7 : 1 }}>
-                {saving ? "Saving…" : "💾 Save Ad"}
-              </button>
-              <button onClick={openPreviewFromEditor}
-                data-testid="preview-ad-btn" style={{ background: PAPER, border: `2px solid ${TEAL}`, color: TEAL, borderRadius: 5, padding: "11px 18px", fontSize: 13, fontWeight: 900, cursor: "pointer", fontFamily: SERIF }}>
-                👁 Preview Ad
-              </button>
-              <button onClick={closeEdit} style={{ background: "none", border: `1.5px solid ${PAPER_DK}`, color: INK_FADE, borderRadius: 5, padding: "10px 16px", fontSize: 12, cursor: "pointer", fontFamily: SANS }}>Cancel</button>
-            </div>
-          )}
-          {saveMsg === "saved" && savedAdRecord && (
-            <div style={{ marginTop: 12, background: "#F0FBF4", border: "2px solid #2E7D32", borderRadius: 8, padding: "14px 16px" }}>
-              <div style={{ fontSize: 13, fontWeight: 900, color: "#1B5E20", fontFamily: SERIF, marginBottom: 6 }}>✅ Ad saved!</div>
-              <div style={{ fontSize: 12, color: INK_FADE, fontFamily: SANS, lineHeight: 1.8, marginBottom: 12 }}>
-                Your ad <strong style={{ color: INK }}>"{savedAdRecord.headline}"</strong> is ready.<br/>
-                Preview it first, then pay <strong style={{ color: INK }}>$10</strong> to post it live for <strong style={{ color: INK }}>7 days</strong>.<br/>
-                <span style={{ fontSize: 11 }}>You won't be charged again unless you manually launch another ad.</span>
-              </div>
-              <div style={{ display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center" }}>
-                <button data-testid="pay-now-btn" disabled={checkoutLoading} onClick={() => { closeEdit(); handleCheckout(savedAdRecord); }}
-                  style={{ background: "linear-gradient(180deg,#1A6B3C,#145530)", color: "#fff", border: "2px solid #1A6B3C", borderRadius: 6, padding: "11px 24px", fontSize: 13, fontWeight: 900, cursor: checkoutLoading ? "not-allowed" : "pointer", fontFamily: SERIF, opacity: checkoutLoading ? 0.7 : 1 }}>
-                  {checkoutLoading ? "Redirecting to Stripe…" : "💳 Pay $10 — Post Live for 7 Days →"}
-                </button>
-                <button onClick={() => { setPreviewAd({ ...savedAdRecord, image_url: filePreview || savedAdRecord.image_url }); setPreviewFromEditor(false); }}
-                  style={{ background: "none", border: `1.5px solid ${TEAL}`, color: TEAL, borderRadius: 6, padding: "10px 16px", fontSize: 12, cursor: "pointer", fontFamily: SANS, fontWeight: 700 }}>
-                  👁 Preview First
-                </button>
-                <button onClick={closeEdit}
-                  style={{ background: "none", border: `1.5px solid ${PAPER_DK}`, color: INK_FADE, borderRadius: 5, padding: "10px 14px", fontSize: 12, cursor: "pointer", fontFamily: SANS }}>
-                  Save for Later
-                </button>
-              </div>
-              {checkoutErr && <div style={{ marginTop: 8, fontSize: 12, color: "#c00", fontFamily: SANS }}>{checkoutErr}</div>}
-            </div>
-          )}
+          {/* Save + Preview buttons — context-aware: live ad vs draft */}
+          {(() => {
+            const isEditingLive = currentRecord?.is_active === true;
+            return (
+              <>
+                {saveErr && <div style={{ marginTop: 10, fontSize: 12, color: "#c00", fontFamily: SANS }}>{saveErr}</div>}
+
+                {saveMsg !== "saved" && (
+                  <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center", marginTop: 14 }}>
+                    <button data-testid="save-ad-btn" onClick={handleSave} disabled={saving}
+                      style={{ background: isEditingLive ? "linear-gradient(180deg,#1A6B3C,#145530)" : `linear-gradient(180deg,#9A6030,${BROWN_BTN})`, color: PAPER, border: `2px solid ${isEditingLive ? "#1A6B3C" : NAVY}`, borderRadius: 5, padding: "11px 24px", fontSize: 13, fontWeight: 900, cursor: saving ? "not-allowed" : "pointer", fontFamily: SERIF, opacity: saving ? 0.7 : 1 }}>
+                      {saving ? "Updating…" : isEditingLive ? "✅ Update Live Ad" : "💾 Save Ad"}
+                    </button>
+                    <button onClick={openPreviewFromEditor}
+                      data-testid="preview-ad-btn" style={{ background: PAPER, border: `2px solid ${TEAL}`, color: TEAL, borderRadius: 5, padding: "11px 18px", fontSize: 13, fontWeight: 900, cursor: "pointer", fontFamily: SERIF }}>
+                      👁 Preview Ad
+                    </button>
+                    <button onClick={closeEdit} style={{ background: "none", border: `1.5px solid ${PAPER_DK}`, color: INK_FADE, borderRadius: 5, padding: "10px 16px", fontSize: 12, cursor: "pointer", fontFamily: SANS }}>Cancel</button>
+                  </div>
+                )}
+
+                {saveMsg === "saved" && savedAdRecord && !isEditingLive && (
+                  <div style={{ marginTop: 12, background: "#F0FBF4", border: "2px solid #2E7D32", borderRadius: 8, padding: "14px 16px" }}>
+                    <div style={{ fontSize: 13, fontWeight: 900, color: "#1B5E20", fontFamily: SERIF, marginBottom: 6 }}>✅ Ad saved!</div>
+                    <div style={{ fontSize: 12, color: INK_FADE, fontFamily: SANS, lineHeight: 1.8, marginBottom: 12 }}>
+                      Your ad <strong style={{ color: INK }}>"{savedAdRecord.headline}"</strong> is ready.<br/>
+                      Preview it first, then pay <strong style={{ color: INK }}>$10</strong> to post it live for <strong style={{ color: INK }}>7 days</strong>.<br/>
+                      <span style={{ fontSize: 11 }}>You won't be charged again unless you manually launch another ad.</span>
+                    </div>
+                    <div style={{ display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center" }}>
+                      <button data-testid="pay-now-btn" disabled={checkoutLoading} onClick={() => { closeEdit(); handleCheckout(savedAdRecord); }}
+                        style={{ background: "linear-gradient(180deg,#1A6B3C,#145530)", color: "#fff", border: "2px solid #1A6B3C", borderRadius: 6, padding: "11px 24px", fontSize: 13, fontWeight: 900, cursor: checkoutLoading ? "not-allowed" : "pointer", fontFamily: SERIF, opacity: checkoutLoading ? 0.7 : 1 }}>
+                        {checkoutLoading ? "Redirecting to Stripe…" : "💳 Pay $10 — Post Live for 7 Days →"}
+                      </button>
+                      <button onClick={() => { setPreviewAd({ ...savedAdRecord, image_url: filePreview || savedAdRecord.image_url }); setPreviewFromEditor(false); }}
+                        style={{ background: "none", border: `1.5px solid ${TEAL}`, color: TEAL, borderRadius: 6, padding: "10px 16px", fontSize: 12, cursor: "pointer", fontFamily: SANS, fontWeight: 700 }}>
+                        👁 Preview First
+                      </button>
+                      <button onClick={closeEdit}
+                        style={{ background: "none", border: `1.5px solid ${PAPER_DK}`, color: INK_FADE, borderRadius: 5, padding: "10px 14px", fontSize: 12, cursor: "pointer", fontFamily: SANS }}>
+                        Save for Later
+                      </button>
+                    </div>
+                    {checkoutErr && <div style={{ marginTop: 8, fontSize: 12, color: "#c00", fontFamily: SANS }}>{checkoutErr}</div>}
+                  </div>
+                )}
+
+                {saveMsg === "saved" && savedAdRecord && isEditingLive && (
+                  <div style={{ marginTop: 12, background: "#E8F5E9", border: "2px solid #2E7D32", borderRadius: 8, padding: "14px 16px" }}>
+                    <div style={{ fontSize: 13, fontWeight: 900, color: "#1B5E20", fontFamily: SERIF, marginBottom: 4 }}>✅ Live ad updated!</div>
+                    <div style={{ fontSize: 12, color: INK_FADE, fontFamily: SANS, lineHeight: 1.8, marginBottom: 10 }}>
+                      Your changes to <strong style={{ color: INK }}>"{savedAdRecord.headline}"</strong> are now live.<br/>
+                      {savedAdRecord.deal_expires_at && (
+                        <span>This ad continues to run through <strong>{new Date(savedAdRecord.deal_expires_at).toLocaleDateString("en-US",{weekday:"long",month:"long",day:"numeric"})}</strong>.</span>
+                      )}
+                    </div>
+                    <button onClick={closeEdit}
+                      style={{ background: `linear-gradient(180deg,#9A6030,${BROWN_BTN})`, color: PAPER, border: `2px solid ${NAVY}`, borderRadius: 5, padding: "10px 24px", fontSize: 13, fontWeight: 900, cursor: "pointer", fontFamily: SERIF }}>
+                      ← Back to Dashboard
+                    </button>
+                  </div>
+                )}
+              </>
+            );
+          })()}
         </div>
       )}
 
