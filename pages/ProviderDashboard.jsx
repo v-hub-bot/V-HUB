@@ -1484,7 +1484,7 @@ function ClassifiedAdSection({ provider, refreshKey = 0 }) {
                 <input style={{ ...inS, flex: 1 }} placeholder="e.g. Pool cleaning service, sunny Florida backyard"
                   value={aiPrompt} onChange={e => setAiPrompt(e.target.value)}
                   onKeyDown={e => e.key === "Enter" && handleGenerateAI()} />
-                <button onClick={handleGenerateAI} disabled={aiGenerating || !aiPrompt.trim()}
+                <button data-testid="ai-generate-btn" onClick={handleGenerateAI} disabled={aiGenerating || !aiPrompt.trim()}
                   style={{ background: `linear-gradient(180deg,#9A6030,${BROWN_BTN})`, color: PAPER, border: `1.5px solid ${NAVY}`, borderRadius: 5, padding: "8px 14px", fontSize: 12, fontWeight: 700, cursor: aiGenerating || !aiPrompt.trim() ? "not-allowed" : "pointer", fontFamily: SANS, whiteSpace: "nowrap", opacity: aiGenerating ? 0.7 : 1 }}>
                   {aiGenerating ? "Generating…" : "✨ Generate"}
                 </button>
@@ -1503,7 +1503,7 @@ function ClassifiedAdSection({ provider, refreshKey = 0 }) {
                 {saving ? "Saving…" : "💾 Save Ad"}
               </button>
               <button onClick={openPreviewFromEditor}
-                style={{ background: PAPER, border: `2px solid ${TEAL}`, color: TEAL, borderRadius: 5, padding: "11px 18px", fontSize: 13, fontWeight: 900, cursor: "pointer", fontFamily: SERIF }}>
+                data-testid="preview-ad-btn" style={{ background: PAPER, border: `2px solid ${TEAL}`, color: TEAL, borderRadius: 5, padding: "11px 18px", fontSize: 13, fontWeight: 900, cursor: "pointer", fontFamily: SERIF }}>
                 👁 Preview Ad
               </button>
               <button onClick={closeEdit} style={{ background: "none", border: `1.5px solid ${PAPER_DK}`, color: INK_FADE, borderRadius: 5, padding: "10px 16px", fontSize: 12, cursor: "pointer", fontFamily: SANS }}>Cancel</button>
