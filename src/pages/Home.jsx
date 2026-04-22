@@ -536,7 +536,7 @@ function Results({ results, areas, cats, svcs, onReset, onSel, selArea, selCatId
 }
 
 // ── Village Dropdown ────────────────────────────────────────────────────────
-function VillageDropdown({ areas, value, onChange }) {
+function VillagePickerDropdown({ areas, value, onChange }) {
   const [open, setOpen]     = useState(false);
   const [search, setSearch] = useState("");
   const ref = useRef(null);
@@ -600,7 +600,7 @@ function VillageDropdown({ areas, value, onChange }) {
 
 // ── Service Dropdown ────────────────────────────────────────────────────────
 // Two-level: tap a category (macro) → see its services (micro) → tap service → closes & displays choice
-function ServiceDropdown({ cats, svcs, value, onChange }) {
+function ServicePickerDropdown({ cats, svcs, value, onChange }) {
   const [open, setOpen]           = useState(false);
   const [activeCat, setActiveCat] = useState(null);
   const [rect, setRect]           = useState(null);
@@ -855,8 +855,8 @@ export default function Home() {
           </div>
           <div style={{ padding: "14px 12px" }}>
             <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginBottom: 10 }}>
-              <ServiceDropdown cats={cats} svcs={svcs} value={selSvc} onChange={setSelSvc} />
-              <VillageDropdown areas={areas} value={selArea} onChange={setSelArea} />
+              <ServicePickerDropdown cats={cats} svcs={svcs} value={selSvc} onChange={setSelSvc} />
+              <VillagePickerDropdown areas={areas} value={selArea} onChange={setSelArea} />
             </div>
             <button
               onClick={handleSearch}
