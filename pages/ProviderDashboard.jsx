@@ -1074,8 +1074,8 @@ function ClassifiedAdSection({ provider, refreshKey = 0 }) {
     setForm({
       headline:  slot?.headline || (dt && dt.id !== "custom" ? dt.headline.replace("{BIZ}", provider.business_name || "").replace("{X}", "10") : ""),
       body:      slot?.body     || "",
-      village:   slot?.village  || "",
-      address:   slot?.address  || "",
+      village:   slot?.village  || (provider?.is_mobile ? (areaNames.length > 0 ? areaNames[0] : "") : "") || "",
+      address:   slot?.address  || provider?.address || "",
       image_url: slot?.image_url || "",
     });
     setFilePreview(null); setFileObj(null);
@@ -1436,25 +1436,36 @@ function ClassifiedAdSection({ provider, refreshKey = 0 }) {
                 value={form.body} onChange={e => setForm(p => ({ ...p, body: e.target.value.slice(0,300) }))} />
               <div style={{ fontSize: 10, color: INK_FADE, fontFamily: SANS, textAlign: "right" }}>{form.body.length}/300</div>
             </div>
-            {/* Location info — auto-sourced from provider profile */}
+            {/* Location info — editable, pre-filled from profile */}
             <div style={{ gridColumn: "1/-1" }}>
-              <label style={lbS}>Your Location on Ad <span style={{ fontSize: 10, fontWeight: 400, textTransform: "none" }}>(pulled from your profile)</span></label>
-              <div style={{ ...inS, background: "#f0ede4", color: MUTED, fontSize: 12, minHeight: 36, display: "flex", flexDirection: "column", gap: 4, justifyContent: "center", cursor: "default" }}>
-                {provider && provider.is_mobile && areaNames.length > 0 && (
-                  <span>🗺️ <strong>Serves:</strong> {areaNames.join(" · ")}</span>
-                )}
-                {provider && !provider.is_mobile && provider.address && (
-                  <span>📍 <strong>Located at:</strong> {provider.address}</span>
-                )}
-                {provider && provider.is_mobile && provider.address && (
-                  <span>📍 <strong>Also at:</strong> {provider.address}</span>
-                )}
-                {(!provider || (!provider.is_mobile && !provider.address && (!Array.isArray(provider.service_areas) || !provider.service_areas.length))) && (
-                  <span style={{ color: "#b0906a", fontStyle: "italic" }}>No location set — update your profile to show location on your ad.</span>
-                )}
-              </div>
+              <label style={lbS}>Village / Area on Ad <span style={{ fontSize: 10, fontWeight: 400, textTransform: "none", color: TEAL }}>(pre-filled from your profile — you can change it)</span></label>
+              <select
+                style={{ ...inS, cursor: "pointer" }}
+                value={form.village}
+                onChange={e => setForm(p => ({ ...p, village: e.target.value }))}
+              >
+                <option value="">— Select the village/area for this ad —</option>
+                <option value="Historic Side">🌴 Historic Side</option>
+                <option value="Established Villages">🏡 Established Villages</option>
+                <option value="Newer Villages">🏘️ Newer Villages</option>
+                <option value="Eastport">🌊 Eastport</option>
+                <option value="Family/Non-Age-Restricted">👨‍👩‍👧 Family / Non-Age-Restricted</option>
+                <option value="All Villages">📍 All Villages (serves all areas)</option>
+              </select>
               <div style={{ fontSize: 10, color: MUTED, fontFamily: SANS, marginTop: 3 }}>
-                To change this, update your profile. <span style={{ color: ORANGE, cursor: "pointer", textDecoration: "underline" }} onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>Go to Profile →</span>
+                This is how your location appears on the ad. Pre-filled from your profile but you can adjust it for this specific ad.
+              </div>
+            </div>
+            <div style={{ gridColumn: "1/-1" }}>
+              <label style={lbS}>Address / Location Detail <span style={{ fontSize: 10, fontWeight: 400, textTransform: "none" }}>(optional)</span></label>
+              <input
+                style={inS}
+                placeholder={provider?.is_mobile ? "e.g. Serving all of The Villages, FL" : "e.g. 1234 Main St, Lady Lake, FL"}
+                value={form.address}
+                onChange={e => setForm(p => ({ ...p, address: e.target.value }))}
+              />
+              <div style={{ fontSize: 10, color: MUTED, fontFamily: SANS, marginTop: 3 }}>
+                Optional — add a street address or location note for this ad.
               </div>
             </div>
           </div>
