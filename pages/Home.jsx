@@ -1,3 +1,4 @@
+// BUILD_FORCE_2026_04_22_T0400
 // V-Hub Home — PRODUCTION v2026-04-22-R1-FORCE-REBUILD
 import React, { useState, useEffect, useRef } from "react";
 import { User } from "@/api/entities";

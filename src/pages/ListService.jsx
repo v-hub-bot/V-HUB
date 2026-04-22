@@ -1,3 +1,4 @@
+// BUILD_FORCE_2026_04_22_T0400
 // CACHE-BUST-1776573078
 // build-1776559362
 import { useState, useEffect, useRef } from "react"; // v3-static-fix
