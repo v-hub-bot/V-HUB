@@ -659,8 +659,7 @@ function ServiceDropdown({ cats, svcs, value, onChange }) {
     border: "2px solid " + YELLOW,
     borderRadius: 6,
     boxShadow: "0 8px 28px rgba(0,0,0,0.22)",
-    maxHeight: Math.min(window.innerHeight - rect.bottom - 10, 520),
-    overflowY: "auto",
+    overflowY: "visible",
     WebkitOverflowScrolling: "touch",
   } : {};
 
