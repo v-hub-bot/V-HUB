@@ -1470,6 +1470,8 @@ export default function Home() {
       `}</style>
       {/* Preload logo so it's ready instantly on navigation */}
       <link rel="preload" as="image" href="https://base44.app/api/apps/69d062aca815ce8e697894b1/files/mp/public/69d062aca815ce8e697894b1/f14a7cbd0_logo_icon_small.png" />
+      {/* Preload hero image — highest priority, loads with app */}
+      <link rel="preload" as="image" href="https://media.base44.com/images/public/69d062aca815ce8e697894b1/f19aa517d_generated_image.png" fetchpriority="high" />
 
       <div style={{
         minHeight: "100vh",
@@ -1555,6 +1557,9 @@ export default function Home() {
         <img
           src="https://media.base44.com/images/public/69d062aca815ce8e697894b1/f19aa517d_generated_image.png"
           alt="Lake Sumter Landing"
+          fetchpriority="high"
+          loading="eager"
+          decoding="sync"
           style={{ width: "100%", height: 240, objectFit: "cover", objectPosition: "center 55%", display: "block" }}
         />
 
