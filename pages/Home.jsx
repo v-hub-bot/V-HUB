@@ -214,12 +214,19 @@ function Burger({ currentUser }) {
 
 // ── Provider Detail ───────────────────────────────────────────────────────────
 const MACRO_AREAS_MAP = {
+  // Text keys (legacy)
   "Historic Side": "Historic Side",
   "Established Villages": "Established Villages",
   "Newer Villages": "Newer Villages",
   "Eastport": "Eastport",
   "Family Villages": "Family & Non-Age-Restricted",
   "All Villages": "All Villages",
+  // Entity ID keys (current DB values)
+  "69d06c4a4f1e1017a77a7018": "Historic Side",
+  "69d06c4a4f1e1017a77a7019": "Established Villages",
+  "69d06c4a4f1e1017a77a701a": "Newer Villages",
+  "69d06c4a4f1e1017a77a701b": "Eastport",
+  "69d06c4a4f1e1017a77a701c": "Family & Non-Age-Restricted",
 };
 
 function Stars({ rating, size = 14 }) {
