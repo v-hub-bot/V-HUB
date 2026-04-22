@@ -22,6 +22,20 @@ function useMeta({ title, description, canonical }) {
   }, [title]);
 }
 
+
+// ── GA4 Loader ────────────────────────────────────────────────────────────
+if (typeof window !== 'undefined' && !window.__ga4loaded) {
+  window.__ga4loaded = true;
+  const _s = document.createElement('script');
+  _s.async = true;
+  _s.src = 'https://www.googletagmanager.com/gtag/js?id=G-1EJ40FW9E1';
+  document.head.appendChild(_s);
+  window.dataLayer = window.dataLayer || [];
+  window.gtag = function(){window.dataLayer.push(arguments);};
+  window.gtag('js', new Date());
+  window.gtag('config', 'G-1EJ40FW9E1');
+}
+
 const INK       = "#1C0F00";
 const INK_FADE  = "#5C3A10";
 const PAPER     = "#F0E6C8";
