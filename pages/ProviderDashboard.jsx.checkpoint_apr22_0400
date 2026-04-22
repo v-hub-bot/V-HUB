@@ -1033,6 +1033,8 @@ function ClassifiedAdSection({ provider, refreshKey = 0 }) {
   const GREEN     = "#1A6B3C";
   const BROWN_BTN = "#7A4820";
   const YELLOW    = "#FFDB00";
+  const MUTED     = "#9B8068";
+  const ORANGE    = "#E8431A";
   const lbS = { display: "block", fontSize: 11, fontWeight: 700, color: INK_FADE, fontFamily: SANS, letterSpacing: 0.5, textTransform: "uppercase", marginBottom: 4 };
   const inS = { width: "100%", boxSizing: "border-box", background: "#FFFDF5", border: `1.5px solid ${PAPER_DK}`, borderRadius: 5, padding: "9px 10px", fontSize: 13, color: INK, fontFamily: SANS, outline: "none" };
 
@@ -1054,6 +1056,14 @@ function ClassifiedAdSection({ provider, refreshKey = 0 }) {
   const queued      = adSlots.filter(a => !a.is_active);
   const nextUp      = queued.find(a => a.is_queued_next) || null;
   const liveExpired = liveAd?.deal_expires_at && new Date(liveAd.deal_expires_at) < new Date();
+
+  // Local areaNames for location display in ad editor
+  const areaNames = React.useMemo(() => {
+    if (!provider) return [];
+    const ids = provider.service_areas || [];
+    const areaMap = { "69d06c4ad9b0c2b3a2f9e1a1": "Historic Side", "69d06c4ad9b0c2b3a2f9e1a2": "Established Villages", "69d06c4ad9b0c2b3a2f9e1a3": "Newer Villages", "69d06c4ad9b0c2b3a2f9e1a4": "Eastport", "69d06c4ad9b0c2b3a2f9e1a5": "Family/Non-Age-Restricted" };
+    return ids.map(id => areaMap[id] || id).filter(Boolean);
+  }, [provider]);
 
   // ── Open editor ──────────────────────────────────────────────────────────
   const openEdit = (slot, dealType) => {
@@ -1088,7 +1098,7 @@ function ClassifiedAdSection({ provider, refreshKey = 0 }) {
     try {
       const fd = new FormData();
       fd.append("file", file);
-      const upResp = await fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/storage/upload", { method: "POST", body: fd });
+      const upResp = await fetch("https://api.base44.app/api/apps/69d06ada8019d7e9edf7f8e8/storage/upload", { method: "POST", body: fd });
       const upData = await upResp.json();
       if (upData.url) {
         setForm(p => ({ ...p, image_url: upData.url }));
@@ -1138,7 +1148,7 @@ function ClassifiedAdSection({ provider, refreshKey = 0 }) {
       if (fileObj) {
         const fd = new FormData();
         fd.append("file", fileObj);
-        const upResp = await fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/storage/upload", { method: "POST", body: fd });
+        const upResp = await fetch("https://api.base44.app/api/apps/69d06ada8019d7e9edf7f8e8/storage/upload", { method: "POST", body: fd });
         const upData = await upResp.json();
         imageUrl = upData.url || imageUrl;
       }
@@ -1444,7 +1454,7 @@ function ClassifiedAdSection({ provider, refreshKey = 0 }) {
                 )}
               </div>
               <div style={{ fontSize: 10, color: MUTED, fontFamily: SANS, marginTop: 3 }}>
-                To change this, update your profile. <span style={{ color: ORANGE, cursor: "pointer", textDecoration: "underline" }} onClick={() => setActiveTab("profile")}>Go to Profile →</span>
+                To change this, update your profile. <span style={{ color: ORANGE, cursor: "pointer", textDecoration: "underline" }} onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>Go to Profile →</span>
               </div>
             </div>
           </div>
