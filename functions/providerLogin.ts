@@ -1,5 +1,5 @@
 // providerLogin v10 - fixed app ID [1776826785]
-import { createClientFromRequest, createClient } from "npm:@base44/sdk@0.8.25";
+import { createClientFromRequest, createClient } from "npm:@base44/sdk@0.8.23";
 const srStatic = createClient({ appId: '69d062aca815ce8e697894b1' }).asServiceRole;
 
 async function sleep(ms: number): Promise<void> {
@@ -96,9 +96,9 @@ Deno.serve(async (req: Request) => {
     if (body.get_lookup_data === true) {
       try {
         const [cats, svcs, areas] = await Promise.all([
-          withRetry(() => srStatic.entities.Category.list({ limit: 200 }), "cats"),
-          withRetry(() => srStatic.entities.Service.list({ limit: 500 }), "svcs"),
-          withRetry(() => srStatic.entities.ServiceArea.list({ limit: 500 }), "areas"),
+          withRetry(() => sr.entities.Category.list({ limit: 200 }), "cats"),
+          withRetry(() => sr.entities.Service.list({ limit: 500 }), "svcs"),
+          withRetry(() => sr.entities.ServiceArea.list({ limit: 500 }), "areas"),
         ]);
         console.log(`[providerLogin] lookup: cats=${(cats||[]).length} svcs=${(svcs||[]).length} areas=${(areas||[]).length}`);
         return new Response(JSON.stringify({ ok: true, categories: cats||[], services: svcs||[], areas: areas||[] }), { headers: CORS });
