@@ -1097,17 +1097,31 @@ export default function Home() {
     let ENTITY_SVC_MAP = {};   // real Service entity ID -> service name
     let svcEntities = [];
 
-    // ── Step 1: Fetch providers via entity SDK ──────────────────────────
+    // ── Step 1: Fetch providers via backend (service role — works on public page) ──
     try {
-      const PAGE_SIZE = 100;
-      let skip = 0;
-      let page = [];
-      do {
-        page = await Provider.list({ limit: PAGE_SIZE, skip }).catch(() => []);
-        all = all.concat(page || []);
-        skip += PAGE_SIZE;
-      } while (page && page.length === PAGE_SIZE);
+      const resp = await fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/getProviders", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "list_all" }),
+      });
+      if (resp.ok) {
+        const data = await resp.json();
+        all = Array.isArray(data) ? data : (data.providers || []);
+      }
     } catch(e) { all = []; }
+    // Fallback: try entity SDK if backend failed
+    if (all.length === 0) {
+      try {
+        const PAGE_SIZE = 100;
+        let skip = 0;
+        let page = [];
+        do {
+          page = await Provider.list({ limit: PAGE_SIZE, skip }).catch(() => []);
+          all = all.concat(page || []);
+          skip += PAGE_SIZE;
+        } while (page && page.length === PAGE_SIZE);
+      } catch(e) { all = []; }
+    }
 
     // ── Step 2: Try to enrich with entity names (optional, auth may fail on public page) ──
     try {
