@@ -2,18 +2,6 @@
   "app_id": "69d06ada8019d7e9edf7f8e8",
   "slug": "v-hub-app-edf7f8e8",
   "pages": {
-    "ProviderDashboard": {
-      "title": "ProviderDashboard"
-    },
-    "Privacy": {
-      "title": "Privacy"
-    },
-    "Home": {
-      "title": "Home"
-    },
-    "Classifieds": {
-      "title": "Classifieds"
-    },
     "Terms": {
       "title": "Terms"
     },
@@ -22,6 +10,18 @@
     },
     "ListService": {
       "title": "ListService"
+    },
+    "Classifieds": {
+      "title": "Classifieds"
+    },
+    "Home": {
+      "title": "Home"
+    },
+    "Privacy": {
+      "title": "Privacy"
+    },
+    "ProviderDashboard": {
+      "title": "ProviderDashboard"
     }
   }
 }
