@@ -562,7 +562,7 @@ function VillageDropdown({ areas, value, onChange }) {
         {value && <span onClick={e => { e.stopPropagation(); onChange(null); }} style={{ fontSize: 14, color: INK_FADE }}>x</span>}
       </button>
       {open && (
-        <div style={{ position: "absolute", top: "100%", left: 0, right: 0, zIndex: 200, background: PAPER, border: "2px solid " + YELLOW, borderRadius: 6, boxShadow: "0 6px 24px rgba(0,0,0,0.18)", maxHeight: 320, display: "flex", flexDirection: "column" }}>
+        <div style={{ position: "absolute", top: "100%", left: 0, right: 0, zIndex: 200, background: PAPER, border: "2px solid " + YELLOW, borderRadius: 6, boxShadow: "0 6px 24px rgba(0,0,0,0.18)", maxHeight: 600, display: "flex", flexDirection: "column" }}>
           <div style={{ padding: "6px 8px", borderBottom: "1px solid " + PAPER_DK }}>
             <input autoFocus value={search} onChange={e => setSearch(e.target.value)} placeholder="Search village..."
               style={{ width: "100%", boxSizing: "border-box", border: "1px solid " + PAPER_DK, borderRadius: 4, padding: "5px 8px", fontSize: 12, fontFamily: "'Times New Roman', serif", background: PAPER_MID }} />
@@ -659,7 +659,7 @@ function ServiceDropdown({ cats, svcs, value, onChange }) {
     border: "2px solid " + YELLOW,
     borderRadius: 6,
     boxShadow: "0 8px 28px rgba(0,0,0,0.22)",
-    maxHeight: Math.min(window.innerHeight - rect.bottom - 10, 520),
+    maxHeight: Math.min(window.innerHeight - rect.bottom - 10, 600),
     overflowY: "auto",
     WebkitOverflowScrolling: "touch",
   } : {};
