@@ -1,10 +1,10 @@
+// FORCE_REBUILD_1776768600
 // BUILD_FORCE_2026_04_22_T0400
 // CACHE-BUST-1776743534-FIX
 // build-1776559362 
 // @build 2026-04-18-b
 // ProviderDashboard — REBUILD 1776411339
 import React, { useState, useEffect, useRef } from "react";
-const _BUILD = "1776721368"; // cache-bust
 import { Provider, ProviderReview, Service, ServiceArea, Category, ClassifiedAd, ProviderAnalytic } from "@/api/entities";
 
 // ── SEO ───────────────────────────────────────────────────────────────────
