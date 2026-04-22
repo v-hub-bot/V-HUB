@@ -21,8 +21,6 @@ The file `.agents/mini_apps.json` MUST have:
 
 **NOT** `69d062aca815ce8e697894b1` — that is the Base44 builder/editor, not the mini app.
 
-If publishing seems to "work" but the live bundle never updates, check mini_apps.json first.
-
 ## CDN cache busting (the catch-22):
 - The only way to bust the CDN cache on www.v-hub.us is to publish via the Base44 builder
 - But doing so wipes the custom code
@@ -32,30 +30,43 @@ If publishing seems to "work" but the live bundle never updates, check mini_apps
   3. I restore from latest checkpoint and republish — takes under 60 seconds
   4. Done
 
-## Checkpoint files (CURRENT GOLDEN STATE — Apr 22 2026 ~adfix):
-```
-pages/Home.jsx.checkpoint_apr22_0400
-pages/ProviderDashboard.jsx.checkpoint_apr22_adfix   ← LATEST (editable village/address in ad builder)
-pages/Wekcadmin.jsx.checkpoint_apr22_0400
-pages/ListService.jsx.checkpoint_apr22_0400
-pages/Classifieds.jsx.checkpoint_apr22_0400
-```
+## ✅ GOLDEN CHECKPOINT — Apr 22 2026 ~5pm ET (analytics + clean data)
 
-To restore ProviderDashboard to latest:
-```bash
-cp pages/ProviderDashboard.jsx.checkpoint_apr22_adfix pages/ProviderDashboard.jsx
-```
+This is the official "bookmark" / restore point. All test data cleaned, analytics tab upgraded, live flows verified.
 
-To restore everything else:
+### To restore ALL pages from this checkpoint:
 ```bash
-cp pages/Home.jsx.checkpoint_apr22_0400 pages/Home.jsx
-cp pages/Wekcadmin.jsx.checkpoint_apr22_0400 pages/Wekcadmin.jsx
-cp pages/ListService.jsx.checkpoint_apr22_0400 pages/ListService.jsx
-cp pages/Classifieds.jsx.checkpoint_apr22_0400 pages/Classifieds.jsx
+cp pages/Home.jsx.checkpoint_apr22_analytics pages/Home.jsx
+cp pages/ProviderDashboard.jsx.checkpoint_apr22_analytics pages/ProviderDashboard.jsx
+cp pages/Wekcadmin.jsx.checkpoint_apr22_analytics pages/Wekcadmin.jsx
+cp pages/ListService.jsx.checkpoint_apr22_analytics pages/ListService.jsx
+cp pages/Classifieds.jsx.checkpoint_apr22_analytics pages/Classifieds.jsx
 ```
 Then run `manage_app(publish)`.
 
+### What's in this checkpoint:
+- Enhanced Analytics tab (engagement totals, 7-day leads chart, top providers, rating distribution)
+- VH-TEST1 cleaned up as single internal test account (hidden from public, is_visible: false)
+- Bill's Barber (VH-3486 / evansrus@comcast.net) DELETED — was William Evans' test account
+- All test reviews, analytics events, and stray data removed
+- All live backend flows verified ✅
+
+## Test account credentials (keep private):
+- **VH number:** VH-TEST1
+- **Email:** test@v-hub.us
+- **Password:** VHub2026!
+- **Note:** is_visible = false — does NOT appear in public directory
+
+## Live flow test results (Apr 22 2026):
+- ✅ Login with VH number → SUCCESS
+- ✅ Login with email → SUCCESS
+- ✅ Wrong password → Correct error returned
+- ✅ Public search → 233 real providers, test account hidden
+- ✅ Password reset request → Returns ok:true
+- ✅ Submit review → SUCCESS
+
 ## Older checkpoints (kept for reference):
-- `*.checkpoint_apr22_0400` — golden state Apr 22 morning
+- `*.checkpoint_apr22_0400` — golden state Apr 22 morning (pre-analytics)
+- `*.checkpoint_apr22_adfix` — ProviderDashboard with editable village/address in ad builder
 - `*.checkpoint_apr20_2326` — pre-GA4, pre-dropdown-fix
 - `*.golden_apr21` — golden state from April 21
