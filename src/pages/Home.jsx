@@ -628,7 +628,17 @@ function ServiceDropdown({ cats, svcs, value, onChange }) {
     return () => { document.removeEventListener("mousedown", h); document.removeEventListener("touchstart", h); };
   }, [open]);
 
-  const sortedCats    = cats.filter(c => c.is_active !== false);
+  const sortedCats = cats
+    .filter(c => c.is_active !== false)
+    .sort((a, b) => {
+      // Yard & Outdoor always first — most searched in The Villages
+      if (a.name === 'Yard & Outdoor') return -1;
+      if (b.name === 'Yard & Outdoor') return 1;
+      // Home Services second
+      if (a.name === 'Home Services') return -1;
+      if (b.name === 'Home Services') return 1;
+      return a.name.localeCompare(b.name);
+    });
   const selectedSvc   = value ? svcs.find(s => s.id === value) : null;
   const selectedLabel = selectedSvc
     ? (cats.find(c => c.id === selectedSvc.category_id)?.name
@@ -659,7 +669,9 @@ function ServiceDropdown({ cats, svcs, value, onChange }) {
     border: "2px solid " + YELLOW,
     borderRadius: 6,
     boxShadow: "0 8px 28px rgba(0,0,0,0.22)",
-    overflowY: "visible",
+    minHeight: 380,
+    maxHeight: Math.max(window.innerHeight - rect.bottom - 8, 380),
+    overflowY: "auto",
     WebkitOverflowScrolling: "touch",
   } : {};
 
