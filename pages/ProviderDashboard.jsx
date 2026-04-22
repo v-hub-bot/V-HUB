@@ -1500,23 +1500,29 @@ function ClassifiedAdSection({ provider, refreshKey = 0 }) {
             )}
 
             {/* AI generator */}
-            <div style={{ borderTop: `1px solid ${PAPER_DK}`, paddingTop: 10, marginTop: 4 }}>
-              <label style={{ ...lbS, marginBottom: 6 }}>✨ AI Image Generator</label>
-              {selectedDealType && selectedDealType.id !== "custom" && !aiGenerating && !form.image_url && (
-                <div style={{ fontSize: 11, color: TEAL, fontFamily: SANS, marginBottom: 6, fontStyle: "italic" }}>
-                  💡 We pre-filled a prompt based on your "{selectedDealType.label}" deal — just hit Generate or customize it first!
-                </div>
-              )}
-              <div style={{ display: "flex", gap: 8 }}>
-                <input style={{ ...inS, flex: 1 }} placeholder="e.g. Pool cleaning service, sunny Florida backyard"
-                  value={aiPrompt} onChange={e => setAiPrompt(e.target.value)}
-                  onKeyDown={e => e.key === "Enter" && handleGenerateAI()} />
-                <button data-testid="ai-generate-btn" onClick={handleGenerateAI} disabled={aiGenerating || !aiPrompt.trim()}
-                  style={{ background: `linear-gradient(180deg,#9A6030,${BROWN_BTN})`, color: PAPER, border: `1.5px solid ${NAVY}`, borderRadius: 5, padding: "8px 14px", fontSize: 12, fontWeight: 700, cursor: aiGenerating || !aiPrompt.trim() ? "not-allowed" : "pointer", fontFamily: SANS, whiteSpace: "nowrap", opacity: aiGenerating ? 0.7 : 1 }}>
-                  {aiGenerating ? "Generating…" : "✨ Generate"}
-                </button>
+            <div style={{ borderTop: `2px dashed ${TEAL}`, paddingTop: 14, marginTop: 10, background: "#F9F5EC", borderRadius: 6, padding: "14px 12px" }}>
+              <label style={{ ...lbS, marginBottom: 4, fontSize: 12, color: NAVY }}>✨ DESCRIBE YOUR IMAGE — AI WILL CREATE IT</label>
+              <div style={{ fontSize: 12, color: INK_FADE, fontFamily: SANS, marginBottom: 10, lineHeight: 1.5 }}>
+                Type exactly what you want in your ad image. Be specific! For example:<br/>
+                <em style={{ color: TEAL }}>"Golf cart with 3 tires in the back and 1 in the front, red and white color, parked in front of a Florida home"</em><br/>
+                <em style={{ color: TEAL }}>"Before and after lawn — left side overgrown, right side freshly mowed, sunny day"</em>
               </div>
-              {aiGenerating && <div style={{ marginTop: 6, fontSize: 11, color: INK_FADE, fontFamily: SANS }}>Creating your image — takes ~10 seconds…</div>}
+              <textarea
+                style={{ ...inS, minHeight: 70, resize: "vertical", lineHeight: 1.5, fontSize: 13 }}
+                placeholder="Describe your image in detail... e.g. 'Golf cart with custom wheels, red and white paint, parked outside a Florida home in sunshine'"
+                value={aiPrompt}
+                onChange={e => setAiPrompt(e.target.value)}
+              />
+              <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 8 }}>
+                <button data-testid="ai-generate-btn" onClick={handleGenerateAI} disabled={aiGenerating || !aiPrompt.trim()}
+                  style={{ background: aiGenerating || !aiPrompt.trim() ? "#aaa" : `linear-gradient(180deg,#9A6030,${BROWN_BTN})`, color: PAPER, border: `2px solid ${NAVY}`, borderRadius: 5, padding: "10px 20px", fontSize: 13, fontWeight: 700, cursor: aiGenerating || !aiPrompt.trim() ? "not-allowed" : "pointer", fontFamily: SANS }}>
+                  {aiGenerating ? "⏳ Creating Image…" : "✨ Generate My Image"}
+                </button>
+                {aiPrompt.trim() && !aiGenerating && (
+                  <span style={{ fontSize: 11, color: INK_FADE, fontFamily: SANS, fontStyle: "italic" }}>~10 seconds to generate</span>
+                )}
+              </div>
+              {aiGenerating && <div style={{ marginTop: 8, fontSize: 12, color: TEAL, fontFamily: SANS, fontWeight: 600 }}>🎨 Creating your custom image… almost there!</div>}
               {aiError && <div style={{ marginTop: 6, fontSize: 11, color: "#c00", fontFamily: SANS }}>{aiError}</div>}
             </div>
           </div>
