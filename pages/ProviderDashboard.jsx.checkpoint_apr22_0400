@@ -978,6 +978,7 @@ function LoginScreen({ onLogin, onForgot }) {
 //       NOT charged again until they manually launch another ad.
 
 function ClassifiedAdSection({ provider, refreshKey = 0 }) {
+  const sectionRef = React.useRef(null);
   const [adSlots, setAdSlots]         = React.useState([]);
   const [liveAd, setLiveAd]           = React.useState(null);
   const [loading, setLoading]         = React.useState(true);
@@ -1236,7 +1237,7 @@ function ClassifiedAdSection({ provider, refreshKey = 0 }) {
   if (loading) return <div style={{ padding: 16, fontSize: 13, color: INK_FADE, fontFamily: SANS }}>Loading ads…</div>;
 
   return (
-    <div style={{ marginBottom: 24 }}>
+    <div ref={sectionRef} style={{ marginBottom: 24 }}>
 
       {/* ── STEP INDICATOR (when no live ad and nothing in queue) ── */}
       {!liveAd && queued.length === 0 && editingSlot === null && (
@@ -1248,7 +1249,7 @@ function ClassifiedAdSection({ provider, refreshKey = 0 }) {
             <span style={{ color: NAVY, fontWeight: 700 }}>Step 2</span> — Preview it exactly as visitors will see it<br/>
             <span style={{ color: NAVY, fontWeight: 700 }}>Step 3</span> — Pay <strong>$10</strong> via Stripe · runs 7 days · no auto-charge
           </div>
-          <button data-testid="create-first-ad-btn" onClick={() => setDealTypeStep(true)} style={{ background: `linear-gradient(180deg,#9A6030,${BROWN_BTN})`, color: PAPER, border: `2px solid ${NAVY}`, borderRadius: 6, padding: "11px 28px", fontSize: 13, fontWeight: 900, cursor: "pointer", fontFamily: SERIF }}>
+          <button data-testid="create-first-ad-btn" onClick={() => { setDealTypeStep(true); setTimeout(() => sectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 50); }} style={{ background: `linear-gradient(180deg,#9A6030,${BROWN_BTN})`, color: PAPER, border: `2px solid ${NAVY}`, borderRadius: 6, padding: "11px 28px", fontSize: 13, fontWeight: 900, cursor: "pointer", fontFamily: SERIF }}>
             ✚ Create My First Ad
           </button>
         </div>
@@ -1875,7 +1876,7 @@ function AnalyticsDashboard({ provider, reviews }) {
   const maxTrend = analytics ? Math.max(1, ...analytics.trend.map(([, v]) => v)) : 1;
 
   return (
-    <div style={{ marginBottom: 24 }}>
+    <div ref={sectionRef} style={{ marginBottom: 24 }}>
       {/* Header row */}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14, flexWrap: "wrap", gap: 8 }}>
         <div style={{ ...shS, marginBottom: 0, borderBottom: "none", paddingBottom: 0 }}>📊 Your Activity Report</div>
