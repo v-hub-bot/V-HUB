@@ -1379,7 +1379,7 @@ function ClassifiedAdSection({ provider, refreshKey = 0 }) {
           </div>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
             {DEAL_TYPES.map(dt => (
-              <button key={dt.id} onClick={() => openEdit(null, dt)}
+              <button key={dt.id} data-testid={`deal-type-${dt.id}`} onClick={() => openEdit(null, dt)}
                 style={{ background: PAPER, border: `2px solid ${PAPER_DK}`, borderRadius: 8, padding: "12px 10px", textAlign: "left", cursor: "pointer", fontFamily: SANS, transition: "border-color 0.15s" }}
                 onMouseEnter={e => e.currentTarget.style.borderColor = NAVY}
                 onMouseLeave={e => e.currentTarget.style.borderColor = PAPER_DK}>
