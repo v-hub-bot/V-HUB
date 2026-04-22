@@ -773,7 +773,7 @@ function SvcDropdown({ open, cats, svcs, openCat, selSvc, setOpenCat, setSelSvc,
         position: "absolute", top: "calc(100% + 2px)", left: 0, right: 0,
         background: PAPER, border: `2px solid ${INK}`, borderRadius: 4,
         zIndex: 9999, boxShadow: "0 8px 28px rgba(0,0,0,0.4)",
-        maxHeight: 340, overflowY: "auto", overflowX: "hidden",
+        maxHeight: 600, overflowY: "auto", overflowX: "hidden",
         WebkitOverflowScrolling: "touch",
       }}
     >
