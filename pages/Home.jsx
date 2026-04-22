@@ -93,6 +93,7 @@ const NEWSPAPER_CONTENT = {
     body: [
       "Residents report record demand for trusted local service providers. From landscaping crews in Eastport to home repair specialists in Spanish Springs, the marketplace has never been more active.",
       "Lawn care, pest control, and handyman services top the search charts each spring, with new providers joining V-Hub every week.",
+      "Whether you're a longtime resident or new to the community, finding the right help has never been easier.",
     ]
   },
   growthStory: {
@@ -116,6 +117,7 @@ const NEWSPAPER_CONTENT = {
     body: [
       "Whether you need a faucet fixed, windows replaced, or your lawn trimmed, V-Hub connects you with vetted local professionals across every village.",
       "Residents can leave reviews and help their neighbors make informed choices.",
+      "From one-time repairs to recurring maintenance, V-Hub providers offer flexible scheduling built around your lifestyle — no long hold times, no call centers.",
     ]
   },
   providerSpotlight: {
