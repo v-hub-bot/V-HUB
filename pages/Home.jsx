@@ -100,8 +100,6 @@ const NEWSPAPER_CONTENT = {
     subhead: "What neighbors are searching for this season",
     body: [
       "Spring means pool openings, golf cart tune-ups, and patio projects. Residents turn to V-Hub to find trusted local professionals before the summer heat sets in.",
-      "New to The Villages? Hundreds of families arrive each month. V-Hub helps newcomers find reliable providers fast — no word-of-mouth required.",
-      "From Brownwood to Fenney, neighbors are searching for home cleaners, handymen, and landscapers at a record pace. The most searched services this month include lawn care, pressure washing, and interior painting.",
       "Word travels fast in The Villages — but V-Hub travels faster. Bookmark it, share it with a neighbor, and never scramble for a referral again.",
     ]
   },
@@ -1597,13 +1595,17 @@ export default function Home() {
             <p style={sub}>{NEWSPAPER_CONTENT.neighborhoodWatch.subhead}</p>
             {NEWSPAPER_CONTENT.neighborhoodWatch.body.map((p,i) => <p key={i} style={para}>{p}</p>)}
             <div style={rule} />
-            <p style={hd}>{NEWSPAPER_CONTENT.growthStory.headline}</p>
-            <p style={sub}>{NEWSPAPER_CONTENT.growthStory.subhead}</p>
-            {NEWSPAPER_CONTENT.growthStory.body.map((p,i) => <p key={i} style={para}>{p}</p>)}
+            <p style={hd}>{NEWSPAPER_CONTENT.safetyTrust.headline}</p>
+            <p style={sub}>{NEWSPAPER_CONTENT.safetyTrust.subhead}</p>
+            {NEWSPAPER_CONTENT.safetyTrust.body.map((p,i) => <p key={i} style={para}>{p}</p>)}
           </div>
 
           {/* ── CENTER COLUMN ── */}
           <div className="np-center">
+            <p style={hd}>{NEWSPAPER_CONTENT.growthStory.headline}</p>
+            <p style={sub}>{NEWSPAPER_CONTENT.growthStory.subhead}</p>
+            {NEWSPAPER_CONTENT.growthStory.body.map((p,i) => <p key={i} style={{...para, marginBottom: 10}}>{p}</p>)}
+            <div style={rule} />
             <p style={hd}>{NEWSPAPER_CONTENT.howItWorks.headline}</p>
             <p style={sub}>{NEWSPAPER_CONTENT.howItWorks.subhead}</p>
             {NEWSPAPER_CONTENT.howItWorks.body.map((p,i) => <p key={i} style={{...para, marginBottom: 10}}>{p}</p>)}
@@ -1612,10 +1614,6 @@ export default function Home() {
               <p style={sub}>{NEWSPAPER_CONTENT.homeServices.subhead}</p>
               {NEWSPAPER_CONTENT.homeServices.body.map((p,i) => <p key={i} style={para}>{p}</p>)}
             </div>
-            <div style={rule} />
-            <p style={hd}>{NEWSPAPER_CONTENT.safetyTrust.headline}</p>
-            <p style={sub}>{NEWSPAPER_CONTENT.safetyTrust.subhead}</p>
-            {NEWSPAPER_CONTENT.safetyTrust.body.map((p,i) => <p key={i} style={para}>{p}</p>)}
           </div>
 
           {/* ── RIGHT COLUMN ── */}
