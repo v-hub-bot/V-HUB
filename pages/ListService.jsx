@@ -71,7 +71,7 @@ const CATS = [
     "Auto Repairs","Auto Detailing","Oil Changes","Tire Services","Mobile Mechanic",
   ]},
   { id: "c6", name: "Personal Care", icon: "💆", services: [
-    "Hair Stylists / Barbers","Nail Technicians","Spa Services","Home Health Aides","Massage Therapists","Personal Trainers","Makeup Artists",
+    "Barber / Stylist","Nail Technicians","Spa Services","Home Health Aides","Massage Therapists","Personal Trainers","Makeup Artists",
   ]},
   { id: "c7", name: "Pet Services", icon: "🐾", services: [
     "Veterinary Services","Grooming","Pet Sitting/Walking","Pet Training","Mobile Grooming",
@@ -383,7 +383,7 @@ export default function ListService() {
       { id: "69d1822df3b2afb229b5baf9", category_id: "69d09c14d5ee9e7be9aa301e", name: "Oil Changes", is_active: true },
       { id: "69d1822df3b2afb229b5bafa", category_id: "69d09c14d5ee9e7be9aa301e", name: "Tire Services", is_active: true },
       { id: "69d1822df3b2afb229b5bafb", category_id: "69d09c14d5ee9e7be9aa301e", name: "Mobile Mechanic", is_active: true },
-      { id: "69d1822df3b2afb229b5bafc", category_id: "69d09c14d5ee9e7be9aa301f", name: "Hair Stylists / Barbers", is_active: true },
+      { id: "69d1822df3b2afb229b5bafc", category_id: "69d09c14d5ee9e7be9aa301f", name: "Barber / Stylist", is_active: true },
       { id: "69d1822df3b2afb229b5bafd", category_id: "69d09c14d5ee9e7be9aa301f", name: "Nail Technicians", is_active: true },
       { id: "69d1822df3b2afb229b5bafe", category_id: "69d09c14d5ee9e7be9aa301f", name: "Spa Services", is_active: true },
       { id: "69d1822df3b2afb229b5baff", category_id: "69d09c14d5ee9e7be9aa301f", name: "Home Health Aides", is_active: true },
