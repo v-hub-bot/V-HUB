@@ -1541,12 +1541,12 @@ export default function Home() {
         }}>
           {/* Header label */}
           <div style={{
-            padding: "8px 16px", textAlign: "center", fontSize: 13, fontWeight: 900,
+            padding: "5px 16px", textAlign: "center", fontSize: 13, fontWeight: 900,
             letterSpacing: 2, color: "#000", textTransform: "uppercase",
             borderBottom: "1px solid #1A6B3C88",
           }}>Classifieds</div>
           {/* Search box */}
-          <div style={{ padding: "8px 12px 4px" }}>
+          <div style={{ padding: "4px 12px 2px" }}>
             <SearchBox cats={cats} svcs={svcs} areas={areas} onSearch={doSearch} selSvc={selSvc} setSelSvc={setSelSvc} selArea={selArea} setSelArea={setSelArea} />
           </div>
         </div>
@@ -1555,7 +1555,7 @@ export default function Home() {
         <img
           src="https://media.base44.com/images/public/69d062aca815ce8e697894b1/f19aa517d_generated_image.png"
           alt="Lake Sumter Landing"
-          style={{ width: "100%", height: 200, objectFit: "cover", objectPosition: "center 60%", display: "block" }}
+          style={{ width: "100%", height: 230, objectFit: "cover", objectPosition: "center 50%", display: "block" }}
         />
 
         {/* CLASSIFIEDS — full width, thick red border, links to Classifieds */}
@@ -1569,8 +1569,8 @@ export default function Home() {
             width: "100%", boxSizing: "border-box",
             cursor: "pointer",
           }}>
-            <div style={{ padding: "8px 16px 4px", textAlign: "center", fontSize: 13, fontWeight: 900, letterSpacing: 2, color: "#CC0000", textTransform: "uppercase", fontFamily: "'Times New Roman', serif" }}>🔥 Deals of the Week!</div>
-            <div style={{ padding: "0 16px 8px", textAlign: "center", fontSize: 11, fontStyle: "italic", color: "#CC0000", fontFamily: "'Times New Roman', serif", opacity: 0.8 }}>Click here to see this week's deals →</div>
+            <div style={{ padding: "5px 16px 2px", textAlign: "center", fontSize: 13, fontWeight: 900, letterSpacing: 2, color: "#CC0000", textTransform: "uppercase", fontFamily: "'Times New Roman', serif" }}>🔥 Deals of the Week!</div>
+            <div style={{ padding: "0 16px 5px", textAlign: "center", fontSize: 11, fontStyle: "italic", color: "#CC0000", fontFamily: "'Times New Roman', serif", opacity: 0.8 }}>Click here to see this week's deals →</div>
           </div>
         </a>
 
