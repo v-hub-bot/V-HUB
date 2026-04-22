@@ -556,7 +556,7 @@ function VillageDropdown({ areas, value, onChange }) {
 
   return (
     <div ref={ref} style={{ position: "relative", flex: 1, minWidth: 0 }}>
-      <button onClick={() => setOpen(o => !o)}
+      <button data-testid="village-dropdown-btn" onClick={() => setOpen(o => !o)}
         style={{ width: "100%", background: PAPER, border: "2.5px solid " + YELLOW, boxShadow: "0 0 0 1.5px " + YELLOW + "55", borderRadius: 6, padding: "11px 13px", fontSize: 14, fontFamily: "'Times New Roman', serif", color: value ? INK : INK_FADE, cursor: "pointer", textAlign: "left", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <span>{selectedLabel || "Select a Village..."}</span>
         {value && <span onClick={e => { e.stopPropagation(); onChange(null); }} style={{ fontSize: 14, color: INK_FADE }}>x</span>}
@@ -667,7 +667,7 @@ function ServiceDropdown({ cats, svcs, value, onChange }) {
   return (
     <div style={{ position: "relative", flex: 1, minWidth: 0 }}>
       {/* Trigger button */}
-      <button ref={btnRef}
+      <button data-testid="service-dropdown-btn" ref={btnRef}
         onClick={() => { if (open) { setOpen(false); setActiveCat(null); } else { openDropdown(); } }}
         style={{ width: "100%", background: PAPER, border: "2.5px solid " + YELLOW, boxShadow: "0 0 0 1.5px " + YELLOW + "55", borderRadius: 6, padding: "11px 13px", fontSize: 14, fontFamily: "'Times New Roman', serif", color: value ? INK : INK_FADE, cursor: "pointer", textAlign: "left", display: "flex", justifyContent: "space-between", alignItems: "center", gap: 6 }}>
         <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", flex: 1 }}>{selectedLabel || "Select a Service..."}</span>
