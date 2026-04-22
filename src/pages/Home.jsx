@@ -1,4 +1,3 @@
-// BUILD: FORCE-REBUILD-APR22-0230-DROPDOWN-FIX
 // V-Hub Home — PRODUCTION v2026-04-20-R4-CDN-BUST
 import React, { useState, useEffect, useRef } from "react";
 import { User } from "@/api/entities";
@@ -536,7 +535,7 @@ function Results({ results, areas, cats, svcs, onReset, onSel, selArea, selCatId
 }
 
 // ── Village Dropdown ────────────────────────────────────────────────────────
-function VillagePickerDropdown({ areas, value, onChange }) {
+function VillageDropdown({ areas, value, onChange }) {
   const [open, setOpen]     = useState(false);
   const [search, setSearch] = useState("");
   const ref = useRef(null);
@@ -600,7 +599,7 @@ function VillagePickerDropdown({ areas, value, onChange }) {
 
 // ── Service Dropdown ────────────────────────────────────────────────────────
 // Two-level: tap a category (macro) → see its services (micro) → tap service → closes & displays choice
-function ServicePickerDropdown({ cats, svcs, value, onChange }) {
+function ServiceDropdown({ cats, svcs, value, onChange }) {
   const [open, setOpen]           = useState(false);
   const [activeCat, setActiveCat] = useState(null);
   const [rect, setRect]           = useState(null);
@@ -629,17 +628,7 @@ function ServicePickerDropdown({ cats, svcs, value, onChange }) {
     return () => { document.removeEventListener("mousedown", h); document.removeEventListener("touchstart", h); };
   }, [open]);
 
-  const CAT_ORDER = ['Yard & Outdoor','Home Services','Home Systems & Utilities','Golf Cart Services','Automobile Services','Personal Care','Pet Services','Professional Services','Transportation'];
-  const sortedCats = cats
-    .filter(c => c.is_active !== false)
-    .sort((a, b) => {
-      const ai = CAT_ORDER.indexOf(a.name);
-      const bi = CAT_ORDER.indexOf(b.name);
-      if (ai === -1 && bi === -1) return a.name.localeCompare(b.name);
-      if (ai === -1) return 1;
-      if (bi === -1) return -1;
-      return ai - bi;
-    });
+  const sortedCats    = cats.filter(c => c.is_active !== false);
   const selectedSvc   = value ? svcs.find(s => s.id === value) : null;
   const selectedLabel = selectedSvc
     ? (cats.find(c => c.id === selectedSvc.category_id)?.name
@@ -670,7 +659,7 @@ function ServicePickerDropdown({ cats, svcs, value, onChange }) {
     border: "2px solid " + YELLOW,
     borderRadius: 6,
     boxShadow: "0 8px 28px rgba(0,0,0,0.22)",
-    maxHeight: 600,
+    maxHeight: Math.min(window.innerHeight - rect.bottom - 10, 520),
     overflowY: "auto",
     WebkitOverflowScrolling: "touch",
   } : {};
@@ -855,8 +844,8 @@ export default function Home() {
           </div>
           <div style={{ padding: "14px 12px" }}>
             <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginBottom: 10 }}>
-              <ServicePickerDropdown cats={cats} svcs={svcs} value={selSvc} onChange={setSelSvc} />
-              <VillagePickerDropdown areas={areas} value={selArea} onChange={setSelArea} />
+              <ServiceDropdown cats={cats} svcs={svcs} value={selSvc} onChange={setSelSvc} />
+              <VillageDropdown areas={areas} value={selArea} onChange={setSelArea} />
             </div>
             <button
               onClick={handleSearch}
