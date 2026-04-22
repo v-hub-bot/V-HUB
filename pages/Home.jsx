@@ -1555,7 +1555,7 @@ export default function Home() {
         <img
           src="https://media.base44.com/images/public/69d062aca815ce8e697894b1/f19aa517d_generated_image.png"
           alt="Lake Sumter Landing"
-          style={{ width: "100%", height: 240, objectFit: "cover", objectPosition: "center 45%", display: "block" }}
+          style={{ width: "100%", height: 240, objectFit: "cover", objectPosition: "center 55%", display: "block" }}
         />
 
         {/* CLASSIFIEDS — full width, thick red border, links to Classifieds */}
@@ -1612,6 +1612,10 @@ export default function Home() {
               <p style={sub}>{NEWSPAPER_CONTENT.homeServices.subhead}</p>
               {NEWSPAPER_CONTENT.homeServices.body.map((p,i) => <p key={i} style={para}>{p}</p>)}
             </div>
+            <div style={rule} />
+            <p style={hd}>{NEWSPAPER_CONTENT.safetyTrust.headline}</p>
+            <p style={sub}>{NEWSPAPER_CONTENT.safetyTrust.subhead}</p>
+            {NEWSPAPER_CONTENT.safetyTrust.body.map((p,i) => <p key={i} style={para}>{p}</p>)}
           </div>
 
           {/* ── RIGHT COLUMN ── */}
@@ -1623,10 +1627,6 @@ export default function Home() {
             <p style={hd}>{NEWSPAPER_CONTENT.classifieds.headline}</p>
             <p style={sub}>{NEWSPAPER_CONTENT.classifieds.subhead}</p>
             {NEWSPAPER_CONTENT.classifieds.body.map((p,i) => <p key={i} style={{...para, borderBottom: `1px dotted ${PAPER_DK}`, paddingBottom: 5}}>{p}</p>)}
-            <div style={rule} />
-            <p style={hd}>{NEWSPAPER_CONTENT.safetyTrust.headline}</p>
-            <p style={sub}>{NEWSPAPER_CONTENT.safetyTrust.subhead}</p>
-            {NEWSPAPER_CONTENT.safetyTrust.body.map((p,i) => <p key={i} style={para}>{p}</p>)}
           </div>
 
         </div>
