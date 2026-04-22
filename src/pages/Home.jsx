@@ -1,4 +1,4 @@
-// V-Hub Home — PRODUCTION v2026-04-20-R4-CDN-BUST
+// V-Hub Home — PRODUCTION v2026-04-22-R1-FORCE-REBUILD
 import React, { useState, useEffect, useRef } from "react";
 import { User } from "@/api/entities";
 
