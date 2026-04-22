@@ -1555,7 +1555,7 @@ export default function Home() {
         <img
           src="https://media.base44.com/images/public/69d062aca815ce8e697894b1/f19aa517d_generated_image.png"
           alt="Lake Sumter Landing"
-          style={{ width: "100%", height: 230, objectFit: "cover", objectPosition: "center 50%", display: "block" }}
+          style={{ width: "100%", height: 240, objectFit: "cover", objectPosition: "center 45%", display: "block" }}
         />
 
         {/* CLASSIFIEDS — full width, thick red border, links to Classifieds */}
