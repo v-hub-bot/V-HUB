@@ -127,6 +127,19 @@ Deno.serve(async (req) => {
       search_appearances: searchCounts[p.id] || 0,
     }));
 
+    // Daily rollups for last 30 days — used by analytics charts
+    const viewsByDay: Record<string, number> = {};
+    const searchesByDay: Record<string, number> = {};
+    for (const a of aArr) {
+      const day = a.date_key || (a.created_date ? String(a.created_date).split("T")[0] : null);
+      if (!day) continue;
+      if (a.event_type === 'profile_view') {
+        viewsByDay[day] = (viewsByDay[day] || 0) + 1;
+      } else if (a.event_type === 'search_appearance') {
+        searchesByDay[day] = (searchesByDay[day] || 0) + 1;
+      }
+    }
+
     return Response.json({
       providers: enrichedProviders,
       reviews: Array.isArray(reviews) ? reviews : [],
@@ -136,6 +149,8 @@ Deno.serve(async (req) => {
       services: Array.isArray(services) ? services : [],
       serviceAreas: Array.isArray(serviceAreas) ? serviceAreas : [],
       classifiedAds: Array.isArray(classifiedAds) ? classifiedAds : [],
+      viewsByDay,
+      searchesByDay,
     }, { headers: CORS });
 
   } catch (error) {
