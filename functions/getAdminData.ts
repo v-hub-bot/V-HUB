@@ -15,16 +15,19 @@ function getCorsHeaders(req: Request) {
 
 const ADMIN_EMAILS = ["kimberlycook1980@gmail.com", "5bebegurlz@gmail.com"];
 
-// Fetch ALL records from an entity — the SDK .list() returns an array directly
-// Use limit=500 to get everything in one shot for entities under 500 records
-async function fetchAll(entity: any): Promise<any[]> {
-  const result = await entity.list({ limit: 500 });
-  // SDK returns array directly
-  if (Array.isArray(result)) return result;
-  // Fallback for any wrapper format
-  if (result?.records) return result.records;
-  if (result?.data) return result.data;
-  return [];
+// Fetch ALL records with true pagination — keeps going until no more pages
+async function fetchAll(entity: any, pageSize = 500): Promise<any[]> {
+  let all: any[] = [];
+  let skip = 0;
+  while (true) {
+    const page = await entity.list({ limit: pageSize, skip });
+    const records = Array.isArray(page) ? page : (page?.records || page?.data || []);
+    if (!records || records.length === 0) break;
+    all = all.concat(records);
+    if (records.length < pageSize) break; // last page
+    skip += pageSize;
+  }
+  return all;
 }
 
 Deno.serve(async (req) => {
@@ -61,7 +64,8 @@ Deno.serve(async (req) => {
 
     const sr = base44.asServiceRole;
 
-    // Fetch all records with limit=500 to avoid the default 100-record cap
+    // Fetch everything — use true pagination for large tables
+    // ProviderAnalytic can have thousands of records, so we paginate fully
     const [providers, reviews, leads, stats, categories, services, serviceAreas, classifiedAds, analytics] = await Promise.all([
       fetchAll(sr.entities.Provider),
       fetchAll(sr.entities.ProviderReview),
@@ -69,9 +73,9 @@ Deno.serve(async (req) => {
       fetchAll(sr.entities.ServiceSearchStat),
       fetchAll(sr.entities.Category),
       fetchAll(sr.entities.Service),
-      fetchAll(sr.entities.ServiceArea),   // was capped at 100, now gets all 114+
+      fetchAll(sr.entities.ServiceArea),
       fetchAll(sr.entities.ClassifiedAd),
-      fetchAll(sr.entities.ProviderAnalytic),
+      fetchAll(sr.entities.ProviderAnalytic),  // may be thousands — paginated fully
     ]);
 
     // Roll up analytics into per-provider counts
@@ -85,7 +89,7 @@ Deno.serve(async (req) => {
       }
     }
 
-    // Inject analytics counts into provider records
+    // Inject live analytics counts into provider records
     const enrichedProviders = (providers || []).map((p: any) => ({
       ...p,
       profile_views: viewCounts[p.id] || 0,
