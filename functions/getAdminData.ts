@@ -15,18 +15,47 @@ function getCorsHeaders(req: Request) {
 
 const ADMIN_EMAILS = ["kimberlycook1980@gmail.com", "5bebegurlz@gmail.com"];
 
-// Fetch ALL records with true pagination — keeps going until no more pages
-async function fetchAll(entity: any, pageSize = 500): Promise<any[]> {
-  let all: any[] = [];
-  let skip = 0;
-  while (true) {
-    const page = await entity.list({ limit: pageSize, skip });
-    const records = Array.isArray(page) ? page : (page?.records || page?.data || []);
-    if (!records || records.length === 0) break;
-    all = all.concat(records);
-    if (records.length < pageSize) break; // last page
-    skip += pageSize;
+// Retry wrapper for flaky SDK calls
+async function withRetry<T>(fn: () => Promise<T>, label = "", retries = 3): Promise<T> {
+  for (let i = 0; i < retries; i++) {
+    try { return await fn(); } catch (e) {
+      console.warn(`[retry ${i+1}/${retries}] ${label}:`, e?.message);
+      if (i === retries - 1) throw e;
+      await new Promise(r => setTimeout(r, 400 * (i + 1)));
+    }
   }
+  throw new Error(`${label} failed after ${retries} retries`);
+}
+
+// Fetch all pages — SDK 0.8.23: call list() with no args for first page, 
+// then paginate using filter/skip for subsequent pages
+async function fetchAllPages(entity: any, label = ""): Promise<any[]> {
+  // First call with no args (golden pattern that works)
+  const first = await withRetry(() => entity.list(), label);
+  const firstPage = Array.isArray(first) ? first : [];
+  
+  if (firstPage.length < 100) {
+    // Less than 100 records, definitely got everything
+    return firstPage;
+  }
+
+  // More records may exist — paginate with skip
+  let all = [...firstPage];
+  let skip = firstPage.length;
+  while (true) {
+    try {
+      const page = await withRetry(() => entity.list({ limit: 500, skip }), `${label}_page_${skip}`);
+      const records = Array.isArray(page) ? page : [];
+      if (records.length === 0) break;
+      all = all.concat(records);
+      if (records.length < 500) break;
+      skip += records.length;
+    } catch(e) {
+      console.error(`[fetchAllPages] ${label} stopped at skip=${skip}:`, e?.message);
+      break;
+    }
+  }
+  console.log(`[fetchAllPages] ${label}: ${all.length} total records`);
   return all;
 }
 
@@ -35,53 +64,56 @@ Deno.serve(async (req) => {
     return new Response(null, { headers: getCorsHeaders(req) });
   }
 
+  const CORS = getCorsHeaders(req);
+
   try {
+    // Read body ONCE
+    const body = await req.json().catch(() => ({}));
+    const VALID_PINS = ["1357"];
+    const pinOk = body.pin && VALID_PINS.includes(String(body.pin));
+
     const base44 = createClientFromRequest(req);
-
-    // Check if logged-in user is an admin
-    let userIsAdmin = false;
-    try {
-      const me = await base44.auth.me();
-      if (me?.email && ADMIN_EMAILS.includes(me.email.toLowerCase())) {
-        userIsAdmin = true;
-      }
-    } catch (_) {}
-
-    // Also accept a legacy PIN for backward compatibility
-    let pinProvided = false;
-    try {
-      const body = await req.json().catch(() => ({}));
-      const VALID_PINS = ["1357"];
-      if (body.pin && VALID_PINS.includes(String(body.pin))) pinProvided = true;
-    } catch (_) {}
-
-    if (!userIsAdmin && !pinProvided) {
-      const origin = req.headers.get("origin") || "";
-      if (!ALLOWED_ORIGINS.includes(origin) && origin !== "") {
-        return Response.json({ error: "Unauthorized" }, { status: 401, headers: getCorsHeaders(req) });
-      }
-    }
-
     const sr = base44.asServiceRole;
 
-    // Fetch everything — use true pagination for large tables
-    // ProviderAnalytic can have thousands of records, so we paginate fully
+    // Auth check
+    let authorized = pinOk;
+    if (!authorized) {
+      try {
+        const me = await base44.auth.me();
+        if (me?.email && ADMIN_EMAILS.includes(me.email.toLowerCase())) authorized = true;
+      } catch (_) {}
+    }
+    if (!authorized) {
+      const origin = req.headers.get("origin") || "";
+      if (ALLOWED_ORIGINS.includes(origin)) authorized = true;
+    }
+    if (!authorized) {
+      return Response.json({ error: "Unauthorized" }, { status: 401, headers: CORS });
+    }
+
+    // Fetch all entities — small ones use golden no-arg pattern, 
+    // ProviderAnalytic needs full pagination
     const [providers, reviews, leads, stats, categories, services, serviceAreas, classifiedAds, analytics] = await Promise.all([
-      fetchAll(sr.entities.Provider),
-      fetchAll(sr.entities.ProviderReview),
-      fetchAll(sr.entities.LeadInquiry),
-      fetchAll(sr.entities.ServiceSearchStat),
-      fetchAll(sr.entities.Category),
-      fetchAll(sr.entities.Service),
-      fetchAll(sr.entities.ServiceArea),
-      fetchAll(sr.entities.ClassifiedAd),
-      fetchAll(sr.entities.ProviderAnalytic),  // may be thousands — paginated fully
+      withRetry(() => sr.entities.Provider.list(), "providers"),
+      withRetry(() => sr.entities.ProviderReview.list(), "reviews"),
+      withRetry(() => sr.entities.LeadInquiry.list(), "leads"),
+      withRetry(() => sr.entities.ServiceSearchStat.list(), "stats"),
+      withRetry(() => sr.entities.Category.list(), "categories"),
+      withRetry(() => sr.entities.Service.list(), "services"),
+      withRetry(() => sr.entities.ServiceArea.list(), "areas"),
+      withRetry(() => sr.entities.ClassifiedAd.list(), "classifieds"),
+      fetchAllPages(sr.entities.ProviderAnalytic, "analytics"), // needs full pagination
     ]);
+
+    const pArr = Array.isArray(providers) ? providers : [];
+    const aArr = Array.isArray(analytics) ? analytics : [];
+
+    console.log(`[getAdminData] providers=${pArr.length} analytics=${aArr.length} reviews=${Array.isArray(reviews)?reviews.length:0}`);
 
     // Roll up analytics into per-provider counts
     const viewCounts: Record<string, number> = {};
     const searchCounts: Record<string, number> = {};
-    for (const a of (analytics || [])) {
+    for (const a of aArr) {
       if (a.event_type === 'profile_view') {
         viewCounts[a.provider_id] = (viewCounts[a.provider_id] || 0) + 1;
       } else if (a.event_type === 'search_appearance') {
@@ -89,8 +121,7 @@ Deno.serve(async (req) => {
       }
     }
 
-    // Inject live analytics counts into provider records
-    const enrichedProviders = (providers || []).map((p: any) => ({
+    const enrichedProviders = pArr.map((p: any) => ({
       ...p,
       profile_views: viewCounts[p.id] || 0,
       search_appearances: searchCounts[p.id] || 0,
@@ -98,16 +129,17 @@ Deno.serve(async (req) => {
 
     return Response.json({
       providers: enrichedProviders,
-      reviews: reviews || [],
-      leads: leads || [],
-      stats: stats || [],
-      categories: categories || [],
-      services: services || [],
-      serviceAreas: serviceAreas || [],
-      classifiedAds: classifiedAds || [],
-    }, { headers: getCorsHeaders(req) });
+      reviews: Array.isArray(reviews) ? reviews : [],
+      leads: Array.isArray(leads) ? leads : [],
+      stats: Array.isArray(stats) ? stats : [],
+      categories: Array.isArray(categories) ? categories : [],
+      services: Array.isArray(services) ? services : [],
+      serviceAreas: Array.isArray(serviceAreas) ? serviceAreas : [],
+      classifiedAds: Array.isArray(classifiedAds) ? classifiedAds : [],
+    }, { headers: CORS });
+
   } catch (error) {
-    console.error('getAdminData error:', error);
-    return Response.json({ error: error.message }, { status: 500, headers: getCorsHeaders(req) });
+    console.error('[getAdminData] error:', error);
+    return Response.json({ error: error.message }, { status: 500, headers: CORS });
   }
 });
