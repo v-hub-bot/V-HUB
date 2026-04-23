@@ -5,12 +5,6 @@
     "Classifieds": {
       "title": "Classifieds"
     },
-    "Home": {
-      "title": "Home"
-    },
-    "ListService": {
-      "title": "ListService"
-    },
     "Privacy": {
       "title": "Privacy"
     },
@@ -22,6 +16,12 @@
     },
     "Wekcadmin": {
       "title": "Wekcadmin"
+    },
+    "Home": {
+      "title": "Home"
+    },
+    "ListService": {
+      "title": "ListService"
     }
   }
 }
