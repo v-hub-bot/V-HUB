@@ -830,7 +830,7 @@ export default function ListService() {
                         </div>
                         <div onClick={() => setOpenMacro(isExpanded ? null : macro.key)} style={{ padding: "12px 14px", cursor: "pointer", fontSize: 11, color: INK, transition: "transform 0.25s", transform: isExpanded ? "rotate(180deg)" : "rotate(0deg)" }}>▼</div>
                       </div>
-                      <div style={{ overflow: "hidden", maxHeight: isExpanded ? `${macroVillages.length * 44}px` : "0px", transition: "max-height 0.3s ease" }}>
+                      <div style={{ overflow: "hidden", maxHeight: isExpanded ? "280px" : "0px", transition: "max-height 0.25s ease", overflowY: isExpanded ? "auto" : "hidden" }}>
                         {macroVillages.sort((a,b) => a.name.localeCompare(b.name)).map(area => {
                           const checked = selAreas.includes(area.id);
                           return (
@@ -1111,7 +1111,7 @@ export default function ListService() {
                         </div>
                         <div onClick={() => setOpenMacro(isExpanded ? null : macro.key)} style={{ padding: "12px 14px", cursor: "pointer", fontSize: 11, color: INK, transition: "transform 0.25s", transform: isExpanded ? "rotate(180deg)" : "rotate(0deg)" }}>▼</div>
                       </div>
-                      <div style={{ overflow: "hidden", maxHeight: isExpanded ? `${macroVillages.length * 44}px` : "0px", transition: "max-height 0.3s ease" }}>
+                      <div style={{ overflow: "hidden", maxHeight: isExpanded ? "280px" : "0px", transition: "max-height 0.25s ease", overflowY: isExpanded ? "auto" : "hidden" }}>
                         {macroVillages.sort((a,b) => a.name.localeCompare(b.name)).map(area => {
                           const checked = selAreas.includes(area.id);
                           return (
