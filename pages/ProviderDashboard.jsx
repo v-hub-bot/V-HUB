@@ -329,12 +329,38 @@ function VillageSelect({ selAreas, setSelAreas, dbAreas, areaMap }) {
   const [openGroup, setOpenGroup] = useState(null);
 
   const MACRO_GROUPS = [
-    { key: "historic",     label: "🌴 Historic Side / Spanish Springs Area", villages: ["Alhambra","Country Club","Del Mar","El Cortez","Hacienda","La Reynalda","La Zamora","Mira Mesa","Orange Blossom","Silver Lake","Spring Arbor","Valle Verde"] },
-    { key: "established_n", label: "🏡 Established Villages (North of SR-466A)", villages: ["Ashland","Belle Aire","Belvedere","Bonita","Bonnybrook","Calumet Grove","Caroline","Chatham","Duval","Glenbrook","Hadley","Hemingway","Lynnhaven","Mallory Square","Pennecamp","Poinciana","Sabal Chase","Santiago","Sunset Pointe","Tall Trees","Virginia Trace","Winifred"] },
-    { key: "established_s", label: "🏡 Established Villages (South of SR-466A)", villages: ["Bridgeport at Laurel Valley","Bridgeport at Mission Hills","Charlotte","Collier","Dunedin","Fernandina","Gilchrist","Hillsborough","LaBelle","Lake Deaton","Osceola Hills","Pinellas","Sanibel"] },
-    { key: "newer",        label: "🌿 Newer Villages (South of SR-44)", villages: ["Bradford","Brownwood","Cason Hammock","Chitty Chatty","Citrus Grove","DeLuna","DeSoto","Fenney","Hammock at Fenney","Hawkins","Linden","Marsh Bend","McClure","Monarch Grove","Richmond","St. Catherine","St. Johns"] },
-    { key: "eastport",     label: "🌊 Eastport / Newest Development Area", villages: ["Dabney","Lake Denham","Moultrie Creek","Newell","Shady Brook"] },
-    { key: "family",       label: "🏠 Family / Non-Age-Restricted Villages", villages: ["Bison Valley","Middleton","Oak Meadows","Oxford Oaks"] },
+    { key: "historic", label: "🌴 Historic Side (Spanish Springs / Lake County / North of 466)", villages: [
+      "Alhambra","Belle Aire","Briar Meadow","Calumet Grove","Chatham","Country Club Hills",
+      "De Allende","De La Vista","Del Mar","El Cortez","Glenbrook","Hacienda","La Reynalda",
+      "La Zamora","Mira Mesa","Orange Blossom Gardens","Palo Alto","Piedmont","Pine Hills",
+      "Pine Ridge","Polo Ridge","Rio Grande","Rio Ponderosa","Rio Ranchero","Santiago",
+      "Santo Domingo","Silver Lake","Springdale","Summerhill","Tierra Del Sol","Valle Verde","Woodbury",
+    ]},
+    { key: "established_466", label: "🏡 Established Villages (Between 466 & 466A / Lake Sumter Landing)", villages: [
+      "Amelia","Ashland","Belvedere","Bonita","Bonnybrook","Bridgeport at Creekside Landing",
+      "Bridgeport at Lake Miona","Bridgeport at Lake Shore Cottages","Bridgeport at Lake Sumter",
+      "Bridgeport at Laurel Valley","Bridgeport at Miona Shores","Bridgeport at Mission Hills",
+      "Buttonwood","Cabanas at Creekside Landing","Caroline","Duval","Hadley",
+      "Haciendas of Mission Hills","Hemingway","Lago Vista","Lakeshore Cottages","Largo",
+      "Liberty Park","Lynnhaven","Mallory Square","Pennecamp","Poinciana","Sabal Chase",
+      "St. Charles","St. James","Sunset Pointe","Tall Trees","Tamarind Grove","Virginia Trace","Winifred",
+    ]},
+    { key: "established_s", label: "🏡 Established Villages (South of SR-466A / Brownwood area)", villages: [
+      "Alden Bungalows","Antrim Dells","Charlotte","Collier","Dunedin","Fernandina","Gilchrist",
+      "Hillsborough","LaBelle","Lake Deaton","Osceola Hills","Osceola Hills at Soaring Eagle Preserve",
+      "Pinellas","Sanibel",
+    ]},
+    { key: "newer", label: "🌿 Newer Villages (South of SR-44)", villages: [
+      "Bradford","Cason Hammock","Chitty Chatty","Citrus Grove","DeLuna","DeSoto","Fenney",
+      "Hammock at Fenney","Hawkins","Linden","Marsh Bend","McClure","Monarch Grove",
+      "Richmond","St. Catherine","St. Johns",
+    ]},
+    { key: "eastport", label: "🌊 Eastport / Newest (District 14 & 15)", villages: [
+      "Dabney","Lake Denham","Moultrie Creek","Newell","Oak Hollow","Shady Brook","Waters Edge","Well Point",
+    ]},
+    { key: "family", label: "🏠 Family / Non-Age-Restricted Villages", villages: [
+      "Bison Valley","Middleton","Oak Meadows","Oxford Oaks",
+    ]},
   ];
 
   // Build name→id map from live DB areas
