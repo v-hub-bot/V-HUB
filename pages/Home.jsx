@@ -267,9 +267,10 @@ function ProvDetail({ prov, areas, cats, svcs, onBack }) {
   const resolvedAreas    = (prov.service_areas || []).map(a => areaMap[a] || MACRO_AREAS_MAP[a] || null).filter(Boolean);
 
   useEffect(() => {
-    ProviderReview.filter({ provider_id: prov.id })
-      .then(all => setReviews((all || []).filter(r => r.is_approved)))
-      .catch(() => setReviews([]));
+    fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/submitReview", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ get_reviews: true, provider_id: prov.id }),
+    }).then(r => r.json()).then(d => setReviews(d.reviews || [])).catch(() => setReviews([]));
     // profile_views counter is incremented server-side by trackEvent (works without auth)
     // Log to detailed analytics
     fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/trackEvent", {
@@ -286,7 +287,12 @@ function ProvDetail({ prov, areas, cats, svcs, onBack }) {
   const handleReviewSubmit = async () => {
     if (!reviewForm.customer_name || !reviewForm.review_text) return;
     try {
-      await ProviderReview.create({ ...reviewForm, provider_id: prov.id, is_approved: false, helpful_count: 0 });
+      const res = await fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/submitReview", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...reviewForm, provider_id: prov.id }),
+      });
+      const data = await res.json();
+      if (!data.success) throw new Error(data.error || "Submit failed");
       setReviewSaved(true);
       setShowReviewForm(false);
       setReviewForm({ customer_name: "", customer_village: "", rating: 5, review_text: "", service_used: "" });
@@ -539,15 +545,17 @@ function ProviderRatingBadge({ providerId, googleRating }) {
   const [count, setCount] = React.useState(0);
 
   React.useEffect(() => {
-    ProviderReview.filter({ provider_id: providerId, is_approved: true })
-      .then(revs => {
-        const approved = (revs || []);
-        if (approved.length > 0) {
-          const avg = approved.reduce((s, r) => s + (r.rating || 0), 0) / approved.length;
-          setVhubRating(avg);
-          setCount(approved.length);
-        }
-      }).catch(() => {});
+    fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/submitReview", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ get_reviews: true, provider_id: providerId }),
+    }).then(r => r.json()).then(d => {
+      const approved = d.reviews || [];
+      if (approved.length > 0) {
+        const avg = approved.reduce((s, r) => s + (r.rating || 0), 0) / approved.length;
+        setVhubRating(avg);
+        setCount(approved.length);
+      }
+    }).catch(() => {});
   }, [providerId]);
 
   if (vhubRating !== null) {
