@@ -820,15 +820,15 @@ export default function ListService() {
                   const someChecked = checkedCount > 0 && !allChecked;
                   return (
                     <div key={macro.key}>
-                      <div style={{ display: "flex", alignItems: "center", borderBottom: `1px solid ${PAPER_DK}`, background: someChecked || allChecked ? "rgba(122,72,32,0.08)" : "transparent" }}>
+                      <div data-macro-row style={{ display: "flex", alignItems: "center", borderBottom: `1px solid ${PAPER_DK}`, background: someChecked || allChecked ? "rgba(122,72,32,0.08)" : "transparent" }}>
                         <div onClick={() => toggleMacro(macroIds)} style={{ width: 20, height: 20, border: `2px solid ${allChecked ? BROWN_BTN : someChecked ? BROWN_BTN : PAPER_DK}`, borderRadius: 3, background: allChecked ? BROWN_BTN : PAPER, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, margin: "12px 10px 12px 14px", cursor: "pointer" }}>
                           {allChecked && <span style={{ color: PAPER, fontSize: 11 }}>✓</span>}
                           {someChecked && <span style={{ color: BROWN_BTN, fontSize: 11 }}>–</span>}
                         </div>
-                        <div onClick={() => setOpenMacro(isExpanded ? null : macro.key)} style={{ flex: 1, padding: "12px 0", cursor: "pointer", fontWeight: 700, fontSize: 13, color: INK, fontFamily: "'Times New Roman', serif" }}>
+                        <div onClick={(e) => { e.preventDefault(); const el = e.currentTarget.closest('[data-macro-row]'); setOpenMacro(isExpanded ? null : macro.key); if (!isExpanded && el) { setTimeout(() => el.scrollIntoView({ block: 'nearest', behavior: 'smooth' }), 10); } }} style={{ flex: 1, padding: "12px 0", cursor: "pointer", fontWeight: 700, fontSize: 13, color: INK, fontFamily: "'Times New Roman', serif" }}>
                           {macro.label} {checkedCount > 0 ? <span style={{ fontSize: 11, color: BROWN_BTN }}>({checkedCount} selected)</span> : ""}
                         </div>
-                        <div onClick={() => setOpenMacro(isExpanded ? null : macro.key)} style={{ padding: "12px 14px", cursor: "pointer", fontSize: 11, color: INK }}>{isExpanded ? "▲" : "▼"}</div>
+                        <div onClick={(e) => { e.preventDefault(); const el = e.currentTarget.closest('[data-macro-row]'); setOpenMacro(isExpanded ? null : macro.key); if (!isExpanded && el) { setTimeout(() => el.scrollIntoView({ block: 'nearest', behavior: 'smooth' }), 10); } }} style={{ padding: "12px 14px", cursor: "pointer", fontSize: 11, color: INK }}>{isExpanded ? "▲" : "▼"}</div>
                       </div>
                       {isExpanded && macroVillages.sort((a,b) => a.name.localeCompare(b.name)).map(area => {
                         const checked = selAreas.includes(area.id);
@@ -1099,15 +1099,15 @@ export default function ListService() {
                   const someChecked = checkedCount > 0 && !allChecked;
                   return (
                     <div key={macro.key}>
-                      <div style={{ display: "flex", alignItems: "center", borderBottom: `1px solid ${PAPER_DK}`, background: someChecked || allChecked ? "rgba(122,72,32,0.08)" : "transparent" }}>
+                      <div data-macro-row style={{ display: "flex", alignItems: "center", borderBottom: `1px solid ${PAPER_DK}`, background: someChecked || allChecked ? "rgba(122,72,32,0.08)" : "transparent" }}>
                         <div onClick={() => toggleMacro(macroIds)} style={{ width: 20, height: 20, border: `2px solid ${allChecked ? BROWN_BTN : someChecked ? BROWN_BTN : PAPER_DK}`, borderRadius: 3, background: allChecked ? BROWN_BTN : PAPER, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, margin: "12px 10px 12px 14px", cursor: "pointer" }}>
                           {allChecked && <span style={{ color: PAPER, fontSize: 11 }}>✓</span>}
                           {someChecked && <span style={{ color: BROWN_BTN, fontSize: 11 }}>–</span>}
                         </div>
-                        <div onClick={() => setOpenMacro(isExpanded ? null : macro.key)} style={{ flex: 1, padding: "12px 0", cursor: "pointer", fontWeight: 700, fontSize: 13, color: INK, fontFamily: "'Times New Roman', serif" }}>
+                        <div onClick={(e) => { e.preventDefault(); const el = e.currentTarget.closest('[data-macro-row]'); setOpenMacro(isExpanded ? null : macro.key); if (!isExpanded && el) { setTimeout(() => el.scrollIntoView({ block: 'nearest', behavior: 'smooth' }), 10); } }} style={{ flex: 1, padding: "12px 0", cursor: "pointer", fontWeight: 700, fontSize: 13, color: INK, fontFamily: "'Times New Roman', serif" }}>
                           {macro.label} {checkedCount > 0 ? <span style={{ fontSize: 11, color: BROWN_BTN }}>({checkedCount} selected)</span> : ""}
                         </div>
-                        <div onClick={() => setOpenMacro(isExpanded ? null : macro.key)} style={{ padding: "12px 14px", cursor: "pointer", fontSize: 11, color: INK }}>{isExpanded ? "▲" : "▼"}</div>
+                        <div onClick={(e) => { e.preventDefault(); const el = e.currentTarget.closest('[data-macro-row]'); setOpenMacro(isExpanded ? null : macro.key); if (!isExpanded && el) { setTimeout(() => el.scrollIntoView({ block: 'nearest', behavior: 'smooth' }), 10); } }} style={{ padding: "12px 14px", cursor: "pointer", fontSize: 11, color: INK }}>{isExpanded ? "▲" : "▼"}</div>
                       </div>
                       {isExpanded && macroVillages.sort((a,b) => a.name.localeCompare(b.name)).map(area => {
                         const checked = selAreas.includes(area.id);
