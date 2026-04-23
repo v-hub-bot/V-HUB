@@ -86,30 +86,37 @@ const CATS = [
 
 // ── Macro service areas ────────────────────────────────────────────────────
 const MACRO_AREAS = [
-  { key: "historic", label: "🌴 Historic Side / Spanish Springs Area", villages: [
-    "Alhambra","Country Club","Del Mar","El Cortez","Hacienda","La Reynalda","La Zamora",
-    "Mira Mesa","Orange Blossom","Silver Lake","Spring Arbor","Valle Verde",
+  { key: "historic", label: "🌴 Historic Side (Spanish Springs / Lake County / North of 466)", villages: [
+    "Alhambra","Belle Aire","Briar Meadow","Calumet Grove","Chatham","Country Club Hills",
+    "De Allende","De La Vista","Del Mar","El Cortez","Glenbrook","Hacienda","La Reynalda",
+    "La Zamora","Mira Mesa","Orange Blossom Gardens","Palo Alto","Piedmont","Pine Hills",
+    "Pine Ridge","Polo Ridge","Rio Grande","Rio Ponderosa","Rio Ranchero","Santiago",
+    "Santo Domingo","Silver Lake","Springdale","Summerhill","Tierra Del Sol","Valle Verde","Woodbury",
   ]},
-  { key: "established_n", label: "🏡 Established Villages (North of SR-466A)", villages: [
-    "Ashland","Belle Aire","Belvedere","Bonita","Bonnybrook","Bridgeport at Laurel Valley",
-    "Bridgeport at Mission Hills","Calumet Grove","Caroline","Chatham","Duval","Glenbrook",
-    "Hadley","Hemingway","Lynnhaven","Mallory Square","Pennecamp","Poinciana","Sabal Chase",
-    "Santiago","Sunset Pointe","Tall Trees","Virginia Trace","Winifred",
+  { key: "established_466", label: "🏡 Established Villages (Between 466 & 466A / Lake Sumter Landing area)", villages: [
+    "Amelia","Ashland","Belvedere","Bonita","Bonnybrook","Bridgeport at Creekside Landing",
+    "Bridgeport at Lake Miona","Bridgeport at Lake Shore Cottages","Bridgeport at Lake Sumter",
+    "Bridgeport at Laurel Valley","Bridgeport at Miona Shores","Bridgeport at Mission Hills",
+    "Buttonwood","Cabanas at Creekside Landing","Caroline","Duval","Hadley",
+    "Haciendas of Mission Hills","Hemingway","Lago Vista","Lakeshore Cottages","Largo",
+    "Liberty Park","Lynnhaven","Mallory Square","Pennecamp","Poinciana","Sabal Chase",
+    "St. Charles","St. James","Sunset Pointe","Tall Trees","Tamarind Grove","Virginia Trace","Winifred",
   ]},
-  { key: "established_s", label: "🏡 Established Villages (South of SR-466A)", villages: [
-    "Charlotte","Collier","Dunedin","Fernandina","Gilchrist","Hillsborough","LaBelle",
-    "Lake Deaton","Osceola Hills","Pinellas","Sanibel",
+  { key: "established_s", label: "🏡 Established Villages (South of SR-466A / Brownwood area)", villages: [
+    "Alden Bungalows","Antrim Dells","Charlotte","Collier","Dunedin","Fernandina","Gilchrist",
+    "Hillsborough","LaBelle","Lake Deaton","Osceola Hills","Osceola Hills at Soaring Eagle Preserve",
+    "Pinellas","Sanibel",
   ]},
-  { key: "newer", label: "🌿 Newer Villages (south of SR 44)", villages: [
+  { key: "newer", label: "🌿 Newer Villages (South of SR-44)", villages: [
     "Bradford","Cason Hammock","Chitty Chatty","Citrus Grove","DeLuna","DeSoto","Fenney",
     "Hammock at Fenney","Hawkins","Linden","Marsh Bend","McClure","Monarch Grove",
     "Richmond","St. Catherine","St. Johns",
   ]},
-  { key: "eastport", label: "🌊 Eastport / newest development area", villages: [
-    "Moultrie Creek","Newell","Lake Denham","Dabney","Shady Brook",
+  { key: "eastport", label: "🌊 Eastport / Newest (District 14 & 15)", villages: [
+    "Dabney","Lake Denham","Moultrie Creek","Newell","Oak Hollow","Shady Brook","Waters Edge","Well Point",
   ]},
-  { key: "family", label: "🏠 Family / non-age-restricted villages", villages: [
-    "Bison Valley","Oak Meadows","Oxford Oaks","Middleton",
+  { key: "family", label: "🏠 Family / Non-Age-Restricted Villages", villages: [
+    "Bison Valley","Middleton","Oak Meadows","Oxford Oaks",
   ]},
 ];
 
@@ -666,7 +673,7 @@ export default function ListService() {
           </div>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginTop: 14 }}>
             {[
-              ["97", "Villages"],
+              ["114", "Villages"],
               ["9",  "Categories"],
               ["62", "Services"],
               ["#1", "Directory"],
@@ -1215,7 +1222,7 @@ export default function ListService() {
           <div style={{ margin: "16px 0", textAlign: "center", color: PAPER_DK, fontSize: 16 }}>✦ ✦ ✦</div>
           <div style={{ border: `1.5px solid ${PAPER_DK}`, borderRadius: 4, padding: "12px 10px", background: PAPER }}>
             <div style={{ fontSize: 10, fontWeight: 900, letterSpacing: 3, textTransform: "uppercase", color: INK, borderBottom: `2px solid ${INK}`, paddingBottom: 4, marginBottom: 10, textAlign: "center" }}>V-Hub By the Numbers</div>
-            {[["97","Villages Covered"],["9","Service Categories"],["62","Searchable Services"],["#1","Local Directory"]].map(([num, label]) => (
+            {[["114","Villages Covered"],["9","Service Categories"],["62","Searchable Services"],["#1","Local Directory"]].map(([num, label]) => (
               <div key={label} style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", padding: "5px 0", borderBottom: `1px solid ${PAPER_MID}` }}>
                 <span style={{ fontSize: 20, fontWeight: 900, color: BROWN_BTN, fontFamily: "'Times New Roman', serif" }}>{num}</span>
                 <span style={{ fontSize: 11, color: INK_FADE, fontStyle: "italic" }}>{label}</span>
