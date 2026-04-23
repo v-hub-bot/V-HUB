@@ -15,6 +15,18 @@ function getCorsHeaders(req: Request) {
 
 const ADMIN_EMAILS = ["kimberlycook1980@gmail.com", "5bebegurlz@gmail.com"];
 
+// Fetch ALL records from an entity — the SDK .list() returns an array directly
+// Use limit=500 to get everything in one shot for entities under 500 records
+async function fetchAll(entity: any): Promise<any[]> {
+  const result = await entity.list({ limit: 500 });
+  // SDK returns array directly
+  if (Array.isArray(result)) return result;
+  // Fallback for any wrapper format
+  if (result?.records) return result.records;
+  if (result?.data) return result.data;
+  return [];
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: getCorsHeaders(req) });
@@ -49,16 +61,17 @@ Deno.serve(async (req) => {
 
     const sr = base44.asServiceRole;
 
+    // Fetch all records with limit=500 to avoid the default 100-record cap
     const [providers, reviews, leads, stats, categories, services, serviceAreas, classifiedAds, analytics] = await Promise.all([
-      sr.entities.Provider.list(),
-      sr.entities.ProviderReview.list(),
-      sr.entities.LeadInquiry.list(),
-      sr.entities.ServiceSearchStat.list(),
-      sr.entities.Category.list(),
-      sr.entities.Service.list(),
-      sr.entities.ServiceArea.list(),
-      sr.entities.ClassifiedAd.list(),
-      sr.entities.ProviderAnalytic.list(),
+      fetchAll(sr.entities.Provider),
+      fetchAll(sr.entities.ProviderReview),
+      fetchAll(sr.entities.LeadInquiry),
+      fetchAll(sr.entities.ServiceSearchStat),
+      fetchAll(sr.entities.Category),
+      fetchAll(sr.entities.Service),
+      fetchAll(sr.entities.ServiceArea),   // was capped at 100, now gets all 114+
+      fetchAll(sr.entities.ClassifiedAd),
+      fetchAll(sr.entities.ProviderAnalytic),
     ]);
 
     // Roll up analytics into per-provider counts
