@@ -142,6 +142,7 @@ function StatusBanner({ provider, onUpgrade, onCancel, onManageBilling, paymentL
           </div>
           {paymentError && <div style={{ fontSize: 12, color: RED_RULE, marginBottom: 8, fontFamily: SANS }}>{paymentError}</div>}
           <button
+            data-testid="subscribe-btn"
             onClick={onUpgrade}
             disabled={paymentLoading}
             style={{
