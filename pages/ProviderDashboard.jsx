@@ -1089,7 +1089,7 @@ function ClassifiedAdSection({ provider, refreshKey = 0 }) {
     if (!provider) return [];
     const ids = provider.service_areas || [];
     const areaMap = { "69d06c4ad9b0c2b3a2f9e1a1": "Historic Side", "69d06c4ad9b0c2b3a2f9e1a2": "Established Villages", "69d06c4ad9b0c2b3a2f9e1a3": "Newer Villages", "69d06c4ad9b0c2b3a2f9e1a4": "Eastport", "69d06c4ad9b0c2b3a2f9e1a5": "Family/Non-Age-Restricted" };
-    return ids.map(id => areaMap[id] || id).filter(Boolean);
+    return ids.map(id => areaMap[id] || null).filter(Boolean);
   }, [provider]);
 
   // ── Open editor ──────────────────────────────────────────────────────────

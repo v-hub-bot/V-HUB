@@ -595,7 +595,7 @@ function ProvidersTab({ providers, setProviders, catMap, svcMap, areaMap, fullSv
         const isOpen = expanded === p.id;
         const svcList = Array.isArray(p.services) ? p.services : [];
         const areaList = Array.isArray(p.service_areas) ? p.service_areas : [];
-        const catName = p.category_id ? (catMap[p.category_id] || p.category_id) : null;
+        const catName = p.category_id ? (catMap[p.category_id] || null) : null;
         const svcNames = svcList.map(s => resolveName(s, svcMap)).filter(Boolean);
         const areaNames = areaList.map(a => resolveName(a, areaMap)).filter(Boolean);
 

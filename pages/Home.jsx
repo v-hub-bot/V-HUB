@@ -264,7 +264,7 @@ function ProvDetail({ prov, areas, cats, svcs, onBack }) {
   }, [areas]);
 
   const resolvedServices = (prov.services || []).map(s => svcMap[s] || s).filter(Boolean);
-  const resolvedAreas    = (prov.service_areas || []).map(a => areaMap[a] || MACRO_AREAS_MAP[a] || a).filter(Boolean);
+  const resolvedAreas    = (prov.service_areas || []).map(a => areaMap[a] || MACRO_AREAS_MAP[a] || null).filter(Boolean);
 
   useEffect(() => {
     ProviderReview.filter({ provider_id: prov.id })
