@@ -1,7 +1,7 @@
 // submitReview — handles both review loading (get_reviews) and submission
 // Uses asServiceRole so no auth token is required from the submitter
 // NOTE: customer_name is stored privately but NEVER returned in get_reviews — admin only
-import { createClientFromRequest } from "npm:@base44/sdk@0.8.25";
+import { createClientFromRequest } from "npm:@base44/sdk@0.8.23";
 
 Deno.serve(async (req: Request): Promise<Response> => {
   const corsHeaders = {
