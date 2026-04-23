@@ -820,28 +820,30 @@ export default function ListService() {
                   const someChecked = checkedCount > 0 && !allChecked;
                   return (
                     <div key={macro.key}>
-                      <div data-macro-row style={{ display: "flex", alignItems: "center", borderBottom: `1px solid ${PAPER_DK}`, background: someChecked || allChecked ? "rgba(122,72,32,0.08)" : "transparent" }}>
+                      <div style={{ display: "flex", alignItems: "center", borderBottom: `1px solid ${PAPER_DK}`, background: someChecked || allChecked ? "rgba(122,72,32,0.08)" : "transparent" }}>
                         <div onClick={() => toggleMacro(macroIds)} style={{ width: 20, height: 20, border: `2px solid ${allChecked ? BROWN_BTN : someChecked ? BROWN_BTN : PAPER_DK}`, borderRadius: 3, background: allChecked ? BROWN_BTN : PAPER, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, margin: "12px 10px 12px 14px", cursor: "pointer" }}>
                           {allChecked && <span style={{ color: PAPER, fontSize: 11 }}>✓</span>}
                           {someChecked && <span style={{ color: BROWN_BTN, fontSize: 11 }}>–</span>}
                         </div>
-                        <div onClick={(e) => { e.preventDefault(); const el = e.currentTarget.closest('[data-macro-row]'); setOpenMacro(isExpanded ? null : macro.key); if (!isExpanded && el) { setTimeout(() => el.scrollIntoView({ block: 'nearest', behavior: 'smooth' }), 10); } }} style={{ flex: 1, padding: "12px 0", cursor: "pointer", fontWeight: 700, fontSize: 13, color: INK, fontFamily: "'Times New Roman', serif" }}>
+                        <div onClick={() => setOpenMacro(isExpanded ? null : macro.key)} style={{ flex: 1, padding: "12px 0", cursor: "pointer", fontWeight: 700, fontSize: 13, color: INK, fontFamily: "'Times New Roman', serif" }}>
                           {macro.label} {checkedCount > 0 ? <span style={{ fontSize: 11, color: BROWN_BTN }}>({checkedCount} selected)</span> : ""}
                         </div>
-                        <div onClick={(e) => { e.preventDefault(); const el = e.currentTarget.closest('[data-macro-row]'); setOpenMacro(isExpanded ? null : macro.key); if (!isExpanded && el) { setTimeout(() => el.scrollIntoView({ block: 'nearest', behavior: 'smooth' }), 10); } }} style={{ padding: "12px 14px", cursor: "pointer", fontSize: 11, color: INK }}>{isExpanded ? "▲" : "▼"}</div>
+                        <div onClick={() => setOpenMacro(isExpanded ? null : macro.key)} style={{ padding: "12px 14px", cursor: "pointer", fontSize: 11, color: INK, transition: "transform 0.25s", transform: isExpanded ? "rotate(180deg)" : "rotate(0deg)" }}>▼</div>
                       </div>
-                      {isExpanded && macroVillages.sort((a,b) => a.name.localeCompare(b.name)).map(area => {
-                        const checked = selAreas.includes(area.id);
-                        return (
-                          <div key={area.id} onClick={() => toggleVillage(area.id)}
-                            style={{ display: "flex", alignItems: "center", gap: 10, padding: "9px 14px 9px 44px", cursor: "pointer", background: checked ? "rgba(122,72,32,0.06)" : PAPER_MID, borderBottom: `1px solid ${PAPER_DK}` }}>
-                            <div style={{ width: 16, height: 16, border: `2px solid ${checked ? BROWN_BTN : PAPER_DK}`, borderRadius: 3, background: checked ? BROWN_BTN : PAPER, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                              {checked && <span style={{ color: PAPER, fontSize: 10 }}>✓</span>}
+                      <div style={{ overflow: "hidden", maxHeight: isExpanded ? `${macroVillages.length * 44}px` : "0px", transition: "max-height 0.3s ease" }}>
+                        {macroVillages.sort((a,b) => a.name.localeCompare(b.name)).map(area => {
+                          const checked = selAreas.includes(area.id);
+                          return (
+                            <div key={area.id} onClick={() => toggleVillage(area.id)}
+                              style={{ display: "flex", alignItems: "center", gap: 10, padding: "9px 14px 9px 44px", cursor: "pointer", background: checked ? "rgba(122,72,32,0.06)" : PAPER_MID, borderBottom: `1px solid ${PAPER_DK}` }}>
+                              <div style={{ width: 16, height: 16, border: `2px solid ${checked ? BROWN_BTN : PAPER_DK}`, borderRadius: 3, background: checked ? BROWN_BTN : PAPER, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                                {checked && <span style={{ color: PAPER, fontSize: 10 }}>✓</span>}
+                              </div>
+                              <span style={{ fontSize: 13, color: INK, fontFamily: "'Times New Roman', serif" }}>{area.name}</span>
                             </div>
-                            <span style={{ fontSize: 13, color: INK, fontFamily: "'Times New Roman', serif" }}>{area.name}</span>
-                          </div>
-                        );
-                      })}
+                          );
+                        })}
+                      </div>
                     </div>
                   );
                 });
@@ -1099,28 +1101,30 @@ export default function ListService() {
                   const someChecked = checkedCount > 0 && !allChecked;
                   return (
                     <div key={macro.key}>
-                      <div data-macro-row style={{ display: "flex", alignItems: "center", borderBottom: `1px solid ${PAPER_DK}`, background: someChecked || allChecked ? "rgba(122,72,32,0.08)" : "transparent" }}>
+                      <div style={{ display: "flex", alignItems: "center", borderBottom: `1px solid ${PAPER_DK}`, background: someChecked || allChecked ? "rgba(122,72,32,0.08)" : "transparent" }}>
                         <div onClick={() => toggleMacro(macroIds)} style={{ width: 20, height: 20, border: `2px solid ${allChecked ? BROWN_BTN : someChecked ? BROWN_BTN : PAPER_DK}`, borderRadius: 3, background: allChecked ? BROWN_BTN : PAPER, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, margin: "12px 10px 12px 14px", cursor: "pointer" }}>
                           {allChecked && <span style={{ color: PAPER, fontSize: 11 }}>✓</span>}
                           {someChecked && <span style={{ color: BROWN_BTN, fontSize: 11 }}>–</span>}
                         </div>
-                        <div onClick={(e) => { e.preventDefault(); const el = e.currentTarget.closest('[data-macro-row]'); setOpenMacro(isExpanded ? null : macro.key); if (!isExpanded && el) { setTimeout(() => el.scrollIntoView({ block: 'nearest', behavior: 'smooth' }), 10); } }} style={{ flex: 1, padding: "12px 0", cursor: "pointer", fontWeight: 700, fontSize: 13, color: INK, fontFamily: "'Times New Roman', serif" }}>
+                        <div onClick={() => setOpenMacro(isExpanded ? null : macro.key)} style={{ flex: 1, padding: "12px 0", cursor: "pointer", fontWeight: 700, fontSize: 13, color: INK, fontFamily: "'Times New Roman', serif" }}>
                           {macro.label} {checkedCount > 0 ? <span style={{ fontSize: 11, color: BROWN_BTN }}>({checkedCount} selected)</span> : ""}
                         </div>
-                        <div onClick={(e) => { e.preventDefault(); const el = e.currentTarget.closest('[data-macro-row]'); setOpenMacro(isExpanded ? null : macro.key); if (!isExpanded && el) { setTimeout(() => el.scrollIntoView({ block: 'nearest', behavior: 'smooth' }), 10); } }} style={{ padding: "12px 14px", cursor: "pointer", fontSize: 11, color: INK }}>{isExpanded ? "▲" : "▼"}</div>
+                        <div onClick={() => setOpenMacro(isExpanded ? null : macro.key)} style={{ padding: "12px 14px", cursor: "pointer", fontSize: 11, color: INK, transition: "transform 0.25s", transform: isExpanded ? "rotate(180deg)" : "rotate(0deg)" }}>▼</div>
                       </div>
-                      {isExpanded && macroVillages.sort((a,b) => a.name.localeCompare(b.name)).map(area => {
-                        const checked = selAreas.includes(area.id);
-                        return (
-                          <div key={area.id} onClick={() => toggleVillage(area.id)}
-                            style={{ display: "flex", alignItems: "center", gap: 10, padding: "9px 14px 9px 44px", cursor: "pointer", background: checked ? "rgba(122,72,32,0.06)" : PAPER_MID, borderBottom: `1px solid ${PAPER_DK}` }}>
-                            <div style={{ width: 16, height: 16, border: `2px solid ${checked ? BROWN_BTN : PAPER_DK}`, borderRadius: 3, background: checked ? BROWN_BTN : PAPER, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                              {checked && <span style={{ color: PAPER, fontSize: 10 }}>✓</span>}
+                      <div style={{ overflow: "hidden", maxHeight: isExpanded ? `${macroVillages.length * 44}px` : "0px", transition: "max-height 0.3s ease" }}>
+                        {macroVillages.sort((a,b) => a.name.localeCompare(b.name)).map(area => {
+                          const checked = selAreas.includes(area.id);
+                          return (
+                            <div key={area.id} onClick={() => toggleVillage(area.id)}
+                              style={{ display: "flex", alignItems: "center", gap: 10, padding: "9px 14px 9px 44px", cursor: "pointer", background: checked ? "rgba(122,72,32,0.06)" : PAPER_MID, borderBottom: `1px solid ${PAPER_DK}` }}>
+                              <div style={{ width: 16, height: 16, border: `2px solid ${checked ? BROWN_BTN : PAPER_DK}`, borderRadius: 3, background: checked ? BROWN_BTN : PAPER, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                                {checked && <span style={{ color: PAPER, fontSize: 10 }}>✓</span>}
+                              </div>
+                              <span style={{ fontSize: 13, color: INK, fontFamily: "'Times New Roman', serif" }}>{area.name}</span>
                             </div>
-                            <span style={{ fontSize: 13, color: INK, fontFamily: "'Times New Roman', serif" }}>{area.name}</span>
-                          </div>
-                        );
-                      })}
+                          );
+                        })}
+                      </div>
                     </div>
                   );
                 });
