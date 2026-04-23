@@ -270,12 +270,7 @@ function ProvDetail({ prov, areas, cats, svcs, onBack }) {
     ProviderReview.filter({ provider_id: prov.id })
       .then(all => setReviews((all || []).filter(r => r.is_approved)))
       .catch(() => setReviews([]));
-    // increment profile view count (read fresh to avoid race condition)
-    Provider.get(prov.id).then(fresh => {
-      Provider.update(prov.id, { profile_views: (fresh.profile_views || 0) + 1 }).catch(() => {});
-    }).catch(() => {
-      Provider.update(prov.id, { profile_views: (prov.profile_views || 0) + 1 }).catch(() => {});
-    });
+    // profile_views counter is incremented server-side by trackEvent (works without auth)
     // Log to detailed analytics
     fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/trackEvent", {
       method: "POST", headers: { "Content-Type": "application/json" },
@@ -1363,7 +1358,7 @@ export default function Home() {
     setSearched(true);
     // Track search appearances — fire & forget to backend analytics
     if (out.length > 0) {
-      const areaLabel = selArea ? (areas.find(a => a.id === selArea || a.name === selArea)?.name || selArea) : "";
+      const areaLabel = selArea ? (typeof selArea === "string" ? selArea : (selArea.name || "")).split("—").pop().trim() : "";
       const svcObj = selSvc ? svcs.find(s => s.id === selSvc) : null;
       const catObj = svcObj ? cats.find(c => c.id === svcObj.category_id) : null;
       const events = out.map(p => ({

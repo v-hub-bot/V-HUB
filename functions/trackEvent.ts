@@ -3,6 +3,17 @@
 // event_type: "search_appearance" | "profile_view" | "classified_click" | "lead_inquiry"
 import { createClientFromRequest } from "npm:@base44/sdk@0.8.23";
 
+// Safely extract a string from a value that might be an object {id, name}
+function safeStr(val: unknown): string | null {
+  if (!val) return null;
+  if (typeof val === "string") return val.trim() || null;
+  if (typeof val === "object" && val !== null && "name" in val) {
+    const name = (val as any).name;
+    return typeof name === "string" ? name.split("—").pop()?.trim() || null : null;
+  }
+  return null;
+}
+
 Deno.serve(async (req: Request): Promise<Response> => {
   const corsHeaders = {
     "Access-Control-Allow-Origin": "*",
@@ -17,9 +28,9 @@ Deno.serve(async (req: Request): Promise<Response> => {
     const events: Array<{
       provider_id: string;
       event_type: string;
-      service_name?: string;
-      category_name?: string;
-      area_name?: string;
+      service_name?: unknown;
+      category_name?: unknown;
+      area_name?: unknown;
       source?: string;
     }> = Array.isArray(body) ? body : [body];
 
@@ -35,9 +46,9 @@ Deno.serve(async (req: Request): Promise<Response> => {
         await base44.asServiceRole.entities.ProviderAnalytic.create({
           provider_id: ev.provider_id,
           event_type: ev.event_type,
-          service_name: ev.service_name || null,
-          category_name: ev.category_name || null,
-          area_name: ev.area_name || null,
+          service_name:  safeStr(ev.service_name),
+          category_name: safeStr(ev.category_name),
+          area_name:     safeStr(ev.area_name),
           date_key: dateKey,
           source: ev.source || "homepage",
         });
