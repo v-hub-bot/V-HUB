@@ -5,20 +5,20 @@
     "Home": {
       "title": "Home"
     },
-    "Classifieds": {
-      "title": "Classifieds"
-    },
     "ProviderDashboard": {
       "title": "ProviderDashboard"
     },
-    "Privacy": {
-      "title": "Privacy"
+    "Wekcadmin": {
+      "title": "Wekcadmin"
     },
     "ListService": {
       "title": "ListService"
     },
-    "Wekcadmin": {
-      "title": "Wekcadmin"
+    "Classifieds": {
+      "title": "Classifieds"
+    },
+    "Privacy": {
+      "title": "Privacy"
     },
     "Terms": {
       "title": "Terms"

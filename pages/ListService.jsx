@@ -80,7 +80,7 @@ const CATS = [
     "Medical Transport","Airport Transport","Local Rides","Errand Services","Courier/Delivery Services","Vehicle Transport",
   ]},
   { id: "c9", name: "Professional Services", icon: "💼", services: [
-    "Accounting & Bookkeeping","Notary Services","IT Support","Legal Services","Business Consulting","Tax Preparation","Home Inspection",
+    "Accounting & Bookkeeping","Notary Services","IT Support","Legal Services","Business Consulting","Tax Preparation",
   ]},
 ];
 
@@ -416,7 +416,6 @@ export default function ListService() {
       { id: "69d1822df3b2afb229b5badf", category_id: "69d09c14d5ee9e7be9aa301b", name: "Home Watch", is_active: true },
       { id: "69d1822df3b2afb229b5bae6", category_id: "69d09c14d5ee9e7be9aa301c", name: "Pool & Spa Services", is_active: true },
       { id: "69d1822df3b2afb229b5bb0a", category_id: "69d09c14d5ee9e7be9aa3021", name: "Vehicle Transport", is_active: true },
-      { id: "69ea749b0daf529bb432bdef", category_id: "69d09c14d5ee9e7be9aa301b", name: "Home Inspection", is_active: true },
     ];
     const AREAS_STATIC = [
       // 59 villages — each has a unique DB ID (matches ServiceArea entity exactly)

@@ -595,7 +595,7 @@ function ProvidersTab({ providers, setProviders, catMap, svcMap, areaMap, fullSv
         const isOpen = expanded === p.id;
         const svcList = Array.isArray(p.services) ? p.services : [];
         const areaList = Array.isArray(p.service_areas) ? p.service_areas : [];
-        const catName = p.category_id ? (catMap[p.category_id] || null) : null;
+        const catName = p.category_id ? (catMap[p.category_id] || p.category_id) : null;
         const svcNames = svcList.map(s => resolveName(s, svcMap)).filter(Boolean);
         const areaNames = areaList.map(a => resolveName(a, areaMap)).filter(Boolean);
 
@@ -1289,7 +1289,7 @@ function DealsTab({ providers, classifiedAds }) {
 }
 
 // ── ANALYTICS TAB ─────────────────────────────────────────────────────────────
-function AnalyticsTab({ providers, reviews, leads, stats, catMap, svcMap, fullSvcMap, classifiedAds, viewsByDay = {}, searchesByDay = {} }) {
+function AnalyticsTab({ providers, reviews, leads, stats, catMap, svcMap, fullSvcMap, classifiedAds }) {
   const [timeRange, setTimeRange] = React.useState("30d");
 
   const now = new Date();
@@ -1375,7 +1375,7 @@ function AnalyticsTab({ providers, reviews, leads, stats, catMap, svcMap, fullSv
       <div style={S.card}>
         <div style={S.secTitle}>📬 Activity — {rangeLabels[timeRange]}</div>
         <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:8}}>
-          {[["New Providers",filteredProviders.length,T.teal],["Profile Views",providers.filter(p=>p.profile_views>0).length,"#1A6B3C"],["New Reviews",filteredReviews.length,T.gold]].map(([l,v,c])=>(
+          {[["New Providers",filteredProviders.length,T.teal],["New Leads",filteredLeads.length,"#1A6B3C"],["New Reviews",filteredReviews.length,T.gold]].map(([l,v,c])=>(
             <div key={l} style={{textAlign:"center",background:T.parchment,borderRadius:6,padding:"12px 6px"}}>
               <div style={{fontSize:26,fontWeight:800,color:c,fontFamily:T.sans}}>{v}</div>
               <div style={{fontSize:10,color:T.brownLight,fontFamily:T.sans,textTransform:"uppercase",letterSpacing:0.5}}>{l}</div>
@@ -1387,7 +1387,7 @@ function AnalyticsTab({ providers, reviews, leads, stats, catMap, svcMap, fullSv
       <div style={S.card}>
         <div style={S.secTitle}>👁️ Platform Engagement (All-Time)</div>
         <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:8}}>
-          {[["Total Profile Views",totalViews,T.brown],["Search Appearances",totalSearchAppearances,T.teal],["Total Reviews",reviews.length,"#1A6B3C"]].map(([l,v,c])=>(
+          {[["Total Profile Views",totalViews,T.brown],["Search Appearances",totalSearchAppearances,T.teal],["Total Leads Sent",leads.length,"#1A6B3C"]].map(([l,v,c])=>(
             <div key={l} style={{textAlign:"center",background:T.parchment,borderRadius:6,padding:"12px 6px"}}>
               <div style={{fontSize:26,fontWeight:800,color:c,fontFamily:T.sans}}>{v.toLocaleString()}</div>
               <div style={{fontSize:10,color:T.brownLight,fontFamily:T.sans,textTransform:"uppercase",letterSpacing:0.5}}>{l}</div>
@@ -1451,45 +1451,22 @@ function AnalyticsTab({ providers, reviews, leads, stats, catMap, svcMap, fullSv
       </div>
 
       <div style={S.card}>
-        <div style={S.secTitle}>👁️ Profile Views — Last 7 Days</div>
+        <div style={S.secTitle}>📨 Leads Sent — Last 7 Days</div>
         <div style={{display:"flex",alignItems:"flex-end",gap:6,height:70}}>
-          {last7.map(date=>{
-            const count = viewsByDay[date] || 0;
+          {last7Leads.map(({date,count})=>{
             const d=new Date(date+"T12:00:00");
             const label=d.toLocaleDateString("en-US",{weekday:"short"});
-            const maxV = Math.max(...last7.map(d=>viewsByDay[d]||0),1);
             return (
               <div key={date} style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",gap:2}}>
                 <div style={{fontSize:9,color:T.brownLight,fontWeight:700,fontFamily:T.sans}}>{count||""}</div>
-                <div style={{width:"100%",background:count>0?T.brown:"#e0d8c8",borderRadius:"3px 3px 0 0",height:`${Math.max((count/maxV)*50,3)}px`}}></div>
+                <div style={{width:"100%",background:count>0?"#1A6B3C":"#e0d8c8",borderRadius:"3px 3px 0 0",height:`${Math.max((count/maxDayLeads)*50,3)}px`}}></div>
                 <div style={{fontSize:9,color:T.brownLight,fontFamily:T.sans}}>{label}</div>
               </div>
             );
           })}
         </div>
         <div style={{marginTop:8,fontSize:11,color:T.brownLight,fontFamily:T.sans}}>
-          {last7.reduce((s,d)=>s+(viewsByDay[d]||0),0)} profile views in last 7 days · {totalViews.toLocaleString()} all-time
-        </div>
-      </div>
-      <div style={S.card}>
-        <div style={S.secTitle}>🔍 Search Appearances — Last 7 Days</div>
-        <div style={{display:"flex",alignItems:"flex-end",gap:6,height:70}}>
-          {last7.map(date=>{
-            const count = searchesByDay[date] || 0;
-            const d=new Date(date+"T12:00:00");
-            const label=d.toLocaleDateString("en-US",{weekday:"short"});
-            const maxS = Math.max(...last7.map(d=>searchesByDay[d]||0),1);
-            return (
-              <div key={date} style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",gap:2}}>
-                <div style={{fontSize:9,color:T.brownLight,fontWeight:700,fontFamily:T.sans}}>{count||""}</div>
-                <div style={{width:"100%",background:count>0?T.teal:"#e0d8c8",borderRadius:"3px 3px 0 0",height:`${Math.max((count/maxS)*50,3)}px`}}></div>
-                <div style={{fontSize:9,color:T.brownLight,fontFamily:T.sans}}>{label}</div>
-              </div>
-            );
-          })}
-        </div>
-        <div style={{marginTop:8,fontSize:11,color:T.brownLight,fontFamily:T.sans}}>
-          {last7.reduce((s,d)=>s+(searchesByDay[d]||0),0)} search appearances in last 7 days · {totalSearchAppearances.toLocaleString()} all-time
+          {last7Leads.reduce((s,d)=>s+d.count,0)} leads in last 7 days · {leads.length} all-time
         </div>
       </div>
 
@@ -1961,8 +1938,6 @@ function Dashboard({ adminPin }) {
   const [categories, setCategories] = useState([]);
   const [services, setServices] = useState([]);
   const [serviceAreas, setServiceAreas] = useState([]);
-  const [viewsByDay, setViewsByDay] = useState({});
-  const [searchesByDay, setSearchesByDay] = useState({});
   const [tab, setTab] = useState("Overview");
   const [loading, setLoading] = useState(true);
   const [toast, setToast] = useState(null); // { msg, type: "success"|"error" }
@@ -1989,8 +1964,6 @@ function Dashboard({ adminPin }) {
       setCategories(Array.isArray(data.categories) ? data.categories.filter(c => c.is_active) : []);
       setServices(Array.isArray(data.services) ? data.services : []);
       setServiceAreas(Array.isArray(data.serviceAreas) ? data.serviceAreas : []);
-      setViewsByDay(data.viewsByDay && typeof data.viewsByDay === 'object' ? data.viewsByDay : {});
-      setSearchesByDay(data.searchesByDay && typeof data.searchesByDay === 'object' ? data.searchesByDay : {});
     } catch (e) { console.error('Admin data load error:', e); }
     setLoading(false);
   };
@@ -2104,7 +2077,7 @@ function Dashboard({ adminPin }) {
         {tab === "Reviews" && <ReviewsTab reviews={reviews} setReviews={setReviews} providers={providers} adminPin={adminPin} />}
         {tab === "Leads" && <LeadsTab leads={leads} providers={providers} />}
         {tab === "Deals" && <DealsTab providers={providers} classifiedAds={classifiedAds} />}
-        {tab === "Analytics" && <AnalyticsTab providers={providers} reviews={reviews} leads={leads} stats={stats} catMap={catMap} svcMap={svcMap} fullSvcMap={fullSvcMap} classifiedAds={classifiedAds} viewsByDay={viewsByDay} searchesByDay={searchesByDay} />}
+        {tab === "Analytics" && <AnalyticsTab providers={providers} reviews={reviews} leads={leads} stats={stats} catMap={catMap} svcMap={svcMap} fullSvcMap={fullSvcMap} classifiedAds={classifiedAds} />}
         {tab === "Add Provider" && <AddProviderTab onAdded={p => { setProviders(prev => [p, ...prev]); setTab("Providers"); }} categories={categories} services={services} serviceAreas={serviceAreas} adminPin={adminPin} />}
       </div>
     </div>

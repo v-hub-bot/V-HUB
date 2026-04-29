@@ -264,14 +264,18 @@ function ProvDetail({ prov, areas, cats, svcs, onBack }) {
   }, [areas]);
 
   const resolvedServices = (prov.services || []).map(s => svcMap[s] || s).filter(Boolean);
-  const resolvedAreas    = (prov.service_areas || []).map(a => areaMap[a] || MACRO_AREAS_MAP[a] || null).filter(Boolean);
+  const resolvedAreas    = (prov.service_areas || []).map(a => areaMap[a] || MACRO_AREAS_MAP[a] || a).filter(Boolean);
 
   useEffect(() => {
-    fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/submitReview", {
-      method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ get_reviews: true, provider_id: prov.id }),
-    }).then(r => r.json()).then(d => setReviews(d.reviews || [])).catch(() => setReviews([]));
-    // profile_views counter is incremented server-side by trackEvent (works without auth)
+    ProviderReview.filter({ provider_id: prov.id })
+      .then(all => setReviews((all || []).filter(r => r.is_approved)))
+      .catch(() => setReviews([]));
+    // increment profile view count (read fresh to avoid race condition)
+    Provider.get(prov.id).then(fresh => {
+      Provider.update(prov.id, { profile_views: (fresh.profile_views || 0) + 1 }).catch(() => {});
+    }).catch(() => {
+      Provider.update(prov.id, { profile_views: (prov.profile_views || 0) + 1 }).catch(() => {});
+    });
     // Log to detailed analytics
     fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/trackEvent", {
       method: "POST", headers: { "Content-Type": "application/json" },
@@ -287,12 +291,7 @@ function ProvDetail({ prov, areas, cats, svcs, onBack }) {
   const handleReviewSubmit = async () => {
     if (!reviewForm.customer_name || !reviewForm.review_text) return;
     try {
-      const res = await fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/submitReview", {
-        method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...reviewForm, provider_id: prov.id }),
-      });
-      const data = await res.json();
-      if (!data.success) throw new Error(data.error || "Submit failed");
+      await ProviderReview.create({ ...reviewForm, provider_id: prov.id, is_approved: false, helpful_count: 0 });
       setReviewSaved(true);
       setShowReviewForm(false);
       setReviewForm({ customer_name: "", customer_village: "", rating: 5, review_text: "", service_used: "" });
@@ -545,17 +544,15 @@ function ProviderRatingBadge({ providerId, googleRating }) {
   const [count, setCount] = React.useState(0);
 
   React.useEffect(() => {
-    fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/submitReview", {
-      method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ get_reviews: true, provider_id: providerId }),
-    }).then(r => r.json()).then(d => {
-      const approved = d.reviews || [];
-      if (approved.length > 0) {
-        const avg = approved.reduce((s, r) => s + (r.rating || 0), 0) / approved.length;
-        setVhubRating(avg);
-        setCount(approved.length);
-      }
-    }).catch(() => {});
+    ProviderReview.filter({ provider_id: providerId, is_approved: true })
+      .then(revs => {
+        const approved = (revs || []);
+        if (approved.length > 0) {
+          const avg = approved.reduce((s, r) => s + (r.rating || 0), 0) / approved.length;
+          setVhubRating(avg);
+          setCount(approved.length);
+        }
+      }).catch(() => {});
   }, [providerId]);
 
   if (vhubRating !== null) {
@@ -1025,7 +1022,6 @@ export default function Home() {
     { id: "69d1822df3b2afb229b5bb10", category_id: "69d181fe57b60e0aecf4067e", name: "Legal Services" },
     { id: "69d1822df3b2afb229b5bb11", category_id: "69d181fe57b60e0aecf4067e", name: "Business Consulting" },
     { id: "69d1822df3b2afb229b5bb12", category_id: "69d181fe57b60e0aecf4067e", name: "Tax Preparation" },
-    { id: "69ea749b0daf529bb432bdef", category_id: "69d09c14d5ee9e7be9aa301b", name: "Home Inspection" },
   ];
 
   useEffect(() => {
@@ -1169,7 +1165,7 @@ export default function Home() {
 
     // ── Legacy ID lookup maps ──────────────────────────────────────────────
     const LEGACY_VA = {"va001":"Alhambra","va002":"Amelia","va003":"Ashland","va004":"Belle Aire","va005":"Belvedere","va006":"Bonita","va007":"Bonnybrook","va008":"Bradford","va009":"Briar Meadow","va010":"Bridgeport at Creekside Landing","va011":"Bridgeport at Lake Miona","va012":"Bridgeport at Lake Sumter","va013":"Bridgeport at Laurel Valley","va014":"Bridgeport at Miona Shores","va015":"Bridgeport at Mission Hills","va016":"Buttonwood","va017":"Calumet Grove","va018":"Caroline","va019":"Cason Hammock","va020":"Charlotte","va021":"Chatham","va022":"Chitty Chatty","va023":"Citrus Grove","va024":"Collier","va025":"Collier at Alden Bungalows","va026":"Collier at Antrim Dells","va027":"Country Club Hills","va028":"Dabney","va029":"De Allende","va030":"De La Vista","va031":"Del Mar","va032":"DeLuna","va033":"DeSoto","va034":"Dunedin","va035":"Duval","va036":"El Cortez","va037":"Fenney","va038":"Fernandina","va039":"Gilchrist","va040":"Glenbrook","va041":"Hacienda","va042":"Haciendas of Mission Hills","va043":"Hadley","va044":"Hammock at Fenney","va045":"Hawkins","va046":"Hemingway","va047":"Hillsborough","va048":"La Reynalda","va049":"La Zamora","va050":"LaBelle","va051":"Lake Deaton","va052":"Lake Denham","va053":"Lakeshore Cottages","va054":"Largo","va055":"Liberty Park","va056":"Linden","va057":"Lynnhaven","va058":"Mallory Square","va059":"Marsh Bend","va060":"McClure","va061":"Mira Mesa","va062":"Monarch Grove","va063":"Newell","va064":"Orange Blossom Gardens","va065":"Osceola Hills","va066":"Osceola Hills at Soaring Eagle Preserve","va067":"Palo Alto","va068":"Pennecamp","va069":"Piedmont","va070":"Pine Hills","va071":"Pine Ridge","va072":"Pinellas","va073":"Poinciana","va074":"Polo Ridge","va075":"Richmond","va076":"Rio Grande","va077":"Rio Ponderosa","va078":"Rio Ranchero","va079":"Sabal Chase","va080":"Sanibel","va081":"Santiago","va082":"Santo Domingo","va083":"Silver Lake","va084":"Springdale","va085":"St. Catherine","va086":"St. Charles","va087":"St. James","va088":"St. Johns","va089":"Summerhill","va090":"Sunset Pointe","va091":"Tall Trees","va092":"Tamarind Grove","va093":"Tierra Del Sol","va094":"Valle Verde","va095":"Virginia Trace","va096":"Winifred","va097":"Woodbury","va098":"Bison Valley","va099":"Country Club","va100":"Middleton","va101":"Moultrie Creek","va102":"Oak Meadows","va103":"Orange Blossom","va104":"Oxford Oaks","va105":"Shady Brook","va106":"Spring Arbor"};
-    const LEGACY_SVC_MAP = {"s01":"Home Improvements","s02":"General Repairs","s03":"Cleaning Services","s04":"Painting (Interior/Exterior)","s05":"Garage Door Services","s06":"Window Installation/Repair","s07":"HVAC","s08":"Plumbing","s09":"Roofing","s10":"Handyman Services","s11":"Security & Home Watch","s12":"Pest Control","s13":"Appliance Repair","s14":"Electrical & Lighting","s15":"Flooring (Tile, Wood, Carpet)","s16":"Home Organization","s17":"Smart Home Installation","s18":"Pool & Spa Services","s19":"Lawn Mowing","s20":"Sod Installation","s21":"Tree Trimming & Pruning/Removal","s22":"Lawn Fertilization","s23":"Irrigation/Sprinkler Services","s24":"Landscaping","s25":"Hardscaping","s26":"Pressure Washing","s27":"Driveway Repair/Cleaning/Painting","s28":"Rentals","s29":"Repairs","s30":"Detailing","s31":"Lighting Upgrades","s32":"Improvements/Customizations","s33":"Battery Replacement","s34":"Tire Services","s35":"Auto Repairs","s36":"Auto Detailing","s37":"Oil Changes","s38":"Tire Services","s39":"Mobile Mechanic","s40":"Barber / Stylist","s41":"Nail Technicians","s42":"Spa Services","s43":"Home Health Aides","s44":"Massage Therapists","s45":"Personal Trainers","s46":"Makeup Artists","s47":"Veterinary Services","s48":"Grooming","s49":"Pet Sitting/Walking","s50":"Pet Training","s51":"Mobile Grooming","s52":"Medical Transport","s53":"Airport Transport","s54":"Local Rides","s55":"Errand Services","s56":"Courier/Delivery Services","s57":"Accounting & Bookkeeping","s58":"Notary Services","s59":"IT Support","s60":"Legal Services","s61":"Business Consulting","s62":"Tax Preparation","s63":"Home Watch","s64":"Pool & Spa Services","s65":"Vehicle Transport","s66":"Home Inspection"};
+    const LEGACY_SVC_MAP = {"s01":"Home Improvements","s02":"General Repairs","s03":"Cleaning Services","s04":"Painting (Interior/Exterior)","s05":"Garage Door Services","s06":"Window Installation/Repair","s07":"HVAC","s08":"Plumbing","s09":"Roofing","s10":"Handyman Services","s11":"Security & Home Watch","s12":"Pest Control","s13":"Appliance Repair","s14":"Electrical & Lighting","s15":"Flooring (Tile, Wood, Carpet)","s16":"Home Organization","s17":"Smart Home Installation","s18":"Pool & Spa Services","s19":"Lawn Mowing","s20":"Sod Installation","s21":"Tree Trimming & Pruning/Removal","s22":"Lawn Fertilization","s23":"Irrigation/Sprinkler Services","s24":"Landscaping","s25":"Hardscaping","s26":"Pressure Washing","s27":"Driveway Repair/Cleaning/Painting","s28":"Rentals","s29":"Repairs","s30":"Detailing","s31":"Lighting Upgrades","s32":"Improvements/Customizations","s33":"Battery Replacement","s34":"Tire Services","s35":"Auto Repairs","s36":"Auto Detailing","s37":"Oil Changes","s38":"Tire Services","s39":"Mobile Mechanic","s40":"Barber / Stylist","s41":"Nail Technicians","s42":"Spa Services","s43":"Home Health Aides","s44":"Massage Therapists","s45":"Personal Trainers","s46":"Makeup Artists","s47":"Veterinary Services","s48":"Grooming","s49":"Pet Sitting/Walking","s50":"Pet Training","s51":"Mobile Grooming","s52":"Medical Transport","s53":"Airport Transport","s54":"Local Rides","s55":"Errand Services","s56":"Courier/Delivery Services","s57":"Accounting & Bookkeeping","s58":"Notary Services","s59":"IT Support","s60":"Legal Services","s61":"Business Consulting","s62":"Tax Preparation","s63":"Home Watch","s64":"Pool & Spa Services","s65":"Vehicle Transport"};
     // Macro entity ID → group name (for old test providers)
     const MACRO_AREA = {"69d06c4a4f1e1017a77a7018":"historic","69d06c4a4f1e1017a77a7019":"established","69d06c4a4f1e1017a77a701a":"newer","69d06c4a4f1e1017a77a701b":"eastport","69d06c4a4f1e1017a77a701c":"family"};
 
@@ -1261,7 +1257,6 @@ export default function Home() {
     };
 
     // Build macro-group lookup once (reused in area matching)
-    // Maps macro group ID -> all individual village IDs in that group (new 69e9a307... IDs)
     const MACRO_VILLAGES_MAP = {
       "69d06c4a4f1e1017a77a7018": [
         "69e9a307d1bc6cfe7247ea92","69e9a307d1bc6cfe7247ea93","69e9a307d1bc6cfe7247ea94",
@@ -1413,7 +1408,7 @@ export default function Home() {
     setSearched(true);
     // Track search appearances — fire & forget to backend analytics
     if (out.length > 0) {
-      const areaLabel = selArea ? (typeof selArea === "string" ? selArea : (selArea.name || "")).split("—").pop().trim() : "";
+      const areaLabel = selArea ? (areas.find(a => a.id === selArea || a.name === selArea)?.name || selArea) : "";
       const svcObj = selSvc ? svcs.find(s => s.id === selSvc) : null;
       const catObj = svcObj ? cats.find(c => c.id === svcObj.category_id) : null;
       const events = out.map(p => ({

@@ -39,7 +39,7 @@ const SANS      = "'Helvetica Neue', Arial, sans-serif";
 const SERIF     = "'Times New Roman', Georgia, serif";
 
 // ── Legacy short-code lookup maps (providers created before entity migration)
-const LEGACY_SVC = {"s01":"Home Improvements","s02":"General Repairs","s03":"Cleaning Services","s04":"Painting (Interior/Exterior)","s05":"Garage Door Services","s06":"Window Installation/Repair","s07":"HVAC","s08":"Plumbing","s09":"Roofing","s10":"Handyman Services","s11":"Security & Home Watch","s12":"Pest Control","s13":"Appliance Repair","s14":"Electrical & Lighting","s15":"Flooring (Tile, Wood, Carpet)","s16":"Home Organization","s17":"Smart Home Installation","s18":"Pool & Spa Services","s19":"Lawn Mowing","s20":"Sod Installation","s21":"Tree Trimming & Pruning/Removal","s22":"Lawn Fertilization","s23":"Irrigation/Sprinkler Services","s24":"Landscaping","s25":"Hardscaping","s26":"Pressure Washing","s27":"Driveway Repair/Cleaning/Painting","s28":"Rentals","s29":"Repairs","s30":"Detailing","s31":"Lighting Upgrades","s32":"Improvements/Customizations","s33":"Battery Replacement","s34":"Tire Services","s35":"Auto Repairs","s36":"Auto Detailing","s37":"Oil Changes","s38":"Tire Services","s39":"Mobile Mechanic","s40":"Barber / Stylist","s41":"Nail Technicians","s42":"Spa Services","s43":"Home Health Aides","s44":"Massage Therapists","s45":"Personal Trainers","s46":"Makeup Artists","s47":"Veterinary Services","s48":"Grooming","s49":"Pet Sitting/Walking","s50":"Pet Training","s51":"Mobile Grooming","s52":"Medical Transport","s53":"Airport Transport","s54":"Local Rides","s55":"Errand Services","s56":"Courier/Delivery Services","s57":"Accounting & Bookkeeping","s58":"Notary Services","s59":"IT Support","s60":"Legal Services","s61":"Business Consulting","s62":"Tax Preparation","s63":"Home Watch","s64":"Pool & Spa Services","s65":"Vehicle Transport","s66":"Home Inspection"};
+const LEGACY_SVC = {"s01":"Home Improvements","s02":"General Repairs","s03":"Cleaning Services","s04":"Painting (Interior/Exterior)","s05":"Garage Door Services","s06":"Window Installation/Repair","s07":"HVAC","s08":"Plumbing","s09":"Roofing","s10":"Handyman Services","s11":"Security & Home Watch","s12":"Pest Control","s13":"Appliance Repair","s14":"Electrical & Lighting","s15":"Flooring (Tile, Wood, Carpet)","s16":"Home Organization","s17":"Smart Home Installation","s18":"Pool & Spa Services","s19":"Lawn Mowing","s20":"Sod Installation","s21":"Tree Trimming & Pruning/Removal","s22":"Lawn Fertilization","s23":"Irrigation/Sprinkler Services","s24":"Landscaping","s25":"Hardscaping","s26":"Pressure Washing","s27":"Driveway Repair/Cleaning/Painting","s28":"Rentals","s29":"Repairs","s30":"Detailing","s31":"Lighting Upgrades","s32":"Improvements/Customizations","s33":"Battery Replacement","s34":"Tire Services","s35":"Auto Repairs","s36":"Auto Detailing","s37":"Oil Changes","s38":"Tire Services","s39":"Mobile Mechanic","s40":"Barber / Stylist","s41":"Nail Technicians","s42":"Spa Services","s43":"Home Health Aides","s44":"Massage Therapists","s45":"Personal Trainers","s46":"Makeup Artists","s47":"Veterinary Services","s48":"Grooming","s49":"Pet Sitting/Walking","s50":"Pet Training","s51":"Mobile Grooming","s52":"Medical Transport","s53":"Airport Transport","s54":"Local Rides","s55":"Errand Services","s56":"Courier/Delivery Services","s57":"Accounting & Bookkeeping","s58":"Notary Services","s59":"IT Support","s60":"Legal Services","s61":"Business Consulting","s62":"Tax Preparation","s63":"Home Watch","s64":"Pool & Spa Services","s65":"Vehicle Transport"};
 const LEGACY_AREA = {"va001":"Alhambra","va002":"Amelia","va003":"Ashland","va004":"Belle Aire","va005":"Belvedere","va006":"Bonita","va007":"Bonnybrook","va008":"Bradford","va009":"Briar Meadow","va010":"Bridgeport at Creekside Landing","va011":"Bridgeport at Lake Miona","va012":"Bridgeport at Lake Sumter","va013":"Bridgeport at Laurel Valley","va014":"Bridgeport at Miona Shores","va015":"Bridgeport at Mission Hills","va016":"Buttonwood","va017":"Calumet Grove","va018":"Caroline","va019":"Cason Hammock","va020":"Charlotte","va021":"Chatham","va022":"Chitty Chatty","va023":"Citrus Grove","va024":"Collier","va025":"Collier at Alden Bungalows","va026":"Collier at Antrim Dells","va027":"Country Club Hills","va028":"Dabney","va029":"De Allende","va030":"De La Vista","va031":"Del Mar","va032":"DeLuna","va033":"DeSoto","va034":"Dunedin","va035":"Duval","va036":"El Cortez","va037":"Fenney","va038":"Fernandina","va039":"Gilchrist","va040":"Glenbrook","va041":"Hacienda","va042":"Haciendas of Mission Hills","va043":"Hadley","va044":"Hammock at Fenney","va045":"Hawkins","va046":"Hemingway","va047":"Hillsborough","va048":"La Reynalda","va049":"La Zamora","va050":"LaBelle","va051":"Lake Deaton","va052":"Lake Denham","va053":"Lakeshore Cottages","va054":"Largo","va055":"Liberty Park","va056":"Linden","va057":"Lynnhaven","va058":"Mallory Square","va059":"Marsh Bend","va060":"McClure","va061":"Mira Mesa","va062":"Monarch Grove","va063":"Newell","va064":"Orange Blossom Gardens","va065":"Osceola Hills","va066":"Osceola Hills at Soaring Eagle Preserve","va067":"Palo Alto","va068":"Pennecamp","va069":"Piedmont","va070":"Pine Hills","va071":"Pine Ridge","va072":"Pinellas","va073":"Poinciana","va074":"Polo Ridge","va075":"Richmond","va076":"Rio Grande","va077":"Rio Ponderosa","va078":"Rio Ranchero","va079":"Sabal Chase","va080":"Sanibel","va081":"Santiago","va082":"Santo Domingo","va083":"Silver Lake","va084":"Springdale","va085":"St. Catherine","va086":"St. Charles","va087":"St. James","va088":"St. Johns","va089":"Summerhill","va090":"Sunset Pointe","va091":"Tall Trees","va092":"Tamarind Grove","va093":"Tierra Del Sol","va094":"Valle Verde","va095":"Virginia Trace","va096":"Winifred","va097":"Woodbury"};
 
 // ── Helpers ───────────────────────────────────────────────────────────────
@@ -142,7 +142,6 @@ function StatusBanner({ provider, onUpgrade, onCancel, onManageBilling, paymentL
           </div>
           {paymentError && <div style={{ fontSize: 12, color: RED_RULE, marginBottom: 8, fontFamily: SANS }}>{paymentError}</div>}
           <button
-            data-testid="subscribe-btn"
             onClick={onUpgrade}
             disabled={paymentLoading}
             style={{
@@ -330,38 +329,12 @@ function VillageSelect({ selAreas, setSelAreas, dbAreas, areaMap }) {
   const [openGroup, setOpenGroup] = useState(null);
 
   const MACRO_GROUPS = [
-    { key: "historic", label: "🌴 Historic Side (Spanish Springs / Lake County / North of 466)", villages: [
-      "Alhambra","Belle Aire","Briar Meadow","Calumet Grove","Chatham","Country Club Hills",
-      "De Allende","De La Vista","Del Mar","El Cortez","Glenbrook","Hacienda","La Reynalda",
-      "La Zamora","Mira Mesa","Orange Blossom Gardens","Palo Alto","Piedmont","Pine Hills",
-      "Pine Ridge","Polo Ridge","Rio Grande","Rio Ponderosa","Rio Ranchero","Santiago",
-      "Santo Domingo","Silver Lake","Springdale","Summerhill","Tierra Del Sol","Valle Verde","Woodbury",
-    ]},
-    { key: "established_466", label: "🏡 Established Villages (Between 466 & 466A / Lake Sumter Landing)", villages: [
-      "Amelia","Ashland","Belvedere","Bonita","Bonnybrook","Bridgeport at Creekside Landing",
-      "Bridgeport at Lake Miona","Bridgeport at Lake Shore Cottages","Bridgeport at Lake Sumter",
-      "Bridgeport at Laurel Valley","Bridgeport at Miona Shores","Bridgeport at Mission Hills",
-      "Buttonwood","Cabanas at Creekside Landing","Caroline","Duval","Hadley",
-      "Haciendas of Mission Hills","Hemingway","Lago Vista","Lakeshore Cottages","Largo",
-      "Liberty Park","Lynnhaven","Mallory Square","Pennecamp","Poinciana","Sabal Chase",
-      "St. Charles","St. James","Sunset Pointe","Tall Trees","Tamarind Grove","Virginia Trace","Winifred",
-    ]},
-    { key: "established_s", label: "🏡 Established Villages (South of SR-466A / Brownwood area)", villages: [
-      "Alden Bungalows","Antrim Dells","Charlotte","Collier","Dunedin","Fernandina","Gilchrist",
-      "Hillsborough","LaBelle","Lake Deaton","Osceola Hills","Osceola Hills at Soaring Eagle Preserve",
-      "Pinellas","Sanibel",
-    ]},
-    { key: "newer", label: "🌿 Newer Villages (South of SR-44)", villages: [
-      "Bradford","Cason Hammock","Chitty Chatty","Citrus Grove","DeLuna","DeSoto","Fenney",
-      "Hammock at Fenney","Hawkins","Linden","Marsh Bend","McClure","Monarch Grove",
-      "Richmond","St. Catherine","St. Johns",
-    ]},
-    { key: "eastport", label: "🌊 Eastport / Newest (District 14 & 15)", villages: [
-      "Dabney","Lake Denham","Moultrie Creek","Newell","Oak Hollow","Shady Brook","Waters Edge","Well Point",
-    ]},
-    { key: "family", label: "🏠 Family / Non-Age-Restricted Villages", villages: [
-      "Bison Valley","Middleton","Oak Meadows","Oxford Oaks",
-    ]},
+    { key: "historic",     label: "🌴 Historic Side / Spanish Springs Area", villages: ["Alhambra","Country Club","Del Mar","El Cortez","Hacienda","La Reynalda","La Zamora","Mira Mesa","Orange Blossom","Silver Lake","Spring Arbor","Valle Verde"] },
+    { key: "established_n", label: "🏡 Established Villages (North of SR-466A)", villages: ["Ashland","Belle Aire","Belvedere","Bonita","Bonnybrook","Calumet Grove","Caroline","Chatham","Duval","Glenbrook","Hadley","Hemingway","Lynnhaven","Mallory Square","Pennecamp","Poinciana","Sabal Chase","Santiago","Sunset Pointe","Tall Trees","Virginia Trace","Winifred"] },
+    { key: "established_s", label: "🏡 Established Villages (South of SR-466A)", villages: ["Bridgeport at Laurel Valley","Bridgeport at Mission Hills","Charlotte","Collier","Dunedin","Fernandina","Gilchrist","Hillsborough","LaBelle","Lake Deaton","Osceola Hills","Pinellas","Sanibel"] },
+    { key: "newer",        label: "🌿 Newer Villages (South of SR-44)", villages: ["Bradford","Brownwood","Cason Hammock","Chitty Chatty","Citrus Grove","DeLuna","DeSoto","Fenney","Hammock at Fenney","Hawkins","Linden","Marsh Bend","McClure","Monarch Grove","Richmond","St. Catherine","St. Johns"] },
+    { key: "eastport",     label: "🌊 Eastport / Newest Development Area", villages: ["Dabney","Lake Denham","Moultrie Creek","Newell","Shady Brook"] },
+    { key: "family",       label: "🏠 Family / Non-Age-Restricted Villages", villages: ["Bison Valley","Middleton","Oak Meadows","Oxford Oaks"] },
   ];
 
   // Build name→id map from live DB areas
@@ -1089,7 +1062,7 @@ function ClassifiedAdSection({ provider, refreshKey = 0 }) {
     if (!provider) return [];
     const ids = provider.service_areas || [];
     const areaMap = { "69d06c4ad9b0c2b3a2f9e1a1": "Historic Side", "69d06c4ad9b0c2b3a2f9e1a2": "Established Villages", "69d06c4ad9b0c2b3a2f9e1a3": "Newer Villages", "69d06c4ad9b0c2b3a2f9e1a4": "Eastport", "69d06c4ad9b0c2b3a2f9e1a5": "Family/Non-Age-Restricted" };
-    return ids.map(id => areaMap[id] || null).filter(Boolean);
+    return ids.map(id => areaMap[id] || id).filter(Boolean);
   }, [provider]);
 
   // ── Open editor ──────────────────────────────────────────────────────────
