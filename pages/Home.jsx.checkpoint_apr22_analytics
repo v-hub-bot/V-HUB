@@ -1172,6 +1172,7 @@ export default function Home() {
     // HARDCODED entity ID → plain village name (never depends on runtime fetch)
     // This is the source of truth — baked from the ServiceArea DB records
     const STATIC_ENTITY_AREA_MAP = {
+      // OLD IDs (legacy support)
       "69d06c54c9c22e67aed3c0ff":"alhambra","69d06c54c9c22e67aed3c100":"country club",
       "69d06c54c9c22e67aed3c101":"del mar","69d06c54c9c22e67aed3c102":"el cortez",
       "69d06c54c9c22e67aed3c103":"hacienda","69d06c54c9c22e67aed3c104":"la reynalda",
@@ -1202,6 +1203,46 @@ export default function Home() {
       "69d06c54c9c22e67aed3c135":"shady brook","69d06c54c9c22e67aed3c136":"bison valley",
       "69d06c54c9c22e67aed3c137":"oak meadows","69d06c54c9c22e67aed3c138":"oxford oaks",
       "69d06c54c9c22e67aed3c139":"middleton",
+      // NEW IDs (current production ServiceArea entity IDs)
+      "69e9a307d1bc6cfe7247ea92":"briar meadow","69e9a307d1bc6cfe7247ea93":"de allende",
+      "69e9a307d1bc6cfe7247ea94":"de la vista","69e9a307d1bc6cfe7247ea95":"palo alto",
+      "69e9a307d1bc6cfe7247ea96":"pine hills","69e9a307d1bc6cfe7247ea97":"pine ridge",
+      "69e9a307d1bc6cfe7247ea98":"polo ridge","69e9a307d1bc6cfe7247ea99":"rio grande",
+      "69e9a307d1bc6cfe7247ea9a":"rio ponderosa","69e9a307d1bc6cfe7247ea9b":"rio ranchero",
+      "69e9a307d1bc6cfe7247ea9c":"santo domingo","69e9a307d1bc6cfe7247ea9d":"springdale",
+      "69e9a307d1bc6cfe7247ea9e":"summerhill","69e9a307d1bc6cfe7247ea9f":"tierra del sol",
+      "69e9a307d1bc6cfe7247eaa0":"woodbury","69e9a307d1bc6cfe7247eaa1":"amelia",
+      "69e9a307d1bc6cfe7247eaa2":"ashland","69e9a307d1bc6cfe7247eaa3":"belvedere",
+      "69e9a307d1bc6cfe7247eaa4":"bonita","69e9a307d1bc6cfe7247eaa5":"bonnybrook",
+      "69e9a307d1bc6cfe7247eaa6":"bridgeport at creekside landing","69e9a307d1bc6cfe7247eaa7":"bridgeport at lake miona",
+      "69e9a307d1bc6cfe7247eaa8":"bridgeport at lake shore cottages","69e9a307d1bc6cfe7247eaa9":"bridgeport at lake sumter",
+      "69e9a307d1bc6cfe7247eaaa":"bridgeport at miona shores","69e9a307d1bc6cfe7247eaab":"buttonwood",
+      "69e9a307d1bc6cfe7247eaac":"cabanas at creekside landing","69e9a307d1bc6cfe7247eaad":"caroline",
+      "69e9a307d1bc6cfe7247eaae":"duval","69e9a307d1bc6cfe7247eaaf":"hadley",
+      "69e9a307d1bc6cfe7247eab0":"haciendas of mission hills","69e9a307d1bc6cfe7247eab1":"hemingway",
+      "69e9a307d1bc6cfe7247eab2":"lago vista","69e9a307d1bc6cfe7247eab3":"lakeshore cottages",
+      "69e9a307d1bc6cfe7247eab4":"largo","69e9a307d1bc6cfe7247eab5":"liberty park",
+      "69e9a307d1bc6cfe7247eab6":"lynnhaven","69e9a307d1bc6cfe7247eab7":"mallory square",
+      "69e9a307d1bc6cfe7247eab8":"pennecamp","69e9a307d1bc6cfe7247eab9":"poinciana",
+      "69e9a307d1bc6cfe7247eaba":"sabal chase","69e9a307d1bc6cfe7247eabb":"st. charles",
+      "69e9a307d1bc6cfe7247eabc":"st. james","69e9a307d1bc6cfe7247eabd":"sunset pointe",
+      "69e9a307d1bc6cfe7247eabe":"tall trees","69e9a307d1bc6cfe7247eabf":"tamarind grove",
+      "69e9a307d1bc6cfe7247eac0":"virginia trace","69e9a307d1bc6cfe7247eac1":"winifred",
+      "69e9a307d1bc6cfe7247eac2":"alden bungalows","69e9a307d1bc6cfe7247eac3":"antrim dells",
+      "69e9a307d1bc6cfe7247eac4":"osceola hills at soaring eagle preserve","69e9a307d1bc6cfe7247eac5":"oak hollow",
+      "69e9a307d1bc6cfe7247eac6":"waters edge","69e9a307d1bc6cfe7247eac7":"well point",
+      "69e91929e9a419d0ed14129e":"piedmont",
+      "69e047e27ddcca3eaa81600e":"bridgeport at laurel valley","69e047e27ddcca3eaa81600f":"bridgeport at mission hills",
+      "69e047e27ddcca3eaa816010":"charlotte","69e047e27ddcca3eaa816011":"collier",
+      "69e047e27ddcca3eaa816012":"dunedin","69e047e27ddcca3eaa816013":"fernandina",
+      "69e047e27ddcca3eaa816014":"gilchrist","69e047e27ddcca3eaa816015":"hillsborough",
+      "69e047e27ddcca3eaa816016":"labelle","69e047e27ddcca3eaa816017":"lake deaton",
+      "69e047e27ddcca3eaa816018":"osceola hills","69e047e27ddcca3eaa816019":"pinellas",
+      "69e047e27ddcca3eaa81601a":"sanibel",
+      // Macro group IDs
+      "69d06c4a4f1e1017a77a7018":"historic","69d06c4a4f1e1017a77a7019":"established",
+      "69d06c4a4f1e1017a77a701a":"newer","69d06c4a4f1e1017a77a701b":"eastport",
+      "69d06c4a4f1e1017a77a701c":"family",
     };
 
     // Resolve a provider area value to a lowercase name string
