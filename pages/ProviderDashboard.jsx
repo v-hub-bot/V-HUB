@@ -1950,9 +1950,15 @@ function AnalyticsDashboard({ provider, reviews }) {
       const adClicks  = inRange.filter(e => e.event_type === "classified_ad_click" || e.event_type === "ad_click");
       const leads     = inRange.filter(e => e.event_type === "lead_inquiry");
 
-      // Search breakdown by service
+      // Search breakdown by service — use service_name, fallback to category_name, then "General Browse"
       const byService = {};
-      searches.forEach(e => { const k = e.service_name || "General Search"; byService[k] = (byService[k]||0)+1; });
+      searches.forEach(e => {
+        const k = e.service_name || e.category_name || null;
+        if (k) { byService[k] = (byService[k]||0)+1; }
+        // null = area-only or no-filter search — count separately
+      });
+      const generalBrowseCount = searches.filter(e => !e.service_name && !e.category_name).length;
+      if (generalBrowseCount > 0) byService["General Browse"] = generalBrowseCount;
 
       // Activity by area
       const byArea = {};
@@ -2044,7 +2050,7 @@ function AnalyticsDashboard({ provider, reviews }) {
               { icon:"🔍", label:"Search Appearances", value:analytics.searches, sub:`Last ${range} days — times you showed up`, color:TEAL },
               { icon:"👁", label:"Profile Views", value:analytics.views, sub:`Last ${range} days — people who clicked you`, color:BROWN_BTN },
               { icon:"📩", label:"Leads Received", value:analytics.leads, sub:`Last ${range} days — contact requests`, color:"#1A6B3C" },
-              { icon:"📰", label:"Classified Ad Clicks", value:analytics.adClicks, sub:hasAd?`Last ${range} days`:"Add Classifieds add-on to unlock", color:"#7B3FA0" },
+              { icon:"📰", label:"Classified Ad Clicks", value:hasAd?analytics.adClicks:"—", sub:hasAd?`Last ${range} days`:"Not active on your plan", color:hasAd?"#7B3FA0":"#bbb" },
             ].map(({icon,label,value,sub,color})=>(
               <div key={label} style={{background:PAPER_MID,border:`1.5px solid ${PAPER_DK}`,borderRadius:8,padding:"14px 12px",textAlign:"center"}}>
                 <div style={{fontSize:22,marginBottom:4}}>{icon}</div>
@@ -2102,27 +2108,41 @@ function AnalyticsDashboard({ provider, reviews }) {
           )}
 
           {/* ── What are people searching for? ── */}
-          {analytics.byService.length>0 && (
-            <div style={{background:PAPER_MID,border:`1.5px solid ${PAPER_DK}`,borderRadius:8,padding:"14px",marginBottom:14}}>
-              <div style={{fontSize:11,fontWeight:700,color:INK_FADE,textTransform:"uppercase",letterSpacing:1,fontFamily:SANS,marginBottom:10}}>
-                🔍 What Customers Searched For
-              </div>
-              {analytics.byService.map(([svc,cnt])=>{
-                const pct = Math.round((cnt/(analytics.searches||1))*100);
-                return (
-                  <div key={svc} style={{marginBottom:7}}>
-                    <div style={{display:"flex",justifyContent:"space-between",fontSize:12,fontFamily:SANS,marginBottom:2}}>
-                      <span style={{color:INK,fontWeight:600}}>{svc}</span>
-                      <span style={{color:INK_FADE}}>{cnt}x ({pct}%)</span>
-                    </div>
-                    <div style={{background:PAPER_DK,borderRadius:3,height:6}}>
-                      <div style={{background:TEAL,borderRadius:3,height:6,width:`${pct}%`,transition:"width 0.4s"}}/>
-                    </div>
+          {analytics.byService.length>0 && (() => {
+            const named = analytics.byService.filter(([s])=>s!=="General Browse");
+            const browseCnt = (analytics.byService.find(([s])=>s==="General Browse")||[])[1]||0;
+            return (
+              <div style={{background:PAPER_MID,border:`1.5px solid ${PAPER_DK}`,borderRadius:8,padding:"14px",marginBottom:14}}>
+                <div style={{fontSize:11,fontWeight:700,color:INK_FADE,textTransform:"uppercase",letterSpacing:1,fontFamily:SANS,marginBottom:10}}>
+                  🔍 What Customers Searched For
+                </div>
+                {named.length===0 && (
+                  <div style={{fontSize:12,color:INK_FADE,fontFamily:SANS,fontStyle:"italic",textAlign:"center",padding:"8px 0"}}>
+                    Most visitors found you through general browsing — no specific service filter used yet.
                   </div>
-                );
-              })}
-            </div>
-          )}
+                )}
+                {named.map(([svc,cnt])=>{
+                  const pct = Math.round((cnt/(analytics.searches||1))*100);
+                  return (
+                    <div key={svc} style={{marginBottom:7}}>
+                      <div style={{display:"flex",justifyContent:"space-between",fontSize:12,fontFamily:SANS,marginBottom:2}}>
+                        <span style={{color:INK,fontWeight:600}}>{svc}</span>
+                        <span style={{color:INK_FADE}}>{cnt}x ({pct}%)</span>
+                      </div>
+                      <div style={{background:PAPER_DK,borderRadius:3,height:6}}>
+                        <div style={{background:TEAL,borderRadius:3,height:6,width:`${pct}%`,transition:"width 0.4s"}}/>
+                      </div>
+                    </div>
+                  );
+                })}
+                {browseCnt>0 && (
+                  <div style={{fontSize:11,color:INK_FADE,fontFamily:SANS,marginTop:named.length>0?8:0,padding:"6px 10px",background:PAPER,borderRadius:4,border:`1px solid ${PAPER_DK}`}}>
+                    + {browseCnt} appearance{browseCnt>1?"s":""} from general browsing (no service filter)
+                  </div>
+                )}
+              </div>
+            );
+          })()}
 
           {/* ── Where are customers finding you? (by area) ── */}
           {analytics.byArea.length>0 && (
