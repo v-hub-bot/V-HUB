@@ -72,13 +72,16 @@ Deno.serve(async (req: Request) => {
     // ── LOOKUP DATA ───────────────────────────────────────────────────
     if (body?.get_lookup_data === true) {
       try {
+        // Use direct REST API — SDK auth is flaky on unauthenticated public requests
         const [cats, svcs, areas] = await Promise.all([
-          withRetry(() => sr.entities.Category.list({ limit: 200 }), "cats"),
-          withRetry(() => sr.entities.Service.list({ limit: 500 }), "svcs"),
-          withRetry(() => sr.entities.ServiceArea.list({ limit: 500 }), "areas"),
+          fetchAllPages("Category", 200),
+          fetchAllPages("Service", 500),
+          fetchAllPages("ServiceArea", 500),
         ]);
-        return Response.json({ ok: true, categories: cats||[], services: svcs||[], areas: areas||[] }, { headers: CORS });
+        console.log(`[getProviders] lookup: cats=${cats.length} svcs=${svcs.length} areas=${areas.length}`);
+        return Response.json({ ok: true, categories: cats, services: svcs, areas: areas }, { headers: CORS });
       } catch (e: any) {
+        console.error("[getProviders] lookup failed:", e.message);
         return Response.json({ ok: false, error: e.message, categories: [], services: [], areas: [] }, { headers: CORS });
       }
     }
