@@ -159,11 +159,14 @@ export default function Classifieds() {
   const [filterArea, setFilterArea] = useState("");
   const [filterService, setFilterService] = useState("");
 
+
   // Read ?village= or ?service= from URL for deep-link from homepage search
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    if (params.get("village")) setFilterArea(params.get("village"));
-    if (params.get("service")) setFilterService(params.get("service").toLowerCase());
+    const v = params.get("village");
+    const s = params.get("service");
+    if (v) setFilterArea(v);
+    if (s) setFilterService(s.toLowerCase());
   }, []);
 
   useEffect(() => {
@@ -305,21 +308,31 @@ export default function Classifieds() {
           </div>
         )}
 
-        {!loading && !error && visibleAds.length === 0 && (
+        {!loading && !error && !(filterArea || filterService) && (
           <div style={{ textAlign: "center", padding: 60, color: MUTED }}>
-            <div style={{ fontSize: 40, marginBottom: 12 }}>🏖️</div>
+            <div style={{ fontSize: 40, marginBottom: 12 }}>🔍</div>
             <div style={{ fontSize: 18, fontWeight: 700, color: NAVY, marginBottom: 8 }}>
-              {filterArea || filterService ? "No deals match your search" : "No Active Deals Right Now"}
+              Find Deals Near You
             </div>
             <div style={{ fontSize: 14 }}>
-              {filterArea || filterService
-                ? "Try a different village or service keyword."
-                : "Check back soon — new deals are added weekly!"}
+              Enter a service (e.g. lawn, pool) or your village above to see active deals.
             </div>
           </div>
         )}
 
-        {!loading && !error && visibleAds.length > 0 && (
+        {!loading && !error && !!(filterArea || filterService) && visibleAds.length === 0 && (
+          <div style={{ textAlign: "center", padding: 60, color: MUTED }}>
+            <div style={{ fontSize: 40, marginBottom: 12 }}>🏖️</div>
+            <div style={{ fontSize: 18, fontWeight: 700, color: NAVY, marginBottom: 8 }}>
+              No deals match your search
+            </div>
+            <div style={{ fontSize: 14 }}>
+              Try a different village or service keyword.
+            </div>
+          </div>
+        )}
+
+        {!loading && !error && !!(filterArea || filterService) && visibleAds.length > 0 && (
           <div style={{ display: "flex", flexDirection: "column", gap: 28 }}>
             {visibleAds.map(ad => <AdCard key={ad.id} ad={ad} />)}
           </div>
