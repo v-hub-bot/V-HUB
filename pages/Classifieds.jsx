@@ -507,7 +507,7 @@ export default function Classifieds() {
     return true;
   });
 
-  const hasFilter = !!(filterArea || filterService);
+  const hasFilter = true; // always show ads; dropdowns just filter them
   const currentAd = visibleAds[currentIndex] || null;
 
   const handlePrev = useCallback(() => {
@@ -726,7 +726,7 @@ export default function Classifieds() {
           </div>
         </div>
 
-        {hasFilter && (
+        {!!(filterArea || filterService) && (
           <button
             onClick={() => { setFilterArea(""); setFilterService(""); setSelSvcObj(null); setSelVilObj(null); setSvcOpen(false); setVilOpen(false); }}
             style={{
