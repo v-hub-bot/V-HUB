@@ -1,4 +1,4 @@
-// FORCE_REBUILD_1776768600
+// FORCE_REBUILD_APR30_DEEPLINK
 // V-Hub Home — v2026-04-14c
 import React, { useState, useEffect, useRef } from "react"; // v3 - expanded content
 import { createPortal } from "react-dom";
@@ -1153,6 +1153,29 @@ export default function Home() {
       method: "POST", headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ provider_id: "SITE", event_type: "homepage_view", source: "homepage" }),
     }).catch(() => {});
+
+    // ── Deep-link from Deals of the Week: /?provider=<entity_id> ──
+    // If URL has ?provider=ID, fetch that provider and open their detail view directly
+    const urlParams = new URLSearchParams(window.location.search);
+    const deepLinkId = urlParams.get("provider");
+    if (deepLinkId) {
+      fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/getProviders", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "list_all" }),
+      })
+        .then(r => r.json())
+        .then(data => {
+          const all = Array.isArray(data) ? data : (data.providers || []);
+          const found = all.find(p => p.id === deepLinkId);
+          if (found) {
+            setSelProv(found);
+            // Clean the URL so hitting Back works nicely
+            window.history.replaceState({}, "", "/");
+          }
+        })
+        .catch(() => {});
+    }
   }, []);
 
 
