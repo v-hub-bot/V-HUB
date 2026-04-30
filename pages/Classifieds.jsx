@@ -1,185 +1,298 @@
-// BUILD_FORCE_2026_04_22_T0400
-// CACHE-BUST-1776573078
-// build-1776559362
-// build-1776539899-PROBE 
-import { useState, useEffect, useRef, useCallback } from "react";
-import { ClassifiedAd, Provider } from "@/api/entities";
+// CACHE-BUST-DEALS-CLEAN-APR30
+import { useState, useEffect } from "react";
 
-// ────────────────────────────────────────────────────────────────
-//  V-HUB  ·  Deals of the Week
-//  Shows rotating "featured deal" ads from active providers.
-//  Slot rotation is handled nightly by the rolloverClassifiedAds function.
-// ────────────────────────────────────────────────────────────────
-
-const ORANGE  = "#E8431A";
-const TEAL    = "#00BFA5";
-const NAVY    = "#1B3D6F";
-const PARCH   = "#f5f0e8";
-const INK     = "#1a0a00";
-const MUTED   = "#7a6652";
-const WHITE   = "#ffffff";
-const GREEN   = "#1A6B3C";
-const RED     = "#CC0000";
+const ORANGE = "#E8431A";
+const TEAL   = "#00BFA5";
+const NAVY   = "#1B3D6F";
+const PARCH  = "#f5f0e8";
+const INK    = "#1a0a00";
+const MUTED  = "#7a6652";
+const WHITE  = "#ffffff";
+const RED    = "#CC0000";
+const GREEN  = "#1A6B3C";
 
 const API_BASE = "https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions";
-
-// ── tiny helpers ──────────────────────────────────────────────────
-function fmt(d) {
-  if (!d) return "";
-  try { return new Date(d).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }); }
-  catch { return ""; }
-}
 
 function isExpired(ad) {
   if (!ad.deal_expires_at) return false;
   return new Date(ad.deal_expires_at) < new Date();
 }
 
-// ── AdCard ────────────────────────────────────────────────────────
+function fmt(d) {
+  if (!d) return "";
+  try { return new Date(d).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }); }
+  catch { return ""; }
+}
+
+// ── Clean Ad Card — image first, minimal text, big CTA ──────────────
 function AdCard({ ad }) {
   const expired = isExpired(ad);
+  const [saved, setSaved] = useState(false);
 
-  const handleAdClick = () => {
-    if (ad.provider_id) {
-      fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/trackEvent", {
-        method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          provider_id: ad.provider_id,
-          event_type: "classified_ad_click",
-          source: "classifieds",
-        }),
-      }).catch(() => {});
+  const goToProvider = () => {
+    // Track click
+    fetch(`${API_BASE}/trackEvent`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        provider_id: ad._provider_entity_id || ad.provider_id,
+        event_type: "classified_ad_click",
+        source: "classifieds",
+      }),
+    }).catch(() => {});
+    // Navigate to provider profile
+    if (ad._provider_entity_id) {
+      window.location.href = `/?provider=${ad._provider_entity_id}`;
     }
   };
 
+  const handleSave = (e) => {
+    e.stopPropagation();
+    // Save image by opening in new tab for long-press save on mobile
+    if (ad.image_url) {
+      const a = document.createElement("a");
+      a.href = ad.image_url;
+      a.target = "_blank";
+      a.rel = "noopener";
+      a.click();
+    }
+    setSaved(true);
+    setTimeout(() => setSaved(false), 2000);
+  };
+
   return (
-    <div onClick={handleAdClick} style={{
+    <div style={{
       background: WHITE,
-      border: `2px solid ${NAVY}`,
-      borderRadius: 10,
+      borderRadius: 14,
       overflow: "hidden",
-      boxShadow: "0 3px 14px rgba(0,0,0,0.13)",
-      display: "flex",
-      flexDirection: "column",
-      cursor: "pointer",
-      minHeight: 340,
-      opacity: expired ? 0.55 : 1,
+      boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
+      opacity: expired ? 0.5 : 1,
       position: "relative",
+      border: expired ? `2px solid ${MUTED}` : `2px solid ${NAVY}`,
     }}>
+
+      {/* Expired badge */}
       {expired && (
         <div style={{
-          position: "absolute", top: 10, right: 10,
-          background: MUTED, color: WHITE,
-          fontSize: 10, fontWeight: 700, padding: "3px 8px",
-          borderRadius: 4, textTransform: "uppercase", letterSpacing: 1,
+          position: "absolute", top: 12, left: 12, zIndex: 10,
+          background: "rgba(0,0,0,0.7)", color: WHITE,
+          fontSize: 11, fontWeight: 700, padding: "4px 10px",
+          borderRadius: 20, textTransform: "uppercase", letterSpacing: 1,
         }}>Expired</div>
       )}
 
-      {/* image */}
-      {ad.image_url && (
-        <img
-          src={ad.image_url}
-          alt={ad.headline}
-          style={{ width: "100%", height: 180, objectFit: "cover", display: "block" }}
-          onError={e => { e.target.style.display = "none"; }}
-        />
+      {/* Save button — top right */}
+      {!expired && (
+        <button onClick={handleSave} style={{
+          position: "absolute", top: 12, right: 12, zIndex: 10,
+          background: saved ? GREEN : "rgba(0,0,0,0.55)",
+          border: "none", borderRadius: 20,
+          color: WHITE, fontSize: 11, fontWeight: 700,
+          padding: "5px 12px", cursor: "pointer",
+          display: "flex", alignItems: "center", gap: 4,
+          backdropFilter: "blur(4px)",
+        }}>
+          {saved ? "✓ Saved!" : "⬇ Save"}
+        </button>
       )}
 
-      {/* body */}
-      <div style={{ padding: "14px 16px", flex: 1, display: "flex", flexDirection: "column", gap: 6 }}>
-        {/* provider name */}
-        <div style={{ fontSize: 11, fontWeight: 700, color: TEAL, textTransform: "uppercase", letterSpacing: 1 }}>
-          {ad.provider_name}
+      {/* Full ad image — the hero */}
+      {ad.image_url ? (
+        <img
+          src={ad.image_url}
+          alt={ad.headline || ad.provider_name}
+          style={{ width: "100%", display: "block", maxHeight: 480, objectFit: "cover" }}
+          onError={e => { e.target.style.display = "none"; }}
+        />
+      ) : (
+        <div style={{
+          background: `linear-gradient(135deg, ${NAVY}, ${TEAL})`,
+          height: 220, display: "flex", alignItems: "center", justifyContent: "center",
+        }}>
+          <span style={{ color: WHITE, fontSize: 48 }}>🏷️</span>
         </div>
+      )}
 
-        {/* headline */}
-        <div style={{ fontSize: 17, fontWeight: 900, color: NAVY, lineHeight: 1.25 }}>
-          {ad.headline}
-        </div>
-
-        {/* body */}
-        <div style={{ fontSize: 13, color: INK, lineHeight: 1.6, flex: 1 }}>
-          {ad.body}
-        </div>
-
-        {/* location info + expiry */}
-        <div style={{ marginTop: 8, display: "flex", flexDirection: "column", gap: 4 }}>
-          {/* Mobile provider: show service areas */}
-          {ad._provider_is_mobile && ad._provider_areas && ad._provider_areas.length > 0 && (
-            <div style={{ fontSize: 11, color: TEAL, fontWeight: 600 }}>
-              🗺️ Serves: {ad._provider_areas.join(" · ")}
-            </div>
-          )}
-          {/* Brick & mortar: show address */}
-          {!ad._provider_is_mobile && ad._provider_address && (
-            <div style={{ fontSize: 11, color: MUTED }}>
-              📍 {ad._provider_address}
-            </div>
-          )}
-          {/* Both mobile AND has a location (hybrid) */}
-          {ad._provider_is_mobile && ad._provider_address && (
-            <div style={{ fontSize: 11, color: MUTED }}>
-              📍 Also at: {ad._provider_address}
-            </div>
-          )}
-          {/* Fallback: manual village field if no provider data enrichment */}
-          {!ad._provider_is_mobile && !ad._provider_address && ad.village && (
-            <div style={{ fontSize: 11, color: MUTED }}>
-              📍 {ad.village}
-            </div>
-          )}
+      {/* Bottom strip — provider name + expiry + CTA */}
+      <div style={{
+        padding: "14px 16px 16px",
+        background: WHITE,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        gap: 12,
+        flexWrap: "wrap",
+      }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>
+          <div style={{ fontSize: 15, fontWeight: 900, color: NAVY }}>
+            {ad.provider_name}
+          </div>
           {ad.deal_expires_at && !expired && (
-            <div style={{ fontSize: 11, color: RED, fontWeight: 700 }}>
-              Expires {fmt(ad.deal_expires_at)}
+            <div style={{ fontSize: 11, color: RED, fontWeight: 600 }}>
+              Offer expires {fmt(ad.deal_expires_at)}
             </div>
           )}
         </div>
+
+        {!expired && ad._provider_entity_id && (
+          <button onClick={goToProvider} style={{
+            background: `linear-gradient(135deg, ${ORANGE}, #c93510)`,
+            color: WHITE, border: "none", borderRadius: 8,
+            fontWeight: 800, fontSize: 13, padding: "10px 18px",
+            cursor: "pointer", whiteSpace: "nowrap",
+            boxShadow: "0 2px 8px rgba(232,67,26,0.4)",
+          }}>
+            Contact Provider →
+          </button>
+        )}
       </div>
     </div>
   );
 }
 
-// ── Page ──────────────────────────────────────────────────────────
+// ── Main Page ────────────────────────────────────────────────────────
 export default function Classifieds() {
-  const [ads, setAds]       = useState([]);
+  const [ads, setAds]         = useState([]);
+  const [areas, setAreas]     = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError]   = useState(null);
+  const [error, setError]     = useState(null);
+  const [filterArea, setFilterArea] = useState("");
+  const [filterService, setFilterService] = useState("");
+
+  // Read ?village= or ?service= from URL for deep-link from homepage search
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("village")) setFilterArea(params.get("village"));
+    if (params.get("service")) setFilterService(params.get("service").toLowerCase());
+  }, []);
 
   useEffect(() => {
     (async () => {
       try {
-        const res = await fetch(`${API_BASE}/getDeals`);
-        if (!res.ok) throw new Error("Failed to load deals");
-        const data = await res.json();
-        setAds(data.ads || []);
+        const [dealsRes, areasRes] = await Promise.all([
+          fetch(`${API_BASE}/getDeals`),
+          fetch(`${API_BASE}/getProviders`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ action: "list_areas" }),
+          }),
+        ]);
+        const dealsData = dealsRes.ok ? await dealsRes.json() : { ads: [] };
+        setAds(dealsData.ads || []);
+        // Try to get area names for filter dropdown
+        try {
+          const areasData = areasRes.ok ? await areasRes.json() : { areas: [] };
+          setAreas((areasData.areas || []).sort((a, b) => a.name?.localeCompare(b.name)));
+        } catch {}
       } catch (e) {
-        setError("Could not load Deals of the Week. Please try again later.");
+        setError("Could not load deals right now. Please try again shortly.");
       } finally {
         setLoading(false);
       }
     })();
   }, []);
 
+  // Filter: by village (check if provider serves that area) + by service keyword
+  const visibleAds = ads.filter(ad => {
+    if (isExpired(ad)) return false;
+
+    // Village filter — check provider's service_areas names
+    if (filterArea) {
+      const areaLower = filterArea.toLowerCase();
+      const serves = Array.isArray(ad._provider_areas)
+        ? ad._provider_areas.some(a => a.toLowerCase().includes(areaLower))
+        : true; // no area data = show everywhere
+      if (!serves) return false;
+    }
+
+    // Service/keyword filter — match against headline, provider name, body
+    if (filterService) {
+      const kw = filterService.toLowerCase();
+      const haystack = [
+        ad.provider_name || "",
+        ad.headline || "",
+        ad.body || "",
+        ...(ad._provider_services || []),
+        ad._provider_category || "",
+      ].join(" ").toLowerCase();
+      if (!haystack.includes(kw)) return false;
+    }
+
+    return true;
+  });
+
   return (
     <div style={{ background: PARCH, minHeight: "100vh", fontFamily: "'Times New Roman', Georgia, serif" }}>
+
       {/* Header */}
       <div style={{
-        background: NAVY, color: WHITE, padding: "18px 20px 14px",
-        textAlign: "center", borderBottom: `4px solid ${ORANGE}`,
+        background: NAVY, color: WHITE,
+        padding: "14px 16px 12px",
+        borderBottom: `4px solid ${ORANGE}`,
       }}>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-start", marginBottom: 8 }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
           <a href="/" style={{ textDecoration: "none" }}>
-            <button style={{ background: "linear-gradient(180deg,#9A6030,#7A4820 60%,#5A3010)", border: "2px solid #1B3D6F", borderRadius: 6, color: "#F5E8CC", fontFamily: "Georgia, serif", fontWeight: 700, fontSize: 13, padding: "8px 16px", cursor: "pointer", whiteSpace: "nowrap" }}>« Home</button>
+            <button style={{
+              background: "linear-gradient(180deg,#9A6030,#7A4820 60%,#5A3010)",
+              border: "2px solid #1B3D6F", borderRadius: 6,
+              color: "#F5E8CC", fontFamily: "Georgia, serif",
+              fontWeight: 700, fontSize: 13, padding: "7px 14px", cursor: "pointer",
+            }}>« Home</button>
           </a>
+          <img
+            src="https://media.base44.com/images/public/69d062aca815ce8e697894b1/a9af95bc3_V-Hublogo.png"
+            alt="V-Hub"
+            style={{ height: 36 }}
+          />
         </div>
-        <div style={{ fontSize: 28, fontWeight: 900, letterSpacing: 1 }}>🔥 Deals of the Week!</div>
-        <div style={{ fontSize: 13, opacity: 0.8, marginTop: 4 }}>
-          Exclusive offers from local providers in The Villages, FL
+        <div style={{ textAlign: "center" }}>
+          <div style={{ fontSize: 26, fontWeight: 900, letterSpacing: 1 }}>🔥 Deals of the Week</div>
+          <div style={{ fontSize: 12, opacity: 0.75, marginTop: 3 }}>
+            Exclusive offers from local providers in The Villages, FL
+          </div>
         </div>
       </div>
 
+      {/* Filter bar */}
+      <div style={{
+        background: WHITE,
+        borderBottom: `2px solid ${NAVY}22`,
+        padding: "12px 16px",
+        display: "flex", gap: 10, flexWrap: "wrap",
+      }}>
+        <input
+          placeholder="🔍 Search by service (e.g. lawn, pool...)"
+          value={filterService}
+          onChange={e => setFilterService(e.target.value.toLowerCase())}
+          style={{
+            flex: 2, minWidth: 140,
+            padding: "9px 12px", borderRadius: 8,
+            border: `2px solid ${NAVY}44`, fontSize: 13,
+            fontFamily: "Georgia, serif", outline: "none",
+          }}
+        />
+        <input
+          placeholder="📍 Village (e.g. Pennecamp)"
+          value={filterArea}
+          onChange={e => setFilterArea(e.target.value)}
+          style={{
+            flex: 1, minWidth: 130,
+            padding: "9px 12px", borderRadius: 8,
+            border: `2px solid ${NAVY}44`, fontSize: 13,
+            fontFamily: "Georgia, serif", outline: "none",
+          }}
+        />
+        {(filterArea || filterService) && (
+          <button onClick={() => { setFilterArea(""); setFilterService(""); }} style={{
+            background: MUTED, color: WHITE, border: "none", borderRadius: 8,
+            fontSize: 12, fontWeight: 700, padding: "9px 14px", cursor: "pointer",
+          }}>Clear</button>
+        )}
+      </div>
+
       {/* Content */}
-      <div style={{ maxWidth: 680, margin: "0 auto", padding: "20px 16px 40px" }}>
+      <div style={{ maxWidth: 520, margin: "0 auto", padding: "20px 16px 50px" }}>
+
         {loading && (
           <div style={{ textAlign: "center", padding: 60, color: MUTED, fontSize: 16 }}>
             Loading deals…
@@ -192,25 +305,34 @@ export default function Classifieds() {
           </div>
         )}
 
-        {!loading && !error && ads.length === 0 && (
+        {!loading && !error && visibleAds.length === 0 && (
           <div style={{ textAlign: "center", padding: 60, color: MUTED }}>
             <div style={{ fontSize: 40, marginBottom: 12 }}>🏖️</div>
-            <div style={{ fontSize: 18, fontWeight: 700, color: NAVY, marginBottom: 8 }}>No Active Deals Right Now</div>
-            <div style={{ fontSize: 14 }}>Check back soon — new deals are added weekly!</div>
+            <div style={{ fontSize: 18, fontWeight: 700, color: NAVY, marginBottom: 8 }}>
+              {filterArea || filterService ? "No deals match your search" : "No Active Deals Right Now"}
+            </div>
+            <div style={{ fontSize: 14 }}>
+              {filterArea || filterService
+                ? "Try a different village or service keyword."
+                : "Check back soon — new deals are added weekly!"}
+            </div>
           </div>
         )}
 
-        {!loading && !error && ads.length > 0 && (
-          <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
-            {ads.map(ad => <AdCard key={ad.id} ad={ad} />)}
+        {!loading && !error && visibleAds.length > 0 && (
+          <div style={{ display: "flex", flexDirection: "column", gap: 28 }}>
+            {visibleAds.map(ad => <AdCard key={ad.id} ad={ad} />)}
           </div>
         )}
       </div>
 
       {/* Footer */}
-      <div style={{ background: INK, padding: "12px 20px", textAlign: "center", fontSize: 11, color: "rgba(245,232,204,0.5)" }}>
-        © 2026 V-Hub · The Villages, Florida ·{" "}
-        <a href="/Terms" style={{ color: "rgba(245,232,204,0.4)" }}>Terms</a>
+      <div style={{
+        background: INK, padding: "12px 20px",
+        textAlign: "center", fontSize: 11,
+        color: "rgba(245,232,204,0.5)",
+      }}>
+        © 2026 V-Hub · The Villages, Florida
       </div>
     </div>
   );

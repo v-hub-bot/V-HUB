@@ -1,7 +1,4 @@
-// Public endpoint — returns all active ClassifiedAd records for the Deals of the Week page
-// Ads become visible the INSTANT payment is confirmed (webhook sets is_active=true + deal_expires_at)
-// Ads expire exactly 7 days after payment (precise timestamp comparison, not date-only)
-// v2: enriches each ad with provider location info (service areas for mobile, address for B&M)
+// getDeals v4 — entity id passthrough fixed, service/area enrichment
 import { createClientFromRequest } from "npm:@base44/sdk@0.8.23";
 
 const CORS = {
@@ -10,7 +7,6 @@ const CORS = {
   "Access-Control-Allow-Headers": "Content-Type",
 };
 
-// Legacy area code → name map (matches approveProvider.ts)
 const AREA_LEGACY_MAP: Record<string, string> = {
   va001:"Alhambra",va002:"Amelia",va003:"Antelope",va004:"Ashland",va005:"Bonnybrook",
   va006:"Calumet Grove",va007:"Chatham",va008:"Citrus Grove",va009:"Collier",
@@ -44,106 +40,101 @@ function cleanName(n: string): string {
   return n.includes(' — ') ? n.split(' — ').pop()!.trim() : n;
 }
 
-async function resolveAreaNames(base44: any, ids: string[]): Promise<string[]> {
-  if (!ids || ids.length === 0) return [];
-  try {
-    const all = await base44.asServiceRole.entities.ServiceArea.list();
-    const map = new Map(all.map((a: any) => [a.id, a.name]));
-    return ids
-      .map(id => map.get(id) || AREA_LEGACY_MAP[id] || null)
-      .filter(Boolean)
-      .map(cleanName) as string[];
-  } catch {
-    return ids.map(id => AREA_LEGACY_MAP[id] || null).filter(Boolean).map(cleanName) as string[];
-  }
-}
-
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") return new Response(null, { status: 204, headers: CORS });
 
   try {
     const base44 = createClientFromRequest(req);
 
-    // Fetch all active ads
+    // Fetch active ads
     let all: any[] = [];
     try {
       all = await base44.asServiceRole.entities.ClassifiedAd.filter({ is_active: true });
-      console.log("filter returned:", all.length);
-    } catch (e1) {
-      console.log("filter failed, trying list:", String(e1));
-      try {
-        all = await base44.asServiceRole.entities.ClassifiedAd.list({ limit: 500 });
-        console.log("list returned:", all.length);
-      } catch (e2) {
-        console.error("list also failed:", String(e2));
-      }
+    } catch {
+      try { all = await base44.asServiceRole.entities.ClassifiedAd.list(); } catch {}
     }
 
-    // Use exact timestamp comparison — ad is live until the millisecond it expires
     const now = new Date();
-
     const live = all.filter(ad => {
       if (!ad.is_active) return false;
-      if (ad.deal_expires_at) {
-        if (new Date(ad.deal_expires_at) <= now) return false;
-      }
+      if (ad.deal_expires_at && new Date(ad.deal_expires_at) <= now) return false;
       return true;
     });
 
-    // Sort: slot_number ascending first (featured slots), then A-Z by provider name
     live.sort((a, b) => {
-      const slotA = a.slot_number ?? 99;
-      const slotB = b.slot_number ?? 99;
-      if (slotA !== slotB) return slotA - slotB;
+      const sa = a.slot_number ?? 99, sb = b.slot_number ?? 99;
+      if (sa !== sb) return sa - sb;
       return (a.provider_name || "").localeCompare(b.provider_name || "");
     });
 
-    // Fetch all providers once (keyed by provider_id / vh_number)
+    // Load lookup tables
     let providerMap: Map<string, any> = new Map();
+    let areaNameMap: Map<string, string> = new Map();
+    let serviceNameMap: Map<string, string> = new Map();
+    let categoryNameMap: Map<string, string> = new Map();
+
     try {
-      const providers = await base44.asServiceRole.entities.Provider.list({ limit: 500 });
+      // SDK 0.8.23: call list() with NO args for first page
+      const providers = await base44.asServiceRole.entities.Provider.list();
       for (const p of providers) {
         if (p.vh_number) providerMap.set(p.vh_number, p);
-        if (p.id)        providerMap.set(p.id, p);
+        if (p.id) providerMap.set(p.id, p);
       }
-      console.log("loaded providers:", providers.length);
-    } catch (pe) {
-      console.error("provider load failed:", String(pe));
-    }
+      console.log("providers loaded:", providers.length);
+    } catch (e) { console.error("provider load:", e); }
 
-    // Fetch all ServiceArea names once
-    let areaNameMap: Map<string, string> = new Map();
     try {
       const areas = await base44.asServiceRole.entities.ServiceArea.list();
-      for (const a of areas) {
-        areaNameMap.set(a.id, cleanName(a.name));
-      }
-    } catch (ae) {
-      console.error("area load failed:", String(ae));
-    }
+      for (const a of areas) areaNameMap.set(a.id, cleanName(a.name));
+    } catch {}
 
-    // Enrich each ad with provider location info
+    try {
+      const svcs = await base44.asServiceRole.entities.Service.list();
+      for (const s of svcs) serviceNameMap.set(s.id, s.name);
+    } catch {}
+
+    try {
+      const cats = await base44.asServiceRole.entities.Category.list();
+      for (const c of cats) categoryNameMap.set(c.id, c.name);
+    } catch {}
+
+    // Enrich each ad
     const enriched = live.map(ad => {
       const prov = providerMap.get(ad.provider_id);
-      if (!prov) return ad;
 
-      const isMobile  = !!prov.is_mobile;
-      const hasBM     = !!(prov.address && prov.address.trim());
-      // Resolve service area IDs to names
+      // Even if provider not found in map, pass the provider_id as entity id
+      // since ClassifiedAd.provider_id stores the entity UUID directly
+      if (!prov) {
+        return {
+          ...ad,
+          _provider_entity_id: ad.provider_id || null,
+        };
+      }
+
       const areaIds: string[] = Array.isArray(prov.service_areas) ? prov.service_areas : [];
       const areaNames = areaIds
         .map(id => areaNameMap.get(id) || AREA_LEGACY_MAP[id] || null)
         .filter(Boolean) as string[];
 
+      const svcIds: string[] = Array.isArray(prov.services) ? prov.services : [];
+      const svcNames = svcIds
+        .map(id => serviceNameMap.get(id) || null)
+        .filter(Boolean) as string[];
+
+      const catName = categoryNameMap.get(prov.category_id || "") || "";
+
       return {
         ...ad,
-        _provider_is_mobile: isMobile,
+        _provider_entity_id: prov.id,
+        _provider_is_mobile: !!prov.is_mobile,
         _provider_address:   prov.address || null,
-        _provider_areas:     areaNames,   // array of human-readable area names
+        _provider_areas:     areaNames,
+        _provider_services:  svcNames,
+        _provider_category:  catName,
       };
     });
 
-    console.log("returning live ads:", enriched.length, "at", now.toISOString());
+    console.log("returning", enriched.length, "live ads");
     return Response.json({ ads: enriched }, { headers: CORS });
   } catch (err: any) {
     console.error("getDeals error:", err);
