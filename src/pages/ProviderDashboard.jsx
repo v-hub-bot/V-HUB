@@ -1102,10 +1102,14 @@ function ClassifiedAdSection({ provider, refreshKey = 0 }) {
     if (!aiPrompt.trim()) return;
     setAiError(""); setAiGenerating(true);
     try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 70000); // 70s timeout
       const resp = await fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/generateAdImage", {
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ prompt: aiPrompt, provider_id: provider.id }),
+        signal: controller.signal,
       });
+      clearTimeout(timeoutId);
       const data = await resp.json();
       if (data.url) {
         setForm(p => ({ ...p, image_url: data.url }));
