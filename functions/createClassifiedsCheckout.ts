@@ -26,7 +26,7 @@ Deno.serve(async (req) => {
       line_items: [{
         price_data: {
           currency: "usd",
-          unit_amount: 1000, // $10.00
+          unit_amount: 2000, // $20.00
           product_data: {
             name: "V-Hub Deals of the Week — 7-Day Ad",
             description: `Your ad runs on V-Hub's Deals of the Week page for 7 days (through ${weekEndStr}).`,

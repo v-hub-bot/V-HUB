@@ -1239,7 +1239,7 @@ function DealsTab({ providers, classifiedAds }) {
                           }
                         </span>
                       )}
-                      <span style={{ fontSize: 10, fontFamily: T.sans, color: "#2E7D32", fontWeight: 700 }}>💰 $10 paid</span>
+                      <span style={{ fontSize: 10, fontFamily: T.sans, color: "#2E7D32", fontWeight: 700 }}>💰 $20 paid</span>
                     </div>
                     {live.deal_expires_at && (
                       <div style={{ fontSize: 10, color: "#888", fontFamily: T.sans, marginTop: 2 }}>
