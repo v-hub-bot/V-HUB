@@ -14,14 +14,14 @@
     "Privacy": {
       "title": "Privacy"
     },
-    "ProviderDashboard": {
-      "title": "ProviderDashboard"
-    },
     "Terms": {
       "title": "Terms"
     },
     "Wekcadmin": {
       "title": "Wekcadmin"
+    },
+    "ProviderDashboard": {
+      "title": "ProviderDashboard"
     }
   }
 }
