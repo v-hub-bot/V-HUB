@@ -1,5 +1,6 @@
-// v3 — no text in image (avoids foreign language issue entirely)
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
+// v4 — downloads OpenAI image and re-uploads to permanent Base44 CDN storage
+// OpenAI URLs expire in ~60 min — this ensures the image is saved forever
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.23';
 
 const CORS_HEADERS = {
   "Access-Control-Allow-Origin": "*",
@@ -14,20 +15,15 @@ Deno.serve(async (req) => {
     const body = await req.json().catch(() => ({}));
     const { prompt, provider_id } = body;
 
-    if (!prompt) {
-      return Response.json({ error: "Prompt is required" }, { status: 400, headers: CORS_HEADERS });
-    }
-    if (!provider_id) {
-      return Response.json({ error: "Provider ID required" }, { status: 400, headers: CORS_HEADERS });
-    }
+    if (!prompt) return Response.json({ error: "Prompt is required" }, { status: 400, headers: CORS_HEADERS });
+    if (!provider_id) return Response.json({ error: "Provider ID required" }, { status: 400, headers: CORS_HEADERS });
 
     const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY");
-    if (!OPENAI_API_KEY) {
-      return Response.json({ error: "OpenAI API key not configured" }, { status: 500, headers: CORS_HEADERS });
-    }
+    if (!OPENAI_API_KEY) return Response.json({ error: "OpenAI API key not configured" }, { status: 500, headers: CORS_HEADERS });
 
     const fullPrompt = `Create a professional, eye-catching advertisement background image for a local service business in The Villages, Florida. ${prompt}. Style: vibrant colors, clean composition, suitable for a weekly deals/promotions advertisement. CRITICAL REQUIREMENT: The image must contain absolutely NO text, NO words, NO letters, NO numbers, NO signs with writing, NO banners with text — zero text of any kind in any language. Pure visual imagery only. No watermarks. High quality photorealistic or illustrated style.`;
 
+    // Step 1: Generate with OpenAI
     const resp = await fetch("https://api.openai.com/v1/images/generations", {
       method: "POST",
       headers: {
@@ -51,13 +47,67 @@ Deno.serve(async (req) => {
     }
 
     const data = await resp.json();
-    const url = data?.data?.[0]?.url;
+    const tempUrl = data?.data?.[0]?.url;
+    if (!tempUrl) return Response.json({ error: "No image returned from OpenAI" }, { status: 500, headers: CORS_HEADERS });
 
-    if (!url) {
-      return Response.json({ error: "No image returned from OpenAI" }, { status: 500, headers: CORS_HEADERS });
+    // Step 2: Download the image from OpenAI (expires in ~60 min)
+    let permanentUrl = tempUrl; // fallback if upload fails
+    try {
+      const imgResp = await fetch(tempUrl);
+      if (imgResp.ok) {
+        const imgBlob = await imgResp.blob();
+        const imgBytes = new Uint8Array(await imgBlob.arrayBuffer());
+
+        // Step 3: Upload to Base44 permanent CDN storage
+        const formData = new FormData();
+        const filename = `ai_ad_${provider_id}_${Date.now()}.png`;
+        formData.append("file", new Blob([imgBytes], { type: "image/png" }), filename);
+
+        const uploadResp = await fetch(
+          "https://api.base44.app/api/apps/69d062aca815ce8e697894b1/storage/upload",
+          {
+            method: "POST",
+            headers: { "Authorization": req.headers.get("Authorization") || "" },
+            body: formData,
+          }
+        );
+
+        if (uploadResp.ok) {
+          const uploadData = await uploadResp.json();
+          if (uploadData.url) {
+            permanentUrl = uploadData.url;
+            console.log("Image permanently saved:", permanentUrl);
+          } else {
+            console.warn("Upload response had no url:", uploadData);
+          }
+        } else {
+          console.warn("Upload failed, using temp OpenAI URL:", await uploadResp.text());
+        }
+      }
+    } catch (uploadErr) {
+      console.error("Upload step failed, returning temp URL:", uploadErr);
     }
 
-    return Response.json({ url }, { headers: CORS_HEADERS });
+    // Step 4: Also persist to ClassifiedAd.saved_images if a record exists for this provider
+    try {
+      const base44 = createClientFromRequest(req);
+      const existingAds = await base44.asServiceRole.entities.ClassifiedAd.filter({ provider_id });
+      if (existingAds && existingAds.length > 0) {
+        // Update the most recent ad's saved_images
+        const latest = existingAds.sort((a: any, b: any) => new Date(b.updated_date).getTime() - new Date(a.updated_date).getTime())[0];
+        const savedImages = Array.isArray(latest.saved_images) ? latest.saved_images : [];
+        const newSaved = [permanentUrl, ...savedImages.filter((u: string) => u !== permanentUrl)].slice(0, 5);
+        await base44.asServiceRole.entities.ClassifiedAd.update(latest.id, {
+          saved_images: newSaved,
+          image_url: permanentUrl,
+        });
+        console.log("Saved to ClassifiedAd saved_images:", latest.id);
+      }
+    } catch (dbErr) {
+      console.warn("Could not save to DB (ok if new ad):", dbErr);
+    }
+
+    return Response.json({ url: permanentUrl }, { headers: CORS_HEADERS });
 
   } catch (err: any) {
     console.error("generateAdImage error:", err);

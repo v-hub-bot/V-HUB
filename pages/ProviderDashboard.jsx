@@ -1,4 +1,4 @@
-// CACHE-BUST-DEALS-20260429
+// CACHE-BUST-DEALS-CLEAN-APR30-v2
 // FORCE_REBUILD_1776768600
 // BUILD_FORCE_2026_04_22_T0400
 // CACHE-BUST-1776743534-FIX
@@ -1642,46 +1642,35 @@ function ClassifiedAdSection({ provider, refreshKey = 0 }) {
               <span style={{ fontSize: 12, fontWeight: 700, fontFamily: SANS, letterSpacing: 0.5 }}>👁 Preview — How Visitors Will See Your Ad</span>
               <button onClick={() => setPreviewAd(null)} style={{ background: "none", border: "none", color: PAPER, fontSize: 20, cursor: "pointer", lineHeight: 1 }}>✕</button>
             </div>
-            {/* Ad card — exact same style as Classifieds page */}
+            {/* Ad card — CLEAN style matching Classifieds page */}
             {(() => {
               const ad = previewAd;
               const fmtD = d => new Date(d).toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"});
-              const days = ad.deal_expires_at ? Math.ceil((new Date(ad.deal_expires_at) - new Date().setHours(0,0,0,0)) / 86400000) : null;
-              let badge = null;
-              if (days !== null) {
-                if (days < 0)    badge = <span style={{ display:"inline-block", marginTop:4, padding:"2px 8px", background:"#7B0000", color:"#fff", fontSize:9, fontWeight:700, borderRadius:2, letterSpacing:0.5, textTransform:"uppercase" }}>Expired</span>;
-                else if (days===0) badge = <span style={{ display:"inline-block", marginTop:4, padding:"2px 8px", background:"#C62828", color:"#fff", fontSize:9, fontWeight:700, borderRadius:2, letterSpacing:0.5, textTransform:"uppercase" }}>Ends Today!</span>;
-                else if (days<=3) badge = <span style={{ display:"inline-block", marginTop:4, padding:"2px 8px", background:"#E65100", color:"#fff", fontSize:9, fontWeight:700, borderRadius:2, letterSpacing:0.5, textTransform:"uppercase" }}>Ends in {days} day{days!==1?"s":""}!</span>;
-                else              badge = <span style={{ display:"inline-block", marginTop:4, padding:"2px 8px", background:"#1A6B3C", color:"#fff", fontSize:9, fontWeight:700, borderRadius:2, letterSpacing:0.5, textTransform:"uppercase" }}>Thru {fmtD(ad.deal_expires_at)}</span>;
-              }
+              const imgSrc = ad.image_url || "";
               return (
-                <div style={{ background:"#F0E6C8", border:"2px solid #1C0F00", display:"flex", flexDirection:"column", overflow:"hidden", boxShadow:"3px 3px 12px rgba(0,0,0,0.4)" }}>
-                  <div style={{ background:"#1C0F00", padding:"10px 14px 9px", textAlign:"center" }}>
-                    <div style={{ fontSize:9, color:"#C8B07A", fontFamily:SANS, letterSpacing:2, textTransform:"uppercase", marginBottom:4 }}>✦ Deal of the Week ✦</div>
-                    <div style={{ fontSize:17, fontWeight:900, color:YELLOW, textTransform:"uppercase", letterSpacing:0.5, lineHeight:1.25, fontFamily:SERIF }}>{ad.headline || "Your Headline Here"}</div>
-                    {badge}
-                  </div>
-                  {ad.image_url && (
-                    <img src={ad.image_url} alt={ad.headline} style={{ width:"100%", height:160, objectFit:"cover", display:"block", borderBottom:"1px solid #C8B07A" }} />
+                <div style={{ background:"#fff", borderRadius:14, overflow:"hidden", boxShadow:"0 4px 20px rgba(0,0,0,0.25)", border:"2px solid #1B3D6F" }}>
+                  {/* Full image */}
+                  {imgSrc ? (
+                    <img src={imgSrc} alt={ad.headline} style={{ width:"100%", display:"block", maxHeight:400, objectFit:"cover" }} />
+                  ) : (
+                    <div style={{ background:"linear-gradient(135deg,#1B3D6F,#00BFA5)", height:180, display:"flex", alignItems:"center", justifyContent:"center" }}>
+                      <span style={{ color:"#fff", fontSize:40 }}>🏷️</span>
+                    </div>
                   )}
-                  {!ad.image_url && (
-                    <div style={{ width:"100%", height:100, background:PAPER_MID, display:"flex", alignItems:"center", justifyContent:"center", fontSize:13, color:INK_FADE, fontFamily:SANS, fontStyle:"italic" }}>No image selected</div>
-                  )}
-                  <div style={{ padding:"14px 16px 8px", fontSize:14, color:"#1C0F00", lineHeight:1.8, fontFamily:SERIF }}>{ad.body || "Your deal description will appear here."}</div>
-                  {/* Location info — smart display based on mobile/B&M/hybrid */}
-                  <div style={{ padding:"2px 16px 10px", display:"flex", flexDirection:"column", gap:3 }}>
-                    {ad._provider_is_mobile && Array.isArray(ad._provider_areas) && ad._provider_areas.length > 0 && (
-                      <div style={{ fontSize:12, color:"#00836B", fontWeight:700, fontFamily:SANS }}>🗺️ Serves: {ad._provider_areas.join(" · ")}</div>
-                    )}
-                    {!ad._provider_is_mobile && ad._provider_address && (
-                      <div style={{ fontSize:12, color:"#00836B", fontWeight:700, fontFamily:SANS }}>📍 Located at: {ad._provider_address}</div>
-                    )}
-                    {ad._provider_is_mobile && ad._provider_address && (
-                      <div style={{ fontSize:12, color:"#5C7A6B", fontFamily:SANS }}>📍 Also at: {ad._provider_address}</div>
-                    )}
-                  </div>
-                  <div style={{ borderTop:"1px solid #C8B07A", background:"#E4D5A8", padding:"9px 14px", display:"flex", justifyContent:"space-between", alignItems:"center", gap:8, flexWrap:"wrap" }}>
-                    <div style={{ fontSize:13, fontWeight:900, color:NAVY, fontFamily:SANS }}>{ad.provider_name || provider.business_name}</div>
+                  {/* Bottom strip */}
+                  <div style={{ padding:"14px 16px 16px", background:"#fff", display:"flex", alignItems:"center", justifyContent:"space-between", gap:12, flexWrap:"wrap" }}>
+                    <div style={{ display:"flex", flexDirection:"column", gap:3 }}>
+                      <div style={{ fontSize:15, fontWeight:900, color:"#1B3D6F" }}>{ad.provider_name || provider.business_name}</div>
+                      {ad.deal_expires_at && (
+                        <div style={{ fontSize:11, color:"#CC0000", fontWeight:600 }}>Offer expires {fmtD(ad.deal_expires_at)}</div>
+                      )}
+                      {!ad.deal_expires_at && (
+                        <div style={{ fontSize:11, color:"#CC0000", fontWeight:600 }}>Offer expires May 14, 2026 (example)</div>
+                      )}
+                    </div>
+                    <div style={{ background:"linear-gradient(135deg,#E8431A,#c93510)", color:"#fff", border:"none", borderRadius:8, fontWeight:800, fontSize:13, padding:"10px 18px", boxShadow:"0 2px 8px rgba(232,67,26,0.4)" }}>
+                      Contact Provider →
+                    </div>
                   </div>
                 </div>
               );

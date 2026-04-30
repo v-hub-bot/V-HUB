@@ -5,23 +5,23 @@
     "Classifieds": {
       "title": "Classifieds"
     },
-    "Wekcadmin": {
-      "title": "Wekcadmin"
-    },
-    "Terms": {
-      "title": "Terms"
-    },
-    "Privacy": {
-      "title": "Privacy"
+    "Home": {
+      "title": "Home"
     },
     "ListService": {
       "title": "ListService"
     },
+    "Privacy": {
+      "title": "Privacy"
+    },
     "ProviderDashboard": {
       "title": "ProviderDashboard"
     },
-    "Home": {
-      "title": "Home"
+    "Terms": {
+      "title": "Terms"
+    },
+    "Wekcadmin": {
+      "title": "Wekcadmin"
     }
   }
 }
