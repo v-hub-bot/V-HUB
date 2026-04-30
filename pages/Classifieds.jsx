@@ -39,8 +39,21 @@ function isExpired(ad) {
 function AdCard({ ad }) {
   const expired = isExpired(ad);
 
+  const handleAdClick = () => {
+    if (ad.provider_id) {
+      fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/trackEvent", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          provider_id: ad.provider_id,
+          event_type: "classified_ad_click",
+          source: "classifieds",
+        }),
+      }).catch(() => {});
+    }
+  };
+
   return (
-    <div style={{
+    <div onClick={handleAdClick} style={{
       background: WHITE,
       border: `2px solid ${NAVY}`,
       borderRadius: 10,
@@ -48,6 +61,7 @@ function AdCard({ ad }) {
       boxShadow: "0 3px 14px rgba(0,0,0,0.13)",
       display: "flex",
       flexDirection: "column",
+      cursor: "pointer",
       minHeight: 340,
       opacity: expired ? 0.55 : 1,
       position: "relative",

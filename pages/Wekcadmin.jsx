@@ -1289,7 +1289,7 @@ function DealsTab({ providers, classifiedAds }) {
 }
 
 // ── ANALYTICS TAB ─────────────────────────────────────────────────────────────
-function AnalyticsTab({ providers, reviews, leads, stats, catMap, svcMap, fullSvcMap, classifiedAds }) {
+function AnalyticsTab({ providers, reviews, leads, stats, catMap, svcMap, fullSvcMap, classifiedAds, siteViewsByDay, adClicksByDay, totalSiteViews, totalAdClicks }) {
   const [timeRange, setTimeRange] = React.useState("30d");
 
   const now = new Date();
@@ -1384,6 +1384,61 @@ function AnalyticsTab({ providers, reviews, leads, stats, catMap, svcMap, fullSv
         </div>
       </div>
 
+      {/* ── Site Traffic ───────────────────────────────────────── */}
+      <div style={S.card}>
+        <div style={S.secTitle}>🌐 Site Traffic</div>
+        <div style={{display:"grid",gridTemplateColumns:"repeat(2,1fr)",gap:8,marginBottom:12}}>
+          {[
+            ["Total Site Visits",totalSiteViews,T.teal],
+            ["Total Ad Clicks",totalAdClicks,"#E8431A"],
+          ].map(([l,v,c])=>(
+            <div key={l} style={{textAlign:"center",background:T.parchment,borderRadius:6,padding:"14px 6px"}}>
+              <div style={{fontSize:28,fontWeight:800,color:c,fontFamily:T.sans}}>{(v||0).toLocaleString()}</div>
+              <div style={{fontSize:10,color:T.brownLight,fontFamily:T.sans,textTransform:"uppercase",letterSpacing:0.5}}>{l}</div>
+            </div>
+          ))}
+        </div>
+        {/* Site visits — last 14 days bar chart */}
+        {(() => {
+          const last14 = Array.from({length:14},(_,i)=>{ const d=new Date(now); d.setDate(d.getDate()-13+i); return d.toISOString().split("T")[0]; });
+          const maxV = Math.max(...last14.map(d=>siteViewsByDay[d]||0),1);
+          const maxA = Math.max(...last14.map(d=>adClicksByDay[d]||0),1);
+          return (
+            <div>
+              <div style={{fontSize:11,fontWeight:700,color:T.brownLight,textTransform:"uppercase",letterSpacing:1,marginBottom:6,fontFamily:T.sans}}>Site Visits — Last 14 Days</div>
+              <div style={{display:"flex",alignItems:"flex-end",gap:3,height:60,marginBottom:14}}>
+                {last14.map(d=>{
+                  const cnt=siteViewsByDay[d]||0;
+                  const day=new Date(d+"T12:00:00").toLocaleDateString("en-US",{weekday:"short"});
+                  return (
+                    <div key={d} style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",gap:1}}>
+                      <div style={{fontSize:8,color:T.brownLight,fontFamily:T.sans}}>{cnt||""}</div>
+                      <div style={{width:"100%",background:T.teal,borderRadius:"2px 2px 0 0",height:`${Math.max((cnt/maxV)*48,cnt>0?4:1)}px`}}></div>
+                      <div style={{fontSize:7,color:T.brownLight,fontFamily:T.sans,whiteSpace:"nowrap"}}>{day}</div>
+                    </div>
+                  );
+                })}
+              </div>
+              <div style={{fontSize:11,fontWeight:700,color:T.brownLight,textTransform:"uppercase",letterSpacing:1,marginBottom:6,fontFamily:T.sans}}>Deal Ad Clicks — Last 14 Days</div>
+              <div style={{display:"flex",alignItems:"flex-end",gap:3,height:60}}>
+                {last14.map(d=>{
+                  const cnt=adClicksByDay[d]||0;
+                  const day=new Date(d+"T12:00:00").toLocaleDateString("en-US",{weekday:"short"});
+                  return (
+                    <div key={d} style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",gap:1}}>
+                      <div style={{fontSize:8,color:T.brownLight,fontFamily:T.sans}}>{cnt||""}</div>
+                      <div style={{width:"100%",background:"#E8431A",borderRadius:"2px 2px 0 0",height:`${Math.max((cnt/maxA)*48,cnt>0?4:1)}px`}}></div>
+                      <div style={{fontSize:7,color:T.brownLight,fontFamily:T.sans,whiteSpace:"nowrap"}}>{day}</div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          );
+        })()}
+      </div>
+
+      {/* ── Platform Engagement ─────────────────────────────────── */}
       <div style={S.card}>
         <div style={S.secTitle}>👁️ Platform Engagement (All-Time)</div>
         <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:8}}>
@@ -1564,16 +1619,16 @@ function AnalyticsTab({ providers, reviews, leads, stats, catMap, svcMap, fullSv
       </div>
 
       <div style={{...S.card,borderLeft:`4px solid ${T.teal}`}}>
-        <div style={S.secTitle}>🌐 External Traffic (Google Analytics)</div>
+        <div style={S.secTitle}>🌐 Deep Traffic Analytics (Google Analytics)</div>
         <div style={{fontSize:12,color:T.brownDark,fontFamily:T.sans,marginBottom:10}}>
-          For site visitors, page views, and traffic sources, open GA4 directly:
+          For traffic sources, bounce rate, device breakdown, and geographic data, open GA4 directly:
         </div>
         <a href="https://analytics.google.com/analytics/web/#/p490233278/reports/reportinghub"
            target="_blank" rel="noopener noreferrer"
            style={{display:"inline-block",padding:"10px 20px",background:T.teal,color:"#fff",borderRadius:6,fontWeight:700,fontSize:13,textDecoration:"none"}}>
           📊 Open Google Analytics →
         </a>
-        <div style={{marginTop:6,fontSize:10,color:"#aaa",fontFamily:T.sans}}>Property: G-1EJ40FW9E1 · www.v-hub.us</div>
+        <div style={{marginTop:6,fontSize:10,color:"#aaa",fontFamily:T.sans}}>Property: G-1EJ40FW9E1 · www.v-hub.us · V-HUB native tracking is shown above</div>
       </div>
 
     </div>
@@ -1938,6 +1993,10 @@ function Dashboard({ adminPin }) {
   const [categories, setCategories] = useState([]);
   const [services, setServices] = useState([]);
   const [serviceAreas, setServiceAreas] = useState([]);
+  const [siteViewsByDay, setSiteViewsByDay] = useState({});
+  const [adClicksByDay, setAdClicksByDay] = useState({});
+  const [totalSiteViews, setTotalSiteViews] = useState(0);
+  const [totalAdClicks, setTotalAdClicks] = useState(0);
   const [tab, setTab] = useState("Overview");
   const [loading, setLoading] = useState(true);
   const [toast, setToast] = useState(null); // { msg, type: "success"|"error" }
@@ -1964,6 +2023,10 @@ function Dashboard({ adminPin }) {
       setCategories(Array.isArray(data.categories) ? data.categories.filter(c => c.is_active) : []);
       setServices(Array.isArray(data.services) ? data.services : []);
       setServiceAreas(Array.isArray(data.serviceAreas) ? data.serviceAreas : []);
+      setSiteViewsByDay(data.siteViewsByDay || {});
+      setAdClicksByDay(data.adClicksByDay || {});
+      setTotalSiteViews(data.totalSiteViews || 0);
+      setTotalAdClicks(data.totalAdClicks || 0);
     } catch (e) { console.error('Admin data load error:', e); }
     setLoading(false);
   };
@@ -2077,7 +2140,7 @@ function Dashboard({ adminPin }) {
         {tab === "Reviews" && <ReviewsTab reviews={reviews} setReviews={setReviews} providers={providers} adminPin={adminPin} />}
         {tab === "Leads" && <LeadsTab leads={leads} providers={providers} />}
         {tab === "Deals" && <DealsTab providers={providers} classifiedAds={classifiedAds} />}
-        {tab === "Analytics" && <AnalyticsTab providers={providers} reviews={reviews} leads={leads} stats={stats} catMap={catMap} svcMap={svcMap} fullSvcMap={fullSvcMap} classifiedAds={classifiedAds} />}
+        {tab === "Analytics" && <AnalyticsTab providers={providers} reviews={reviews} leads={leads} stats={stats} catMap={catMap} svcMap={svcMap} fullSvcMap={fullSvcMap} classifiedAds={classifiedAds} siteViewsByDay={siteViewsByDay} adClicksByDay={adClicksByDay} totalSiteViews={totalSiteViews} totalAdClicks={totalAdClicks} />}
         {tab === "Add Provider" && <AddProviderTab onAdded={p => { setProviders(prev => [p, ...prev]); setTab("Providers"); }} categories={categories} services={services} serviceAreas={serviceAreas} adminPin={adminPin} />}
       </div>
     </div>

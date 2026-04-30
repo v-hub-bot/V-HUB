@@ -1148,6 +1148,11 @@ export default function Home() {
       { id: "69e047e27ddcca3eaa81601b", name: "Brownwood" },
     ];
             setAreas(VILLAGE_DATA);
+    // Track homepage visit for site traffic analytics
+    fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/trackEvent", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ provider_id: "SITE", event_type: "homepage_view", source: "homepage" }),
+    }).catch(() => {});
   }, []);
 
 

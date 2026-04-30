@@ -1918,7 +1918,7 @@ function AnalyticsDashboard({ provider, reviews }) {
       // Tally by type
       const searches   = inRange.filter(e => e.event_type === "search_appearance");
       const views      = inRange.filter(e => e.event_type === "profile_view");
-      const adClicks   = inRange.filter(e => e.event_type === "classified_click");
+      const adClicks   = inRange.filter(e => e.event_type === "classified_ad_click");
       const leads      = inRange.filter(e => e.event_type === "lead_inquiry");
 
       // Searches by service
@@ -1954,6 +1954,7 @@ function AnalyticsDashboard({ provider, reviews }) {
         leads: leads.length,
         allTimeSearches: allTime.filter(e => e.event_type === "search_appearance").length,
         allTimeViews: allTime.filter(e => e.event_type === "profile_view").length,
+        allTimeAdClicks: allTime.filter(e => e.event_type === "classified_ad_click").length,
         byService: Object.entries(byService).sort((a, b) => b[1] - a[1]).slice(0, 8),
         byArea: Object.entries(byArea).sort((a, b) => b[1] - a[1]).slice(0, 8),
         trend: Object.entries(trend),
@@ -2019,6 +2020,10 @@ function AnalyticsDashboard({ provider, reviews }) {
             <div style={{ fontSize: 12, color: INK_FADE, fontFamily: SANS, textAlign: "center" }}>
               <span style={{ fontWeight: 900, color: INK, fontSize: 16 }}>{analytics.leads}</span>
               <br />Leads in {range} days
+            </div>
+            <div style={{ fontSize: 12, color: INK_FADE, fontFamily: SANS, textAlign: "center" }}>
+              <span style={{ fontWeight: 900, color: "#7B3FA0", fontSize: 16 }}>{(analytics.allTimeAdClicks||0).toLocaleString()}</span>
+              <br />All-time ad clicks
             </div>
           </div>
 
