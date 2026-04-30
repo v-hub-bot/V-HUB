@@ -40,7 +40,7 @@ function AdCard({ ad, index, total, onPrev, onNext }) {
       }),
     }).catch(() => {});
     if (ad._provider_entity_id) {
-      window.location.href = `/?provider=${ad._provider_entity_id}`;
+      window.location.href = `/Home?provider=${ad._provider_entity_id}`;
     }
   };
 

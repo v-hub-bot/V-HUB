@@ -1167,7 +1167,7 @@ export default function Home() {
           const found = data.provider || null;
           if (found) {
             setSelProv(found);
-            window.history.replaceState({}, "", "/");
+            window.history.replaceState({}, "", "/Home");
           }
         })
         .catch(() => {});
