@@ -1928,7 +1928,7 @@ function ReviewsSection({ provider }) {
 function AnalyticsDashboard({ provider, reviews }) {
   const [analytics, setAnalytics] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [range, setRange] = useState(30); // days
+  const [range, setRange] = useState(30);
 
   useEffect(() => {
     if (!provider?.id) return;
@@ -1938,61 +1938,72 @@ function AnalyticsDashboard({ provider, reviews }) {
   const loadAnalytics = async () => {
     setLoading(true);
     try {
-      // Pull all analytic events for this provider
       const events = await ProviderAnalytic.filter({ provider_id: provider.id });
-
       const cutoff = new Date();
       cutoff.setDate(cutoff.getDate() - range);
       const cutoffKey = cutoff.toISOString().slice(0, 10);
-
       const inRange = (events || []).filter(e => (e.date_key || "") >= cutoffKey);
       const allTime = events || [];
 
-      // Tally by type
-      const searches   = inRange.filter(e => e.event_type === "search_appearance");
-      const views      = inRange.filter(e => e.event_type === "profile_view");
-      const adClicks   = inRange.filter(e => e.event_type === "classified_ad_click");
-      const leads      = inRange.filter(e => e.event_type === "lead_inquiry");
+      const searches  = inRange.filter(e => e.event_type === "search_appearance");
+      const views     = inRange.filter(e => e.event_type === "profile_view");
+      const adClicks  = inRange.filter(e => e.event_type === "classified_ad_click" || e.event_type === "ad_click");
+      const leads     = inRange.filter(e => e.event_type === "lead_inquiry");
 
-      // Searches by service
+      // Search breakdown by service
       const byService = {};
-      searches.forEach(e => {
-        const k = e.service_name || "General Search";
-        byService[k] = (byService[k] || 0) + 1;
-      });
+      searches.forEach(e => { const k = e.service_name || "General Search"; byService[k] = (byService[k]||0)+1; });
 
-      // Searches + views by area/village
+      // Activity by area
       const byArea = {};
-      [...searches, ...views].forEach(e => {
-        const k = e.area_name || "Unknown";
-        if (k && k !== "Unknown") byArea[k] = (byArea[k] || 0) + 1;
-      });
+      [...searches,...views].forEach(e => { const k=e.area_name||"Unknown"; if(k&&k!=="Unknown") byArea[k]=(byArea[k]||0)+1; });
 
-      // Daily trend — last 14 days
+      // Views by source (if available)
+      const bySource = {};
+      views.forEach(e => { const k=e.source||"Direct"; bySource[k]=(bySource[k]||0)+1; });
+
+      // 30-day daily trend
       const trend = {};
       const today = new Date();
-      for (let i = 13; i >= 0; i--) {
-        const d = new Date(today);
-        d.setDate(d.getDate() - i);
-        trend[d.toISOString().slice(0, 10)] = 0;
+      const trendDays = Math.min(range, 30);
+      for (let i = trendDays-1; i >= 0; i--) {
+        const d = new Date(today); d.setDate(d.getDate()-i);
+        trend[d.toISOString().slice(0,10)] = 0;
       }
-      inRange.forEach(e => {
-        if (e.date_key && trend[e.date_key] !== undefined) trend[e.date_key]++;
+      inRange.forEach(e => { if(e.date_key && trend[e.date_key]!==undefined) trend[e.date_key]++; });
+
+      // Weekly breakdown for longer ranges
+      const weeklyData = {};
+      allTime.forEach(e => {
+        if (!e.date_key) return;
+        const d = new Date(e.date_key);
+        const weekStart = new Date(d);
+        weekStart.setDate(d.getDate() - d.getDay());
+        const wk = weekStart.toISOString().slice(0,10);
+        if (!weeklyData[wk]) weeklyData[wk] = { searches:0, views:0, leads:0, adClicks:0 };
+        if (e.event_type==="search_appearance") weeklyData[wk].searches++;
+        else if (e.event_type==="profile_view") weeklyData[wk].views++;
+        else if (e.event_type==="lead_inquiry") weeklyData[wk].leads++;
+        else if (e.event_type==="classified_ad_click"||e.event_type==="ad_click") weeklyData[wk].adClicks++;
       });
+      const recentWeeks = Object.entries(weeklyData).sort((a,b)=>a[0].localeCompare(b[0])).slice(-8);
 
       setAnalytics({
         searches: searches.length,
         views: views.length,
         adClicks: adClicks.length,
         leads: leads.length,
-        allTimeSearches: allTime.filter(e => e.event_type === "search_appearance").length,
-        allTimeViews: allTime.filter(e => e.event_type === "profile_view").length,
-        allTimeAdClicks: allTime.filter(e => e.event_type === "classified_ad_click").length,
-        byService: Object.entries(byService).sort((a, b) => b[1] - a[1]).slice(0, 8),
-        byArea: Object.entries(byArea).sort((a, b) => b[1] - a[1]).slice(0, 8),
+        allTimeSearches: allTime.filter(e=>e.event_type==="search_appearance").length,
+        allTimeViews: allTime.filter(e=>e.event_type==="profile_view").length,
+        allTimeAdClicks: allTime.filter(e=>e.event_type==="classified_ad_click"||e.event_type==="ad_click").length,
+        allTimeLeads: allTime.filter(e=>e.event_type==="lead_inquiry").length,
+        byService: Object.entries(byService).sort((a,b)=>b[1]-a[1]).slice(0,8),
+        byArea: Object.entries(byArea).sort((a,b)=>b[1]-a[1]).slice(0,8),
+        bySource: Object.entries(bySource).sort((a,b)=>b[1]-a[1]).slice(0,6),
         trend: Object.entries(trend),
+        recentWeeks,
       });
-    } catch (e) {
+    } catch(e) {
       console.error("Analytics load error:", e);
       setAnalytics(null);
     } finally {
@@ -2000,17 +2011,20 @@ function AnalyticsDashboard({ provider, reviews }) {
     }
   };
 
-  const maxTrend = analytics ? Math.max(1, ...analytics.trend.map(([, v]) => v)) : 1;
+  const maxTrend = analytics ? Math.max(1,...analytics.trend.map(([,v])=>v)) : 1;
+  const hasAd = provider?.classifieds_addon;
+  const avgRating = reviews.length>0 ? (reviews.reduce((s,r)=>s+(r.rating||0),0)/reviews.length).toFixed(1) : null;
 
   return (
-    <div style={{ marginBottom: 24 }}>
-      {/* Header row */}
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14, flexWrap: "wrap", gap: 8 }}>
-        <div style={{ ...shS, marginBottom: 0, borderBottom: "none", paddingBottom: 0 }}>📊 Your Activity Report</div>
-        <div style={{ display: "flex", gap: 4 }}>
-          {[7, 30, 90].map(d => (
-            <button key={d} onClick={() => setRange(d)}
-              style={{ background: range === d ? TEAL : PAPER_MID, color: range === d ? "#fff" : INK, border: `1.5px solid ${range === d ? TEAL : PAPER_DK}`, borderRadius: 20, padding: "4px 12px", fontSize: 11, cursor: "pointer", fontFamily: SANS, fontWeight: range === d ? 700 : 400 }}>
+    <div style={{marginBottom:24}}>
+
+      {/* Header + range selector */}
+      <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:14,flexWrap:"wrap",gap:8}}>
+        <div style={{...shS,marginBottom:0,borderBottom:"none",paddingBottom:0}}>📊 Your Performance Report</div>
+        <div style={{display:"flex",gap:4}}>
+          {[7,30,90].map(d=>(
+            <button key={d} onClick={()=>setRange(d)}
+              style={{background:range===d?TEAL:PAPER_MID,color:range===d?"#fff":INK,border:`1.5px solid ${range===d?TEAL:PAPER_DK}`,borderRadius:20,padding:"4px 12px",fontSize:11,cursor:"pointer",fontFamily:SANS,fontWeight:range===d?700:400}}>
               {d}d
             </button>
           ))}
@@ -2018,86 +2032,91 @@ function AnalyticsDashboard({ provider, reviews }) {
       </div>
 
       {loading ? (
-        <div style={{ padding: "20px 0", textAlign: "center", fontSize: 13, color: INK_FADE, fontFamily: SANS }}>Loading your stats…</div>
+        <div style={{padding:"20px 0",textAlign:"center",fontSize:13,color:INK_FADE,fontFamily:SANS}}>Loading your stats…</div>
       ) : !analytics ? (
-        <div style={{ padding: "16px 0", textAlign: "center", fontSize: 13, color: INK_FADE, fontFamily: SANS, fontStyle: "italic" }}>Stats not available.</div>
+        <div style={{padding:"16px 0",textAlign:"center",fontSize:13,color:INK_FADE,fontFamily:SANS,fontStyle:"italic"}}>Stats not available right now.</div>
       ) : (
         <>
-          {/* ── Top 4 stat cards ── */}
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 8, marginBottom: 14 }}>
+
+          {/* ── 4 KPI cards ── */}
+          <div style={{display:"grid",gridTemplateColumns:"repeat(2,1fr)",gap:8,marginBottom:14}}>
             {[
-              { icon: "🔍", label: "Times You Appeared in Search", value: analytics.searches, sub: `${range}-day window`, color: TEAL },
-              { icon: "👁", label: "People Clicked Your Profile", value: analytics.views, sub: `${range}-day window`, color: BROWN_BTN },
-              { icon: "📰", label: "Classified Ad Clicks", value: analytics.adClicks, sub: provider.classifieds_addon ? `${range}-day window` : "Add-on not active", color: "#7B3FA0" },
-              { icon: "⭐", label: "Reviews", value: reviews.length, sub: "All time", color: "#B8860B" },
-            ].map(({ icon, label, value, sub, color }) => (
-              <div key={label} style={{ background: PAPER_MID, border: `1.5px solid ${PAPER_DK}`, borderRadius: 8, padding: "14px 12px", textAlign: "center" }}>
-                <div style={{ fontSize: 20, marginBottom: 4 }}>{icon}</div>
-                <div style={{ fontSize: 26, fontWeight: 900, color, fontFamily: SANS, lineHeight: 1 }}>{value}</div>
-                <div style={{ fontSize: 11, color: INK, fontFamily: SANS, marginTop: 4, fontWeight: 700, lineHeight: 1.4 }}>{label}</div>
-                <div style={{ fontSize: 10, color: INK_FADE, fontFamily: SANS, marginTop: 2 }}>{sub}</div>
+              { icon:"🔍", label:"Search Appearances", value:analytics.searches, sub:`Last ${range} days — times you showed up`, color:TEAL },
+              { icon:"👁", label:"Profile Views", value:analytics.views, sub:`Last ${range} days — people who clicked you`, color:BROWN_BTN },
+              { icon:"📩", label:"Leads Received", value:analytics.leads, sub:`Last ${range} days — contact requests`, color:"#1A6B3C" },
+              { icon:"📰", label:"Classified Ad Clicks", value:analytics.adClicks, sub:hasAd?`Last ${range} days`:"Add Classifieds add-on to unlock", color:"#7B3FA0" },
+            ].map(({icon,label,value,sub,color})=>(
+              <div key={label} style={{background:PAPER_MID,border:`1.5px solid ${PAPER_DK}`,borderRadius:8,padding:"14px 12px",textAlign:"center"}}>
+                <div style={{fontSize:22,marginBottom:4}}>{icon}</div>
+                <div style={{fontSize:28,fontWeight:900,color,fontFamily:SANS,lineHeight:1}}>{value}</div>
+                <div style={{fontSize:11,color:INK,fontFamily:SANS,marginTop:4,fontWeight:700,lineHeight:1.4}}>{label}</div>
+                <div style={{fontSize:10,color:INK_FADE,fontFamily:SANS,marginTop:2}}>{sub}</div>
               </div>
             ))}
           </div>
 
-          {/* ── All-time totals ── */}
-          <div style={{ background: PAPER, border: `1px solid ${PAPER_DK}`, borderRadius: 8, padding: "10px 14px", marginBottom: 14, display: "flex", gap: 20, flexWrap: "wrap", justifyContent: "center" }}>
-            <div style={{ fontSize: 12, color: INK_FADE, fontFamily: SANS, textAlign: "center" }}>
-              <span style={{ fontWeight: 900, color: INK, fontSize: 16 }}>{analytics.allTimeSearches.toLocaleString()}</span>
-              <br />All-time search appearances
-            </div>
-            <div style={{ fontSize: 12, color: INK_FADE, fontFamily: SANS, textAlign: "center" }}>
-              <span style={{ fontWeight: 900, color: INK, fontSize: 16 }}>{analytics.allTimeViews.toLocaleString()}</span>
-              <br />All-time profile views
-            </div>
-            <div style={{ fontSize: 12, color: INK_FADE, fontFamily: SANS, textAlign: "center" }}>
-              <span style={{ fontWeight: 900, color: INK, fontSize: 16 }}>{analytics.leads}</span>
-              <br />Leads in {range} days
-            </div>
-            <div style={{ fontSize: 12, color: INK_FADE, fontFamily: SANS, textAlign: "center" }}>
-              <span style={{ fontWeight: 900, color: "#7B3FA0", fontSize: 16 }}>{(analytics.allTimeAdClicks||0).toLocaleString()}</span>
-              <br />All-time ad clicks
+          {/* ── All-time totals bar ── */}
+          <div style={{background:PAPER,border:`1px solid ${PAPER_DK}`,borderRadius:8,padding:"12px 14px",marginBottom:14}}>
+            <div style={{fontSize:10,fontWeight:700,color:INK_FADE,textTransform:"uppercase",letterSpacing:1,fontFamily:SANS,marginBottom:8}}>All-Time Totals</div>
+            <div style={{display:"grid",gridTemplateColumns:"repeat(2,1fr)",gap:8}}>
+              {[
+                ["🔍 Searches",analytics.allTimeSearches,TEAL],
+                ["👁 Profile Views",analytics.allTimeViews,BROWN_BTN],
+                ["📩 Leads",analytics.allTimeLeads,"#1A6B3C"],
+                ["📰 Ad Clicks",analytics.allTimeAdClicks,"#7B3FA0"],
+                ["⭐ Reviews",reviews.length,"#B8860B"],
+                ["🌟 Avg Rating",avgRating||"—","#B8860B"],
+              ].map(([l,v,c])=>(
+                <div key={l} style={{display:"flex",alignItems:"center",gap:8,background:PAPER_MID,borderRadius:6,padding:"8px 10px"}}>
+                  <div style={{fontSize:20,fontWeight:900,color:c,fontFamily:SANS,minWidth:36}}>{typeof v==="number"?v.toLocaleString():v}</div>
+                  <div style={{fontSize:11,color:INK_FADE,fontFamily:SANS}}>{l}</div>
+                </div>
+              ))}
             </div>
           </div>
 
-          {/* ── 14-day trend bar chart ── */}
-          {analytics.trend.some(([, v]) => v > 0) && (
-            <div style={{ background: PAPER_MID, border: `1.5px solid ${PAPER_DK}`, borderRadius: 8, padding: "14px 14px 10px", marginBottom: 14 }}>
-              <div style={{ fontSize: 11, fontWeight: 700, color: INK_FADE, textTransform: "uppercase", letterSpacing: 1, fontFamily: SANS, marginBottom: 10 }}>14-Day Activity Trend</div>
-              <div style={{ display: "flex", alignItems: "flex-end", gap: 3, height: 52 }}>
-                {analytics.trend.map(([date, count]) => {
-                  const h = Math.max(4, Math.round((count / maxTrend) * 48));
-                  const isToday = date === new Date().toISOString().slice(0, 10);
+          {/* ── 14-day trend chart ── */}
+          {analytics.trend.some(([,v])=>v>0) && (
+            <div style={{background:PAPER_MID,border:`1.5px solid ${PAPER_DK}`,borderRadius:8,padding:"14px 14px 10px",marginBottom:14}}>
+              <div style={{fontSize:11,fontWeight:700,color:INK_FADE,textTransform:"uppercase",letterSpacing:1,fontFamily:SANS,marginBottom:10}}>
+                📈 Daily Activity Trend
+              </div>
+              <div style={{display:"flex",alignItems:"flex-end",gap:2,height:60}}>
+                {analytics.trend.map(([date,count])=>{
+                  const h = Math.max(2,Math.round((count/maxTrend)*52));
+                  const isToday = date===new Date().toISOString().slice(0,10);
+                  const lbl = new Date(date+"T12:00:00").toLocaleDateString("en-US",{weekday:"short"});
                   return (
-                    <div key={date} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 2, height: "100%", justifyContent: "flex-end" }} title={`${date}: ${count} events`}>
-                      <div style={{ width: "100%", height: h, background: isToday ? TEAL : BROWN_BTN, borderRadius: "2px 2px 0 0", opacity: count === 0 ? 0.2 : 1, transition: "height 0.3s" }} />
+                    <div key={date} style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",gap:1,height:"100%",justifyContent:"flex-end"}} title={`${date}: ${count} events`}>
+                      {count>0 && <div style={{fontSize:7,color:INK_FADE,fontFamily:SANS}}>{count}</div>}
+                      <div style={{width:"100%",height:h,background:isToday?TEAL:BROWN_BTN,borderRadius:"2px 2px 0 0",opacity:count===0?0.15:1,transition:"height 0.3s"}}/>
                     </div>
                   );
                 })}
               </div>
-              <div style={{ display: "flex", justifyContent: "space-between", marginTop: 4, fontSize: 9, color: INK_FADE, fontFamily: SANS }}>
+              <div style={{display:"flex",justifyContent:"space-between",marginTop:4,fontSize:9,color:INK_FADE,fontFamily:SANS}}>
                 <span>{analytics.trend[0]?.[0]?.slice(5)}</span>
-                <span style={{ color: TEAL, fontWeight: 700 }}>Today</span>
+                <span style={{color:TEAL,fontWeight:700}}>Today</span>
               </div>
             </div>
           )}
 
-          {/* ── What are people searching? ── */}
-          {analytics.byService.length > 0 && (
-            <div style={{ background: PAPER_MID, border: `1.5px solid ${PAPER_DK}`, borderRadius: 8, padding: "14px", marginBottom: 14 }}>
-              <div style={{ fontSize: 11, fontWeight: 700, color: INK_FADE, textTransform: "uppercase", letterSpacing: 1, fontFamily: SANS, marginBottom: 10 }}>
+          {/* ── What are people searching for? ── */}
+          {analytics.byService.length>0 && (
+            <div style={{background:PAPER_MID,border:`1.5px solid ${PAPER_DK}`,borderRadius:8,padding:"14px",marginBottom:14}}>
+              <div style={{fontSize:11,fontWeight:700,color:INK_FADE,textTransform:"uppercase",letterSpacing:1,fontFamily:SANS,marginBottom:10}}>
                 🔍 What Customers Searched For
               </div>
-              {analytics.byService.map(([svc, cnt]) => {
-                const pct = Math.round((cnt / (analytics.searches || 1)) * 100);
+              {analytics.byService.map(([svc,cnt])=>{
+                const pct = Math.round((cnt/(analytics.searches||1))*100);
                 return (
-                  <div key={svc} style={{ marginBottom: 7 }}>
-                    <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, fontFamily: SANS, marginBottom: 2 }}>
-                      <span style={{ color: INK, fontWeight: svc !== "General Search" ? 700 : 400 }}>{svc}</span>
-                      <span style={{ color: INK_FADE }}>{cnt}x</span>
+                  <div key={svc} style={{marginBottom:7}}>
+                    <div style={{display:"flex",justifyContent:"space-between",fontSize:12,fontFamily:SANS,marginBottom:2}}>
+                      <span style={{color:INK,fontWeight:600}}>{svc}</span>
+                      <span style={{color:INK_FADE}}>{cnt}x ({pct}%)</span>
                     </div>
-                    <div style={{ background: PAPER_DK, borderRadius: 3, height: 6 }}>
-                      <div style={{ background: TEAL, borderRadius: 3, height: 6, width: `${pct}%`, transition: "width 0.4s" }} />
+                    <div style={{background:PAPER_DK,borderRadius:3,height:6}}>
+                      <div style={{background:TEAL,borderRadius:3,height:6,width:`${pct}%`,transition:"width 0.4s"}}/>
                     </div>
                   </div>
                 );
@@ -2105,23 +2124,23 @@ function AnalyticsDashboard({ provider, reviews }) {
             </div>
           )}
 
-          {/* ── Where are customers coming from? ── */}
-          {analytics.byArea.length > 0 && (
-            <div style={{ background: PAPER_MID, border: `1.5px solid ${PAPER_DK}`, borderRadius: 8, padding: "14px", marginBottom: 14 }}>
-              <div style={{ fontSize: 11, fontWeight: 700, color: INK_FADE, textTransform: "uppercase", letterSpacing: 1, fontFamily: SANS, marginBottom: 10 }}>
-                📍 Where Customers Are Coming From
+          {/* ── Where are customers finding you? (by area) ── */}
+          {analytics.byArea.length>0 && (
+            <div style={{background:PAPER_MID,border:`1.5px solid ${PAPER_DK}`,borderRadius:8,padding:"14px",marginBottom:14}}>
+              <div style={{fontSize:11,fontWeight:700,color:INK_FADE,textTransform:"uppercase",letterSpacing:1,fontFamily:SANS,marginBottom:10}}>
+                📍 Activity by Village / Area
               </div>
-              {analytics.byArea.map(([area, cnt]) => {
-                const maxArea = analytics.byArea[0]?.[1] || 1;
-                const pct = Math.round((cnt / maxArea) * 100);
+              {analytics.byArea.map(([area,cnt])=>{
+                const maxA = analytics.byArea[0]?.[1]||1;
+                const pct = Math.round((cnt/maxA)*100);
                 return (
-                  <div key={area} style={{ marginBottom: 7 }}>
-                    <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, fontFamily: SANS, marginBottom: 2 }}>
-                      <span style={{ color: INK, fontWeight: 700 }}>📍 {area}</span>
-                      <span style={{ color: INK_FADE }}>{cnt} searches</span>
+                  <div key={area} style={{marginBottom:7}}>
+                    <div style={{display:"flex",justifyContent:"space-between",fontSize:12,fontFamily:SANS,marginBottom:2}}>
+                      <span style={{color:INK,fontWeight:600}}>{area}</span>
+                      <span style={{color:INK_FADE}}>{cnt} interactions</span>
                     </div>
-                    <div style={{ background: PAPER_DK, borderRadius: 3, height: 6 }}>
-                      <div style={{ background: BROWN_BTN, borderRadius: 3, height: 6, width: `${pct}%`, transition: "width 0.4s" }} />
+                    <div style={{background:PAPER_DK,borderRadius:3,height:6}}>
+                      <div style={{background:BROWN_BTN,borderRadius:3,height:6,width:`${pct}%`,transition:"width 0.4s"}}/>
                     </div>
                   </div>
                 );
@@ -2129,23 +2148,49 @@ function AnalyticsDashboard({ provider, reviews }) {
             </div>
           )}
 
-          {/* Empty state — no data yet */}
-          {analytics.searches === 0 && analytics.views === 0 && analytics.adClicks === 0 && (
-            <div style={{ background: PAPER, border: `1px dashed ${PAPER_DK}`, borderRadius: 8, padding: "16px", textAlign: "center", marginBottom: 8 }}>
-              <div style={{ fontSize: 13, color: INK_FADE, fontFamily: SANS, fontStyle: "italic", lineHeight: 1.8 }}>
-                No activity recorded in the last {range} days yet.<br />
+          {/* ── Ad performance (if active) ── */}
+          {hasAd && (
+            <div style={{background:"#f5f0ff",border:"1.5px solid #d0b8f0",borderRadius:8,padding:"14px",marginBottom:14}}>
+              <div style={{fontSize:11,fontWeight:700,color:"#7B3FA0",textTransform:"uppercase",letterSpacing:1,fontFamily:SANS,marginBottom:8}}>
+                📰 Classified Ad Performance
+              </div>
+              <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:8,textAlign:"center"}}>
+                <div>
+                  <div style={{fontSize:22,fontWeight:900,color:"#7B3FA0",fontFamily:SANS}}>{analytics.adClicks}</div>
+                  <div style={{fontSize:10,color:INK_FADE,fontFamily:SANS}}>Clicks ({range}d)</div>
+                </div>
+                <div>
+                  <div style={{fontSize:22,fontWeight:900,color:"#7B3FA0",fontFamily:SANS}}>{analytics.allTimeAdClicks}</div>
+                  <div style={{fontSize:10,color:INK_FADE,fontFamily:SANS}}>All-Time Clicks</div>
+                </div>
+                <div>
+                  <div style={{fontSize:22,fontWeight:900,color:"#7B3FA0",fontFamily:SANS}}>{analytics.views>0?Math.round((analytics.adClicks/analytics.views)*100):0}%</div>
+                  <div style={{fontSize:10,color:INK_FADE,fontFamily:SANS}}>Click-Through Rate</div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Empty state */}
+          {analytics.searches===0 && analytics.views===0 && analytics.adClicks===0 && analytics.leads===0 && (
+            <div style={{background:PAPER,border:`1px dashed ${PAPER_DK}`,borderRadius:8,padding:"16px",textAlign:"center",marginBottom:8}}>
+              <div style={{fontSize:13,color:INK_FADE,fontFamily:SANS,fontStyle:"italic",lineHeight:1.8}}>
+                No activity in the last {range} days yet.<br/>
                 As customers search V-Hub, your real stats will appear here.
               </div>
             </div>
           )}
 
-          <div style={{ fontSize: 10, color: INK_FADE, fontFamily: SANS, fontStyle: "italic", textAlign: "right", marginTop: 4 }}>
-            All data is from real customer interactions — never estimated.
+          <div style={{fontSize:10,color:INK_FADE,fontFamily:SANS,fontStyle:"italic",textAlign:"right",marginTop:4}}>
+            All data is from real customer interactions — updated live.
           </div>
         </>
       )}
     </div>
   );
+}
+
+
 }
 
 
