@@ -1,4 +1,4 @@
-// v2 — English-only prompt
+// v3 — no text in image (avoids foreign language issue entirely)
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
 
 const CORS_HEADERS = {
@@ -26,7 +26,7 @@ Deno.serve(async (req) => {
       return Response.json({ error: "OpenAI API key not configured" }, { status: 500, headers: CORS_HEADERS });
     }
 
-    const fullPrompt = `Create a professional, eye-catching advertisement image for a local service business in The Villages, Florida. ${prompt}. Style: vibrant colors, clear composition, suitable for a weekly deals/promotions advertisement. IMPORTANT: All text in the image must be in English only — do not include any foreign language text, symbols, or characters. No watermarks. High quality.`;
+    const fullPrompt = `Create a professional, eye-catching advertisement background image for a local service business in The Villages, Florida. ${prompt}. Style: vibrant colors, clean composition, suitable for a weekly deals/promotions advertisement. CRITICAL REQUIREMENT: The image must contain absolutely NO text, NO words, NO letters, NO numbers, NO signs with writing, NO banners with text — zero text of any kind in any language. Pure visual imagery only. No watermarks. High quality photorealistic or illustrated style.`;
 
     const resp = await fetch("https://api.openai.com/v1/images/generations", {
       method: "POST",
