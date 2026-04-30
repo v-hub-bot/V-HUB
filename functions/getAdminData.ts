@@ -27,15 +27,14 @@ async function withRetry<T>(fn: () => Promise<T>, label = "", retries = 3): Prom
   throw new Error(`${label} failed after ${retries} retries`);
 }
 
-// Fetch all pages — SDK 0.8.23: call list() with no args for first page, 
+// Fetch all pages — SDK 0.8.23: call list() with no args for first page,
 // then paginate using filter/skip for subsequent pages
 async function fetchAllPages(entity: any, label = ""): Promise<any[]> {
   // First call with no args (golden pattern that works)
   const first = await withRetry(() => entity.list(), label);
   const firstPage = Array.isArray(first) ? first : [];
-  
+
   if (firstPage.length < 100) {
-    // Less than 100 records, definitely got everything
     return firstPage;
   }
 
@@ -67,7 +66,6 @@ Deno.serve(async (req) => {
   const CORS = getCorsHeaders(req);
 
   try {
-    // Read body ONCE
     const body = await req.json().catch(() => ({}));
     const VALID_PINS = ["1357"];
     const pinOk = body.pin && VALID_PINS.includes(String(body.pin));
@@ -91,8 +89,6 @@ Deno.serve(async (req) => {
       return Response.json({ error: "Unauthorized" }, { status: 401, headers: CORS });
     }
 
-    // Fetch all entities — small ones use golden no-arg pattern, 
-    // ProviderAnalytic needs full pagination
     const [providers, reviews, leads, stats, categories, services, serviceAreas, classifiedAds, analytics] = await Promise.all([
       withRetry(() => sr.entities.Provider.list(), "providers"),
       withRetry(() => sr.entities.ProviderReview.list(), "reviews"),
@@ -102,7 +98,7 @@ Deno.serve(async (req) => {
       withRetry(() => sr.entities.Service.list(), "services"),
       withRetry(() => sr.entities.ServiceArea.list(), "areas"),
       withRetry(() => sr.entities.ClassifiedAd.list(), "classifieds"),
-      fetchAllPages(sr.entities.ProviderAnalytic, "analytics"), // needs full pagination
+      fetchAllPages(sr.entities.ProviderAnalytic, "analytics"),
     ]);
 
     const pArr = Array.isArray(providers) ? providers : [];
@@ -127,18 +123,30 @@ Deno.serve(async (req) => {
       search_appearances: searchCounts[p.id] || 0,
     }));
 
-    // Daily rollups for last 30 days — used by analytics charts
-    const viewsByDay: Record<string, number> = {};
+    // Daily rollups — siteViewsByDay = profile_view + homepage_view (real visitor traffic)
+    // searchesByDay = search_appearance events (provider exposure)
+    // adClicksByDay = ad_click events (classified ad clicks)
+    const siteViewsByDay: Record<string, number> = {};
     const searchesByDay: Record<string, number> = {};
+    const adClicksByDay: Record<string, number> = {};
+
     for (const a of aArr) {
       const day = a.date_key || (a.created_date ? String(a.created_date).split("T")[0] : null);
       if (!day) continue;
-      if (a.event_type === 'profile_view') {
-        viewsByDay[day] = (viewsByDay[day] || 0) + 1;
+
+      if (a.event_type === 'profile_view' || a.event_type === 'homepage_view') {
+        // Both count as real site visits
+        siteViewsByDay[day] = (siteViewsByDay[day] || 0) + 1;
       } else if (a.event_type === 'search_appearance') {
         searchesByDay[day] = (searchesByDay[day] || 0) + 1;
+      } else if (a.event_type === 'ad_click') {
+        adClicksByDay[day] = (adClicksByDay[day] || 0) + 1;
       }
     }
+
+    // Totals
+    const totalSiteViews = Object.values(siteViewsByDay).reduce((s, v) => s + v, 0);
+    const totalAdClicks = Object.values(adClicksByDay).reduce((s, v) => s + v, 0);
 
     return Response.json({
       providers: enrichedProviders,
@@ -149,8 +157,11 @@ Deno.serve(async (req) => {
       services: Array.isArray(services) ? services : [],
       serviceAreas: Array.isArray(serviceAreas) ? serviceAreas : [],
       classifiedAds: Array.isArray(classifiedAds) ? classifiedAds : [],
-      viewsByDay,
+      siteViewsByDay,      // ✅ correct key name (was "viewsByDay" — mismatch fixed)
       searchesByDay,
+      adClicksByDay,       // ✅ now included
+      totalSiteViews,      // ✅ grand total for summary card
+      totalAdClicks,       // ✅ grand total for summary card
     }, { headers: CORS });
 
   } catch (error) {
