@@ -1143,26 +1143,14 @@ function ClassifiedAdSection({ provider, refreshKey = 0 }) {
       });
       const data = await resp.json();
       if (data.url) {
-        let finalUrl = data.url;
-        // If OpenAI returned a temp URL, re-upload to permanent CDN via frontend (has session auth)
-        if (finalUrl.includes("oaidalleapiprodscus") || finalUrl.includes("blob.core.windows.net")) {
-          try {
-            const imgBlob = await fetch(finalUrl).then(r => r.blob());
-            const fd2 = new FormData();
-            fd2.append("file", imgBlob, `ai_ad_${provider.id}_${Date.now()}.png`);
-            const upResp = await fetch("https://api.base44.app/api/apps/69d06ada8019d7e9edf7f8e8/storage/upload", { method: "POST", body: fd2 });
-            const upData = await upResp.json();
-            if (upData.url) finalUrl = toCDNUrl(upData.url) || finalUrl;
-          } catch { /* keep temp URL if CDN upload fails */ }
-        }
-        setForm(p => ({ ...p, image_url: finalUrl }));
+        setForm(p => ({ ...p, image_url: data.url }));
         setFilePreview(null); setFileObj(null);
         // Persist to saved_images on existing record
         const existingRecord = editingSlot !== "new" ? editingSlot : null;
         if (existingRecord?.id) {
           const existingSaved = existingRecord.saved_images || [];
-          const newSaved = [finalUrl, ...existingSaved.filter(u => u !== finalUrl)].slice(0, 3);
-          await ClassifiedAd.update(existingRecord.id, { ai_prompt: aiPrompt, image_url: finalUrl, saved_images: newSaved });
+          const newSaved = [data.url, ...existingSaved.filter(u => u !== data.url)].slice(0, 3);
+          await ClassifiedAd.update(existingRecord.id, { ai_prompt: aiPrompt, image_url: data.url, saved_images: newSaved });
           await loadAds();
           const fresh = await ClassifiedAd.filter({ provider_id: provider.id });
           const updated = fresh.find(a => a.id === existingRecord.id);
