@@ -997,6 +997,7 @@ function ClassifiedAdSection({ provider, refreshKey = 0 }) {
   const [filePreview, setFilePreview] = React.useState(null);
   const [fileObj, setFileObj]         = React.useState(null);
   const [uploading, setUploading]     = React.useState(false);
+  const [sectDbAreas, setSectDbAreas]  = React.useState([]);
 
   const [showImagePicker, setShowImagePicker] = React.useState(false);
   const [aiPrompt, setAiPrompt]   = React.useState("");
@@ -1058,12 +1059,24 @@ function ClassifiedAdSection({ provider, refreshKey = 0 }) {
   const liveExpired = liveAd?.deal_expires_at && new Date(liveAd.deal_expires_at) < new Date();
 
   // Local areaNames for location display in ad editor
+  // Load real ServiceArea names from DB so IDs resolve correctly
+  React.useEffect(() => {
+    ServiceArea.list().then(areas => setSectDbAreas(areas || [])).catch(() => {});
+  }, []);
   const areaNames = React.useMemo(() => {
     if (!provider) return [];
     const ids = provider.service_areas || [];
-    const areaMap = { "69d06c4ad9b0c2b3a2f9e1a1": "Historic Side", "69d06c4ad9b0c2b3a2f9e1a2": "Established Villages", "69d06c4ad9b0c2b3a2f9e1a3": "Newer Villages", "69d06c4ad9b0c2b3a2f9e1a4": "Eastport", "69d06c4ad9b0c2b3a2f9e1a5": "Family/Non-Age-Restricted" };
-    return ids.map(id => areaMap[id] || id).filter(Boolean);
-  }, [provider]);
+    if (sectDbAreas.length > 0) {
+      return ids.map(id => {
+        const a = sectDbAreas.find(x => x.id === id);
+        if (!a) return null;
+        const n = a.name || "";
+        return n.includes(" — ") ? n.split(" — ").pop().trim() : n;
+      }).filter(Boolean);
+    }
+    // Fallback: show IDs until areas load (better than legacy hardcoded map)
+    return ids;
+  }, [provider, sectDbAreas]);
 
   // ── Open editor ──────────────────────────────────────────────────────────
   const openEdit = (slot, dealType) => {
