@@ -64,8 +64,8 @@ function AdCard({ ad, index, total, onPrev, onNext }) {
       {total > 1 && (
         <div style={{
           textAlign: "center", marginBottom: 10,
-          fontSize: 13, color: MUTED, fontWeight: 600,
-          fontFamily: "Georgia, serif",
+          fontSize: 13, color: "rgba(255,255,255,0.7)", fontWeight: 600,
+          fontFamily: "Georgia, serif", letterSpacing: 0.5,
         }}>
           Deal {index + 1} of {total}
         </div>
@@ -74,13 +74,20 @@ function AdCard({ ad, index, total, onPrev, onNext }) {
       {/* ── Card ── */}
       <div style={{
         background: WHITE,
-        borderRadius: 14,
+        borderRadius: 16,
         overflow: "hidden",
-        boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
+        boxShadow: expired ? "none" : "0 8px 32px rgba(232,67,26,0.25), 0 2px 8px rgba(0,0,0,0.3)",
         opacity: expired ? 0.5 : 1,
         position: "relative",
-        border: expired ? `2px solid ${MUTED}` : `2px solid ${NAVY}`,
+        border: expired ? `2px solid ${MUTED}` : "2px solid #FFDB00",
       }}>
+        {/* Top accent bar */}
+        {!expired && (
+          <div style={{
+            height: 5,
+            background: "linear-gradient(90deg,#E8431A,#FFDB00,#00BFA5)",
+          }} />
+        )}
         {/* Expired badge */}
         {expired && (
           <div style={{
@@ -126,7 +133,8 @@ function AdCard({ ad, index, total, onPrev, onNext }) {
         {/* Bottom strip */}
         <div style={{
           padding: "14px 16px 16px",
-          background: WHITE,
+          background: "linear-gradient(180deg,#ffffff,#f7f4ef)",
+          borderTop: "1px solid #eee",
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
@@ -177,12 +185,12 @@ function AdCard({ ad, index, total, onPrev, onNext }) {
             disabled={index === 0}
             style={{
               width: 48, height: 48, borderRadius: "50%",
-              background: index === 0 ? "#ddd" : NAVY,
-              color: index === 0 ? "#aaa" : WHITE,
+              background: index === 0 ? "rgba(255,255,255,0.1)" : "linear-gradient(135deg,#E8431A,#c93510)",
+              color: index === 0 ? "rgba(255,255,255,0.25)" : WHITE,
               border: "none", fontSize: 22, fontWeight: 900,
               cursor: index === 0 ? "default" : "pointer",
               display: "flex", alignItems: "center", justifyContent: "center",
-              boxShadow: index === 0 ? "none" : "0 2px 8px rgba(27,61,111,0.4)",
+              boxShadow: index === 0 ? "none" : "0 4px 14px rgba(232,67,26,0.5)",
               transition: "all 0.15s",
             }}
             title="Previous deal"
@@ -214,12 +222,12 @@ function AdCard({ ad, index, total, onPrev, onNext }) {
             disabled={index === total - 1}
             style={{
               width: 48, height: 48, borderRadius: "50%",
-              background: index === total - 1 ? "#ddd" : NAVY,
-              color: index === total - 1 ? "#aaa" : WHITE,
+              background: index === total - 1 ? "rgba(255,255,255,0.1)" : "linear-gradient(135deg,#E8431A,#c93510)",
+              color: index === total - 1 ? "rgba(255,255,255,0.25)" : WHITE,
               border: "none", fontSize: 22, fontWeight: 900,
               cursor: index === total - 1 ? "default" : "pointer",
               display: "flex", alignItems: "center", justifyContent: "center",
-              boxShadow: index === total - 1 ? "none" : "0 2px 8px rgba(27,61,111,0.4)",
+              boxShadow: index === total - 1 ? "none" : "0 4px 14px rgba(232,67,26,0.5)",
               transition: "all 0.15s",
             }}
             title="Next deal"
@@ -521,48 +529,71 @@ export default function Classifieds() {
   }, [handlePrev, handleNext]);
 
   return (
-    <div style={{ background: PARCH, minHeight: "100vh", fontFamily: "'Times New Roman', Georgia, serif" }}>
+    <div style={{ background: "linear-gradient(160deg,#1B3D6F 0%,#0e2548 40%,#1a0a00 100%)", minHeight: "100vh", fontFamily: "'Times New Roman', Georgia, serif" }}>
 
       {/* ── Header ── */}
       <div style={{
-        background: NAVY, color: WHITE,
-        padding: "14px 16px 12px",
-        borderBottom: `4px solid ${ORANGE}`,
+        background: "linear-gradient(135deg,#E8431A 0%,#c93510 40%,#8B0000 100%)",
+        color: WHITE,
+        padding: "14px 16px 18px",
+        borderBottom: "4px solid #FFDB00",
+        boxShadow: "0 4px 20px rgba(232,67,26,0.5)",
+        position: "relative",
+        overflow: "hidden",
       }}>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
+        {/* Decorative burst rings */}
+        <div style={{ position: "absolute", top: -40, right: -40, width: 160, height: 160, borderRadius: "50%", background: "rgba(255,219,0,0.08)", pointerEvents: "none" }} />
+        <div style={{ position: "absolute", top: -20, right: -20, width: 100, height: 100, borderRadius: "50%", background: "rgba(255,219,0,0.08)", pointerEvents: "none" }} />
+
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
           <a href="/" style={{ textDecoration: "none" }}>
             <button style={{
-              background: "linear-gradient(180deg,#9A6030,#7A4820 60%,#5A3010)",
-              border: "2px solid #1B3D6F", borderRadius: 6,
-              color: "#F5E8CC", fontFamily: "Georgia, serif",
+              background: "rgba(0,0,0,0.3)",
+              border: "2px solid rgba(255,255,255,0.4)", borderRadius: 6,
+              color: WHITE, fontFamily: "Georgia, serif",
               fontWeight: 700, fontSize: 13, padding: "7px 14px", cursor: "pointer",
+              backdropFilter: "blur(4px)",
             }}>« Home</button>
           </a>
           <img
             src="https://media.base44.com/images/public/69d062aca815ce8e697894b1/a9af95bc3_V-Hublogo.png"
             alt="V-Hub"
-            style={{ height: 36 }}
+            style={{ height: 36, filter: "brightness(0) invert(1)" }}
           />
         </div>
         <div style={{ textAlign: "center" }}>
-          <div style={{ fontSize: 26, fontWeight: 900, letterSpacing: 1 }}>🔥 Deals of the Week</div>
-          <div style={{ fontSize: 12, opacity: 0.75, marginTop: 3 }}>
-            Exclusive offers from local providers in The Villages, FL
+          <div style={{
+            fontSize: 32, fontWeight: 900, letterSpacing: 1,
+            textShadow: "0 2px 8px rgba(0,0,0,0.4)",
+            display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+          }}>
+            🔥 Deals of the Week 🔥
+          </div>
+          <div style={{
+            display: "inline-block",
+            marginTop: 8,
+            background: "#FFDB00",
+            color: "#1a0a00",
+            fontSize: 11, fontWeight: 800,
+            padding: "3px 14px", borderRadius: 20,
+            letterSpacing: 1.5, textTransform: "uppercase",
+          }}>
+            Exclusive Local Offers · The Villages, FL
           </div>
         </div>
       </div>
 
       {/* ── Filter bar ── */}
       <div style={{
-        background: WHITE,
-        borderBottom: `2px solid ${NAVY}22`,
-        padding: "12px 16px",
+        background: "linear-gradient(180deg,#1e3a6e,#162d56)",
+        borderBottom: "3px solid #FFDB00",
+        padding: "14px 16px",
       }}>
         <div style={{ display: "flex", gap: 8, marginBottom: 6 }}>
-          <div style={{ flex: 1, fontSize: 11, fontWeight: 700, color: INK, fontFamily: "'Times New Roman', serif" }}>
+          <div style={{ flex: 1, fontSize: 11, fontWeight: 700, color: "#FFDB00", fontFamily: "'Times New Roman', serif", letterSpacing: 0.5 }}>
             What service do you need?
           </div>
-          <div style={{ flex: 1, fontSize: 11, fontWeight: 700, color: INK, fontFamily: "'Times New Roman', serif" }}>
+          <div style={{ flex: 1, fontSize: 11, fontWeight: 700, color: "#FFDB00", fontFamily: "'Times New Roman', serif", letterSpacing: 0.5 }}>
             Where do you need it?
           </div>
         </div>
@@ -573,16 +604,20 @@ export default function Classifieds() {
               onClick={e => { e.stopPropagation(); setSvcOpen(o => !o); setVilOpen(false); setOpenCat(null); }}
               style={{
                 width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between",
-                padding: "10px 12px", border: `2px solid ${selSvcObj ? NAVY : NAVY + "66"}`,
-                borderRadius: 8, background: selSvcObj ? "#fffbf0" : WHITE,
-                fontFamily: "'Times New Roman', serif", fontSize: 13, color: selSvcObj ? INK : MUTED,
+                padding: "10px 12px",
+                border: selSvcObj ? "2px solid #FFDB00" : "2px solid rgba(255,255,255,0.3)",
+                borderRadius: 8,
+                background: selSvcObj ? "rgba(255,219,0,0.15)" : "rgba(255,255,255,0.12)",
+                fontFamily: "'Times New Roman', serif", fontSize: 13,
+                color: selSvcObj ? "#FFDB00" : "rgba(255,255,255,0.85)",
                 cursor: "pointer", fontWeight: selSvcObj ? 700 : 400, textAlign: "left",
+                backdropFilter: "blur(4px)",
               }}
             >
               <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                 {selSvcObj ? selSvcObj.name : "🔍 Select a Service..."}
               </span>
-              <span style={{ fontSize: 10, flexShrink: 0, marginLeft: 4, color: MUTED }}>
+              <span style={{ fontSize: 10, flexShrink: 0, marginLeft: 4, color: "rgba(255,255,255,0.6)" }}>
                 {svcOpen ? "▲" : "▼"}
               </span>
             </button>
@@ -643,16 +678,20 @@ export default function Classifieds() {
               onClick={e => { e.stopPropagation(); setVilOpen(o => !o); setSvcOpen(false); setOpenCat(null); }}
               style={{
                 width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between",
-                padding: "10px 12px", border: `2px solid ${selVilObj ? NAVY : NAVY + "66"}`,
-                borderRadius: 8, background: selVilObj ? "#fffbf0" : WHITE,
-                fontFamily: "'Times New Roman', serif", fontSize: 13, color: selVilObj ? INK : MUTED,
+                padding: "10px 12px",
+                border: selVilObj ? "2px solid #FFDB00" : "2px solid rgba(255,255,255,0.3)",
+                borderRadius: 8,
+                background: selVilObj ? "rgba(255,219,0,0.15)" : "rgba(255,255,255,0.12)",
+                fontFamily: "'Times New Roman', serif", fontSize: 13,
+                color: selVilObj ? "#FFDB00" : "rgba(255,255,255,0.85)",
                 cursor: "pointer", fontWeight: selVilObj ? 700 : 400, textAlign: "left",
+                backdropFilter: "blur(4px)",
               }}
             >
               <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                 {selVilObj ? selVilObj.name : "📍 Select a Village..."}
               </span>
-              <span style={{ fontSize: 10, flexShrink: 0, marginLeft: 4, color: MUTED }}>
+              <span style={{ fontSize: 10, flexShrink: 0, marginLeft: 4, color: "rgba(255,255,255,0.6)" }}>
                 {vilOpen ? "▲" : "▼"}
               </span>
             </button>
@@ -691,8 +730,10 @@ export default function Classifieds() {
           <button
             onClick={() => { setFilterArea(""); setFilterService(""); setSelSvcObj(null); setSelVilObj(null); setSvcOpen(false); setVilOpen(false); }}
             style={{
-              marginTop: 8, background: MUTED, color: WHITE, border: "none", borderRadius: 8,
-              fontSize: 12, fontWeight: 700, padding: "8px 14px", cursor: "pointer",
+              marginTop: 8, background: "rgba(255,255,255,0.15)", color: WHITE,
+              border: "1px solid rgba(255,255,255,0.3)", borderRadius: 20,
+              fontSize: 12, fontWeight: 700, padding: "7px 16px", cursor: "pointer",
+              backdropFilter: "blur(4px)",
             }}
           >✕ Clear Filters</button>
         )}
@@ -702,7 +743,7 @@ export default function Classifieds() {
       <div style={{ maxWidth: 520, margin: "0 auto", padding: "20px 16px 60px" }}>
 
         {loading && (
-          <div style={{ textAlign: "center", padding: 60, color: MUTED, fontSize: 16 }}>
+          <div style={{ textAlign: "center", padding: 60, color: "rgba(255,255,255,0.7)", fontSize: 16 }}>
             Loading deals…
           </div>
         )}
@@ -715,18 +756,23 @@ export default function Classifieds() {
 
         {/* Prompt to search */}
         {!loading && !error && !hasFilter && (
-          <div style={{ textAlign: "center", padding: 60, color: MUTED }}>
-            <div style={{ fontSize: 44, marginBottom: 12 }}>🔍</div>
-            <div style={{ fontSize: 20, fontWeight: 700, color: NAVY, marginBottom: 8 }}>
-              Find Deals Near You
+          <div style={{ textAlign: "center", padding: "50px 20px 60px" }}>
+            <div style={{ fontSize: 52, marginBottom: 16 }}>🔥</div>
+            <div style={{ fontSize: 22, fontWeight: 900, color: WHITE, marginBottom: 8, textShadow: "0 2px 8px rgba(0,0,0,0.4)" }}>
+              Hot Deals Near You
             </div>
-            <div style={{ fontSize: 14, lineHeight: 1.7 }}>
+            <div style={{ fontSize: 14, lineHeight: 1.8, color: "rgba(255,255,255,0.75)" }}>
               Select a service and your village above<br />
-              to see active deals near you.
+              to see exclusive deals this week.
             </div>
             {ads.length > 0 && (
-              <div style={{ marginTop: 18, fontSize: 12, color: MUTED }}>
-                {ads.filter(a => !isExpired(a)).length} active deal{ads.filter(a => !isExpired(a)).length !== 1 ? "s" : ""} available this week
+              <div style={{
+                display: "inline-block", marginTop: 20,
+                background: "rgba(255,219,0,0.15)", border: "1px solid #FFDB00",
+                color: "#FFDB00", fontSize: 12, fontWeight: 700,
+                padding: "6px 18px", borderRadius: 20,
+              }}>
+                🏷️ {ads.filter(a => !isExpired(a)).length} active deal{ads.filter(a => !isExpired(a)).length !== 1 ? "s" : ""} available this week
               </div>
             )}
           </div>
@@ -734,9 +780,9 @@ export default function Classifieds() {
 
         {/* No results */}
         {!loading && !error && hasFilter && visibleAds.length === 0 && (
-          <div style={{ textAlign: "center", padding: 60, color: MUTED }}>
+          <div style={{ textAlign: "center", padding: 60, color: "rgba(255,255,255,0.75)" }}>
             <div style={{ fontSize: 44, marginBottom: 12 }}>🏖️</div>
-            <div style={{ fontSize: 18, fontWeight: 700, color: NAVY, marginBottom: 8 }}>
+            <div style={{ fontSize: 18, fontWeight: 700, color: WHITE, marginBottom: 8 }}>
               No deals match your search
             </div>
             <div style={{ fontSize: 14, lineHeight: 1.7 }}>
