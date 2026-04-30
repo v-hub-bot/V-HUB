@@ -264,7 +264,21 @@ function ProvDetail({ prov, areas, cats, svcs, onBack }) {
   }, [areas]);
 
   const resolvedServices = (prov.services || []).map(s => svcMap[s] || s).filter(Boolean);
-  const resolvedAreas    = (prov.service_areas || []).map(a => areaMap[a] || MACRO_AREAS_MAP[a] || a).filter(Boolean);
+  const rawAreas = (prov.service_areas || []).map(a => areaMap[a] || MACRO_AREAS_MAP[a] || a).filter(Boolean);
+  // Smart area display: if serving 20+ villages, collapse to macro labels or "All Villages"
+  const resolvedAreas = (() => {
+    // Filter out raw UUIDs (unmapped IDs)
+    const cleanAreas = rawAreas.filter(a => !/^[0-9a-f]{24}$/i.test(a));
+    const totalAreas = Object.keys(areaMap).length || 114;
+    if (cleanAreas.length === 0) return [];
+    if (cleanAreas.length >= totalAreas * 0.9) return ["All Villages — The Villages, FL"];
+    // Check if contains macro group labels
+    const macroLabels = ["Historic Side", "Established Villages", "Newer Villages", "Eastport", "Family & Non-Age-Restricted"];
+    const hasMacro = cleanAreas.some(a => macroLabels.includes(a));
+    if (hasMacro) return cleanAreas.filter(a => macroLabels.includes(a));
+    if (cleanAreas.length > 20) return ["All Villages — The Villages, FL"];
+    return cleanAreas;
+  })();
 
   useEffect(() => {
     ProviderReview.filter({ provider_id: prov.id })
