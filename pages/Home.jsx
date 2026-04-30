@@ -1524,15 +1524,6 @@ export default function Home() {
       const tier = { premium: 0, featured: 1, standard: 2, basic: 3 };
       return (tier[a.subscription_tier] ?? 3) - (tier[b.subscription_tier] ?? 3);
     });
-    window.__VHUB_DEBUG = debugLog;
-    console.log("[V-HUB SEARCH]", {
-      total_candidates: all.length,
-      matched: debugLog.matchedProviders.length,
-      excluded: debugLog.excludedProviders.length,
-      selArea: selArea ? { id: selArea.id, name: selArea.name } : null,
-      selSvc: selSvc ? { id: selSvc.id, name: selSvc.name } : null,
-      sample_excluded: debugLog.excludedProviders.slice(0, 3).map(e => ({ name: e.business_name, reasons: e.exclusion_reasons }))
-    });
     setResults(out);
     setIsLoading(false);
     setSearched(true);
