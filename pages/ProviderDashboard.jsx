@@ -1,8 +1,9 @@
-// CACHE-BUST-DEALS-EDIT-APR30-v3
+// FORCE-NEW-BUNDLE-APR30-v4-EDIT-PULLADD
 // FORCE_REBUILD_1776768600
 // BUILD_FORCE_2026_04_22_T0400
 // CACHE-BUST-1776743534-FIX
 // build-1776559362 
+const _FORCE_REBUILD_APR30_V4 = "edit-pull-v4"; // force new bundle hash
 // @build 2026-04-18-b
 // ProviderDashboard — REBUILD 1776411339
 import React, { useState, useEffect, useRef } from "react";
@@ -2221,7 +2222,6 @@ function AnalyticsDashboard({ provider, reviews }) {
 }
 
 
-}
 
 
 export default function ProviderDashboard() {
