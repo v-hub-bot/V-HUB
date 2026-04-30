@@ -1,5 +1,4 @@
-// v6 — generate DALL-E image and return URL; frontend handles CDN upload
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.23';
+// v9 — DALL-E 3 with base64_json response to avoid temp-URL CORS issues on frontend CDN re-upload
 
 const CORS_HEADERS = {
   "Access-Control-Allow-Origin": "*",
@@ -22,7 +21,7 @@ Deno.serve(async (req) => {
 
     const fullPrompt = `Create a professional, eye-catching advertisement background image for a local service business in The Villages, Florida. ${prompt}. Style: vibrant colors, clean composition, suitable for a weekly deals/promotions advertisement. CRITICAL REQUIREMENT: The image must contain absolutely NO text, NO words, NO letters, NO numbers, NO signs with writing, NO banners with text — zero text of any kind in any language. Pure visual imagery only. No watermarks. High quality photorealistic or illustrated style.`;
 
-    // Generate with OpenAI DALL-E 3
+    // Use b64_json so frontend receives bytes directly — no CORS issues fetching a temp URL
     const resp = await fetch("https://api.openai.com/v1/images/generations", {
       method: "POST",
       headers: {
@@ -35,7 +34,7 @@ Deno.serve(async (req) => {
         n: 1,
         size: "1024x1024",
         quality: "standard",
-        response_format: "url",
+        response_format: "b64_json",
       }),
     });
 
@@ -46,12 +45,13 @@ Deno.serve(async (req) => {
     }
 
     const data = await resp.json();
-    const imageUrl = data?.data?.[0]?.url;
-    if (!imageUrl) return Response.json({ error: "No image returned from OpenAI" }, { status: 500, headers: CORS_HEADERS });
+    const b64 = data?.data?.[0]?.b64_json;
+    if (!b64) return Response.json({ error: "No image returned from OpenAI" }, { status: 500, headers: CORS_HEADERS });
 
-    console.log("✅ Image generated:", imageUrl.substring(0, 60));
-    // Return temp URL — the frontend will re-upload to permanent CDN storage
-    return Response.json({ url: imageUrl }, { headers: CORS_HEADERS });
+    console.log("✅ DALL-E image generated (b64), size:", Math.round(b64.length / 1024), "KB");
+
+    // Return b64 — frontend converts to blob and uploads to CDN storage (no CORS issue)
+    return Response.json({ b64, url: `data:image/png;base64,${b64}` }, { headers: CORS_HEADERS });
 
   } catch (err: any) {
     console.error("generateAdImage error:", err);

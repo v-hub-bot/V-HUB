@@ -1142,18 +1142,27 @@ function ClassifiedAdSection({ provider, refreshKey = 0 }) {
         body: JSON.stringify({ prompt: aiPrompt, provider_id: provider.id }),
       });
       const data = await resp.json();
-      if (data.url) {
-        let finalUrl = data.url;
-        // If OpenAI returned a temp URL, re-upload to permanent CDN via frontend (has session auth)
-        if (finalUrl.includes("oaidalleapiprodscus") || finalUrl.includes("blob.core.windows.net")) {
+      if (data.b64 || data.url) {
+        let finalUrl = data.url || "";
+        // Backend now returns b64_json — convert to blob and upload to permanent CDN
+        if (data.b64) {
           try {
-            const imgBlob = await fetch(finalUrl).then(r => r.blob());
+            const byteArr = Uint8Array.from(atob(data.b64), c => c.charCodeAt(0));
+            const imgBlob = new Blob([byteArr], { type: "image/png" });
             const fd2 = new FormData();
             fd2.append("file", imgBlob, `ai_ad_${provider.id}_${Date.now()}.png`);
             const upResp = await fetch("https://api.base44.app/api/apps/69d06ada8019d7e9edf7f8e8/storage/upload", { method: "POST", body: fd2 });
-            const upData = await upResp.json();
-            if (upData.url) finalUrl = toCDNUrl(upData.url) || finalUrl;
-          } catch { /* keep temp URL if CDN upload fails */ }
+            const upData = await upResp.json().catch(() => ({}));
+            if (upData.url) {
+              finalUrl = toCDNUrl(upData.url) || upData.url;
+            } else {
+              // CDN upload failed — use data URI for immediate display (still works in img tag)
+              finalUrl = `data:image/png;base64,${data.b64}`;
+            }
+          } catch (e) {
+            // Fallback to data URI
+            finalUrl = `data:image/png;base64,${data.b64}`;
+          }
         }
         setForm(p => ({ ...p, image_url: finalUrl }));
         setFilePreview(null); setFileObj(null);
@@ -1181,11 +1190,24 @@ function ClassifiedAdSection({ provider, refreshKey = 0 }) {
     try {
       let imageUrl = form.image_url;
       if (fileObj) {
+        // Manual file upload
         const fd = new FormData();
         fd.append("file", fileObj);
         const upResp = await fetch("https://api.base44.app/api/apps/69d06ada8019d7e9edf7f8e8/storage/upload", { method: "POST", body: fd });
         const upData = await upResp.json();
         imageUrl = toCDNUrl(upData.url) || imageUrl;
+      } else if (imageUrl && imageUrl.startsWith("data:image/")) {
+        // Data URI fallback from AI gen — try to upload to CDN now at save time
+        try {
+          const base64Data = imageUrl.split(",")[1];
+          const byteArr = Uint8Array.from(atob(base64Data), c => c.charCodeAt(0));
+          const imgBlob = new Blob([byteArr], { type: "image/png" });
+          const fd2 = new FormData();
+          fd2.append("file", imgBlob, `ai_ad_${provider.id}_${Date.now()}.png`);
+          const upResp = await fetch("https://api.base44.app/api/apps/69d06ada8019d7e9edf7f8e8/storage/upload", { method: "POST", body: fd2 });
+          const upData = await upResp.json().catch(() => ({}));
+          if (upData.url) imageUrl = toCDNUrl(upData.url) || imageUrl;
+        } catch { /* keep data URI if upload fails */ }
       }
       const existingRecord = editingSlot !== "new" ? editingSlot : null;
       const existingSaved = existingRecord?.saved_images || [];
