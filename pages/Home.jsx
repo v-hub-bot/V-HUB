@@ -1153,22 +1153,20 @@ export default function Home() {
     }).catch(() => {});
 
     // ── Deep-link from Deals of the Week: /?provider=<entity_id> ──
-    // If URL has ?provider=ID, fetch that provider and open their detail view directly
+    // Fetch a single provider by ID instantly instead of loading all 500+
     const urlParams = new URLSearchParams(window.location.search);
     const deepLinkId = urlParams.get("provider");
     if (deepLinkId) {
       fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/getProviders", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "list_all" }),
+        body: JSON.stringify({ get_single: true, provider_id: deepLinkId }),
       })
         .then(r => r.json())
         .then(data => {
-          const all = Array.isArray(data) ? data : (data.providers || []);
-          const found = all.find(p => p.id === deepLinkId);
+          const found = data.provider || null;
           if (found) {
             setSelProv(found);
-            // Clean the URL so hitting Back works nicely
             window.history.replaceState({}, "", "/");
           }
         })

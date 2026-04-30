@@ -86,6 +86,30 @@ Deno.serve(async (req: Request) => {
       }
     }
 
+    // ── GET SINGLE PROVIDER BY ID (for deep-link from Deals page) ──────
+    if (body?.get_single === true) {
+      const { provider_id } = body;
+      if (!provider_id) return Response.json({ error: "Missing provider_id" }, { status: 400, headers: CORS });
+      try {
+        const prov = await withRetry(() => sr.entities.Provider.get(provider_id), "get-single");
+        if (!prov) return Response.json({ error: "Not found" }, { status: 404, headers: CORS });
+        // Fetch approved reviews for this provider
+        let reviews: any[] = [];
+        try {
+          reviews = await withRetry(() => sr.entities.ProviderReview.filter({ provider_id, is_approved: true }), "single-reviews");
+        } catch {}
+        reviews.sort((a:any,b:any) => (b.helpful_count||0)-(a.helpful_count||0));
+        let rating = prov.rating || 0;
+        if (reviews.length > 0) {
+          const avg = reviews.reduce((s:number,r:any)=>s+(r.rating||0),0)/reviews.length;
+          rating = Math.round(avg*10)/10;
+        }
+        return Response.json({ provider: { ...sanitize(prov), reviews, rating } }, { headers: CORS });
+      } catch (e: any) {
+        return Response.json({ error: e.message }, { status: 500, headers: CORS });
+      }
+    }
+
     // ── PROVIDER SELF-UPDATE ──────────────────────────────────────────
     if (body?.provider_update === true) {
       const { provider_id, vh_number, fields } = body;
