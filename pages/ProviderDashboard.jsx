@@ -979,6 +979,14 @@ function LoginScreen({ onLogin, onForgot }) {
 //       pay $10 via Stripe → goes live immediately for 7 days.
 //       NOT charged again until they manually launch another ad.
 
+// Convert Base44 storage API URL to public CDN URL
+function toCDNUrl(apiUrl) {
+  if (!apiUrl) return apiUrl;
+  const match = apiUrl.match(/\/files\/mp\/public\/([^\/]+)\/(.+)$/);
+  if (match) return `https://media.base44.com/images/public/${match[1]}/${match[2]}`;
+  return apiUrl;
+}
+
 function ClassifiedAdSection({ provider, refreshKey = 0 }) {
   const sectionRef = React.useRef(null);
   const [adSlots, setAdSlots]         = React.useState([]);
@@ -1115,8 +1123,9 @@ function ClassifiedAdSection({ provider, refreshKey = 0 }) {
       const upResp = await fetch("https://api.base44.app/api/apps/69d06ada8019d7e9edf7f8e8/storage/upload", { method: "POST", body: fd });
       const upData = await upResp.json();
       if (upData.url) {
-        setForm(p => ({ ...p, image_url: upData.url }));
-        setFilePreview(upData.url);
+        const cdnUrl = toCDNUrl(upData.url);
+        setForm(p => ({ ...p, image_url: cdnUrl }));
+        setFilePreview(cdnUrl);
         setFileObj(null);
       }
     } catch { /* keep filePreview, will re-upload on save */ }
@@ -1164,7 +1173,7 @@ function ClassifiedAdSection({ provider, refreshKey = 0 }) {
         fd.append("file", fileObj);
         const upResp = await fetch("https://api.base44.app/api/apps/69d06ada8019d7e9edf7f8e8/storage/upload", { method: "POST", body: fd });
         const upData = await upResp.json();
-        imageUrl = upData.url || imageUrl;
+        imageUrl = toCDNUrl(upData.url) || imageUrl;
       }
       const existingRecord = editingSlot !== "new" ? editingSlot : null;
       const existingSaved = existingRecord?.saved_images || [];
