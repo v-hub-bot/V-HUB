@@ -1259,12 +1259,6 @@ function ClassifiedAdSection({ provider, refreshKey = 0 }) {
     await loadAds();
   };
 
-  const handlePullLiveAd = async () => {
-    if (!window.confirm("Pull this ad? It will stop showing on Deals of the Week immediately. No refund is issued — you already paid for the 7-day run.")) return;
-    await ClassifiedAd.update(liveAd.id, { is_active: false });
-    await loadAds();
-  };
-
   // ── Stripe Checkout — ALWAYS required to go live ─────────────────────────
   const handleCheckout = async (adToActivate) => {
     setCheckoutErr(""); setCheckoutLoading(true);
@@ -1341,11 +1335,7 @@ function ClassifiedAdSection({ provider, refreshKey = 0 }) {
               <span style={{ fontSize: 13, fontWeight: 900, color: "#1B5E20", fontFamily: SERIF }}>🟢 Live Now:</span>
               <span style={{ fontSize: 13, color: "#2E7D32", fontFamily: SANS, fontWeight: 700 }}>{liveAd.headline}</span>
             </div>
-            <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-              <button onClick={() => openPreviewQueued(liveAd)} style={{ background: "none", border: `1.5px solid ${TEAL}`, color: TEAL, borderRadius: 4, padding: "4px 10px", fontSize: 11, cursor: "pointer", fontFamily: SANS, fontWeight: 700 }}>👁 Preview</button>
-              <button onClick={() => openEdit(liveAd)} style={{ background: "none", border: `1.5px solid ${BROWN_BTN}`, color: BROWN_BTN, borderRadius: 4, padding: "4px 10px", fontSize: 11, cursor: "pointer", fontFamily: SANS, fontWeight: 700 }}>✏ Edit</button>
-              <button onClick={handlePullLiveAd} style={{ background: "none", border: "1.5px solid #c00", color: "#c00", borderRadius: 4, padding: "4px 10px", fontSize: 11, cursor: "pointer", fontFamily: SANS, fontWeight: 700 }}>⏹ Pull Ad</button>
-            </div>
+            <button onClick={() => openPreviewQueued(liveAd)} style={{ background: "none", border: `1.5px solid ${TEAL}`, color: TEAL, borderRadius: 4, padding: "4px 10px", fontSize: 11, cursor: "pointer", fontFamily: SANS, fontWeight: 700 }}>👁 Preview</button>
           </div>
           {liveAd.deal_expires_at && (
             <div style={{ fontSize: 11, color: "#388E3C", fontFamily: SANS }}>
