@@ -1732,19 +1732,20 @@ export default function Home() {
           style={{ width: "100%", height: 240, objectFit: "cover", objectPosition: "center 55%", display: "block" }}
         />
 
-        {/* CLASSIFIEDS — full width, thick red border, links to Classifieds */}
+        {/* CLASSIFIEDS — full width, bold red, white text — eye-catching price-tag style */}
         <a href="/Classifieds" style={{ textDecoration: "none", display: "block", width: "100%" }}>
           <div style={{
-            border: "4px solid #CC0000",
-            outline: "1.5px solid #CC0000",
-            outlineOffset: "0px",
-            boxShadow: "0 0 10px 2px rgba(204,0,0,0.3)",
-            background: PAPER,
+            background: "linear-gradient(160deg, #D10000 0%, #A80000 45%, #820000 100%)",
+            boxShadow: "0 5px 22px rgba(180,0,0,0.7), inset 0 2px 0 rgba(255,100,100,0.25), inset 0 -2px 0 rgba(0,0,0,0.3)",
             width: "100%", boxSizing: "border-box",
             cursor: "pointer",
+            padding: "15px 16px 13px",
+            textAlign: "center",
+            borderTop: "3px solid #FF4444",
+            borderBottom: "3px solid #5A0000",
           }}>
-            <div style={{ padding: "5px 16px 2px", textAlign: "center", fontSize: 13, fontWeight: 900, letterSpacing: 2, color: "#CC0000", textTransform: "uppercase", fontFamily: "'Times New Roman', serif" }}>🔥 Deals of the Week!</div>
-            <div style={{ padding: "0 16px 5px", textAlign: "center", fontSize: 11, fontStyle: "italic", color: "#CC0000", fontFamily: "'Times New Roman', serif", opacity: 0.8 }}>Click here to see this week's deals →</div>
+            <div style={{ fontSize: 19, fontWeight: 900, letterSpacing: 2, color: "#FFFFFF", textTransform: "uppercase", fontFamily: "'Helvetica Neue', Arial, sans-serif", textShadow: "0 2px 6px rgba(0,0,0,0.6), 0 0 20px rgba(255,80,80,0.4)", lineHeight: 1.2 }}>🔥 Deals of the Week!</div>
+            <div style={{ fontSize: 12, fontWeight: 700, color: "rgba(255,255,255,0.92)", fontFamily: "'Helvetica Neue', Arial, sans-serif", marginTop: 4, letterSpacing: 1, textShadow: "0 1px 3px rgba(0,0,0,0.5)" }}>CLICK HERE — SEE THIS WEEK'S DEALS →</div>
           </div>
         </a>
 

@@ -14,6 +14,9 @@
     "Privacy": {
       "title": "Privacy"
     },
+    "Provider": {
+      "title": "Provider"
+    },
     "ProviderDashboard": {
       "title": "ProviderDashboard"
     },
@@ -22,9 +25,6 @@
     },
     "Wekcadmin": {
       "title": "Wekcadmin"
-    },
-    "Provider": {
-      "title": "Provider"
     }
   }
 }
