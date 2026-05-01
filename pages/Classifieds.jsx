@@ -268,15 +268,14 @@ function PeekCarousel({ ads, currentIndex, onPrev, onNext, setIndex }) {
   const total = ads.length;
   if (total === 0) return null;
 
-  // We show: prev (peeking left), active (center), next (peeking right)
-  const prevAd  = total > 1 ? ads[(currentIndex - 1 + total) % total] : null;
+  const prevAd   = total > 1 ? ads[(currentIndex - 1 + total) % total] : null;
   const activeAd = ads[currentIndex];
-  const nextAd  = total > 1 ? ads[(currentIndex + 1) % total] : null;
+  const nextAd   = total > 1 ? ads[(currentIndex + 1) % total] : null;
 
-  // For single ad: just show it centered, no peeks
+  // Single ad — just center it
   if (total === 1) {
     return (
-      <div style={{ padding: "0 16px" }}>
+      <div style={{ padding: "0 16px", maxWidth: 480, margin: "0 auto" }}>
         <AdCard ad={activeAd} active={true} />
       </div>
     );
@@ -284,84 +283,94 @@ function PeekCarousel({ ads, currentIndex, onPrev, onNext, setIndex }) {
 
   return (
     <div
-      style={{ position:"relative", width:"100%", overflow:"hidden" }}
+      style={{ position:"relative", width:"100%", userSelect:"none" }}
       onTouchStart={e => { window._tStart = e.touches[0].clientX; }}
       onTouchEnd={e => {
         const dx = e.changedTouches[0].clientX - (window._tStart || 0);
         if (Math.abs(dx) > 40) { dx < 0 ? onNext() : onPrev(); }
       }}
     >
-      {/* Track: 3 cards side by side, shifted so active is centered */}
-      {/* Each card slot: active = 78vw, peek = ~13vw visible on each side */}
+      {/* 3-card layout: flanking cards visible, center card pops out */}
       <div style={{
-        display:"flex",
-        alignItems:"flex-start",
-        // shift left so the center card is visible: each card is 78vw wide, peek cards start at -65vw
-        transform: "translateX(calc(-65vw + 11vw))",
-        transition:"transform 0.35s cubic-bezier(.4,0,.2,1)",
-        gap: "12px",
-        padding: "8px 0 16px",
+        display: "flex",
+        alignItems: "flex-start",
+        justifyContent: "center",
+        gap: 12,
+        padding: "8px 8px 16px",
       }}>
-        {/* Prev peek */}
-        <div style={{ width:"78vw", flexShrink:0 }}>
+        {/* Left card */}
+        <div
+          onClick={onPrev}
+          style={{
+            flex: "0 0 22%",
+            maxWidth: 160,
+            cursor: "pointer",
+            transform: "scale(0.88)",
+            opacity: 0.55,
+            transition: "transform 0.35s cubic-bezier(.4,0,.2,1), opacity 0.35s",
+            transformOrigin: "right center",
+          }}
+        >
           {prevAd && <AdCard ad={prevAd} active={false} onClick={onPrev} />}
         </div>
-        {/* Active center */}
-        <div style={{ width:"78vw", flexShrink:0 }}>
+
+        {/* Center card — full size, popped out */}
+        <div style={{
+          flex: "0 0 52%",
+          maxWidth: 420,
+          transition: "transform 0.35s cubic-bezier(.4,0,.2,1)",
+          zIndex: 2,
+        }}>
           <AdCard ad={activeAd} active={true} />
         </div>
-        {/* Next peek */}
-        <div style={{ width:"78vw", flexShrink:0 }}>
+
+        {/* Right card */}
+        <div
+          onClick={onNext}
+          style={{
+            flex: "0 0 22%",
+            maxWidth: 160,
+            cursor: "pointer",
+            transform: "scale(0.88)",
+            opacity: 0.55,
+            transition: "transform 0.35s cubic-bezier(.4,0,.2,1), opacity 0.35s",
+            transformOrigin: "left center",
+          }}
+        >
           {nextAd && <AdCard ad={nextAd} active={false} onClick={onNext} />}
         </div>
       </div>
 
-      {/* Left tap zone */}
-      <div
-        onClick={onPrev}
-        style={{
-          position:"absolute",left:0,top:0,bottom:0,width:"13vw",
-          cursor:"pointer",zIndex:10,
-          display:"flex",alignItems:"center",justifyContent:"center",
-        }}
-      >
-        <div style={{
-          width:32,height:32,borderRadius:"50%",
-          background:"rgba(0,0,0,0.45)",backdropFilter:"blur(4px)",
-          display:"flex",alignItems:"center",justifyContent:"center",
-          color:"#fff",fontSize:18,fontWeight:900,
-        }}>‹</div>
-      </div>
+      {/* Prev arrow */}
+      <div onClick={onPrev} style={{
+        position:"absolute", left:4, top:"35%",
+        width:36, height:36, borderRadius:"50%",
+        background:"rgba(0,0,0,0.5)", backdropFilter:"blur(4px)",
+        display:"flex", alignItems:"center", justifyContent:"center",
+        color:"#fff", fontSize:20, fontWeight:900, cursor:"pointer", zIndex:10,
+      }}>‹</div>
 
-      {/* Right tap zone */}
-      <div
-        onClick={onNext}
-        style={{
-          position:"absolute",right:0,top:0,bottom:0,width:"13vw",
-          cursor:"pointer",zIndex:10,
-          display:"flex",alignItems:"center",justifyContent:"center",
-        }}
-      >
-        <div style={{
-          width:32,height:32,borderRadius:"50%",
-          background:"rgba(0,0,0,0.45)",backdropFilter:"blur(4px)",
-          display:"flex",alignItems:"center",justifyContent:"center",
-          color:"#fff",fontSize:18,fontWeight:900,
-        }}>›</div>
-      </div>
+      {/* Next arrow */}
+      <div onClick={onNext} style={{
+        position:"absolute", right:4, top:"35%",
+        width:36, height:36, borderRadius:"50%",
+        background:"rgba(0,0,0,0.5)", backdropFilter:"blur(4px)",
+        display:"flex", alignItems:"center", justifyContent:"center",
+        color:"#fff", fontSize:20, fontWeight:900, cursor:"pointer", zIndex:10,
+      }}>›</div>
 
       {/* Dot indicators */}
-      <div style={{ display:"flex",justifyContent:"center",gap:6,marginTop:4 }}>
+      <div style={{ display:"flex", justifyContent:"center", gap:6, marginTop:4 }}>
         {ads.map((_,i) => (
           <div
             key={i}
             onClick={() => setIndex(i)}
             style={{
               width: i===currentIndex ? 20 : 6,
-              height:6,borderRadius:3,
+              height: 6, borderRadius: 3,
               background: i===currentIndex ? "#FFDB00" : "rgba(255,255,255,0.35)",
-              cursor:"pointer",
-              transition:"width 0.3s ease, background 0.3s ease",
+              cursor: "pointer",
+              transition: "width 0.3s ease, background 0.3s ease",
             }}
           />
         ))}
@@ -369,7 +378,7 @@ function PeekCarousel({ ads, currentIndex, onPrev, onNext, setIndex }) {
 
       {/* Counter */}
       {total > 1 && (
-        <div style={{ textAlign:"center",marginTop:8,fontSize:12,color:"rgba(255,255,255,0.6)",fontWeight:600 }}>
+        <div style={{ textAlign:"center", marginTop:8, fontSize:12, color:"rgba(255,255,255,0.6)", fontWeight:600 }}>
           {currentIndex+1} of {total}
         </div>
       )}
@@ -384,7 +393,7 @@ export default function Classifieds() {
   const [filterArea, setFilterArea] = useState("");
   const [filterService, setFilterService] = useState("");
   const [currentIndex, setCurrentIndex]   = useState(0);
-  const [showAll, setShowAll]             = useState(false);
+  const [showAll, setShowAll]             = useState(true);
   // Dropdown state
   const [svcOpen,  setSvcOpen]  = useState(false);
   const [vilOpen,  setVilOpen]  = useState(false);
@@ -947,7 +956,7 @@ export default function Classifieds() {
         )}
 
         {/* Netflix-style peek carousel */}
-        {!loading && !error && (hasFilter || showAll) && visibleAds.length > 0 && (
+        {!loading && !error && visibleAds.length > 0 && (
           <div id="deals-carousel">
           <PeekCarousel
             ads={visibleAds}
