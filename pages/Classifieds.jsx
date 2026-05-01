@@ -28,6 +28,7 @@ function fmt(d) {
 function AdCard({ ad, active, onClick }) {
   const expired = isExpired(ad);
   const [saved, setSaved] = useState(false);
+  const [showContact, setShowContact] = useState(false);
 
   const goToProvider = (e) => {
     e.stopPropagation();
@@ -40,9 +41,7 @@ function AdCard({ ad, active, onClick }) {
         source: "classifieds",
       }),
     }).catch(() => {});
-    if (ad._provider_entity_id) {
-      window.location.href = `/Home?provider=${ad._provider_entity_id}`;
-    }
+    setShowContact(true);
   };
 
   const handleShare = async (e) => {
@@ -151,6 +150,115 @@ function AdCard({ ad, active, onClick }) {
           </button>
         )}
       </div>
+
+      {/* ── Contact Modal / Bottom Sheet ── */}
+      {showContact && (
+        <div
+          onClick={() => setShowContact(false)}
+          style={{
+            position:"fixed",inset:0,zIndex:1000,
+            background:"rgba(0,0,0,0.6)",
+            display:"flex",alignItems:"flex-end",justifyContent:"center",
+          }}
+        >
+          <div
+            onClick={e => e.stopPropagation()}
+            style={{
+              width:"100%",maxWidth:480,
+              background:"#fff",borderRadius:"20px 20px 0 0",
+              padding:"24px 20px 36px",
+              boxShadow:"0 -4px 32px rgba(0,0,0,0.25)",
+              animation:"slideUp 0.25s ease",
+            }}
+          >
+            <style>{`@keyframes slideUp { from { transform: translateY(100%); opacity:0; } to { transform: translateY(0); opacity:1; } }`}</style>
+
+            {/* Handle */}
+            <div style={{ width:40,height:4,borderRadius:2,background:"#ddd",margin:"0 auto 20px" }} />
+
+            {/* Business name */}
+            <div style={{ fontSize:20,fontWeight:900,color:"#1B3D6F",marginBottom:4 }}>
+              {ad.provider_name}
+            </div>
+
+            {/* Category / headline */}
+            {ad._provider_category && (
+              <div style={{ fontSize:13,color:"#7a6652",marginBottom:12 }}>{ad._provider_category}</div>
+            )}
+            {ad.headline && (
+              <div style={{
+                background:"#fffbe6",border:"1px solid #FFDB00",
+                borderRadius:8,padding:"10px 14px",marginBottom:16,
+                fontSize:14,color:"#1a0a00",fontStyle:"italic",lineHeight:1.5,
+              }}>
+                🏷️ {ad.headline}
+              </div>
+            )}
+            {ad.body && (
+              <div style={{ fontSize:13,color:"#444",lineHeight:1.6,marginBottom:16 }}>
+                {ad.body}
+              </div>
+            )}
+
+            {/* Contact actions */}
+            <div style={{ display:"flex",flexDirection:"column",gap:10 }}>
+              {ad._provider_phone && (
+                <a href={`tel:${ad._provider_phone}`} style={{
+                  display:"flex",alignItems:"center",gap:10,
+                  background:"#1A6B3C",color:"#fff",
+                  borderRadius:10,padding:"13px 18px",
+                  textDecoration:"none",fontWeight:800,fontSize:15,
+                }}>
+                  📞 Call {ad._provider_phone}
+                </a>
+              )}
+              {ad._provider_website && (
+                <a href={ad._provider_website.startsWith("http") ? ad._provider_website : `https://${ad._provider_website}`}
+                  target="_blank" rel="noopener noreferrer"
+                  style={{
+                    display:"flex",alignItems:"center",gap:10,
+                    background:"#1B3D6F",color:"#fff",
+                    borderRadius:10,padding:"13px 18px",
+                    textDecoration:"none",fontWeight:800,fontSize:15,
+                  }}
+                >
+                  🌐 Visit Website
+                </a>
+              )}
+              {ad._provider_entity_id && (
+                <a href={`/Home?provider=${ad._provider_entity_id}`}
+                  style={{
+                    display:"flex",alignItems:"center",gap:10,
+                    background:"#f5f0e8",color:"#1B3D6F",
+                    borderRadius:10,padding:"13px 18px",
+                    textDecoration:"none",fontWeight:700,fontSize:14,
+                    border:"1px solid #ddd",
+                  }}
+                >
+                  👤 View Full Profile & Reviews
+                </a>
+              )}
+            </div>
+
+            {/* Expiry */}
+            {ad.deal_expires_at && !isExpired(ad) && (
+              <div style={{ marginTop:16,textAlign:"center",fontSize:12,color:"#CC0000",fontWeight:600 }}>
+                Offer expires {fmt(ad.deal_expires_at)}
+              </div>
+            )}
+
+            <button
+              onClick={() => setShowContact(false)}
+              style={{
+                marginTop:18,width:"100%",background:"none",border:"none",
+                color:"#aaa",fontSize:14,cursor:"pointer",padding:8,
+              }}
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

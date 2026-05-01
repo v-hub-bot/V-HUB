@@ -131,6 +131,8 @@ Deno.serve(async (req: Request) => {
         _provider_areas:     areaNames,
         _provider_services:  svcNames,
         _provider_category:  catName,
+        _provider_phone:     prov.phone || null,
+        _provider_website:   prov.website || null,
       };
     });
 
