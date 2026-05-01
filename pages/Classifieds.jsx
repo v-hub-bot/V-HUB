@@ -24,12 +24,13 @@ function fmt(d) {
   catch { return ""; }
 }
 
-// ── Single Ad Card ────────────────────────────────────────────────────
-function AdCard({ ad, index, total, onPrev, onNext }) {
+// ── Single Ad Card (used inside carousel) ───────────────────────────
+function AdCard({ ad, active, onClick }) {
   const expired = isExpired(ad);
   const [saved, setSaved] = useState(false);
 
-  const goToProvider = () => {
+  const goToProvider = (e) => {
+    e.stopPropagation();
     fetch(`${API_BASE}/trackEvent`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -57,202 +58,217 @@ function AdCard({ ad, index, total, onPrev, onNext }) {
     if (navigator.share) {
       try { await navigator.share(shareData); } catch (_) {}
     } else {
-      // Fallback: copy link to clipboard
       try {
         await navigator.clipboard.writeText(shareUrl);
         setSaved(true);
         setTimeout(() => setSaved(false), 2000);
-      } catch (_) {
-        window.open(shareUrl, "_blank");
-      }
+      } catch (_) { window.open(shareUrl, "_blank"); }
     }
   };
 
   return (
-    <div style={{ position: "relative" }}>
-
-      {/* ── Carousel counter ── */}
-      {total > 1 && (
-        <div style={{
-          textAlign: "center", marginBottom: 10,
-          fontSize: 13, color: "rgba(255,255,255,0.7)", fontWeight: 600,
-          fontFamily: "Georgia, serif", letterSpacing: 0.5,
-        }}>
-          Deal {index + 1} of {total}
-        </div>
-      )}
-
-      {/* ── Single card: image on top, banner below — NO overflow:hidden so nothing clips ── */}
-
-      {/* Image section — rounded top corners only */}
+    <div
+      onClick={!active ? onClick : undefined}
+      style={{
+        transition: "transform 0.35s cubic-bezier(.4,0,.2,1), opacity 0.35s ease",
+        transform: active ? "scale(1)" : "scale(0.88)",
+        opacity: active ? 1 : 0.55,
+        cursor: active ? "default" : "pointer",
+        flexShrink: 0,
+        width: "100%",
+        userSelect: "none",
+      }}
+    >
+      {/* Image section */}
       <div style={{
         borderRadius: "16px 16px 0 0",
         overflow: "hidden",
-        boxShadow: expired ? `0 0 0 2px ${MUTED}` : "0 0 0 2px #FFDB00, 0 -2px 0 0 #FFDB00",
+        boxShadow: expired ? `0 0 0 2px #7a6652` : active ? "0 0 0 2px #FFDB00, 0 -2px 0 0 #FFDB00" : "0 0 0 2px rgba(255,219,0,0.3)",
         opacity: expired ? 0.5 : 1,
         position: "relative",
       }}>
-        {/* Top accent bar */}
-        {!expired && (
-          <div style={{ height: 5, background: "linear-gradient(90deg,#E8431A,#FFDB00,#00BFA5)" }} />
-        )}
-
-        {/* Expired badge */}
+        {!expired && <div style={{ height: 5, background: "linear-gradient(90deg,#E8431A,#FFDB00,#00BFA5)" }} />}
         {expired && (
-          <div style={{
-            position: "absolute", top: 12, left: 12, zIndex: 10,
-            background: "rgba(0,0,0,0.7)", color: WHITE,
-            fontSize: 11, fontWeight: 700, padding: "4px 10px",
-            borderRadius: 20, textTransform: "uppercase", letterSpacing: 1,
-          }}>Expired</div>
+          <div style={{ position:"absolute",top:12,left:12,zIndex:10,background:"rgba(0,0,0,0.7)",color:"#fff",fontSize:11,fontWeight:700,padding:"4px 10px",borderRadius:20,textTransform:"uppercase",letterSpacing:1 }}>Expired</div>
         )}
-
-        {/* Share button */}
-        {!expired && (
+        {active && !expired && (
           <button onClick={handleShare} style={{
-            position: "absolute", top: 12, right: 12, zIndex: 10,
-            background: saved ? GREEN : "rgba(0,0,0,0.55)",
-            border: "none", borderRadius: 20,
-            color: WHITE, fontSize: 11, fontWeight: 700,
-            padding: "5px 12px", cursor: "pointer",
-            display: "flex", alignItems: "center", gap: 4,
-            backdropFilter: "blur(4px)",
+            position:"absolute",top:12,right:12,zIndex:10,
+            background: saved ? "#1A6B3C" : "rgba(0,0,0,0.55)",
+            border:"none",borderRadius:20,color:"#fff",fontSize:11,fontWeight:700,
+            padding:"5px 12px",cursor:"pointer",display:"flex",alignItems:"center",gap:4,
+            backdropFilter:"blur(4px)",
           }}>
             {saved ? "✓ Link Copied!" : "↗ Share"}
           </button>
         )}
-
-        {/* Full ad image — 100% width, natural height, NEVER clipped */}
         {ad.image_url ? (
           <img
             src={ad.image_url}
             alt={ad.headline || ad.provider_name}
-            style={{ width: "100%", height: "auto", display: "block" }}
+            style={{ width:"100%", height:"auto", display:"block" }}
             onError={e => { e.target.style.display = "none"; }}
           />
         ) : (
-          <div style={{
-            width: "100%", paddingTop: "100%", position: "relative",
-            background: `linear-gradient(135deg, ${NAVY}, ${TEAL})`,
-          }}>
-            <span style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%,-50%)", color: WHITE, fontSize: 48 }}>🏷️</span>
+          <div style={{ width:"100%",paddingTop:"100%",position:"relative",background:`linear-gradient(135deg,#1B3D6F,#00BFA5)` }}>
+            <span style={{ position:"absolute",top:"50%",left:"50%",transform:"translate(-50%,-50%)",color:"#fff",fontSize:48 }}>🏷️</span>
           </div>
         )}
       </div>
 
-      {/* Yellow divider line */}
-      <div style={{ height: 3, background: expired ? MUTED : "#FFDB00" }} />
+      {/* Yellow divider */}
+      <div style={{ height:3, background: expired ? "#7a6652" : "#FFDB00" }} />
 
-      {/* Banner — rounded bottom corners, sits fully below the image */}
+      {/* Banner */}
       <div style={{
-        borderRadius: "0 0 16px 16px",
-        overflow: "hidden",
-        boxShadow: expired ? `0 0 0 2px ${MUTED}` : "0 2px 0 2px #FFDB00, 0 8px 32px rgba(232,67,26,0.25), 0 2px 8px rgba(0,0,0,0.3)",
+        borderRadius:"0 0 16px 16px",
+        overflow:"hidden",
+        boxShadow: expired ? `0 0 0 2px #7a6652` : active ? "0 2px 0 2px #FFDB00, 0 8px 32px rgba(232,67,26,0.25)" : "none",
         opacity: expired ? 0.5 : 1,
-        padding: "14px 16px 18px",
-        background: WHITE,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-        gap: 12,
+        padding: active ? "14px 16px 18px" : "10px 12px 14px",
+        background:"#ffffff",
+        display:"flex",alignItems:"center",justifyContent:"space-between",gap:12,
       }}>
-        <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>
-          <div style={{ fontSize: 15, fontWeight: 900, color: NAVY }}>
-            {ad.provider_name}
-          </div>
-          {ad.headline && (
-            <div style={{ fontSize: 13, color: INK, fontStyle: "italic" }}>
-              {ad.headline}
-            </div>
+        <div style={{ display:"flex",flexDirection:"column",gap:3 }}>
+          <div style={{ fontSize: active?15:13, fontWeight:900, color:"#1B3D6F" }}>{ad.provider_name}</div>
+          {ad.headline && active && (
+            <div style={{ fontSize:13,color:"#1a0a00",fontStyle:"italic" }}>{ad.headline}</div>
           )}
-          {ad.deal_expires_at && !expired && (
-            <div style={{ fontSize: 11, color: RED, fontWeight: 600 }}>
-              Offer expires {fmt(ad.deal_expires_at)}
-            </div>
+          {ad.deal_expires_at && !expired && active && (
+            <div style={{ fontSize:11,color:"#CC0000",fontWeight:600 }}>Offer expires {fmt(ad.deal_expires_at)}</div>
           )}
         </div>
-        {!expired && ad._provider_entity_id && (
+        {active && !expired && ad._provider_entity_id && (
           <button onClick={goToProvider} style={{
-            background: `linear-gradient(135deg, ${ORANGE}, #c93510)`,
-            color: WHITE, border: "none", borderRadius: 8,
-            fontWeight: 800, fontSize: 13, padding: "10px 18px",
-            cursor: "pointer", whiteSpace: "nowrap",
-            boxShadow: "0 2px 8px rgba(232,67,26,0.4)",
-            flexShrink: 0,
+            background:"linear-gradient(135deg,#E8431A,#c93510)",
+            color:"#fff",border:"none",borderRadius:8,
+            fontWeight:800,fontSize:13,padding:"10px 18px",
+            cursor:"pointer",whiteSpace:"nowrap",
+            boxShadow:"0 2px 8px rgba(232,67,26,0.4)",
+            flexShrink:0,
           }}>
-            Contact Provider →
+            Contact →
           </button>
         )}
       </div>
+    </div>
+  );
+}
 
-      {/* ── Left / Right nav arrows ── */}
-      {total > 1 && (
+// ── Netflix-style Peek Carousel ──────────────────────────────────────
+function PeekCarousel({ ads, currentIndex, onPrev, onNext, setIndex }) {
+  const total = ads.length;
+  if (total === 0) return null;
+
+  // We show: prev (peeking left), active (center), next (peeking right)
+  const prevAd  = total > 1 ? ads[(currentIndex - 1 + total) % total] : null;
+  const activeAd = ads[currentIndex];
+  const nextAd  = total > 1 ? ads[(currentIndex + 1) % total] : null;
+
+  // For single ad: just show it centered, no peeks
+  if (total === 1) {
+    return (
+      <div style={{ padding: "0 16px" }}>
+        <AdCard ad={activeAd} active={true} />
+      </div>
+    );
+  }
+
+  return (
+    <div
+      style={{ position:"relative", width:"100%", overflow:"hidden" }}
+      onTouchStart={e => { window._tStart = e.touches[0].clientX; }}
+      onTouchEnd={e => {
+        const dx = e.changedTouches[0].clientX - (window._tStart || 0);
+        if (Math.abs(dx) > 40) { dx < 0 ? onNext() : onPrev(); }
+      }}
+    >
+      {/* Track: 3 cards side by side, shifted so active is centered */}
+      {/* Each card slot: active = 78vw, peek = ~13vw visible on each side */}
+      <div style={{
+        display:"flex",
+        alignItems:"flex-start",
+        // shift left so the center card is visible: each card is 78vw wide, peek cards start at -65vw
+        transform: "translateX(calc(-65vw + 11vw))",
+        transition:"transform 0.35s cubic-bezier(.4,0,.2,1)",
+        gap: "12px",
+        padding: "8px 0 16px",
+      }}>
+        {/* Prev peek */}
+        <div style={{ width:"78vw", flexShrink:0 }}>
+          {prevAd && <AdCard ad={prevAd} active={false} onClick={onPrev} />}
+        </div>
+        {/* Active center */}
+        <div style={{ width:"78vw", flexShrink:0 }}>
+          <AdCard ad={activeAd} active={true} />
+        </div>
+        {/* Next peek */}
+        <div style={{ width:"78vw", flexShrink:0 }}>
+          {nextAd && <AdCard ad={nextAd} active={false} onClick={onNext} />}
+        </div>
+      </div>
+
+      {/* Left tap zone */}
+      <div
+        onClick={onPrev}
+        style={{
+          position:"absolute",left:0,top:0,bottom:0,width:"13vw",
+          cursor:"pointer",zIndex:10,
+          display:"flex",alignItems:"center",justifyContent:"center",
+        }}
+      >
         <div style={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          gap: 16,
-          marginTop: 18,
-        }}>
-          <button
-            onClick={onPrev}
-            disabled={index === 0}
-            style={{
-              width: 48, height: 48, borderRadius: "50%",
-              background: index === 0 ? "rgba(255,255,255,0.1)" : "linear-gradient(135deg,#E8431A,#c93510)",
-              color: index === 0 ? "rgba(255,255,255,0.25)" : WHITE,
-              border: "none", fontSize: 22, fontWeight: 900,
-              cursor: index === 0 ? "default" : "pointer",
-              display: "flex", alignItems: "center", justifyContent: "center",
-              boxShadow: index === 0 ? "none" : "0 4px 14px rgba(232,67,26,0.5)",
-              transition: "all 0.15s",
-            }}
-            title="Previous deal"
-          >‹</button>
+          width:32,height:32,borderRadius:"50%",
+          background:"rgba(0,0,0,0.45)",backdropFilter:"blur(4px)",
+          display:"flex",alignItems:"center",justifyContent:"center",
+          color:"#fff",fontSize:18,fontWeight:900,
+        }}>‹</div>
+      </div>
 
-          {/* Dot indicators */}
-          <div style={{ display: "flex", gap: 7, alignItems: "center" }}>
-            {Array.from({ length: total }).map((_, i) => (
-              <div
-                key={i}
-                style={{
-                  width: i === index ? 10 : 7,
-                  height: i === index ? 10 : 7,
-                  borderRadius: "50%",
-                  background: i === index ? ORANGE : "#ccc",
-                  transition: "all 0.15s",
-                  cursor: "pointer",
-                }}
-                onClick={() => {
-                  if (i < index) { for (let j = 0; j < index - i; j++) onPrev(); }
-                  else { for (let j = 0; j < i - index; j++) onNext(); }
-                }}
-              />
-            ))}
-          </div>
+      {/* Right tap zone */}
+      <div
+        onClick={onNext}
+        style={{
+          position:"absolute",right:0,top:0,bottom:0,width:"13vw",
+          cursor:"pointer",zIndex:10,
+          display:"flex",alignItems:"center",justifyContent:"center",
+        }}
+      >
+        <div style={{
+          width:32,height:32,borderRadius:"50%",
+          background:"rgba(0,0,0,0.45)",backdropFilter:"blur(4px)",
+          display:"flex",alignItems:"center",justifyContent:"center",
+          color:"#fff",fontSize:18,fontWeight:900,
+        }}>›</div>
+      </div>
 
-          <button
-            onClick={onNext}
-            disabled={index === total - 1}
+      {/* Dot indicators */}
+      <div style={{ display:"flex",justifyContent:"center",gap:6,marginTop:4 }}>
+        {ads.map((_,i) => (
+          <div
+            key={i}
+            onClick={() => setIndex(i)}
             style={{
-              width: 48, height: 48, borderRadius: "50%",
-              background: index === total - 1 ? "rgba(255,255,255,0.1)" : "linear-gradient(135deg,#E8431A,#c93510)",
-              color: index === total - 1 ? "rgba(255,255,255,0.25)" : WHITE,
-              border: "none", fontSize: 22, fontWeight: 900,
-              cursor: index === total - 1 ? "default" : "pointer",
-              display: "flex", alignItems: "center", justifyContent: "center",
-              boxShadow: index === total - 1 ? "none" : "0 4px 14px rgba(232,67,26,0.5)",
-              transition: "all 0.15s",
+              width: i===currentIndex ? 20 : 6,
+              height:6,borderRadius:3,
+              background: i===currentIndex ? "#FFDB00" : "rgba(255,255,255,0.35)",
+              cursor:"pointer",
+              transition:"width 0.3s ease, background 0.3s ease",
             }}
-            title="Next deal"
-          >›</button>
+          />
+        ))}
+      </div>
+
+      {/* Counter */}
+      {total > 1 && (
+        <div style={{ textAlign:"center",marginTop:8,fontSize:12,color:"rgba(255,255,255,0.6)",fontWeight:600 }}>
+          {currentIndex+1} of {total}
         </div>
       )}
     </div>
   );
 }
 
-// ── Main Page ────────────────────────────────────────────────────────
 export default function Classifieds() {
   const [ads, setAds]               = useState([]);
   const [loading, setLoading]       = useState(true);
@@ -810,14 +826,14 @@ export default function Classifieds() {
           </div>
         )}
 
-        {/* Single ad carousel */}
-        {!loading && !error && hasFilter && visibleAds.length > 0 && currentAd && (
-          <AdCard
-            ad={currentAd}
-            index={currentIndex}
-            total={visibleAds.length}
+        {/* Netflix-style peek carousel */}
+        {!loading && !error && hasFilter && visibleAds.length > 0 && (
+          <PeekCarousel
+            ads={visibleAds}
+            currentIndex={currentIndex}
             onPrev={handlePrev}
             onNext={handleNext}
+            setIndex={setCurrentIndex}
           />
         )}
       </div>
