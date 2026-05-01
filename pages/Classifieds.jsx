@@ -118,7 +118,7 @@ function AdCard({ ad, index, total, onPrev, onNext }) {
           <img
             src={ad.image_url}
             alt={ad.headline || ad.provider_name}
-            style={{ width: "100%", display: "block", objectFit: "contain" }}
+            style={{ width: "100%", display: "block", maxHeight: "420px", objectFit: "cover", objectPosition: "center center" }}
             onError={e => { e.target.style.display = "none"; }}
           />
         ) : (
