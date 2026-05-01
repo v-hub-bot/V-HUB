@@ -541,10 +541,10 @@ export default function Classifieds() {
     { id: "69d06c54c9c22e67aed3c126", name: "DeSoto" },
     { id: "69e047e27ddcca3eaa816012", name: "Dunedin" },
     { id: "69e9a307d1bc6cfe7247eaae", name: "Duval" },
-    { id: "69d06c4a4f1e1017a77a701b", name: "Eastport (All)" },
+    { id: "69d06c4a4f1e1017a77a701b", name: "Eastport" },
     { id: "69d06c54c9c22e67aed3c102", name: "El Cortez" },
-    { id: "69d06c4a4f1e1017a77a7019", name: "Established Villages (All)" },
-    { id: "69d06c4a4f1e1017a77a701c", name: "Family / Non-Age-Restricted (All)" },
+    { id: "69d06c4a4f1e1017a77a7019", name: "Established Villages" },
+    { id: "69d06c4a4f1e1017a77a701c", name: "Family / Non-Age-Restricted" },
     { id: "69d06c54c9c22e67aed3c127", name: "Fenney" },
     { id: "69e047e27ddcca3eaa816013", name: "Fernandina" },
     { id: "69e047e27ddcca3eaa816014", name: "Gilchrist" },
@@ -556,7 +556,7 @@ export default function Classifieds() {
     { id: "69d06c54c9c22e67aed3c129", name: "Hawkins" },
     { id: "69e9a307d1bc6cfe7247eab1", name: "Hemingway" },
     { id: "69e047e27ddcca3eaa816015", name: "Hillsborough" },
-    { id: "69d06c4a4f1e1017a77a7018", name: "Historic Side (All)" },
+    { id: "69d06c4a4f1e1017a77a7018", name: "Historic Side" },
     { id: "69e047e27ddcca3eaa816016", name: "LaBelle" },
     { id: "69e9a307d1bc6cfe7247eab2", name: "Lago Vista" },
     { id: "69d06c54c9c22e67aed3c133", name: "Lake Denham" },
@@ -575,7 +575,7 @@ export default function Classifieds() {
     { id: "69d06c54c9c22e67aed3c106", name: "Mira Mesa" },
     { id: "69d06c54c9c22e67aed3c12d", name: "Monarch Grove" },
     { id: "69d06c54c9c22e67aed3c131", name: "Moultrie Creek" },
-    { id: "69d06c4a4f1e1017a77a701a", name: "Newer Villages (All)" },
+    { id: "69d06c4a4f1e1017a77a701a", name: "Newer Villages" },
     { id: "69d06c54c9c22e67aed3c132", name: "Newell" },
     { id: "69e9a307d1bc6cfe7247eac5", name: "Oak Hollow" },
     { id: "69d06c54c9c22e67aed3c137", name: "Oak Meadows" },
@@ -653,7 +653,7 @@ export default function Classifieds() {
 
     // Area filter — match against provider's actual service_areas list
     if (filterArea) {
-      // Strip "(All)" suffix from macro group selections e.g. "Eastport (All)" → "Eastport"
+      // Strip "(All)" suffix from macro group selections e.g. "Eastport" → "Eastport"
       const areaLower = filterArea.toLowerCase().replace(/\s*\(all\)\s*$/i, "").trim();
       const areas = ad._provider_areas || [];
       // "ALL" means mobile provider — serves every village
