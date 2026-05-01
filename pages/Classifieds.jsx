@@ -128,20 +128,28 @@ function AdCard({ ad, active, onClick }) {
         background:"#ffffff",
         display:"flex",alignItems:"center",justifyContent:"space-between",gap:12,
       }}>
-        <div style={{ display:"flex",flexDirection:"column",gap:3 }}>
-          <div style={{ fontSize: active?15:13, fontWeight:900, color:"#1B3D6F" }}>{ad.provider_name}</div>
+        <div style={{ display:"flex",flexDirection:"column",gap:2, minWidth:0, flex:1 }}>
+          <div style={{
+            fontSize: 13, fontWeight:900, color:"#1B3D6F",
+            whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis"
+          }}>{ad.provider_name}</div>
           {ad.headline && active && (
-            <div style={{ fontSize:13,color:"#1a0a00",fontStyle:"italic" }}>{ad.headline}</div>
+            <div style={{
+              fontSize:11, color:"#1a0a00", fontStyle:"italic",
+              whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis"
+            }}>{ad.headline}</div>
           )}
           {ad.deal_expires_at && !expired && active && (
-            <div style={{ fontSize:11,color:"#CC0000",fontWeight:600 }}>Offer expires {fmt(ad.deal_expires_at)}</div>
+            <div style={{ fontSize:10, color:"#CC0000", fontWeight:600, whiteSpace:"nowrap" }}>
+              Expires {fmt(ad.deal_expires_at)}
+            </div>
           )}
         </div>
         {active && !expired && ad._provider_entity_id && (
           <button onClick={goToProvider} style={{
             background:"linear-gradient(135deg,#E8431A,#c93510)",
             color:"#fff",border:"none",borderRadius:8,
-            fontWeight:800,fontSize:13,padding:"10px 18px",
+            fontWeight:800,fontSize:12,padding:"8px 14px",
             cursor:"pointer",whiteSpace:"nowrap",
             boxShadow:"0 2px 8px rgba(232,67,26,0.4)",
             flexShrink:0,
@@ -293,12 +301,12 @@ function PeekCarousel({ ads, currentIndex, onPrev, onNext, setIndex }) {
       {/* 3-card layout: flanking cards visible, center card pops out */}
       <div style={{
         display: "flex",
-        alignItems: "center",
+        alignItems: "flex-start",
         justifyContent: "center",
         gap: 10,
         padding: "8px 4px 16px",
       }}>
-        {/* Left card — same size, no dim */}
+        {/* Left card */}
         <div
           onClick={onPrev}
           style={{
@@ -313,21 +321,22 @@ function PeekCarousel({ ads, currentIndex, onPrev, onNext, setIndex }) {
           {prevAd && <AdCard ad={prevAd} active={false} onClick={onPrev} />}
         </div>
 
-        {/* Center card — same width, pops with scale + glow */}
+        {/* Center card — same image size, pops with shadow + gold border only */}
         <div style={{
-          flex: "0 0 34%",
-          maxWidth: 260,
+          flex: "0 0 30%",
+          maxWidth: 220,
           transition: "transform 0.35s cubic-bezier(.4,0,.2,1)",
           zIndex: 2,
-          transform: "scale(1.06)",
           borderRadius: 16,
-          overflow: "hidden",
-          boxShadow: "0 12px 40px rgba(0,0,0,0.55), 0 0 0 2px #FFDB00",
+          overflow: "visible",
+          boxShadow: "0 12px 40px rgba(0,0,0,0.55), 0 0 0 2.5px #FFDB00",
+          position: "relative",
+          top: -8,
         }}>
           <AdCard ad={activeAd} active={true} />
         </div>
 
-        {/* Right card — same size, no dim */}
+        {/* Right card */}
         <div
           onClick={onNext}
           style={{
