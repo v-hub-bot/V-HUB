@@ -35,7 +35,7 @@ async function generateImage(model: string, prompt: string, apiKey: string): Pro
       prompt,
       n: 1,
       size: "1024x1024",
-      quality: "standard",
+      quality: "high",
     }),
   });
 
