@@ -75,7 +75,6 @@ function AdCard({ ad, index, total, onPrev, onNext }) {
       <div style={{
         borderRadius: 16,
         overflow: "hidden",
-        /* box-shadow renders OUTSIDE the box, so it never clips the image unlike border */
         boxShadow: expired
           ? `0 0 0 2px ${MUTED}`
           : "0 0 0 2px #FFDB00, 0 8px 32px rgba(232,67,26,0.25), 0 2px 8px rgba(0,0,0,0.3)",
@@ -118,31 +117,45 @@ function AdCard({ ad, index, total, onPrev, onNext }) {
           </button>
         )}
 
-        {/* Full ad image — wrapped in its own clip container so the card border doesn't shave pixels */}
-        <div style={{ width: "100%", overflow: "hidden", flexShrink: 0 }}>
+        {/* Ad image — fills available space, objectFit:contain shows FULL image, no crop */}
+        <div style={{
+          width: "100%",
+          /* 72vw ≈ card width on mobile; 420px caps on desktop. Leaves ~110px for banner */
+          height: "min(72vw, 420px)",
+          background: "#0a1628",
+          flexShrink: 0,
+          overflow: "hidden",
+        }}>
           {ad.image_url ? (
             <img
               src={ad.image_url}
               alt={ad.headline || ad.provider_name}
-              style={{ width: "100%", height: "auto", display: "block" }}
+              style={{
+                width: "100%",
+                height: "100%",
+                display: "block",
+                objectFit: "cover",
+                objectPosition: "center bottom",
+              }}
               onError={e => { e.target.style.display = "none"; }}
             />
           ) : (
             <div style={{
-              width: "100%", paddingTop: "100%", position: "relative",
+              width: "100%", height: "100%",
               background: `linear-gradient(135deg, ${NAVY}, ${TEAL})`,
+              display: "flex", alignItems: "center", justifyContent: "center",
             }}>
-              <span style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%,-50%)", color: WHITE, fontSize: 48 }}>🏷️</span>
+              <span style={{ color: WHITE, fontSize: 48 }}>🏷️</span>
             </div>
           )}
         </div>
 
-        {/* Thin divider line between image and banner */}
+        {/* Thin yellow divider line */}
         <div style={{ height: 2, background: expired ? MUTED : "#FFDB00", flexShrink: 0 }} />
 
         {/* Banner strip — attached directly below image */}
         <div style={{
-          padding: "14px 16px 16px",
+          padding: "12px 16px 14px",
           background: WHITE,
           display: "flex",
           alignItems: "center",
@@ -151,33 +164,33 @@ function AdCard({ ad, index, total, onPrev, onNext }) {
           flexWrap: "wrap",
           flexShrink: 0,
         }}>
-        <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>
-          <div style={{ fontSize: 15, fontWeight: 900, color: NAVY }}>
-            {ad.provider_name}
+          <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+            <div style={{ fontSize: 15, fontWeight: 900, color: NAVY }}>
+              {ad.provider_name}
+            </div>
+            {ad.headline && (
+              <div style={{ fontSize: 13, color: INK, fontStyle: "italic" }}>
+                {ad.headline}
+              </div>
+            )}
+            {ad.deal_expires_at && !expired && (
+              <div style={{ fontSize: 11, color: RED, fontWeight: 600 }}>
+                Offer expires {fmt(ad.deal_expires_at)}
+              </div>
+            )}
           </div>
-          {ad.headline && (
-            <div style={{ fontSize: 13, color: INK, fontStyle: "italic" }}>
-              {ad.headline}
-            </div>
-          )}
-          {ad.deal_expires_at && !expired && (
-            <div style={{ fontSize: 11, color: RED, fontWeight: 600 }}>
-              Offer expires {fmt(ad.deal_expires_at)}
-            </div>
-          )}
-        </div>
 
-        {!expired && ad._provider_entity_id && (
-          <button onClick={goToProvider} style={{
-            background: `linear-gradient(135deg, ${ORANGE}, #c93510)`,
-            color: WHITE, border: "none", borderRadius: 8,
-            fontWeight: 800, fontSize: 13, padding: "10px 18px",
-            cursor: "pointer", whiteSpace: "nowrap",
-            boxShadow: "0 2px 8px rgba(232,67,26,0.4)",
-          }}>
-            Contact Provider →
-          </button>
-        )}
+          {!expired && ad._provider_entity_id && (
+            <button onClick={goToProvider} style={{
+              background: `linear-gradient(135deg, ${ORANGE}, #c93510)`,
+              color: WHITE, border: "none", borderRadius: 8,
+              fontWeight: 800, fontSize: 13, padding: "10px 18px",
+              cursor: "pointer", whiteSpace: "nowrap",
+              boxShadow: "0 2px 8px rgba(232,67,26,0.4)",
+            }}>
+              Contact Provider →
+            </button>
+          )}
         </div>
       </div>
 
