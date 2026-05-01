@@ -79,6 +79,8 @@ function AdCard({ ad, index, total, onPrev, onNext }) {
         opacity: expired ? 0.5 : 1,
         position: "relative",
         border: expired ? `2px solid ${MUTED}` : "2px solid #FFDB00",
+        display: "flex",
+        flexDirection: "column",
       }}>
         {/* Top accent bar */}
         {!expired && (
@@ -112,8 +114,8 @@ function AdCard({ ad, index, total, onPrev, onNext }) {
           </button>
         )}
 
-        {/* Hero image — capped so bottom strip is always visible */}
-        <div style={{ width: "100%", background: "#0a1628", overflow: "hidden", borderRadius: "14px 14px 0 0" }}>
+        {/* Hero image — fixed pixel cap so bottom strip always shows */}
+        <div style={{ width: "100%", background: "#0a1628", borderRadius: "14px 14px 0 0" }}>
           {ad.image_url ? (
             <img
               src={ad.image_url}
@@ -121,7 +123,7 @@ function AdCard({ ad, index, total, onPrev, onNext }) {
               style={{
                 width: "100%",
                 height: "auto",
-                maxHeight: "calc(100vh - 340px)",
+                maxHeight: 320,
                 objectFit: "contain",
                 display: "block",
                 background: "#0a1628",
