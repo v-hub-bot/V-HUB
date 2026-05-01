@@ -1140,7 +1140,8 @@ function DealsTab({ providers, classifiedAds }) {
   const liveAds  = (classifiedAds || []).filter(a => a.is_active && (daysLeft(a.deal_expires_at) === null || daysLeft(a.deal_expires_at) >= 0));
   const expiredAds = (classifiedAds || []).filter(a => a.is_active && daysLeft(a.deal_expires_at) !== null && daysLeft(a.deal_expires_at) < 0);
   const queuedAds  = (classifiedAds || []).filter(a => !a.is_active);
-  const totalRevenue = liveAds.length * 10;
+  const paidLiveAds = liveAds.filter(a => a.classifieds_stripe_subscription_id);
+  const totalRevenue = paidLiveAds.length * 10;
 
   return (
     <div>
@@ -1239,7 +1240,7 @@ function DealsTab({ providers, classifiedAds }) {
                           }
                         </span>
                       )}
-                      <span style={{ fontSize: 10, fontFamily: T.sans, color: "#2E7D32", fontWeight: 700 }}>💰 $20 paid</span>
+                      {live.classifieds_stripe_subscription_id && <span style={{ fontSize: 10, fontFamily: T.sans, color: "#2E7D32", fontWeight: 700 }}>💰 $20 paid</span>}
                     </div>
                     {live.deal_expires_at && (
                       <div style={{ fontSize: 10, color: "#888", fontFamily: T.sans, marginTop: 2 }}>
@@ -1308,7 +1309,8 @@ function AnalyticsTab({ providers, reviews, leads, stats, catMap, svcMap, fullSv
     if (a.deal_expires_at && new Date(a.deal_expires_at) < now) return false;
     return true;
   });
-  const dealsRevenue = activeAds.length * 10;
+  const paidActiveAds = activeAds.filter(a => a.classifieds_stripe_subscription_id);
+  const dealsRevenue = paidActiveAds.length * 10;
   const totalRevenue = (paid * 12) + dealsRevenue;
 
   const totalViews = providers.reduce((s,p)=>s+(p.profile_views||0),0);
