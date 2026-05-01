@@ -384,6 +384,7 @@ export default function Classifieds() {
   const [filterArea, setFilterArea] = useState("");
   const [filterService, setFilterService] = useState("");
   const [currentIndex, setCurrentIndex]   = useState(0);
+  const [showAll, setShowAll]             = useState(false);
   // Dropdown state
   const [svcOpen,  setSvcOpen]  = useState(false);
   const [vilOpen,  setVilOpen]  = useState(false);
@@ -616,6 +617,7 @@ export default function Classifieds() {
   // Reset to first card whenever filter changes
   useEffect(() => {
     setCurrentIndex(0);
+    if (filterArea || filterService) setShowAll(false);
   }, [filterArea, filterService]);
 
   // Filter logic — mirrors homepage search:
@@ -624,7 +626,9 @@ export default function Classifieds() {
   // Both must be selected before any ads show (like homepage requires both filters)
   const hasFilter = !!(filterArea || filterService);
 
-  const visibleAds = ads.filter(ad => {
+  const visibleAds = (showAll && !filterArea && !filterService)
+    ? ads.filter(ad => !isExpired(ad))
+    : ads.filter(ad => {
     if (isExpired(ad)) return false;
 
     // Area filter — match against provider's actual service_areas list
@@ -887,7 +891,7 @@ export default function Classifieds() {
         )}
 
         {/* Prompt to search */}
-        {!loading && !error && !hasFilter && (
+        {!loading && !error && !hasFilter && !showAll && (
           <div style={{ textAlign: "center", padding: "50px 20px 60px" }}>
             <div style={{ fontSize: 52, marginBottom: 16 }}>🔥</div>
             <div style={{ fontSize: 22, fontWeight: 900, color: WHITE, marginBottom: 8, textShadow: "0 2px 8px rgba(0,0,0,0.4)" }}>
@@ -898,13 +902,17 @@ export default function Classifieds() {
               to see exclusive deals this week.
             </div>
             {ads.length > 0 && (
-              <div style={{
-                display: "inline-block", marginTop: 20,
-                background: "rgba(255,219,0,0.15)", border: "1px solid #FFDB00",
-                color: "#FFDB00", fontSize: 12, fontWeight: 700,
-                padding: "6px 18px", borderRadius: 20,
-              }}>
-                🏷️ {ads.filter(a => !isExpired(a)).length} active deal{ads.filter(a => !isExpired(a)).length !== 1 ? "s" : ""} available this week
+              <div
+                onClick={() => { setFilterArea(""); setFilterService(""); setCurrentIndex(0); setShowAll(true); setTimeout(() => { const el = document.getElementById("deals-carousel"); if (el) el.scrollIntoView({ behavior: "smooth", block: "start" }); }, 80); }}
+                style={{
+                  display: "inline-block", marginTop: 20,
+                  background: "rgba(255,219,0,0.15)", border: "1px solid #FFDB00",
+                  color: "#FFDB00", fontSize: 12, fontWeight: 700,
+                  padding: "6px 18px", borderRadius: 20,
+                  cursor: "pointer", textDecoration: "underline", textUnderlineOffset: 3,
+                }}
+              >
+                🏷️ {ads.filter(a => !isExpired(a)).length} active deal{ads.filter(a => !isExpired(a)).length !== 1 ? "s" : ""} available this week — tap to browse
               </div>
             )}
           </div>
@@ -939,7 +947,8 @@ export default function Classifieds() {
         )}
 
         {/* Netflix-style peek carousel */}
-        {!loading && !error && hasFilter && visibleAds.length > 0 && (
+        {!loading && !error && (hasFilter || showAll) && visibleAds.length > 0 && (
+          <div id="deals-carousel">
           <PeekCarousel
             ads={visibleAds}
             currentIndex={currentIndex}
@@ -947,6 +956,7 @@ export default function Classifieds() {
             onNext={handleNext}
             setIndex={setCurrentIndex}
           />
+          </div>
         )}
       </div>
 
