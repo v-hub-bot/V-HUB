@@ -115,7 +115,7 @@ function AdCard({ ad, index, total, onPrev, onNext }) {
         )}
 
         {/* Hero image — fixed height container, image fills it with cover */}
-        <div style={{ width: "100%", height: 300, background: "#0a1628", borderRadius: "14px 14px 0 0", overflow: "hidden", flexShrink: 0 }}>
+        <div style={{ width: "100%", height: 220, background: "#0a1628", borderRadius: "14px 14px 0 0", overflow: "hidden", flexShrink: 0 }}>
           {ad.image_url ? (
             <img
               src={ad.image_url}
@@ -142,19 +142,18 @@ function AdCard({ ad, index, total, onPrev, onNext }) {
 
       </div>
 
-      {/* Bottom strip — outside the card so it's always fully visible */}
+      {/* Bottom strip — fully separate below the card */}
       <div style={{
         padding: "14px 16px 16px",
-        background: "linear-gradient(180deg,#ffffff,#f7f4ef)",
-        borderRadius: "0 0 16px 16px",
+        background: "#ffffff",
+        borderRadius: 12,
         border: expired ? `2px solid ${MUTED}` : "2px solid #FFDB00",
-        borderTop: "none",
+        marginTop: 10,
         display: "flex",
         alignItems: "center",
         justifyContent: "space-between",
         gap: 12,
         flexWrap: "wrap",
-        marginTop: -2,
       }}>
         <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>
           <div style={{ fontSize: 15, fontWeight: 900, color: NAVY }}>
