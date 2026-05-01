@@ -22,6 +22,9 @@
     },
     "Wekcadmin": {
       "title": "Wekcadmin"
+    },
+    "Provider": {
+      "title": "Provider"
     }
   }
 }

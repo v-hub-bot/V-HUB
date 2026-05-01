@@ -226,7 +226,7 @@ function AdCard({ ad, active, onClick }) {
                 </a>
               )}
               {ad._provider_entity_id && (
-                <a href={`/Home?provider=${ad._provider_entity_id}`}
+                <a href={`/Provider?id=${ad._provider_entity_id}`}
                   style={{
                     display:"flex",alignItems:"center",gap:10,
                     background:"#f5f0e8",color:"#1B3D6F",
