@@ -160,7 +160,7 @@ Deno.serve(async (req) => {
     for (const a of aArr) {
       if (a.event_type === 'profile_view') viewCounts[a.provider_id] = (viewCounts[a.provider_id]||0)+1;
       else if (a.event_type === 'search_appearance') searchCounts[a.provider_id] = (searchCounts[a.provider_id]||0)+1;
-      else if (a.event_type === 'ad_click') adClickCounts[a.provider_id] = (adClickCounts[a.provider_id]||0)+1;
+      else if (a.event_type === 'ad_click' || a.event_type === 'classified_ad_click') adClickCounts[a.provider_id] = (adClickCounts[a.provider_id]||0)+1;
       else if (a.event_type === 'lead_inquiry') leadCounts[a.provider_id] = (leadCounts[a.provider_id]||0)+1;
     }
 
@@ -180,7 +180,7 @@ Deno.serve(async (req) => {
       if (!day) continue;
       if (a.event_type==='profile_view'||a.event_type==='homepage_view') siteViewsByDay[day]=(siteViewsByDay[day]||0)+1;
       else if (a.event_type==='search_appearance') searchesByDay[day]=(searchesByDay[day]||0)+1;
-      else if (a.event_type==='ad_click') adClicksByDay[day]=(adClicksByDay[day]||0)+1;
+      else if (a.event_type==='ad_click' || a.event_type==='classified_ad_click') adClicksByDay[day]=(adClicksByDay[day]||0)+1;
     }
 
     const totalSiteViews = Object.values(siteViewsByDay).reduce((s,v)=>s+v,0);
