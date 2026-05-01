@@ -1,4 +1,4 @@
-// v20 — gpt-image-1 ONLY. No dall-e fallback.
+// v22 — gpt-image-1, quality: medium (faster, avoids timeout)
 const CORS_HEADERS = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
@@ -20,11 +20,11 @@ Deno.serve(async (req) => {
 
     const fullPrompt = `Create a professional, eye-catching advertisement image for a local service business in The Villages, Florida. ${prompt}. Style: vibrant colors, clean composition, suitable for a weekly deals/promotions advertisement. The image must contain absolutely NO text, NO words, NO letters, NO numbers, NO signs with writing — zero text of any kind. Pure visual imagery only. No watermarks. High quality photorealistic or illustrated style.`;
 
-    console.log("Generating with gpt-image-1...");
+    console.log("Generating with gpt-image-1 (medium quality)...");
     const resp = await fetch("https://api.openai.com/v1/images/generations", {
       method: "POST",
       headers: { "Authorization": `Bearer ${OPENAI_API_KEY}`, "Content-Type": "application/json" },
-      body: JSON.stringify({ model: "gpt-image-1", prompt: fullPrompt, n: 1, size: "1024x1024", quality: "high" }),
+      body: JSON.stringify({ model: "gpt-image-1", prompt: fullPrompt, n: 1, size: "1024x1024", quality: "medium" }),
     });
 
     if (!resp.ok) {
@@ -41,7 +41,7 @@ Deno.serve(async (req) => {
     }
 
     // Return as data URI — frontend uploads to CDN at save time
-    console.log("✅ gpt-image-1 success");
+    console.log("✅ gpt-image-1 medium quality success");
     return Response.json({ url: `data:image/png;base64,${b64}` }, { headers: CORS_HEADERS });
 
   } catch (err: any) {
