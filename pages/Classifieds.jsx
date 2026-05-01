@@ -117,39 +117,22 @@ function AdCard({ ad, index, total, onPrev, onNext }) {
           </button>
         )}
 
-        {/* Ad image — capped height, anchored to bottom so the deal info is always visible */}
-        <div style={{
-          width: "100%",
-          height: "min(80vw, 440px)",
-          overflow: "hidden",
-          flexShrink: 0,
-          position: "relative",
-        }}>
-          {ad.image_url ? (
-            <img
-              src={ad.image_url}
-              alt={ad.headline || ad.provider_name}
-              style={{
-                width: "100%",
-                height: "auto",
-                display: "block",
-                /* shift image up so the BOTTOM of the image always shows */
-                position: "absolute",
-                bottom: 0,
-                left: 0,
-              }}
-              onError={e => { e.target.style.display = "none"; }}
-            />
-          ) : (
-            <div style={{
-              width: "100%", height: "100%",
-              background: `linear-gradient(135deg, ${NAVY}, ${TEAL})`,
-              display: "flex", alignItems: "center", justifyContent: "center",
-            }}>
-              <span style={{ color: WHITE, fontSize: 48 }}>🏷️</span>
-            </div>
-          )}
-        </div>
+        {/* Ad image — full natural height, zero cropping ever */}
+        {ad.image_url ? (
+          <img
+            src={ad.image_url}
+            alt={ad.headline || ad.provider_name}
+            style={{ width: "100%", height: "auto", display: "block" }}
+            onError={e => { e.target.style.display = "none"; }}
+          />
+        ) : (
+          <div style={{
+            width: "100%", paddingTop: "100%", position: "relative",
+            background: `linear-gradient(135deg, ${NAVY}, ${TEAL})`,
+          }}>
+            <span style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%,-50%)", color: WHITE, fontSize: 48 }}>🏷️</span>
+          </div>
+        )}
 
         {/* Yellow accent line between image and banner */}
         <div style={{ height: 3, background: expired ? MUTED : "#FFDB00", flexShrink: 0 }} />
