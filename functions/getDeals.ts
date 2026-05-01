@@ -1,6 +1,5 @@
 // Public endpoint — returns all active ClassifiedAd records for the Deals of the Week page
-// Ads become visible the INSTANT payment is confirmed (webhook sets is_active=true + deal_expires_at)
-// Ads expire exactly 7 days after payment (precise timestamp comparison, not date-only)
+// Enriches each ad with provider service_areas (as names), services, and category for filtering
 import { createClientFromRequest } from "npm:@base44/sdk@0.8.23";
 
 const CORS = {
@@ -14,35 +13,42 @@ Deno.serve(async (req: Request) => {
 
   try {
     const base44 = createClientFromRequest(req);
+    const db = base44.asServiceRole.entities;
 
     // Fetch all active ads
     let all: any[] = [];
     try {
-      all = await base44.asServiceRole.entities.ClassifiedAd.filter({ is_active: true });
-      console.log("filter returned:", all.length);
-    } catch (e1) {
-      console.log("filter failed, trying list:", String(e1));
-      try {
-        all = await base44.asServiceRole.entities.ClassifiedAd.list({ limit: 500 });
-        console.log("list returned:", all.length);
-      } catch (e2) {
-        console.error("list also failed:", String(e2));
-      }
+      all = await db.ClassifiedAd.filter({ is_active: true });
+    } catch {
+      all = await db.ClassifiedAd.list({ limit: 500 });
     }
 
-    // Use exact timestamp comparison — ad is live until the millisecond it expires
     const now = new Date();
-
     const live = all.filter(ad => {
       if (!ad.is_active) return false;
-      if (ad.deal_expires_at) {
-        // Compare exact timestamps — don't strip time
-        if (new Date(ad.deal_expires_at) <= now) return false;
-      }
+      if (ad.deal_expires_at && new Date(ad.deal_expires_at) <= now) return false;
       return true;
     });
 
-    // Sort: slot_number ascending first (featured slots), then A-Z by provider name
+    if (live.length === 0) {
+      return Response.json({ ads: [] }, { headers: CORS });
+    }
+
+    // Fetch all lookup tables in parallel
+    const [providers, areas, services, categories] = await Promise.all([
+      db.Provider.list().catch(() => []),
+      db.ServiceArea.list().catch(() => []),
+      db.Service.list().catch(() => []),
+      db.Category.list().catch(() => []),
+    ]);
+
+    // Build lookup maps
+    const providerMap = new Map(providers.map((p: any) => [p.id, p]));
+    const areaMap     = new Map(areas.map((a: any) => [a.id, a.name]));
+    const serviceMap  = new Map(services.map((s: any) => [s.id, s.name]));
+    const categoryMap = new Map(categories.map((c: any) => [c.id, c.name]));
+
+    // Sort ads
     live.sort((a, b) => {
       const slotA = a.slot_number ?? 99;
       const slotB = b.slot_number ?? 99;
@@ -50,8 +56,39 @@ Deno.serve(async (req: Request) => {
       return (a.provider_name || "").localeCompare(b.provider_name || "");
     });
 
-    console.log("returning live ads:", live.length, "at", now.toISOString());
-    const mapped = live.map(ad => ({ ...ad, _provider_entity_id: ad.provider_id || null }));
+    // Enrich each ad with provider data
+    const mapped = live.map(ad => {
+      const provider = providerMap.get(ad.provider_id);
+
+      // Resolve area IDs → names
+      const providerAreaNames: string[] = provider?.service_areas
+        ? provider.service_areas.map((id: string) => areaMap.get(id)).filter(Boolean)
+        : [];
+
+      // Resolve service IDs → names
+      const providerServiceNames: string[] = provider?.services
+        ? provider.services.map((id: string) => serviceMap.get(id)).filter(Boolean)
+        : [];
+
+      // Resolve category ID → name
+      const providerCategoryName: string = provider?.category_id
+        ? (categoryMap.get(provider.category_id) || "")
+        : "";
+
+      // Mobile providers serve all areas
+      const isMobile = provider?.is_mobile === true;
+
+      return {
+        ...ad,
+        _provider_entity_id: ad.provider_id || null,
+        _provider_areas: isMobile ? ["ALL"] : providerAreaNames,
+        _provider_services: providerServiceNames,
+        _provider_category: providerCategoryName,
+        _is_mobile: isMobile,
+      };
+    });
+
+    console.log("returning live ads:", mapped.length, "enriched with provider data");
     return Response.json({ ads: mapped }, { headers: CORS });
   } catch (err: any) {
     console.error("getDeals error:", err);

@@ -654,9 +654,10 @@ export default function Classifieds() {
     // Area filter — match against provider's actual service_areas list
     if (filterArea) {
       const areaLower = filterArea.toLowerCase().trim();
-      const serves = Array.isArray(ad._provider_areas)
-        ? ad._provider_areas.some(a => a.toLowerCase() === areaLower || a.toLowerCase().includes(areaLower))
-        : false; // if no area data, don't assume they serve it
+      const areas = ad._provider_areas || [];
+      // "ALL" means mobile provider — serves every village
+      const serves = areas.includes("ALL") ||
+        areas.some((a: string) => a.toLowerCase().includes(areaLower));
       if (!serves) return false;
     }
 
