@@ -121,6 +121,9 @@ function AdCard({ ad, index, total, onPrev, onNext }) {
               style={{
                 width: "100%",
                 height: "auto",
+                width: "100%",
+                maxHeight: "65vh",
+                objectFit: "contain",
                 display: "block",
                 background: "#0a1628",
               }}
