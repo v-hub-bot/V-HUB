@@ -75,12 +75,24 @@ Deno.serve(async (req: Request) => {
         ? (categoryMap.get(provider.category_id) || "")
         : "";
 
-      // Brick & mortar = fixed location, serves all areas → ALL
-      // Mobile = travels to customer, serve only their selected areas (or ALL if none set)
+      // Brick & mortar = fixed location, serves all villages → ALL
+      // Mobile = travels to customer:
+      //   - No areas selected → ALL
+      //   - All 5 macro group IDs present → bulk-assigned default → ALL
+      //   - Custom subset (provider actually chose their areas) → use their areas
       const isMobile = provider?.is_mobile === true;
+      const MACRO_IDS = [
+        "69d06c4a4f1e1017a77a7019", // Established Villages
+        "69d06c4a4f1e1017a77a701b", // Eastport
+        "69d06c4a4f1e1017a77a7018", // Historic Side
+        "69d06c4a4f1e1017a77a701a", // Newer Villages
+        "69d06c4a4f1e1017a77a701c", // Family
+      ];
+      const areaIds: string[] = provider?.service_areas || [];
+      const hasBulkDefault = MACRO_IDS.every((id: string) => areaIds.includes(id));
       const effectiveAreas = !isMobile
         ? ["ALL"]
-        : (providerAreaNames.length > 0 ? providerAreaNames : ["ALL"]);
+        : (areaIds.length === 0 || hasBulkDefault ? ["ALL"] : providerAreaNames);
 
       return {
         ...ad,
