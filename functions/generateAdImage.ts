@@ -1,4 +1,4 @@
-// v11 — uses gpt-image-1 (latest OpenAI image model), backend uploads to CDN, returns clean URL
+// v12 — gpt-image-1 ONLY. No DALL-E fallback.
 import { createClientFromRequest } from "npm:@base44/sdk@0.8.23";
 
 const CORS_HEADERS = {
@@ -24,7 +24,6 @@ Deno.serve(async (req) => {
 
     console.log("Generating image with gpt-image-1...");
 
-    // gpt-image-1 uses the same /v1/images/generations endpoint
     const resp = await fetch("https://api.openai.com/v1/images/generations", {
       method: "POST",
       headers: {
@@ -42,102 +41,52 @@ Deno.serve(async (req) => {
 
     if (!resp.ok) {
       const errBody = await resp.json().catch(() => ({}));
-      console.error("OpenAI error:", JSON.stringify(errBody));
-      // If gpt-image-1 not available on this key, fall back to dall-e-3
-      if (errBody?.error?.code === "model_not_found" || errBody?.error?.type === "invalid_request_error") {
-        console.log("gpt-image-1 not available, falling back to dall-e-3...");
-        return await generateWithDallE3(req, fullPrompt, provider_id, OPENAI_API_KEY);
-      }
-      return Response.json({ error: errBody?.error?.message || "Image generation failed" }, { status: 500, headers: CORS_HEADERS });
+      console.error("OpenAI gpt-image-1 error:", JSON.stringify(errBody));
+      return Response.json({ error: errBody?.error?.message || "Image generation failed. Please try again." }, { status: 500, headers: CORS_HEADERS });
     }
 
     const data = await resp.json();
-
-    // gpt-image-1 returns b64_json by default
     const b64 = data?.data?.[0]?.b64_json;
     const tempUrl = data?.data?.[0]?.url;
 
     if (!b64 && !tempUrl) {
       console.error("No image data returned:", JSON.stringify(data));
-      return Response.json({ error: "No image returned from OpenAI" }, { status: 500, headers: CORS_HEADERS });
+      return Response.json({ error: "No image returned from OpenAI. Please try again." }, { status: 500, headers: CORS_HEADERS });
     }
 
-    console.log("✅ gpt-image-1 image generated");
+    console.log("✅ gpt-image-1 image generated, uploading to CDN...");
 
-    // Upload to CDN
-    let finalUrl = tempUrl || "";
+    // Upload to Base44 CDN
+    const base44 = createClientFromRequest(req);
+    const filename = `ai_ad_${provider_id}_${Date.now()}.png`;
+
+    let imgBlob: Blob;
+    if (b64) {
+      const byteArr = Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
+      imgBlob = new Blob([byteArr], { type: "image/png" });
+    } else {
+      const imgResp = await fetch(tempUrl!);
+      const imgBytes = await imgResp.arrayBuffer();
+      imgBlob = new Blob([imgBytes], { type: "image/png" });
+    }
+
+    let finalUrl = b64 ? `data:image/png;base64,${b64}` : tempUrl!;
     try {
-      const base44 = createClientFromRequest(req);
-      const filename = `ai_ad_${provider_id}_${Date.now()}.png`;
-
-      let imgBlob: Blob;
-      if (b64) {
-        const byteArr = Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
-        imgBlob = new Blob([byteArr], { type: "image/png" });
-      } else {
-        // fetch from temp URL
-        const imgResp = await fetch(tempUrl!);
-        const imgBytes = await imgResp.arrayBuffer();
-        imgBlob = new Blob([imgBytes], { type: "image/png" });
-      }
-
       const uploadedFile = await base44.storage.uploadFile(imgBlob, filename);
       if (uploadedFile?.url) {
         finalUrl = uploadedFile.url;
         console.log("✅ Uploaded to CDN:", finalUrl);
       } else {
-        // Fallback: return base64 data URI if no URL
-        if (b64) finalUrl = `data:image/png;base64,${b64}`;
-        console.warn("CDN upload returned no URL, using fallback");
+        console.warn("CDN upload returned no URL, using inline fallback");
       }
     } catch (uploadErr) {
-      console.error("CDN upload failed:", String(uploadErr));
-      if (b64) finalUrl = `data:image/png;base64,${b64}`;
+      console.error("CDN upload failed:", String(uploadErr), "— using inline fallback");
     }
-
-    if (!finalUrl) return Response.json({ error: "Failed to store generated image" }, { status: 500, headers: CORS_HEADERS });
 
     return Response.json({ url: finalUrl }, { headers: CORS_HEADERS });
 
   } catch (err: any) {
     console.error("generateAdImage error:", err);
-    return Response.json({ error: err.message || "Unknown error" }, { status: 500, headers: CORS_HEADERS });
+    return Response.json({ error: err.message || "Unknown error. Please try again." }, { status: 500, headers: CORS_HEADERS });
   }
 });
-
-// Fallback: dall-e-3 if gpt-image-1 not available on the API key
-async function generateWithDallE3(req: Request, prompt: string, provider_id: string, apiKey: string): Promise<Response> {
-  const CORS_HEADERS = {
-    "Access-Control-Allow-Origin": "*",
-    "Access-Control-Allow-Methods": "POST, OPTIONS",
-    "Access-Control-Allow-Headers": "Content-Type, Authorization",
-  };
-
-  const resp = await fetch("https://api.openai.com/v1/images/generations", {
-    method: "POST",
-    headers: { "Authorization": `Bearer ${apiKey}`, "Content-Type": "application/json" },
-    body: JSON.stringify({ model: "dall-e-3", prompt, n: 1, size: "1024x1024", quality: "standard", response_format: "url" }),
-  });
-
-  if (!resp.ok) {
-    const errBody = await resp.json().catch(() => ({}));
-    return Response.json({ error: errBody?.error?.message || "dall-e-3 fallback also failed" }, { status: 500, headers: CORS_HEADERS });
-  }
-
-  const data = await resp.json();
-  const tempUrl = data?.data?.[0]?.url;
-  if (!tempUrl) return Response.json({ error: "No image from dall-e-3 fallback" }, { status: 500, headers: CORS_HEADERS });
-
-  const imgResp = await fetch(tempUrl);
-  const imgBytes = await imgResp.arrayBuffer();
-  const blob = new Blob([imgBytes], { type: "image/png" });
-
-  const base44 = createClientFromRequest(req);
-  let finalUrl = tempUrl;
-  try {
-    const uploaded = await base44.storage.uploadFile(blob, `ai_ad_${provider_id}_${Date.now()}.png`);
-    if (uploaded?.url) finalUrl = uploaded.url;
-  } catch (e) { console.error("CDN upload failed in fallback:", e); }
-
-  return Response.json({ url: finalUrl }, { headers: CORS_HEADERS });
-}
