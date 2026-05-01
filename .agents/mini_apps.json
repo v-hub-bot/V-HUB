@@ -5,26 +5,26 @@
     "Classifieds": {
       "title": "Classifieds"
     },
-    "Terms": {
-      "title": "Terms"
-    },
-    "ProviderDashboard": {
-      "title": "ProviderDashboard"
-    },
-    "Privacy": {
-      "title": "Privacy"
-    },
     "Home": {
       "title": "Home"
-    },
-    "Wekcadmin": {
-      "title": "Wekcadmin"
     },
     "ListService": {
       "title": "ListService"
     },
+    "Privacy": {
+      "title": "Privacy"
+    },
     "Provider": {
       "title": "Provider"
+    },
+    "ProviderDashboard": {
+      "title": "ProviderDashboard"
+    },
+    "Terms": {
+      "title": "Terms"
+    },
+    "Wekcadmin": {
+      "title": "Wekcadmin"
     }
   }
 }

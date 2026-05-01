@@ -646,36 +646,32 @@ export default function Classifieds() {
   // Both → show providers matching BOTH area AND service
   const hasFilter = !!(filterArea || filterService);
 
-  const visibleAds = (showAll && !filterArea && !filterService)
-    ? ads.filter(ad => !isExpired(ad))
-    : ads.filter(ad => {
-    if (isExpired(ad)) return false;
-
-    // Area filter — match against provider's actual service_areas list
-    if (filterArea) {
-      // Strip "(All)" suffix from macro group selections e.g. "Eastport" → "Eastport"
-      const areaLower = filterArea.toLowerCase().replace(/\s*\(all\)\s*$/i, "").trim();
-      const areas = ad._provider_areas || [];
-      // "ALL" means mobile provider — serves every village
-      const serves = areas.includes("ALL") ||
-        areas.some((a: string) => a.toLowerCase().includes(areaLower));
-      if (!serves) return false;
-    }
-
-    // Service filter — match ONLY against provider's services list and category name
-    // NOT against headline/body (too loose — nail tech ads shouldn't show for lawn searches)
-    if (filterService) {
-      const kw = filterService.toLowerCase().trim();
-      const haystack = [
-        ...(ad._provider_services || []),
-        ad._provider_category || "",
-        ad.provider_name || "",
-      ].join(" ").toLowerCase();
-      if (!haystack.includes(kw)) return false;
-    }
-
-    return true;
-  });
+  const visibleAds = (() => {
+    const live = ads.filter(ad => !isExpired(ad));
+    // No filters active — return all for showAll, none for teaser
+    if (!filterArea && !filterService) return showAll ? live : [];
+    return live.filter(ad => {
+      // ── Area filter ──
+      if (filterArea) {
+        const needle = filterArea.toLowerCase().trim();
+        const provAreas = ad._provider_areas || [];
+        // "ALL" = explicit all-areas flag; otherwise substring match on area name
+        const servesArea = provAreas.includes("ALL") ||
+          provAreas.some(a => a.toLowerCase().includes(needle));
+        if (!servesArea) return false;
+      }
+      // ── Service filter ──
+      if (filterService) {
+        const needle = filterService.toLowerCase().trim();
+        const haystack = [
+          ...(ad._provider_services || []),
+          ad._provider_category || "",
+        ].join("|").toLowerCase();
+        if (!haystack.includes(needle)) return false;
+      }
+      return true;
+    });
+  })();
 
   const currentAd = visibleAds[currentIndex] || null;
 
