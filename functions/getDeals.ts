@@ -75,10 +75,10 @@ Deno.serve(async (req: Request) => {
         ? (categoryMap.get(provider.category_id) || "")
         : "";
 
-      // is_mobile = comes to the customer, but still has specific service_areas
-      // Always use actual service_areas — only fall back to ALL if no areas are set at all
+      // is_mobile = comes to the customer, but service areas are still the provider's
+      // selected areas — mobile does NOT mean all areas. Use exactly what's on their profile.
       const isMobile = provider?.is_mobile === true;
-      const effectiveAreas = providerAreaNames.length > 0 ? providerAreaNames : (isMobile ? ["ALL"] : []);
+      const effectiveAreas = providerAreaNames; // always use actual selected areas, never "ALL"
 
       return {
         ...ad,

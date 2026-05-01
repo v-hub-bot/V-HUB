@@ -652,12 +652,12 @@ export default function Classifieds() {
     if (!filterArea && !filterService) return showAll ? live : [];
     return live.filter(ad => {
       // ── Area filter ──
+      // Match strictly against the provider's actual selected service_areas.
+      // Mobile vs brick-and-mortar makes no difference — areas are areas.
       if (filterArea) {
         const needle = filterArea.toLowerCase().trim();
         const provAreas = ad._provider_areas || [];
-        // "ALL" = explicit all-areas flag; otherwise substring match on area name
-        const servesArea = provAreas.includes("ALL") ||
-          provAreas.some(a => a.toLowerCase().includes(needle));
+        const servesArea = provAreas.some(a => a.toLowerCase().includes(needle));
         if (!servesArea) return false;
       }
       // ── Service filter ──
