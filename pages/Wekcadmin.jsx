@@ -181,7 +181,7 @@ function MagicLinkGate({ onUnlock }) {
 function Overview({ providers, reviews, leads, fullAreaMap }) {
   const active = providers.filter(p => p.is_active).length;
   const trial = providers.filter(p => p.subscription_status === "trial").length;
-  const paid = providers.filter(p => ["active", "paid"].includes(p.subscription_status)).length;
+  const paid = providers.filter(p => ["active", "paid"].includes(p.subscription_status) && p.stripe_subscription_id).length;
   const expiring = providers.filter(p => { const d = daysLeft(p.trial_end_date); return d !== null && d >= 0 && d <= 7; });
   const expired = providers.filter(p => { const d = daysLeft(p.trial_end_date); return d !== null && d < 0 && p.is_active; }).length;
   const totalViews = providers.reduce((s, p) => s + (p.profile_views || 0), 0);
@@ -1302,7 +1302,7 @@ function AnalyticsTab({ providers, reviews, leads, stats, catMap, svcMap, fullSv
   const filteredReviews = reviews.filter(r => r.created_date && new Date(r.created_date) >= cutoff);
   const filteredProviders = providers.filter(p => p.created_date && new Date(p.created_date) >= cutoff);
 
-  const paid = providers.filter(p => ["active","paid"].includes(p.subscription_status)).length;
+  const paid = providers.filter(p => ["active","paid"].includes(p.subscription_status) && p.stripe_subscription_id).length;
   const trial = providers.filter(p => p.subscription_status === "trial").length;
   const activeAds = (classifiedAds||[]).filter(a => {
     if (!a.is_active) return false;
