@@ -75,7 +75,6 @@ function AdCard({ ad, index, total, onPrev, onNext }) {
       <div style={{
         background: WHITE,
         borderRadius: 16,
-        overflow: "hidden",
         boxShadow: expired ? "none" : "0 8px 32px rgba(232,67,26,0.25), 0 2px 8px rgba(0,0,0,0.3)",
         opacity: expired ? 0.5 : 1,
         position: "relative",
@@ -114,22 +113,22 @@ function AdCard({ ad, index, total, onPrev, onNext }) {
         )}
 
         {/* Hero image — fixed 1:1 ratio container so card always fits on screen */}
-        <div style={{ position: "relative", width: "100%", paddingTop: "75%", background: "#0a1628", overflow: "hidden" }}>
+        <div style={{ width: "100%", background: "#0a1628", overflow: "hidden", borderRadius: "14px 14px 0 0" }}>
           {ad.image_url ? (
             <img
               src={ad.image_url}
               alt={ad.headline || ad.provider_name}
               style={{
-                position: "absolute", top: 0, left: 0,
-                width: "100%", height: "100%",
-                objectFit: "contain",
+                width: "100%",
+                height: "auto",
+                display: "block",
                 background: "#0a1628",
               }}
               onError={e => { e.target.style.display = "none"; }}
             />
           ) : (
             <div style={{
-              position: "absolute", top: 0, left: 0, width: "100%", height: "100%",
+               
               background: `linear-gradient(135deg, ${NAVY}, ${TEAL})`,
               display: "flex", alignItems: "center", justifyContent: "center",
             }}>
