@@ -120,7 +120,7 @@ function AdCard({ ad, index, total, onPrev, onNext }) {
         {/* Ad image — capped height, anchored to bottom so the deal info is always visible */}
         <div style={{
           width: "100%",
-          height: "min(68vw, 380px)",
+          height: "min(80vw, 440px)",
           overflow: "hidden",
           flexShrink: 0,
           position: "relative",
