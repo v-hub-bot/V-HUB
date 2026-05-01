@@ -1,762 +1,173 @@
-// DEALS-CAROUSEL-APR30
-import { useState, useEffect, useCallback } from "react";
+// BUILD_FORCE_2026_04_22_T0400
+// CACHE-BUST-1776573078
+// build-1776559362
+// build-1776539899-PROBE 
+import { useState, useEffect, useRef, useCallback } from "react";
+import { ClassifiedAd, Provider } from "@/api/entities";
 
-const ORANGE = "#E8431A";
-const TEAL   = "#00BFA5";
-const NAVY   = "#1B3D6F";
-const PARCH  = "#f5f0e8";
-const INK    = "#1a0a00";
-const MUTED  = "#7a6652";
-const WHITE  = "#ffffff";
-const RED    = "#CC0000";
-const GREEN  = "#1A6B3C";
+// ────────────────────────────────────────────────────────────────
+//  V-HUB  ·  Deals of the Week
+//  Shows rotating "featured deal" ads from active providers.
+//  Slot rotation is handled nightly by the rolloverClassifiedAds function.
+// ────────────────────────────────────────────────────────────────
+
+const ORANGE  = "#E8431A";
+const TEAL    = "#00BFA5";
+const NAVY    = "#1B3D6F";
+const PARCH   = "#f5f0e8";
+const INK     = "#1a0a00";
+const MUTED   = "#7a6652";
+const WHITE   = "#ffffff";
+const GREEN   = "#1A6B3C";
+const RED     = "#CC0000";
 
 const API_BASE = "https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions";
 
-function isExpired(ad) {
-  if (!ad.deal_expires_at) return false;
-  return new Date(ad.deal_expires_at) < new Date();
-}
-
+// ── tiny helpers ──────────────────────────────────────────────────
 function fmt(d) {
   if (!d) return "";
   try { return new Date(d).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }); }
   catch { return ""; }
 }
 
-// ── Single Ad Card ────────────────────────────────────────────────────
-function AdCard({ ad, index, total, onPrev, onNext }) {
+function isExpired(ad) {
+  if (!ad.deal_expires_at) return false;
+  return new Date(ad.deal_expires_at) < new Date();
+}
+
+// ── AdCard ────────────────────────────────────────────────────────
+function AdCard({ ad }) {
   const expired = isExpired(ad);
-  const [saved, setSaved] = useState(false);
-
-  const goToProvider = () => {
-    fetch(`${API_BASE}/trackEvent`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        provider_id: ad._provider_entity_id || ad.provider_id,
-        event_type: "classified_ad_click",
-        source: "classifieds",
-      }),
-    }).catch(() => {});
-    if (ad._provider_entity_id) {
-      window.location.href = `/Home?provider=${ad._provider_entity_id}`;
-    }
-  };
-
-  const handleSave = (e) => {
-    e.stopPropagation();
-    if (ad.image_url) {
-      const a = document.createElement("a");
-      a.href = ad.image_url;
-      a.target = "_blank";
-      a.rel = "noopener";
-      a.click();
-    }
-    setSaved(true);
-    setTimeout(() => setSaved(false), 2000);
-  };
 
   return (
-    <div style={{ position: "relative" }}>
-
-      {/* ── Carousel counter ── */}
-      {total > 1 && (
+    <div style={{
+      background: WHITE,
+      border: `2px solid ${NAVY}`,
+      borderRadius: 10,
+      overflow: "hidden",
+      boxShadow: "0 3px 14px rgba(0,0,0,0.13)",
+      display: "flex",
+      flexDirection: "column",
+      minHeight: 340,
+      opacity: expired ? 0.55 : 1,
+      position: "relative",
+    }}>
+      {expired && (
         <div style={{
-          textAlign: "center", marginBottom: 10,
-          fontSize: 13, color: "rgba(255,255,255,0.7)", fontWeight: 600,
-          fontFamily: "Georgia, serif", letterSpacing: 0.5,
-        }}>
-          Deal {index + 1} of {total}
-        </div>
+          position: "absolute", top: 10, right: 10,
+          background: MUTED, color: WHITE,
+          fontSize: 10, fontWeight: 700, padding: "3px 8px",
+          borderRadius: 4, textTransform: "uppercase", letterSpacing: 1,
+        }}>Expired</div>
       )}
 
-      {/* ── Card ── */}
-      <div style={{
-        background: WHITE,
-        borderRadius: 16,
-        boxShadow: expired ? "none" : "0 8px 32px rgba(232,67,26,0.25), 0 2px 8px rgba(0,0,0,0.3)",
-        opacity: expired ? 0.5 : 1,
-        position: "relative",
-        border: expired ? `2px solid ${MUTED}` : "2px solid #FFDB00",
-        display: "flex",
-        flexDirection: "column",
-      }}>
-        {/* Top accent bar */}
-        {!expired && (
-          <div style={{
-            height: 5,
-            background: "linear-gradient(90deg,#E8431A,#FFDB00,#00BFA5)",
-          }} />
-        )}
-        {/* Expired badge */}
-        {expired && (
-          <div style={{
-            position: "absolute", top: 12, left: 12, zIndex: 10,
-            background: "rgba(0,0,0,0.7)", color: WHITE,
-            fontSize: 11, fontWeight: 700, padding: "4px 10px",
-            borderRadius: 20, textTransform: "uppercase", letterSpacing: 1,
-          }}>Expired</div>
-        )}
+      {/* image */}
+      {ad.image_url && (
+        <img
+          src={ad.image_url}
+          alt={ad.headline}
+          style={{ width: "100%", height: 180, objectFit: "cover", display: "block" }}
+          onError={e => { e.target.style.display = "none"; }}
+        />
+      )}
 
-        {/* Save button */}
-        {!expired && (
-          <button onClick={handleSave} style={{
-            position: "absolute", top: 12, right: 12, zIndex: 10,
-            background: saved ? GREEN : "rgba(0,0,0,0.55)",
-            border: "none", borderRadius: 20,
-            color: WHITE, fontSize: 11, fontWeight: 700,
-            padding: "5px 12px", cursor: "pointer",
-            display: "flex", alignItems: "center", gap: 4,
-            backdropFilter: "blur(4px)",
-          }}>
-            {saved ? "✓ Saved!" : "⬇ Save"}
-          </button>
-        )}
-
-        {/* Hero image — fixed height container, image fills it with cover */}
-        <div style={{ width: "100%", height: 220, background: "#0a1628", borderRadius: "14px 14px 0 0", overflow: "hidden", flexShrink: 0 }}>
-          {ad.image_url ? (
-            <img
-              src={ad.image_url}
-              alt={ad.headline || ad.provider_name}
-              style={{
-                width: "100%",
-                height: "100%",
-                objectFit: "cover",
-                objectPosition: "top",
-                display: "block",
-              }}
-              onError={e => { e.target.style.display = "none"; }}
-            />
-          ) : (
-            <div style={{
-               
-              background: `linear-gradient(135deg, ${NAVY}, ${TEAL})`,
-              display: "flex", alignItems: "center", justifyContent: "center",
-            }}>
-              <span style={{ color: WHITE, fontSize: 48 }}>🏷️</span>
-            </div>
-          )}
+      {/* body */}
+      <div style={{ padding: "14px 16px", flex: 1, display: "flex", flexDirection: "column", gap: 6 }}>
+        {/* provider name */}
+        <div style={{ fontSize: 11, fontWeight: 700, color: TEAL, textTransform: "uppercase", letterSpacing: 1 }}>
+          {ad.provider_name}
         </div>
 
-      </div>
+        {/* headline */}
+        <div style={{ fontSize: 17, fontWeight: 900, color: NAVY, lineHeight: 1.25 }}>
+          {ad.headline}
+        </div>
 
-      {/* Bottom strip — fully separate below the card */}
-      <div style={{
-        padding: "14px 16px 16px",
-        background: "#ffffff",
-        borderRadius: 12,
-        border: expired ? `2px solid ${MUTED}` : "2px solid #FFDB00",
-        marginTop: 10,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-        gap: 12,
-        flexWrap: "wrap",
-      }}>
-        <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>
-          <div style={{ fontSize: 15, fontWeight: 900, color: NAVY }}>
-            {ad.provider_name}
-          </div>
-          {ad.headline && (
-            <div style={{ fontSize: 13, color: INK, fontStyle: "italic" }}>
-              {ad.headline}
+        {/* body */}
+        <div style={{ fontSize: 13, color: INK, lineHeight: 1.6, flex: 1 }}>
+          {ad.body}
+        </div>
+
+        {/* location info + expiry */}
+        <div style={{ marginTop: 8, display: "flex", flexDirection: "column", gap: 4 }}>
+          {/* Mobile provider: show service areas */}
+          {ad._provider_is_mobile && ad._provider_areas && ad._provider_areas.length > 0 && (
+            <div style={{ fontSize: 11, color: TEAL, fontWeight: 600 }}>
+              🗺️ Serves: {ad._provider_areas.join(" · ")}
+            </div>
+          )}
+          {/* Brick & mortar: show address */}
+          {!ad._provider_is_mobile && ad._provider_address && (
+            <div style={{ fontSize: 11, color: MUTED }}>
+              📍 {ad._provider_address}
+            </div>
+          )}
+          {/* Both mobile AND has a location (hybrid) */}
+          {ad._provider_is_mobile && ad._provider_address && (
+            <div style={{ fontSize: 11, color: MUTED }}>
+              📍 Also at: {ad._provider_address}
+            </div>
+          )}
+          {/* Fallback: manual village field if no provider data enrichment */}
+          {!ad._provider_is_mobile && !ad._provider_address && ad.village && (
+            <div style={{ fontSize: 11, color: MUTED }}>
+              📍 {ad.village}
             </div>
           )}
           {ad.deal_expires_at && !expired && (
-            <div style={{ fontSize: 11, color: RED, fontWeight: 600 }}>
-              Offer expires {fmt(ad.deal_expires_at)}
+            <div style={{ fontSize: 11, color: RED, fontWeight: 700 }}>
+              Expires {fmt(ad.deal_expires_at)}
             </div>
           )}
         </div>
-
-        {!expired && ad._provider_entity_id && (
-          <button onClick={goToProvider} style={{
-            background: `linear-gradient(135deg, ${ORANGE}, #c93510)`,
-            color: WHITE, border: "none", borderRadius: 8,
-            fontWeight: 800, fontSize: 13, padding: "10px 18px",
-            cursor: "pointer", whiteSpace: "nowrap",
-            boxShadow: "0 2px 8px rgba(232,67,26,0.4)",
-          }}>
-            Contact Provider →
-          </button>
-        )}
       </div>
-
-      {/* ── Left / Right nav arrows ── */}
-      {total > 1 && (
-        <div style={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          gap: 16,
-          marginTop: 18,
-        }}>
-          <button
-            onClick={onPrev}
-            disabled={index === 0}
-            style={{
-              width: 48, height: 48, borderRadius: "50%",
-              background: index === 0 ? "rgba(255,255,255,0.1)" : "linear-gradient(135deg,#E8431A,#c93510)",
-              color: index === 0 ? "rgba(255,255,255,0.25)" : WHITE,
-              border: "none", fontSize: 22, fontWeight: 900,
-              cursor: index === 0 ? "default" : "pointer",
-              display: "flex", alignItems: "center", justifyContent: "center",
-              boxShadow: index === 0 ? "none" : "0 4px 14px rgba(232,67,26,0.5)",
-              transition: "all 0.15s",
-            }}
-            title="Previous deal"
-          >‹</button>
-
-          {/* Dot indicators */}
-          <div style={{ display: "flex", gap: 7, alignItems: "center" }}>
-            {Array.from({ length: total }).map((_, i) => (
-              <div
-                key={i}
-                style={{
-                  width: i === index ? 10 : 7,
-                  height: i === index ? 10 : 7,
-                  borderRadius: "50%",
-                  background: i === index ? ORANGE : "#ccc",
-                  transition: "all 0.15s",
-                  cursor: "pointer",
-                }}
-                onClick={() => {
-                  if (i < index) { for (let j = 0; j < index - i; j++) onPrev(); }
-                  else { for (let j = 0; j < i - index; j++) onNext(); }
-                }}
-              />
-            ))}
-          </div>
-
-          <button
-            onClick={onNext}
-            disabled={index === total - 1}
-            style={{
-              width: 48, height: 48, borderRadius: "50%",
-              background: index === total - 1 ? "rgba(255,255,255,0.1)" : "linear-gradient(135deg,#E8431A,#c93510)",
-              color: index === total - 1 ? "rgba(255,255,255,0.25)" : WHITE,
-              border: "none", fontSize: 22, fontWeight: 900,
-              cursor: index === total - 1 ? "default" : "pointer",
-              display: "flex", alignItems: "center", justifyContent: "center",
-              boxShadow: index === total - 1 ? "none" : "0 4px 14px rgba(232,67,26,0.5)",
-              transition: "all 0.15s",
-            }}
-            title="Next deal"
-          >›</button>
-        </div>
-      )}
     </div>
   );
 }
 
-// ── Main Page ────────────────────────────────────────────────────────
+// ── Page ──────────────────────────────────────────────────────────
 export default function Classifieds() {
-  const [ads, setAds]               = useState([]);
-  const [loading, setLoading]       = useState(true);
-  const [error, setError]           = useState(null);
-  const [filterArea, setFilterArea] = useState("");
-  const [filterService, setFilterService] = useState("");
-  const [currentIndex, setCurrentIndex]   = useState(0);
-  // Dropdown state
-  const [svcOpen,  setSvcOpen]  = useState(false);
-  const [vilOpen,  setVilOpen]  = useState(false);
-  const [openCat,  setOpenCat]  = useState(null);
-  const [selSvcObj, setSelSvcObj] = useState(null);
-  const [selVilObj, setSelVilObj] = useState(null);
-
-  // Close dropdowns on outside click
-  useEffect(() => {
-    const handler = () => { setSvcOpen(false); setVilOpen(false); setOpenCat(null); };
-    document.addEventListener("click", handler);
-    return () => document.removeEventListener("click", handler);
-  }, []);
-
-  // Deep-link: ?village= or ?service=
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const v = params.get("village");
-    const s = params.get("service");
-    if (v) setFilterArea(v);
-    if (s) setFilterService(s.toLowerCase());
-  }, []);
-
-  // Static data for dropdowns
-  const CATS_STATIC = [
-    { id: "69d09c14d5ee9e7be9aa301b", name: "Home Services", icon: "🏠" },
-    { id: "69d181fe57b60e0aecf4067d", name: "Home Systems & Utilities", icon: "💡" },
-    { id: "69d09c14d5ee9e7be9aa301c", name: "Yard & Outdoor", icon: "🌿" },
-    { id: "69d09c14d5ee9e7be9aa301d", name: "Golf Cart Services", icon: "⛳" },
-    { id: "69d09c14d5ee9e7be9aa301e", name: "Automobile Services", icon: "🚗" },
-    { id: "69d09c14d5ee9e7be9aa301f", name: "Personal Care", icon: "💆" },
-    { id: "69d09c14d5ee9e7be9aa3020", name: "Pet Services", icon: "🐾" },
-    { id: "69d09c14d5ee9e7be9aa3021", name: "Transportation", icon: "🚐" },
-    { id: "69d181fe57b60e0aecf4067e", name: "Professional Services", icon: "💼" },
-  ];
-  const SVCS_STATIC = [
-    { id: "69d1822df3b2afb229b5bad5", category_id: "69d09c14d5ee9e7be9aa301b", name: "Home Improvements" },
-    { id: "69d1822df3b2afb229b5bad6", category_id: "69d09c14d5ee9e7be9aa301b", name: "General Repairs" },
-    { id: "69d1822df3b2afb229b5bad7", category_id: "69d09c14d5ee9e7be9aa301b", name: "Cleaning Services" },
-    { id: "69d1822df3b2afb229b5bad8", category_id: "69d09c14d5ee9e7be9aa301b", name: "Painting (Interior/Exterior)" },
-    { id: "69d1822df3b2afb229b5bad9", category_id: "69d09c14d5ee9e7be9aa301b", name: "Garage Door Services" },
-    { id: "69d1822df3b2afb229b5bada", category_id: "69d09c14d5ee9e7be9aa301b", name: "Window Installation/Repair" },
-    { id: "69d1822df3b2afb229b5badb", category_id: "69d09c14d5ee9e7be9aa301b", name: "HVAC" },
-    { id: "69d1822df3b2afb229b5badc", category_id: "69d09c14d5ee9e7be9aa301b", name: "Plumbing" },
-    { id: "69d1822df3b2afb229b5badd", category_id: "69d09c14d5ee9e7be9aa301b", name: "Roofing" },
-    { id: "69d1822df3b2afb229b5badf", category_id: "69d09c14d5ee9e7be9aa301b", name: "Security & Home Watch" },
-    { id: "69d1822df3b2afb229b5bade", category_id: "69d09c14d5ee9e7be9aa301b", name: "Handyman Services" },
-    { id: "69d1822df3b2afb229b5bae3", category_id: "69d09c14d5ee9e7be9aa301b", name: "Flooring (Tile, Wood, Carpet)" },
-    { id: "69d1822df3b2afb229b5baee", category_id: "69d09c14d5ee9e7be9aa301b", name: "Pressure Washing" },
-    { id: "69d1822df3b2afb229b5baef", category_id: "69d09c14d5ee9e7be9aa301b", name: "Driveway Repair/Cleaning/Painting" },
-    { id: "69d1822df3b2afb229b5bae0", category_id: "69d181fe57b60e0aecf4067d", name: "Pest Control" },
-    { id: "69d1822df3b2afb229b5bae1", category_id: "69d181fe57b60e0aecf4067d", name: "Appliance Repair" },
-    { id: "69d1822df3b2afb229b5bae2", category_id: "69d181fe57b60e0aecf4067d", name: "Electrical & Lighting" },
-    { id: "69d1822df3b2afb229b5bae4", category_id: "69d181fe57b60e0aecf4067d", name: "Home Organization" },
-    { id: "69d1822df3b2afb229b5bae5", category_id: "69d181fe57b60e0aecf4067d", name: "Smart Home Installation" },
-    { id: "69d1822df3b2afb229b5bae6", category_id: "69d181fe57b60e0aecf4067d", name: "Pool & Spa Services" },
-    { id: "69d1822df3b2afb229b5bae7", category_id: "69d09c14d5ee9e7be9aa301c", name: "Lawn Mowing" },
-    { id: "69d1822df3b2afb229b5bae8", category_id: "69d09c14d5ee9e7be9aa301c", name: "Sod Installation" },
-    { id: "69d1822df3b2afb229b5bae9", category_id: "69d09c14d5ee9e7be9aa301c", name: "Tree Trimming & Pruning/Removal" },
-    { id: "69d1822df3b2afb229b5baea", category_id: "69d09c14d5ee9e7be9aa301c", name: "Lawn Fertilization" },
-    { id: "69d1822df3b2afb229b5baeb", category_id: "69d09c14d5ee9e7be9aa301c", name: "Irrigation/Sprinkler Services" },
-    { id: "69d1822df3b2afb229b5baec", category_id: "69d09c14d5ee9e7be9aa301c", name: "Landscaping" },
-    { id: "69d1822df3b2afb229b5baed", category_id: "69d09c14d5ee9e7be9aa301c", name: "Hardscaping" },
-    { id: "69d1822df3b2afb229b5baf0", category_id: "69d09c14d5ee9e7be9aa301d", name: "Rentals" },
-    { id: "69d1822df3b2afb229b5baf1", category_id: "69d09c14d5ee9e7be9aa301d", name: "Repairs" },
-    { id: "69d1822df3b2afb229b5baf2", category_id: "69d09c14d5ee9e7be9aa301d", name: "Detailing" },
-    { id: "69d1822df3b2afb229b5baf3", category_id: "69d09c14d5ee9e7be9aa301d", name: "Lighting Upgrades" },
-    { id: "69d1822df3b2afb229b5baf4", category_id: "69d09c14d5ee9e7be9aa301d", name: "Improvements/Customizations" },
-    { id: "69d1822df3b2afb229b5baf5", category_id: "69d09c14d5ee9e7be9aa301d", name: "Battery Replacement" },
-    { id: "69d1822df3b2afb229b5baf6", category_id: "69d09c14d5ee9e7be9aa301d", name: "Tire Services" },
-    { id: "69d1822df3b2afb229b5baf7", category_id: "69d09c14d5ee9e7be9aa301e", name: "Auto Repairs" },
-    { id: "69d1822df3b2afb229b5baf8", category_id: "69d09c14d5ee9e7be9aa301e", name: "Auto Detailing" },
-    { id: "69d1822df3b2afb229b5baf9", category_id: "69d09c14d5ee9e7be9aa301e", name: "Oil Changes" },
-    { id: "69d1822df3b2afb229b5bafa", category_id: "69d09c14d5ee9e7be9aa301e", name: "Tire Services" },
-    { id: "69d1822df3b2afb229b5bafb", category_id: "69d09c14d5ee9e7be9aa301e", name: "Mobile Mechanic" },
-    { id: "69d1822df3b2afb229b5bafc", category_id: "69d09c14d5ee9e7be9aa301f", name: "Barber / Stylist" },
-    { id: "69d1822df3b2afb229b5bafd", category_id: "69d09c14d5ee9e7be9aa301f", name: "Nail Technicians" },
-    { id: "69d1822df3b2afb229b5bafe", category_id: "69d09c14d5ee9e7be9aa301f", name: "Spa Services" },
-    { id: "69d1822df3b2afb229b5baff", category_id: "69d09c14d5ee9e7be9aa301f", name: "Home Health Aides" },
-    { id: "69d1822df3b2afb229b5bb00", category_id: "69d09c14d5ee9e7be9aa301f", name: "Massage Therapists" },
-    { id: "69d1822df3b2afb229b5bb01", category_id: "69d09c14d5ee9e7be9aa301f", name: "Personal Trainers" },
-    { id: "69d1822df3b2afb229b5bb02", category_id: "69d09c14d5ee9e7be9aa301f", name: "Makeup Artists" },
-    { id: "69d1822df3b2afb229b5bb04", category_id: "69d09c14d5ee9e7be9aa3020", name: "Grooming" },
-    { id: "69d1822df3b2afb229b5bb05", category_id: "69d09c14d5ee9e7be9aa3020", name: "Pet Sitting/Walking" },
-    { id: "69d1822df3b2afb229b5bb06", category_id: "69d09c14d5ee9e7be9aa3020", name: "Pet Training" },
-    { id: "69d1822df3b2afb229b5bb07", category_id: "69d09c14d5ee9e7be9aa3020", name: "Mobile Grooming" },
-    { id: "69d1822df3b2afb229b5bb08", category_id: "69d09c14d5ee9e7be9aa3021", name: "Medical Transport" },
-    { id: "69d1822df3b2afb229b5bb09", category_id: "69d09c14d5ee9e7be9aa3021", name: "Airport Transport" },
-    { id: "69d1822df3b2afb229b5bb0a", category_id: "69d09c14d5ee9e7be9aa3021", name: "Local Rides" },
-    { id: "69d1822df3b2afb229b5bb0b", category_id: "69d09c14d5ee9e7be9aa3021", name: "Errand Services" },
-    { id: "69d1822df3b2afb229b5bb0c", category_id: "69d09c14d5ee9e7be9aa3021", name: "Courier/Delivery Services" },
-    { id: "69d1822df3b2afb229b5bb0f", category_id: "69d181fe57b60e0aecf4067e", name: "IT Support" },
-    { id: "69d1822df3b2afb229b5bb10", category_id: "69d181fe57b60e0aecf4067e", name: "Legal Services" },
-    { id: "69d1822df3b2afb229b5bb11", category_id: "69d181fe57b60e0aecf4067e", name: "Business Consulting" },
-    { id: "69d1822df3b2afb229b5bb12", category_id: "69d181fe57b60e0aecf4067e", name: "Tax Preparation" },
-    { id: "69d1822df3b2afb229b5bb18", category_id: "69d181fe57b60e0aecf4067e", name: "Tattoo & Body Art" },
-  ];
-  const VILLAGE_DATA = [
-    { id: "69e9a307d1bc6cfe7247eac2", name: "Alden Bungalows" },
-    { id: "69d06c54c9c22e67aed3c0ff", name: "Alhambra" },
-    { id: "69e9a307d1bc6cfe7247eaa1", name: "Amelia" },
-    { id: "69e9a307d1bc6cfe7247eac3", name: "Antrim Dells" },
-    { id: "69e9a307d1bc6cfe7247eaa2", name: "Ashland" },
-    { id: "69e9a307d1bc6cfe7247eaa3", name: "Belvedere" },
-    { id: "69d06c54c9c22e67aed3c10c", name: "Belle Aire" },
-    { id: "69e9a307d1bc6cfe7247eaa4", name: "Bonita" },
-    { id: "69e9a307d1bc6cfe7247eaa5", name: "Bonnybrook" },
-    { id: "69d06c54c9c22e67aed3c121", name: "Bradford" },
-    { id: "69e9a307d1bc6cfe7247ea92", name: "Briar Meadow" },
-    { id: "69e9a307d1bc6cfe7247eaa6", name: "Bridgeport at Creekside Landing" },
-    { id: "69e047e27ddcca3eaa81600e", name: "Bridgeport at Laurel Valley" },
-    { id: "69e9a307d1bc6cfe7247eaa7", name: "Bridgeport at Lake Miona" },
-    { id: "69e9a307d1bc6cfe7247eaa8", name: "Bridgeport at Lake Shore Cottages" },
-    { id: "69e9a307d1bc6cfe7247eaa9", name: "Bridgeport at Lake Sumter" },
-    { id: "69e047e27ddcca3eaa81600f", name: "Bridgeport at Mission Hills" },
-    { id: "69e9a307d1bc6cfe7247eaaa", name: "Bridgeport at Miona Shores" },
-    { id: "69d06c54c9c22e67aed3c136", name: "Bison Valley" },
-    { id: "69e9a307d1bc6cfe7247eaab", name: "Buttonwood" },
-    { id: "69e9a307d1bc6cfe7247eaac", name: "Cabanas at Creekside Landing" },
-    { id: "69d06c54c9c22e67aed3c110", name: "Calumet Grove" },
-    { id: "69e9a307d1bc6cfe7247eaad", name: "Caroline" },
-    { id: "69d06c54c9c22e67aed3c122", name: "Cason Hammock" },
-    { id: "69e047e27ddcca3eaa816010", name: "Charlotte" },
-    { id: "69d06c54c9c22e67aed3c112", name: "Chatham" },
-    { id: "69d06c54c9c22e67aed3c123", name: "Chitty Chatty" },
-    { id: "69d06c54c9c22e67aed3c124", name: "Citrus Grove" },
-    { id: "69e047e27ddcca3eaa816011", name: "Collier" },
-    { id: "69d06c54c9c22e67aed3c100", name: "Country Club Hills" },
-    { id: "69d06c54c9c22e67aed3c134", name: "Dabney" },
-    { id: "69e9a307d1bc6cfe7247ea93", name: "De Allende" },
-    { id: "69e9a307d1bc6cfe7247ea94", name: "De La Vista" },
-    { id: "69d06c54c9c22e67aed3c101", name: "Del Mar" },
-    { id: "69d06c54c9c22e67aed3c125", name: "DeLuna" },
-    { id: "69d06c54c9c22e67aed3c126", name: "DeSoto" },
-    { id: "69e047e27ddcca3eaa816012", name: "Dunedin" },
-    { id: "69e9a307d1bc6cfe7247eaae", name: "Duval" },
-    { id: "69d06c4a4f1e1017a77a701b", name: "Eastport (All)" },
-    { id: "69d06c54c9c22e67aed3c102", name: "El Cortez" },
-    { id: "69d06c4a4f1e1017a77a7019", name: "Established Villages (All)" },
-    { id: "69d06c4a4f1e1017a77a701c", name: "Family / Non-Age-Restricted (All)" },
-    { id: "69d06c54c9c22e67aed3c127", name: "Fenney" },
-    { id: "69e047e27ddcca3eaa816013", name: "Fernandina" },
-    { id: "69e047e27ddcca3eaa816014", name: "Gilchrist" },
-    { id: "69d06c54c9c22e67aed3c114", name: "Glenbrook" },
-    { id: "69e9a307d1bc6cfe7247eab0", name: "Haciendas of Mission Hills" },
-    { id: "69d06c54c9c22e67aed3c103", name: "Hacienda" },
-    { id: "69e9a307d1bc6cfe7247eaaf", name: "Hadley" },
-    { id: "69d06c54c9c22e67aed3c128", name: "Hammock at Fenney" },
-    { id: "69d06c54c9c22e67aed3c129", name: "Hawkins" },
-    { id: "69e9a307d1bc6cfe7247eab1", name: "Hemingway" },
-    { id: "69e047e27ddcca3eaa816015", name: "Hillsborough" },
-    { id: "69d06c4a4f1e1017a77a7018", name: "Historic Side (All)" },
-    { id: "69e047e27ddcca3eaa816016", name: "LaBelle" },
-    { id: "69e9a307d1bc6cfe7247eab2", name: "Lago Vista" },
-    { id: "69d06c54c9c22e67aed3c133", name: "Lake Denham" },
-    { id: "69e047e27ddcca3eaa816017", name: "Lake Deaton" },
-    { id: "69e9a307d1bc6cfe7247eab3", name: "Lakeshore Cottages" },
-    { id: "69e9a307d1bc6cfe7247eab4", name: "Largo" },
-    { id: "69d06c54c9c22e67aed3c104", name: "La Reynalda" },
-    { id: "69d06c54c9c22e67aed3c105", name: "La Zamora" },
-    { id: "69e9a307d1bc6cfe7247eab5", name: "Liberty Park" },
-    { id: "69d06c54c9c22e67aed3c12a", name: "Linden" },
-    { id: "69e9a307d1bc6cfe7247eab6", name: "Lynnhaven" },
-    { id: "69e9a307d1bc6cfe7247eab7", name: "Mallory Square" },
-    { id: "69d06c54c9c22e67aed3c12b", name: "Marsh Bend" },
-    { id: "69d06c54c9c22e67aed3c12c", name: "McClure" },
-    { id: "69d06c54c9c22e67aed3c139", name: "Middleton" },
-    { id: "69d06c54c9c22e67aed3c106", name: "Mira Mesa" },
-    { id: "69d06c54c9c22e67aed3c12d", name: "Monarch Grove" },
-    { id: "69d06c54c9c22e67aed3c131", name: "Moultrie Creek" },
-    { id: "69d06c4a4f1e1017a77a701a", name: "Newer Villages (All)" },
-    { id: "69d06c54c9c22e67aed3c132", name: "Newell" },
-    { id: "69e9a307d1bc6cfe7247eac5", name: "Oak Hollow" },
-    { id: "69d06c54c9c22e67aed3c137", name: "Oak Meadows" },
-    { id: "69d06c54c9c22e67aed3c107", name: "Orange Blossom Gardens" },
-    { id: "69e047e27ddcca3eaa816018", name: "Osceola Hills" },
-    { id: "69e9a307d1bc6cfe7247eac4", name: "Osceola Hills at Soaring Eagle Preserve" },
-    { id: "69d06c54c9c22e67aed3c138", name: "Oxford Oaks" },
-    { id: "69e9a307d1bc6cfe7247ea95", name: "Palo Alto" },
-    { id: "69e9a307d1bc6cfe7247eab8", name: "Pennecamp" },
-    { id: "69e91929e9a419d0ed14129e", name: "Piedmont" },
-    { id: "69e9a307d1bc6cfe7247ea96", name: "Pine Hills" },
-    { id: "69e9a307d1bc6cfe7247ea97", name: "Pine Ridge" },
-    { id: "69e047e27ddcca3eaa816019", name: "Pinellas" },
-    { id: "69e9a307d1bc6cfe7247eab9", name: "Poinciana" },
-    { id: "69e9a307d1bc6cfe7247ea98", name: "Polo Ridge" },
-    { id: "69d06c54c9c22e67aed3c12e", name: "Richmond" },
-    { id: "69e9a307d1bc6cfe7247ea99", name: "Rio Grande" },
-    { id: "69e9a307d1bc6cfe7247ea9a", name: "Rio Ponderosa" },
-    { id: "69e9a307d1bc6cfe7247ea9b", name: "Rio Ranchero" },
-    { id: "69e9a307d1bc6cfe7247eaba", name: "Sabal Chase" },
-    { id: "69e047e27ddcca3eaa81601a", name: "Sanibel" },
-    { id: "69d06c54c9c22e67aed3c11c", name: "Santiago" },
-    { id: "69e9a307d1bc6cfe7247ea9c", name: "Santo Domingo" },
-    { id: "69d06c54c9c22e67aed3c135", name: "Shady Brook" },
-    { id: "69d06c54c9c22e67aed3c108", name: "Silver Lake" },
-    { id: "69d06c54c9c22e67aed3c109", name: "Spring Arbor" },
-    { id: "69e9a307d1bc6cfe7247ea9d", name: "Springdale" },
-    { id: "69e9a307d1bc6cfe7247eabb", name: "St. Charles" },
-    { id: "69d06c54c9c22e67aed3c12f", name: "St. Catherine" },
-    { id: "69e9a307d1bc6cfe7247eabc", name: "St. James" },
-    { id: "69d06c54c9c22e67aed3c130", name: "St. Johns" },
-    { id: "69e9a307d1bc6cfe7247ea9e", name: "Summerhill" },
-    { id: "69e9a307d1bc6cfe7247eabd", name: "Sunset Pointe" },
-    { id: "69e9a307d1bc6cfe7247eabe", name: "Tall Trees" },
-    { id: "69e9a307d1bc6cfe7247eabf", name: "Tamarind Grove" },
-    { id: "69e9a307d1bc6cfe7247ea9f", name: "Tierra Del Sol" },
-    { id: "69d06c54c9c22e67aed3c10a", name: "Valle Verde" },
-    { id: "69e9a307d1bc6cfe7247eac6", name: "Waters Edge" },
-    { id: "69e9a307d1bc6cfe7247eac7", name: "Well Point" },
-    { id: "69e9a307d1bc6cfe7247eac1", name: "Winifred" },
-    { id: "69e9a307d1bc6cfe7247eaa0", name: "Woodbury" },
-    { id: "69e047e27ddcca3eaa81601b", name: "Brownwood" },
-  ];
+  const [ads, setAds]       = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError]   = useState(null);
 
   useEffect(() => {
     (async () => {
       try {
         const res = await fetch(`${API_BASE}/getDeals`);
-        const data = res.ok ? await res.json() : { ads: [] };
+        if (!res.ok) throw new Error("Failed to load deals");
+        const data = await res.json();
         setAds(data.ads || []);
-      } catch {
-        setError("Could not load deals right now. Please try again shortly.");
+      } catch (e) {
+        setError("Could not load Deals of the Week. Please try again later.");
       } finally {
         setLoading(false);
       }
     })();
   }, []);
 
-  // Reset to first card whenever filter changes
-  useEffect(() => {
-    setCurrentIndex(0);
-  }, [filterArea, filterService]);
-
-  // Filter logic
-  const visibleAds = ads.filter(ad => {
-    if (isExpired(ad)) return false;
-
-    if (filterArea) {
-      const areaLower = filterArea.toLowerCase();
-      const serves = Array.isArray(ad._provider_areas)
-        ? ad._provider_areas.some(a => a.toLowerCase().includes(areaLower))
-        : true;
-      if (!serves) return false;
-    }
-
-    if (filterService) {
-      const kw = filterService.toLowerCase();
-      const haystack = [
-        ad.provider_name || "",
-        ad.headline || "",
-        ad.body || "",
-        ...(ad._provider_services || []),
-        ad._provider_category || "",
-      ].join(" ").toLowerCase();
-      if (!haystack.includes(kw)) return false;
-    }
-
-    return true;
-  });
-
-  const hasFilter = true; // always show ads; dropdowns just filter them
-  const currentAd = visibleAds[currentIndex] || null;
-
-  const handlePrev = useCallback(() => {
-    setCurrentIndex(i => Math.max(0, i - 1));
-  }, []);
-
-  const handleNext = useCallback(() => {
-    setCurrentIndex(i => Math.min(visibleAds.length - 1, i + 1));
-  }, [visibleAds.length]);
-
-  // Keyboard arrow support
-  useEffect(() => {
-    const handler = (e) => {
-      if (e.key === "ArrowLeft") handlePrev();
-      if (e.key === "ArrowRight") handleNext();
-    };
-    window.addEventListener("keydown", handler);
-    return () => window.removeEventListener("keydown", handler);
-  }, [handlePrev, handleNext]);
-
   return (
-    <div style={{ background: "linear-gradient(160deg,#1B3D6F 0%,#0e2548 40%,#1a0a00 100%)", minHeight: "100vh", fontFamily: "'Times New Roman', Georgia, serif" }}>
-
-      {/* ── Header ── */}
+    <div style={{ background: PARCH, minHeight: "100vh", fontFamily: "'Times New Roman', Georgia, serif" }}>
+      {/* Header */}
       <div style={{
-        background: "linear-gradient(135deg,#E8431A 0%,#c93510 40%,#8B0000 100%)",
-        color: WHITE,
-        padding: "14px 16px 18px",
-        borderBottom: "4px solid #FFDB00",
-        boxShadow: "0 4px 20px rgba(232,67,26,0.5)",
-        position: "relative",
-        overflow: "hidden",
+        background: NAVY, color: WHITE, padding: "18px 20px 14px",
+        textAlign: "center", borderBottom: `4px solid ${ORANGE}`,
       }}>
-        {/* Decorative burst rings */}
-        <div style={{ position: "absolute", top: -40, right: -40, width: 160, height: 160, borderRadius: "50%", background: "rgba(255,219,0,0.08)", pointerEvents: "none" }} />
-        <div style={{ position: "absolute", top: -20, right: -20, width: 100, height: 100, borderRadius: "50%", background: "rgba(255,219,0,0.08)", pointerEvents: "none" }} />
-
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-start", marginBottom: 8 }}>
           <a href="/" style={{ textDecoration: "none" }}>
-            <button style={{
-              background: "rgba(0,0,0,0.3)",
-              border: "2px solid rgba(255,255,255,0.4)", borderRadius: 6,
-              color: WHITE, fontFamily: "Georgia, serif",
-              fontWeight: 700, fontSize: 13, padding: "7px 14px", cursor: "pointer",
-              backdropFilter: "blur(4px)",
-            }}>« Home</button>
+            <button style={{ background: "linear-gradient(180deg,#9A6030,#7A4820 60%,#5A3010)", border: "2px solid #1B3D6F", borderRadius: 6, color: "#F5E8CC", fontFamily: "Georgia, serif", fontWeight: 700, fontSize: 13, padding: "8px 16px", cursor: "pointer", whiteSpace: "nowrap" }}>« Home</button>
           </a>
-          <img
-            src="https://media.base44.com/images/public/69d062aca815ce8e697894b1/a9af95bc3_V-Hublogo.png"
-            alt="V-Hub"
-            style={{ height: 36, filter: "brightness(0) invert(1)" }}
-          />
         </div>
-        <div style={{ textAlign: "center" }}>
-          <div style={{
-            fontSize: 32, fontWeight: 900, letterSpacing: 1,
-            textShadow: "0 2px 8px rgba(0,0,0,0.4)",
-            display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
-          }}>
-            🔥 Deals of the Week 🔥
-          </div>
-          <div style={{
-            display: "inline-block",
-            marginTop: 8,
-            background: "#FFDB00",
-            color: "#1a0a00",
-            fontSize: 11, fontWeight: 800,
-            padding: "3px 14px", borderRadius: 20,
-            letterSpacing: 1.5, textTransform: "uppercase",
-          }}>
-            Exclusive Local Offers · The Villages, FL
-          </div>
+        <div style={{ fontSize: 28, fontWeight: 900, letterSpacing: 1 }}>🔥 Deals of the Week!</div>
+        <div style={{ fontSize: 13, opacity: 0.8, marginTop: 4 }}>
+          Exclusive offers from local providers in The Villages, FL
         </div>
       </div>
 
-      {/* ── Filter bar ── */}
-      <div style={{
-        background: "linear-gradient(180deg,#1e3a6e,#162d56)",
-        borderBottom: "3px solid #FFDB00",
-        padding: "14px 16px",
-      }}>
-        <div style={{ display: "flex", gap: 8, marginBottom: 6 }}>
-          <div style={{ flex: 1, fontSize: 11, fontWeight: 700, color: "#FFDB00", fontFamily: "'Times New Roman', serif", letterSpacing: 0.5 }}>
-            What service do you need?
-          </div>
-          <div style={{ flex: 1, fontSize: 11, fontWeight: 700, color: "#FFDB00", fontFamily: "'Times New Roman', serif", letterSpacing: 0.5 }}>
-            Where do you need it?
-          </div>
-        </div>
-        <div style={{ display: "flex", gap: 8 }}>
-          {/* Service dropdown */}
-          <div style={{ flex: 1, minWidth: 0, position: "relative" }}>
-            <button
-              onClick={e => { e.stopPropagation(); setSvcOpen(o => !o); setVilOpen(false); setOpenCat(null); }}
-              style={{
-                width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between",
-                padding: "10px 12px",
-                border: selSvcObj ? "2px solid #FFDB00" : "2px solid rgba(255,255,255,0.3)",
-                borderRadius: 8,
-                background: selSvcObj ? "rgba(255,219,0,0.15)" : "rgba(255,255,255,0.12)",
-                fontFamily: "'Times New Roman', serif", fontSize: 13,
-                color: selSvcObj ? "#FFDB00" : "rgba(255,255,255,0.85)",
-                cursor: "pointer", fontWeight: selSvcObj ? 700 : 400, textAlign: "left",
-                backdropFilter: "blur(4px)",
-              }}
-            >
-              <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                {selSvcObj ? selSvcObj.name : "🔍 Select a Service..."}
-              </span>
-              <span style={{ fontSize: 10, flexShrink: 0, marginLeft: 4, color: "rgba(255,255,255,0.6)" }}>
-                {svcOpen ? "▲" : "▼"}
-              </span>
-            </button>
-            {svcOpen && (
-              <div
-                onClick={e => e.stopPropagation()}
-                style={{
-                  position: "absolute", top: "calc(100% + 2px)", left: 0, right: 0,
-                  background: "#f5f0e8", border: `2px solid ${INK}`, borderRadius: 4,
-                  zIndex: 9999, boxShadow: "0 8px 28px rgba(0,0,0,0.4)",
-                  maxHeight: 500, overflowY: "auto",
-                }}
-              >
-                {CATS_STATIC.sort((a, b) => a.name.localeCompare(b.name)).map(c => {
-                  const catSvcs = SVCS_STATIC.filter(s => s.category_id === c.id).sort((a, b) => a.name.localeCompare(b.name));
-                  const isExpanded = openCat === c.id;
-                  return (
-                    <div key={c.id}>
-                      <div
-                        onClick={() => setOpenCat(isExpanded ? null : c.id)}
-                        style={{
-                          display: "flex", alignItems: "center", justifyContent: "space-between",
-                          padding: "11px 14px", borderBottom: "1px solid #ddd6c8",
-                          background: "#f5f0e8", cursor: "pointer", userSelect: "none",
-                        }}
-                      >
-                        <span style={{ fontSize: 13, fontWeight: 700, color: INK, fontFamily: "'Times New Roman', serif" }}>
-                          {c.icon} {c.name}
-                        </span>
-                        <span style={{ fontSize: 10, color: MUTED }}>{isExpanded ? "▲" : "▼"}</span>
-                      </div>
-                      {isExpanded && catSvcs.map(s => (
-                        <div
-                          key={s.id}
-                          onClick={() => { setSelSvcObj(s); setFilterService(s.name.toLowerCase()); setSvcOpen(false); setOpenCat(null); }}
-                          style={{
-                            padding: "10px 14px 10px 28px", fontSize: 13,
-                            fontFamily: "'Times New Roman', serif",
-                            color: selSvcObj?.id === s.id ? "#fff" : INK,
-                            background: selSvcObj?.id === s.id ? "#7A4820" : "#e8e0d0",
-                            borderBottom: "1px solid #ddd6c8", cursor: "pointer",
-                            fontWeight: selSvcObj?.id === s.id ? 700 : 400,
-                          }}
-                        >
-                          {selSvcObj?.id === s.id ? "✓ " : "– "}{s.name}
-                        </div>
-                      ))}
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-
-          {/* Village dropdown */}
-          <div style={{ flex: 1, minWidth: 0, position: "relative" }}>
-            <button
-              onClick={e => { e.stopPropagation(); setVilOpen(o => !o); setSvcOpen(false); setOpenCat(null); }}
-              style={{
-                width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between",
-                padding: "10px 12px",
-                border: selVilObj ? "2px solid #FFDB00" : "2px solid rgba(255,255,255,0.3)",
-                borderRadius: 8,
-                background: selVilObj ? "rgba(255,219,0,0.15)" : "rgba(255,255,255,0.12)",
-                fontFamily: "'Times New Roman', serif", fontSize: 13,
-                color: selVilObj ? "#FFDB00" : "rgba(255,255,255,0.85)",
-                cursor: "pointer", fontWeight: selVilObj ? 700 : 400, textAlign: "left",
-                backdropFilter: "blur(4px)",
-              }}
-            >
-              <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                {selVilObj ? selVilObj.name : "📍 Select a Village..."}
-              </span>
-              <span style={{ fontSize: 10, flexShrink: 0, marginLeft: 4, color: "rgba(255,255,255,0.6)" }}>
-                {vilOpen ? "▲" : "▼"}
-              </span>
-            </button>
-            {vilOpen && (
-              <div
-                onClick={e => e.stopPropagation()}
-                style={{
-                  position: "absolute", top: "calc(100% + 2px)", left: 0, right: 0,
-                  background: "#f5f0e8", border: `2px solid ${INK}`, borderRadius: 4,
-                  zIndex: 9999, boxShadow: "0 8px 28px rgba(0,0,0,0.4)",
-                  maxHeight: 380, overflowY: "auto",
-                }}
-              >
-                {VILLAGE_DATA.sort((a, b) => a.name.localeCompare(b.name)).map(v => (
-                  <div
-                    key={v.id}
-                    onClick={() => { setSelVilObj(v); setFilterArea(v.name); setVilOpen(false); }}
-                    style={{
-                      padding: "12px 16px", fontSize: 14,
-                      color: selVilObj?.id === v.id ? "#fff" : INK,
-                      background: selVilObj?.id === v.id ? "#7A4820" : "#f5f0e8",
-                      borderBottom: "1px solid #ddd6c8", cursor: "pointer",
-                      fontFamily: "'Times New Roman', serif",
-                      fontWeight: selVilObj?.id === v.id ? 700 : 400,
-                    }}
-                  >
-                    {v.name}
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-
-        {!!(filterArea || filterService) && (
-          <button
-            onClick={() => { setFilterArea(""); setFilterService(""); setSelSvcObj(null); setSelVilObj(null); setSvcOpen(false); setVilOpen(false); }}
-            style={{
-              marginTop: 8, background: "rgba(255,255,255,0.15)", color: WHITE,
-              border: "1px solid rgba(255,255,255,0.3)", borderRadius: 20,
-              fontSize: 12, fontWeight: 700, padding: "7px 16px", cursor: "pointer",
-              backdropFilter: "blur(4px)",
-            }}
-          >✕ Clear Filters</button>
-        )}
-      </div>
-
-      {/* ── Content ── */}
-      <div style={{ maxWidth: 520, margin: "0 auto", padding: "20px 16px 60px" }}>
-
+      {/* Content */}
+      <div style={{ maxWidth: 680, margin: "0 auto", padding: "20px 16px 40px" }}>
         {loading && (
-          <div style={{ textAlign: "center", padding: 60, color: "rgba(255,255,255,0.7)", fontSize: 16 }}>
+          <div style={{ textAlign: "center", padding: 60, color: MUTED, fontSize: 16 }}>
             Loading deals…
           </div>
         )}
@@ -767,77 +178,25 @@ export default function Classifieds() {
           </div>
         )}
 
-        {/* Prompt to search */}
-        {!loading && !error && !hasFilter && (
-          <div style={{ textAlign: "center", padding: "50px 20px 60px" }}>
-            <div style={{ fontSize: 52, marginBottom: 16 }}>🔥</div>
-            <div style={{ fontSize: 22, fontWeight: 900, color: WHITE, marginBottom: 8, textShadow: "0 2px 8px rgba(0,0,0,0.4)" }}>
-              Hot Deals Near You
-            </div>
-            <div style={{ fontSize: 14, lineHeight: 1.8, color: "rgba(255,255,255,0.75)" }}>
-              Select a service and your village above<br />
-              to see exclusive deals this week.
-            </div>
-            {ads.length > 0 && (
-              <div style={{
-                display: "inline-block", marginTop: 20,
-                background: "rgba(255,219,0,0.15)", border: "1px solid #FFDB00",
-                color: "#FFDB00", fontSize: 12, fontWeight: 700,
-                padding: "6px 18px", borderRadius: 20,
-              }}>
-                🏷️ {ads.filter(a => !isExpired(a)).length} active deal{ads.filter(a => !isExpired(a)).length !== 1 ? "s" : ""} available this week
-              </div>
-            )}
+        {!loading && !error && ads.length === 0 && (
+          <div style={{ textAlign: "center", padding: 60, color: MUTED }}>
+            <div style={{ fontSize: 40, marginBottom: 12 }}>🏖️</div>
+            <div style={{ fontSize: 18, fontWeight: 700, color: NAVY, marginBottom: 8 }}>No Active Deals Right Now</div>
+            <div style={{ fontSize: 14 }}>Check back soon — new deals are added weekly!</div>
           </div>
         )}
 
-        {/* No results */}
-        {!loading && !error && hasFilter && visibleAds.length === 0 && (
-          <div style={{ textAlign: "center", padding: 60, color: "rgba(255,255,255,0.75)" }}>
-            <div style={{ fontSize: 44, marginBottom: 12 }}>🏖️</div>
-            <div style={{ fontSize: 18, fontWeight: 700, color: WHITE, marginBottom: 8 }}>
-              No deals match your search
-            </div>
-            <div style={{ fontSize: 14, lineHeight: 1.7 }}>
-              {filterArea && filterService
-                ? `No providers offering "${filterService}" in "${filterArea}" have active deals right now.`
-                : filterArea
-                  ? `No providers in "${filterArea}" have active deals right now.`
-                  : `No providers offering "${filterService}" have active deals right now.`
-              }
-            </div>
-            <button
-              onClick={() => { setFilterArea(""); setFilterService(""); }}
-              style={{
-                marginTop: 20, background: NAVY, color: WHITE,
-                border: "none", borderRadius: 8, padding: "10px 22px",
-                fontSize: 13, fontWeight: 700, cursor: "pointer",
-              }}
-            >
-              Clear Search
-            </button>
+        {!loading && !error && ads.length > 0 && (
+          <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
+            {ads.map(ad => <AdCard key={ad.id} ad={ad} />)}
           </div>
-        )}
-
-        {/* Single ad carousel */}
-        {!loading && !error && hasFilter && visibleAds.length > 0 && currentAd && (
-          <AdCard
-            ad={currentAd}
-            index={currentIndex}
-            total={visibleAds.length}
-            onPrev={handlePrev}
-            onNext={handleNext}
-          />
         )}
       </div>
 
-      {/* ── Footer ── */}
-      <div style={{
-        background: INK, padding: "12px 20px",
-        textAlign: "center", fontSize: 11,
-        color: "rgba(245,232,204,0.5)",
-      }}>
-        © 2026 V-Hub · The Villages, Florida
+      {/* Footer */}
+      <div style={{ background: INK, padding: "12px 20px", textAlign: "center", fontSize: 11, color: "rgba(245,232,204,0.5)" }}>
+        © 2026 V-Hub · The Villages, Florida ·{" "}
+        <a href="/Terms" style={{ color: "rgba(245,232,204,0.4)" }}>Terms</a>
       </div>
     </div>
   );
