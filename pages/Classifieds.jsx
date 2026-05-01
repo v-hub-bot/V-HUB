@@ -112,7 +112,7 @@ function AdCard({ ad, index, total, onPrev, onNext }) {
           </button>
         )}
 
-        {/* Hero image — fixed 1:1 ratio container so card always fits on screen */}
+        {/* Hero image — capped so bottom strip is always visible */}
         <div style={{ width: "100%", background: "#0a1628", overflow: "hidden", borderRadius: "14px 14px 0 0" }}>
           {ad.image_url ? (
             <img
@@ -121,8 +121,7 @@ function AdCard({ ad, index, total, onPrev, onNext }) {
               style={{
                 width: "100%",
                 height: "auto",
-                width: "100%",
-                maxHeight: "65vh",
+                maxHeight: "calc(100vh - 340px)",
                 objectFit: "contain",
                 display: "block",
                 background: "#0a1628",
