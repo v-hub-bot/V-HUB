@@ -653,11 +653,11 @@ export default function Classifieds() {
   const currentAd = visibleAds[currentIndex] || null;
 
   const handlePrev = useCallback(() => {
-    setCurrentIndex(i => Math.max(0, i - 1));
-  }, []);
+    setCurrentIndex(i => (i - 1 + visibleAds.length) % visibleAds.length);
+  }, [visibleAds.length]);
 
   const handleNext = useCallback(() => {
-    setCurrentIndex(i => Math.min(visibleAds.length - 1, i + 1));
+    setCurrentIndex(i => (i + 1) % visibleAds.length);
   }, [visibleAds.length]);
 
   // Keyboard arrow support

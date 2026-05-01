@@ -223,6 +223,7 @@ Deno.serve(async (req) => {
               is_active: true,
               is_queued_next: false,
               deal_expires_at: expiresIso,
+              classifieds_stripe_subscription_id: session.id,
             });
             activatedHeadline = adToActivate?.headline || "";
             console.log("✅ Activated specific ad:", adIdToActivate, "expires:", expiresIso);
@@ -235,6 +236,7 @@ Deno.serve(async (req) => {
                 is_active: true,
                 is_queued_next: false,
                 deal_expires_at: expiresIso,
+                classifieds_stripe_subscription_id: session.id,
               });
               activatedHeadline = toActivate.headline || "";
               console.log("✅ Activated fallback queued ad:", toActivate.id, "expires:", expiresIso);
@@ -245,6 +247,7 @@ Deno.serve(async (req) => {
                 provider_name: provider?.business_name || session.metadata?.provider_name || "Provider",
                 is_active: true,
                 deal_expires_at: expiresIso,
+                classifieds_stripe_subscription_id: session.id,
                 headline: "New Deal — Coming Soon",
                 body: "",
                 village: provider?.address || "",
