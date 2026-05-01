@@ -113,22 +113,30 @@ function AdCard({ ad, index, total, onPrev, onNext }) {
           </button>
         )}
 
-        {/* Hero image */}
-        {ad.image_url ? (
-          <img
-            src={ad.image_url}
-            alt={ad.headline || ad.provider_name}
-            style={{ width: "100%", display: "block", maxHeight: "420px", objectFit: "cover", objectPosition: "center center" }}
-            onError={e => { e.target.style.display = "none"; }}
-          />
-        ) : (
-          <div style={{
-            background: `linear-gradient(135deg, ${NAVY}, ${TEAL})`,
-            height: 220, display: "flex", alignItems: "center", justifyContent: "center",
-          }}>
-            <span style={{ color: WHITE, fontSize: 48 }}>🏷️</span>
-          </div>
-        )}
+        {/* Hero image — fixed 1:1 ratio container so card always fits on screen */}
+        <div style={{ position: "relative", width: "100%", paddingTop: "75%", background: "#0a1628", overflow: "hidden" }}>
+          {ad.image_url ? (
+            <img
+              src={ad.image_url}
+              alt={ad.headline || ad.provider_name}
+              style={{
+                position: "absolute", top: 0, left: 0,
+                width: "100%", height: "100%",
+                objectFit: "contain",
+                background: "#0a1628",
+              }}
+              onError={e => { e.target.style.display = "none"; }}
+            />
+          ) : (
+            <div style={{
+              position: "absolute", top: 0, left: 0, width: "100%", height: "100%",
+              background: `linear-gradient(135deg, ${NAVY}, ${TEAL})`,
+              display: "flex", alignItems: "center", justifyContent: "center",
+            }}>
+              <span style={{ color: WHITE, fontSize: 48 }}>🏷️</span>
+            </div>
+          )}
+        </div>
 
         {/* Bottom strip */}
         <div style={{
