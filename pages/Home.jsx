@@ -950,7 +950,7 @@ export default function Home() {
   const [svcs,     setSvcs]     = useState([]);
   const [results,  setResults]  = useState([]);
   const [searched, setSearched] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(() => !!(new URLSearchParams(window.location.search).get("provider")));
   const [selProv,  setSelProv]  = useState(null);
   const [selAreaR, setSelAreaR] = useState(null);
   const [selCatR,  setSelCatR]  = useState(null);
@@ -1181,10 +1181,11 @@ export default function Home() {
           const found = data.provider || null;
           if (found) {
             setSelProv(found);
-            window.history.replaceState({}, "", "/Home");
           }
+          setIsLoading(false);
+          window.history.replaceState({}, "", "/Home");
         })
-        .catch(() => {});
+        .catch(() => { setIsLoading(false); });
     }
   }, []);
 
@@ -1569,13 +1570,13 @@ export default function Home() {
   const para = { margin: "0 0 8px 0", fontSize: 11, color: INK, fontFamily: "'Times New Roman', serif", lineHeight: 1.75, textAlign: "justify" };
   const rule = { height: 2, background: INK, margin: "10px 0", opacity: 0.15 };
 
-  if (selProv)  return <ProvDetail prov={selProv} areas={areas} cats={cats} svcs={svcs} onBack={() => setSelProv(null)} />;
-  if (isLoading) return (
+  if (isLoading && !selProv) return (
     <div style={{ background: "#f5f0e8", minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", gap: 16 }}>
-      <div style={{ fontSize: 40 }}>🔍</div>
-      <div style={{ fontFamily: "Georgia, serif", fontSize: 20, color: "#3b2a1a" }}>Finding providers near you...</div>
+      <div style={{ fontSize: 48 }}>🏡</div>
+      <div style={{ fontFamily: "Georgia, serif", fontSize: 18, color: "#3b2a1a" }}>Loading provider profile…</div>
     </div>
   );
+  if (selProv)  return <ProvDetail prov={selProv} areas={areas} cats={cats} svcs={svcs} onBack={() => setSelProv(null)} />;
   if (searched) return <Results results={results} areas={areas} cats={cats} svcs={svcs} onReset={reset} onSel={setSelProv} selArea={selAreaR} selCatId={selCatR} />;
 
   return (
