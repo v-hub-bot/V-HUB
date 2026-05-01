@@ -114,19 +114,18 @@ function AdCard({ ad, index, total, onPrev, onNext }) {
           </button>
         )}
 
-        {/* Hero image — fixed pixel cap so bottom strip always shows */}
-        <div style={{ width: "100%", background: "#0a1628", borderRadius: "14px 14px 0 0" }}>
+        {/* Hero image — fixed height container, image fills it with cover */}
+        <div style={{ width: "100%", height: 300, background: "#0a1628", borderRadius: "14px 14px 0 0", overflow: "hidden", flexShrink: 0 }}>
           {ad.image_url ? (
             <img
               src={ad.image_url}
               alt={ad.headline || ad.provider_name}
               style={{
                 width: "100%",
-                height: "auto",
-                maxHeight: 320,
-                objectFit: "contain",
+                height: "100%",
+                objectFit: "cover",
+                objectPosition: "top",
                 display: "block",
-                background: "#0a1628",
               }}
               onError={e => { e.target.style.display = "none"; }}
             />
