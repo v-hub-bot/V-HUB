@@ -293,45 +293,50 @@ function PeekCarousel({ ads, currentIndex, onPrev, onNext, setIndex }) {
       {/* 3-card layout: flanking cards visible, center card pops out */}
       <div style={{
         display: "flex",
-        alignItems: "flex-start",
+        alignItems: "center",
         justifyContent: "center",
-        gap: 12,
-        padding: "8px 8px 16px",
+        gap: 10,
+        padding: "8px 4px 16px",
       }}>
-        {/* Left card */}
+        {/* Left card — same size, no dim */}
         <div
           onClick={onPrev}
           style={{
-            flex: "0 0 26%",
-            maxWidth: 200,
+            flex: "0 0 30%",
+            maxWidth: 220,
             cursor: "pointer",
             transition: "transform 0.35s cubic-bezier(.4,0,.2,1)",
-            transformOrigin: "right center",
+            borderRadius: 16,
+            overflow: "hidden",
           }}
         >
           {prevAd && <AdCard ad={prevAd} active={false} onClick={onPrev} />}
         </div>
 
-        {/* Center card — full size, popped out */}
+        {/* Center card — same width, pops with scale + glow */}
         <div style={{
-          flex: "0 0 44%",
-          maxWidth: 420,
+          flex: "0 0 34%",
+          maxWidth: 260,
           transition: "transform 0.35s cubic-bezier(.4,0,.2,1)",
           zIndex: 2,
-          filter: "drop-shadow(0 8px 24px rgba(0,0,0,0.45))",
+          transform: "scale(1.06)",
+          borderRadius: 16,
+          overflow: "hidden",
+          boxShadow: "0 12px 40px rgba(0,0,0,0.55), 0 0 0 2px #FFDB00",
         }}>
           <AdCard ad={activeAd} active={true} />
         </div>
 
-        {/* Right card */}
+        {/* Right card — same size, no dim */}
         <div
           onClick={onNext}
           style={{
-            flex: "0 0 26%",
-            maxWidth: 200,
+            flex: "0 0 30%",
+            maxWidth: 220,
             cursor: "pointer",
             transition: "transform 0.35s cubic-bezier(.4,0,.2,1)",
-            transformOrigin: "left center",
+            borderRadius: 16,
+            overflow: "hidden",
           }}
         >
           {nextAd && <AdCard ad={nextAd} active={false} onClick={onNext} />}
