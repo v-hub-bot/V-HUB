@@ -404,7 +404,7 @@ export default function Classifieds() {
   const [filterArea, setFilterArea] = useState("");
   const [filterService, setFilterService] = useState("");
   const [currentIndex, setCurrentIndex]   = useState(0);
-  const [showAll, setShowAll]             = useState(true);
+  const [showAll, setShowAll]             = useState(false);
   // Dropdown state
   const [svcOpen,  setSvcOpen]  = useState(false);
   const [vilOpen,  setVilOpen]  = useState(false);
@@ -967,7 +967,7 @@ export default function Classifieds() {
         )}
 
         {/* Netflix-style peek carousel */}
-        {!loading && !error && visibleAds.length > 0 && (
+        {!loading && !error && (hasFilter || showAll) && visibleAds.length > 0 && (
           <div id="deals-carousel">
           <PeekCarousel
             ads={visibleAds}
