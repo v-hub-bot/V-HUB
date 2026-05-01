@@ -1143,28 +1143,8 @@ function ClassifiedAdSection({ provider, refreshKey = 0 }) {
         body: JSON.stringify({ prompt: aiPrompt, provider_id: provider.id }),
       });
       const data = await resp.json();
-      if (data.b64 || data.url) {
-        let finalUrl = data.url || "";
-        // Backend now returns b64_json — convert to blob and upload to permanent CDN
-        if (data.b64) {
-          try {
-            const byteArr = Uint8Array.from(atob(data.b64), c => c.charCodeAt(0));
-            const imgBlob = new Blob([byteArr], { type: "image/png" });
-            const fd2 = new FormData();
-            fd2.append("file", imgBlob, `ai_ad_${provider.id}_${Date.now()}.png`);
-            const upResp = await fetch("https://api.base44.app/api/apps/69d06ada8019d7e9edf7f8e8/storage/upload", { method: "POST", body: fd2 });
-            const upData = await upResp.json().catch(() => ({}));
-            if (upData.url) {
-              finalUrl = toCDNUrl(upData.url) || upData.url;
-            } else {
-              // CDN upload failed — use data URI for immediate display (still works in img tag)
-              finalUrl = `data:image/png;base64,${data.b64}`;
-            }
-          } catch (e) {
-            // Fallback to data URI
-            finalUrl = `data:image/png;base64,${data.b64}`;
-          }
-        }
+      if (data.url) {
+        const finalUrl = data.url;
         setForm(p => ({ ...p, image_url: finalUrl }));
         setFilePreview(null); setFileObj(null);
         // Persist to saved_images on existing record

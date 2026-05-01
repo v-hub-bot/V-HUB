@@ -1,4 +1,5 @@
-// v9 — DALL-E 3 with base64_json response to avoid temp-URL CORS issues on frontend CDN re-upload
+// v10 — backend uploads image to CDN directly, returns clean URL (no giant b64 to frontend)
+import { createClientFromRequest } from "npm:@base44/sdk@0.8.23";
 
 const CORS_HEADERS = {
   "Access-Control-Allow-Origin": "*",
@@ -21,7 +22,7 @@ Deno.serve(async (req) => {
 
     const fullPrompt = `Create a professional, eye-catching advertisement background image for a local service business in The Villages, Florida. ${prompt}. Style: vibrant colors, clean composition, suitable for a weekly deals/promotions advertisement. CRITICAL REQUIREMENT: The image must contain absolutely NO text, NO words, NO letters, NO numbers, NO signs with writing, NO banners with text — zero text of any kind in any language. Pure visual imagery only. No watermarks. High quality photorealistic or illustrated style.`;
 
-    // Use b64_json so frontend receives bytes directly — no CORS issues fetching a temp URL
+    // Step 1: Generate with DALL-E 3 using URL response (simpler, no giant b64)
     const resp = await fetch("https://api.openai.com/v1/images/generations", {
       method: "POST",
       headers: {
@@ -34,7 +35,7 @@ Deno.serve(async (req) => {
         n: 1,
         size: "1024x1024",
         quality: "standard",
-        response_format: "b64_json",
+        response_format: "url",
       }),
     });
 
@@ -45,13 +46,39 @@ Deno.serve(async (req) => {
     }
 
     const data = await resp.json();
-    const b64 = data?.data?.[0]?.b64_json;
-    if (!b64) return Response.json({ error: "No image returned from OpenAI" }, { status: 500, headers: CORS_HEADERS });
+    const tempUrl = data?.data?.[0]?.url;
+    if (!tempUrl) return Response.json({ error: "No image returned from OpenAI" }, { status: 500, headers: CORS_HEADERS });
 
-    console.log("✅ DALL-E image generated (b64), size:", Math.round(b64.length / 1024), "KB");
+    console.log("✅ DALL-E image generated, fetching from temp URL...");
 
-    // Return b64 — frontend converts to blob and uploads to CDN storage (no CORS issue)
-    return Response.json({ b64, url: `data:image/png;base64,${b64}` }, { headers: CORS_HEADERS });
+    // Step 2: Fetch the image bytes from OpenAI's temp URL (server-side, no CORS issues)
+    const imgResp = await fetch(tempUrl);
+    if (!imgResp.ok) {
+      console.error("Failed to fetch temp image:", imgResp.status);
+      return Response.json({ error: "Failed to fetch generated image" }, { status: 500, headers: CORS_HEADERS });
+    }
+    const imgBytes = await imgResp.arrayBuffer();
+    console.log("Image fetched, size:", Math.round(imgBytes.byteLength / 1024), "KB");
+
+    // Step 3: Upload to Base44 CDN storage
+    const base44 = createClientFromRequest(req);
+    const filename = `ai_ad_${provider_id}_${Date.now()}.png`;
+    const blob = new Blob([imgBytes], { type: "image/png" });
+
+    let finalUrl = tempUrl; // fallback to temp URL if upload fails
+    try {
+      const uploadedFile = await base44.storage.uploadFile(blob, filename);
+      if (uploadedFile?.url) {
+        finalUrl = uploadedFile.url;
+        console.log("✅ Uploaded to CDN:", finalUrl);
+      } else {
+        console.warn("CDN upload returned no URL, using temp URL");
+      }
+    } catch (uploadErr) {
+      console.error("CDN upload failed:", uploadErr, "— falling back to temp URL");
+    }
+
+    return Response.json({ url: finalUrl }, { headers: CORS_HEADERS });
 
   } catch (err: any) {
     console.error("generateAdImage error:", err);
