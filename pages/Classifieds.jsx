@@ -301,7 +301,7 @@ function PeekCarousel({ ads, currentIndex, onPrev, onNext, setIndex }) {
       {/* 3-card layout: flanking cards visible, center card pops out */}
       <div style={{
         display: "flex",
-        alignItems: "flex-start",
+        alignItems: "center",
         justifyContent: "center",
         gap: 10,
         padding: "8px 4px 16px",
