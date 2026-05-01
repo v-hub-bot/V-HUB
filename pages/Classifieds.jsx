@@ -44,17 +44,28 @@ function AdCard({ ad, index, total, onPrev, onNext }) {
     }
   };
 
-  const handleSave = (e) => {
+  const handleShare = async (e) => {
     e.stopPropagation();
-    if (ad.image_url) {
-      const a = document.createElement("a");
-      a.href = ad.image_url;
-      a.target = "_blank";
-      a.rel = "noopener";
-      a.click();
+    const shareUrl = ad._provider_entity_id
+      ? `${window.location.origin}/Home?provider=${ad._provider_entity_id}`
+      : window.location.href;
+    const shareData = {
+      title: ad.provider_name,
+      text: ad.headline ? `${ad.provider_name} — ${ad.headline}` : ad.provider_name,
+      url: shareUrl,
+    };
+    if (navigator.share) {
+      try { await navigator.share(shareData); } catch (_) {}
+    } else {
+      // Fallback: copy link to clipboard
+      try {
+        await navigator.clipboard.writeText(shareUrl);
+        setSaved(true);
+        setTimeout(() => setSaved(false), 2000);
+      } catch (_) {
+        window.open(shareUrl, "_blank");
+      }
     }
-    setSaved(true);
-    setTimeout(() => setSaved(false), 2000);
   };
 
   return (
@@ -96,9 +107,9 @@ function AdCard({ ad, index, total, onPrev, onNext }) {
           }}>Expired</div>
         )}
 
-        {/* Save button */}
+        {/* Share button */}
         {!expired && (
-          <button onClick={handleSave} style={{
+          <button onClick={handleShare} style={{
             position: "absolute", top: 12, right: 12, zIndex: 10,
             background: saved ? GREEN : "rgba(0,0,0,0.55)",
             border: "none", borderRadius: 20,
@@ -107,7 +118,7 @@ function AdCard({ ad, index, total, onPrev, onNext }) {
             display: "flex", alignItems: "center", gap: 4,
             backdropFilter: "blur(4px)",
           }}>
-            {saved ? "✓ Saved!" : "⬇ Save"}
+            {saved ? "✓ Link Copied!" : "↗ Share"}
           </button>
         )}
 
