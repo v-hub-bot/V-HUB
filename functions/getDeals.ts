@@ -1,4 +1,4 @@
-// getDeals v4 — entity id passthrough fixed, service/area enrichment
+// getDeals v8 — filter by id instead of get(), forces full field return
 import { createClientFromRequest } from "npm:@base44/sdk@0.8.23";
 
 const CORS = {
@@ -45,13 +45,12 @@ Deno.serve(async (req: Request) => {
 
   try {
     const base44 = createClientFromRequest(req);
+    const db = base44.asServiceRole.entities;
 
-    // Fetch active ads
+    // Fetch active non-expired ads
     let all: any[] = [];
-    try {
-      all = await base44.asServiceRole.entities.ClassifiedAd.filter({ is_active: true });
-    } catch {
-      try { all = await base44.asServiceRole.entities.ClassifiedAd.list(); } catch {}
+    try { all = await db.ClassifiedAd.filter({ is_active: true }); } catch {
+      try { all = await db.ClassifiedAd.list(); } catch {}
     }
 
     const now = new Date();
@@ -67,59 +66,46 @@ Deno.serve(async (req: Request) => {
       return (a.provider_name || "").localeCompare(b.provider_name || "");
     });
 
-    // Load lookup tables
-    let providerMap: Map<string, any> = new Map();
-    let areaNameMap: Map<string, string> = new Map();
-    let serviceNameMap: Map<string, string> = new Map();
-    let categoryNameMap: Map<string, string> = new Map();
+    // Build lookup maps
+    const areaNameMap: Map<string, string> = new Map();
+    const serviceNameMap: Map<string, string> = new Map();
+    const categoryNameMap: Map<string, string> = new Map();
 
     try {
-      // SDK 0.8.23: call list() with NO args for first page
-      const providers = await base44.asServiceRole.entities.Provider.list();
-      for (const p of providers) {
-        if (p.vh_number) providerMap.set(p.vh_number, p);
-        if (p.id) providerMap.set(p.id, p);
-      }
-      console.log("providers loaded:", providers.length);
-    } catch (e) { console.error("provider load:", e); }
-
-    try {
-      const areas = await base44.asServiceRole.entities.ServiceArea.list();
+      const areas = await db.ServiceArea.list();
       for (const a of areas) areaNameMap.set(a.id, cleanName(a.name));
     } catch {}
-
     try {
-      const svcs = await base44.asServiceRole.entities.Service.list();
+      const svcs = await db.Service.list();
       for (const s of svcs) serviceNameMap.set(s.id, s.name);
     } catch {}
-
     try {
-      const cats = await base44.asServiceRole.entities.Category.list();
+      const cats = await db.Category.list();
       for (const c of cats) categoryNameMap.set(c.id, c.name);
     } catch {}
 
-    // Enrich each ad
-    const enriched = live.map(ad => {
-      const prov = providerMap.get(ad.provider_id);
+    // Fetch each provider by filtering on id field directly
+    const enriched = await Promise.all(live.map(async (ad) => {
+      const provId = ad.provider_id;
+      if (!provId) return { ...ad, _provider_entity_id: null };
 
-      // Even if provider not found in map, pass the provider_id as entity id
-      // since ClassifiedAd.provider_id stores the entity UUID directly
-      if (!prov) {
-        return {
-          ...ad,
-          _provider_entity_id: ad.provider_id || null,
-        };
+      let prov: any = null;
+      try {
+        // Use filter by id — more reliable than get() for returning all fields
+        const results = await db.Provider.filter({ id: provId });
+        prov = results?.[0] || null;
+        console.log("prov fields:", prov ? Object.keys(prov).join(",") : "null");
+      } catch (e) {
+        console.error("provider fetch failed for", provId, String(e));
       }
 
+      if (!prov) return { ...ad, _provider_entity_id: provId };
+
       const areaIds: string[] = Array.isArray(prov.service_areas) ? prov.service_areas : [];
-      const areaNames = areaIds
-        .map(id => areaNameMap.get(id) || AREA_LEGACY_MAP[id] || null)
-        .filter(Boolean) as string[];
+      const areaNames = areaIds.map(id => areaNameMap.get(id) || AREA_LEGACY_MAP[id] || null).filter(Boolean) as string[];
 
       const svcIds: string[] = Array.isArray(prov.services) ? prov.services : [];
-      const svcNames = svcIds
-        .map(id => serviceNameMap.get(id) || null)
-        .filter(Boolean) as string[];
+      const svcNames = svcIds.map(id => serviceNameMap.get(id) || null).filter(Boolean) as string[];
 
       const catName = categoryNameMap.get(prov.category_id || "") || "";
 
@@ -127,16 +113,15 @@ Deno.serve(async (req: Request) => {
         ...ad,
         _provider_entity_id: prov.id,
         _provider_is_mobile: !!prov.is_mobile,
-        _provider_address:   prov.address || null,
+        _provider_address:   prov.address  || null,
         _provider_areas:     areaNames,
         _provider_services:  svcNames,
         _provider_category:  catName,
-        _provider_phone:     prov.phone || null,
-        _provider_website:   prov.website || null,
+        _provider_phone:     prov.phone    || null,
+        _provider_website:   prov.website  || null,
       };
-    });
+    }));
 
-    console.log("returning", enriched.length, "live ads");
     return Response.json({ ads: enriched }, { headers: CORS });
   } catch (err: any) {
     console.error("getDeals error:", err);
