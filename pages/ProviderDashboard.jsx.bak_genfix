@@ -1138,43 +1138,27 @@ function ClassifiedAdSection({ provider, refreshKey = 0 }) {
     if (!aiPrompt.trim()) return;
     setAiError(""); setAiGenerating(true);
     try {
-      // Step 1: Generate image (returns base64 data URI)
       const resp = await fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/generateAdImage", {
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ prompt: aiPrompt, provider_id: provider.id }),
       });
       const data = await resp.json();
-      if (!data.url) { setAiError("Generation failed: " + (data.error || "unknown error")); return; }
-
-      let finalUrl = data.url;
-
-      // Step 2: Immediately upload base64 to CDN so we get a real URL
-      if (finalUrl.startsWith("data:image/")) {
-        try {
-          const base64Data = finalUrl.split(",")[1];
-          const byteArr = Uint8Array.from(atob(base64Data), c => c.charCodeAt(0));
-          const imgBlob = new Blob([byteArr], { type: "image/png" });
-          const fd = new FormData();
-          fd.append("file", imgBlob, `ai_ad_${provider.id}_${Date.now()}.png`);
-          const upResp = await fetch("https://api.base44.app/api/apps/69d06ada8019d7e9edf7f8e8/storage/upload", { method: "POST", body: fd });
-          const upData = await upResp.json().catch(() => ({}));
-          if (upData.url) finalUrl = toCDNUrl(upData.url) || finalUrl;
-        } catch { /* keep data URI as fallback — save will retry upload */ }
-      }
-
-      // Step 3: Update form + persist to saved_images
-      setForm(p => ({ ...p, image_url: finalUrl }));
-      setFilePreview(null); setFileObj(null);
-      const existingRecord = editingSlot !== "new" ? editingSlot : null;
-      if (existingRecord?.id) {
-        const existingSaved = existingRecord.saved_images || [];
-        const newSaved = [finalUrl, ...existingSaved.filter(u => u !== finalUrl)].slice(0, 3);
-        await ClassifiedAd.update(existingRecord.id, { ai_prompt: aiPrompt, image_url: finalUrl, saved_images: newSaved });
-        await loadAds();
-        const fresh = await ClassifiedAd.filter({ provider_id: provider.id });
-        const updated = fresh.find(a => a.id === existingRecord.id);
-        if (updated) setEditingSlot(updated);
-      }
+      if (data.url) {
+        const finalUrl = data.url;
+        setForm(p => ({ ...p, image_url: finalUrl }));
+        setFilePreview(null); setFileObj(null);
+        // Persist to saved_images on existing record
+        const existingRecord = editingSlot !== "new" ? editingSlot : null;
+        if (existingRecord?.id) {
+          const existingSaved = existingRecord.saved_images || [];
+          const newSaved = [finalUrl, ...existingSaved.filter(u => u !== finalUrl)].slice(0, 3);
+          await ClassifiedAd.update(existingRecord.id, { ai_prompt: aiPrompt, image_url: finalUrl, saved_images: newSaved });
+          await loadAds();
+          const fresh = await ClassifiedAd.filter({ provider_id: provider.id });
+          const updated = fresh.find(a => a.id === existingRecord.id);
+          if (updated) setEditingSlot(updated);
+        }
+      } else { setAiError("Generation failed: " + (data.error || "unknown error")); }
     } catch { setAiError("Error generating. Please try again."); }
     finally { setAiGenerating(false); }
   };

@@ -8,23 +8,23 @@
     "Home": {
       "title": "Home"
     },
-    "Privacy": {
-      "title": "Privacy"
-    },
     "ListService": {
       "title": "ListService"
     },
-    "Terms": {
-      "title": "Terms"
+    "Privacy": {
+      "title": "Privacy"
     },
     "Provider": {
       "title": "Provider"
     },
-    "Wekcadmin": {
-      "title": "Wekcadmin"
-    },
     "ProviderDashboard": {
       "title": "ProviderDashboard"
+    },
+    "Terms": {
+      "title": "Terms"
+    },
+    "Wekcadmin": {
+      "title": "Wekcadmin"
     }
   }
 }
