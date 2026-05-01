@@ -640,10 +640,10 @@ export default function Classifieds() {
     if (filterArea || filterService) setShowAll(false);
   }, [filterArea, filterService]);
 
-  // Filter logic — mirrors homepage search:
-  // Area: must match provider's actual service areas (exact village name match)
-  // Service: must match provider's actual services list or category name — NOT free-text body
-  // Both must be selected before any ads show (like homepage requires both filters)
+  // Filter logic:
+  // Area only → show all providers who serve that village (including mobile = ALL)
+  // Service only → show all providers who offer that service (any area)
+  // Both → show providers matching BOTH area AND service
   const hasFilter = !!(filterArea || filterService);
 
   const visibleAds = (showAll && !filterArea && !filterService)
@@ -665,11 +665,12 @@ export default function Classifieds() {
     // NOT against headline/body (too loose — nail tech ads shouldn't show for lawn searches)
     if (filterService) {
       const kw = filterService.toLowerCase().trim();
-      const strictHaystack = [
+      const haystack = [
         ...(ad._provider_services || []),
         ad._provider_category || "",
+        ad.provider_name || "",
       ].join(" ").toLowerCase();
-      if (!strictHaystack.includes(kw)) return false;
+      if (!haystack.includes(kw)) return false;
     }
 
     return true;
