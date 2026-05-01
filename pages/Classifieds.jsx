@@ -74,7 +74,7 @@ function AdCard({ ad, index, total, onPrev, onNext }) {
       {/* ── Single card: image + divider + banner, all inside one rounded box ── */}
       <div style={{
         borderRadius: 16,
-        overflow: "visible",
+        overflow: "hidden",
         boxShadow: expired
           ? `0 0 0 2px ${MUTED}`
           : "0 0 0 2px #FFDB00, 0 8px 32px rgba(232,67,26,0.25), 0 2px 8px rgba(0,0,0,0.3)",
@@ -83,9 +83,6 @@ function AdCard({ ad, index, total, onPrev, onNext }) {
         display: "flex",
         flexDirection: "column",
         background: WHITE,
-        borderRadius: 16,
-        /* clip children at corners without clipping content */
-        clipPath: "inset(0 round 16px)",
       }}>
         {/* Top accent bar */}
         {!expired && (
@@ -120,28 +117,44 @@ function AdCard({ ad, index, total, onPrev, onNext }) {
           </button>
         )}
 
-        {/* Full ad image — natural height, complete image always visible */}
-        {ad.image_url ? (
-          <img
-            src={ad.image_url}
-            alt={ad.headline || ad.provider_name}
-            style={{ width: "100%", height: "auto", display: "block", flexShrink: 0 }}
-            onError={e => { e.target.style.display = "none"; }}
-          />
-        ) : (
-          <div style={{
-            width: "100%", paddingTop: "100%", position: "relative",
-            background: `linear-gradient(135deg, ${NAVY}, ${TEAL})`,
-            flexShrink: 0,
-          }}>
-            <span style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%,-50%)", color: WHITE, fontSize: 48 }}>🏷️</span>
-          </div>
-        )}
+        {/* Ad image — capped height, anchored to bottom so the deal info is always visible */}
+        <div style={{
+          width: "100%",
+          height: "min(68vw, 380px)",
+          overflow: "hidden",
+          flexShrink: 0,
+          position: "relative",
+        }}>
+          {ad.image_url ? (
+            <img
+              src={ad.image_url}
+              alt={ad.headline || ad.provider_name}
+              style={{
+                width: "100%",
+                height: "auto",
+                display: "block",
+                /* shift image up so the BOTTOM of the image always shows */
+                position: "absolute",
+                bottom: 0,
+                left: 0,
+              }}
+              onError={e => { e.target.style.display = "none"; }}
+            />
+          ) : (
+            <div style={{
+              width: "100%", height: "100%",
+              background: `linear-gradient(135deg, ${NAVY}, ${TEAL})`,
+              display: "flex", alignItems: "center", justifyContent: "center",
+            }}>
+              <span style={{ color: WHITE, fontSize: 48 }}>🏷️</span>
+            </div>
+          )}
+        </div>
 
         {/* Yellow accent line between image and banner */}
         <div style={{ height: 3, background: expired ? MUTED : "#FFDB00", flexShrink: 0 }} />
 
-        {/* Banner sits cleanly below the full image */}
+        {/* Banner sits cleanly below the ad — full width, white bg */}
         <div style={{
           padding: "12px 16px 16px",
           background: WHITE,
