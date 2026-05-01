@@ -1,27 +1,9 @@
-// v13 — gpt-image-1 primary, gpt-image-2 fallback. OpenAI only.
-import { createClientFromRequest } from "npm:@base44/sdk@0.8.23";
-
+// v16 — gpt-image-1 primary, dall-e-3 fallback. Returns b64; frontend handles save.
 const CORS_HEADERS = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
   "Access-Control-Allow-Headers": "Content-Type, Authorization",
 };
-
-async function uploadToCDN(base44: any, imgBlob: Blob, provider_id: string): Promise<string> {
-  const filename = `ai_ad_${provider_id}_${Date.now()}.png`;
-  try {
-    const uploadedFile = await base44.storage.uploadFile(imgBlob, filename);
-    if (uploadedFile?.url) {
-      console.log("✅ Uploaded to CDN:", uploadedFile.url);
-      return uploadedFile.url;
-    }
-    console.warn("CDN upload returned no URL");
-    return "";
-  } catch (e) {
-    console.error("CDN upload failed:", String(e));
-    return "";
-  }
-}
 
 async function generateImage(model: string, prompt: string, apiKey: string): Promise<{ b64?: string; url?: string; error?: string }> {
   const resp = await fetch("https://api.openai.com/v1/images/generations", {
@@ -72,40 +54,26 @@ Deno.serve(async (req) => {
     console.log("Trying gpt-image-1...");
     let result = await generateImage("gpt-image-1", fullPrompt, OPENAI_API_KEY);
 
-    // Fall back to gpt-image-2 if gpt-image-1 fails
+    // Fall back to dall-e-3 if gpt-image-1 fails
     if (result.error) {
-      console.log(`gpt-image-1 failed (${result.error}), trying gpt-image-2...`);
-      result = await generateImage("gpt-image-2", fullPrompt, OPENAI_API_KEY);
+      console.log(`gpt-image-1 failed (${result.error}), trying dall-e-3...`);
+      result = await generateImage("dall-e-3", fullPrompt, OPENAI_API_KEY);
     }
 
     if (result.error) {
       return Response.json({ error: result.error }, { status: 500, headers: CORS_HEADERS });
     }
 
-    console.log("✅ Image generated, uploading to CDN...");
+    // Return the URL directly if available, otherwise b64
+    // The frontend is responsible for uploading b64 images to its own CDN
+    const imageUrl = result.url || (result.b64 ? `data:image/png;base64,${result.b64}` : null);
 
-    // Convert to blob
-    let imgBlob: Blob;
-    if (result.b64) {
-      const byteArr = Uint8Array.from(atob(result.b64), (c) => c.charCodeAt(0));
-      imgBlob = new Blob([byteArr], { type: "image/png" });
-    } else {
-      const imgResp = await fetch(result.url!);
-      const imgBytes = await imgResp.arrayBuffer();
-      imgBlob = new Blob([imgBytes], { type: "image/png" });
+    if (!imageUrl) {
+      return Response.json({ error: "No image data returned" }, { status: 500, headers: CORS_HEADERS });
     }
 
-    // Upload to CDN
-    const base44 = createClientFromRequest(req);
-    let finalUrl = await uploadToCDN(base44, imgBlob, provider_id);
-
-    // If CDN upload failed, use inline b64 as last resort
-    if (!finalUrl) {
-      finalUrl = result.b64 ? `data:image/png;base64,${result.b64}` : result.url!;
-      console.warn("Using inline fallback URL");
-    }
-
-    return Response.json({ url: finalUrl }, { headers: CORS_HEADERS });
+    console.log("✅ Image generated successfully");
+    return Response.json({ url: imageUrl }, { headers: CORS_HEADERS });
 
   } catch (err: any) {
     console.error("generateAdImage error:", err);
