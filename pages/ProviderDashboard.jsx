@@ -1167,15 +1167,20 @@ function ClassifiedAdSection({ provider, refreshKey = 0 }) {
       setFilePreview(null); setFileObj(null);
       const existingRecord = editingSlot !== "new" ? editingSlot : null;
       if (existingRecord?.id) {
-        const existingSaved = existingRecord.saved_images || [];
-        const newSaved = [finalUrl, ...existingSaved.filter(u => u !== finalUrl)].slice(0, 3);
-        await ClassifiedAd.update(existingRecord.id, { ai_prompt: aiPrompt, image_url: finalUrl, saved_images: newSaved });
-        await loadAds();
-        const fresh = await ClassifiedAd.filter({ provider_id: provider.id });
-        const updated = fresh.find(a => a.id === existingRecord.id);
-        if (updated) setEditingSlot(updated);
+        try {
+          const existingSaved = existingRecord.saved_images || [];
+          const newSaved = [finalUrl, ...existingSaved.filter(u => u !== finalUrl)].slice(0, 3);
+          await ClassifiedAd.update(existingRecord.id, { ai_prompt: aiPrompt, image_url: finalUrl, saved_images: newSaved });
+          await loadAds();
+          const fresh = await ClassifiedAd.filter({ provider_id: provider.id });
+          const updated = fresh.find(a => a.id === existingRecord.id);
+          if (updated) setEditingSlot(updated);
+        } catch { /* non-critical — image is set, save will persist it */ }
       }
-    } catch { setAiError("Error generating. Please try again."); }
+    } catch (genErr) {
+      // Only show error if image was never successfully generated
+      if (!form.image_url) setAiError("Error generating. Please try again.");
+    }
     finally { setAiGenerating(false); }
   };
 
