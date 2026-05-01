@@ -75,10 +75,12 @@ function AdCard({ ad, index, total, onPrev, onNext }) {
       <div style={{
         borderRadius: 16,
         overflow: "hidden",
-        boxShadow: expired ? "none" : "0 8px 32px rgba(232,67,26,0.25), 0 2px 8px rgba(0,0,0,0.3)",
+        /* box-shadow renders OUTSIDE the box, so it never clips the image unlike border */
+        boxShadow: expired
+          ? `0 0 0 2px ${MUTED}`
+          : "0 0 0 2px #FFDB00, 0 8px 32px rgba(232,67,26,0.25), 0 2px 8px rgba(0,0,0,0.3)",
         opacity: expired ? 0.5 : 1,
         position: "relative",
-        border: expired ? `2px solid ${MUTED}` : "2px solid #FFDB00",
         display: "flex",
         flexDirection: "column",
         background: WHITE,
@@ -116,23 +118,24 @@ function AdCard({ ad, index, total, onPrev, onNext }) {
           </button>
         )}
 
-        {/* Full ad image — no crop, full height */}
-        {ad.image_url ? (
-          <img
-            src={ad.image_url}
-            alt={ad.headline || ad.provider_name}
-            style={{ width: "100%", height: "auto", display: "block", flexShrink: 0 }}
-            onError={e => { e.target.style.display = "none"; }}
-          />
-        ) : (
-          <div style={{
-            width: "100%", paddingTop: "100%", position: "relative",
-            background: `linear-gradient(135deg, ${NAVY}, ${TEAL})`,
-            flexShrink: 0,
-          }}>
-            <span style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%,-50%)", color: WHITE, fontSize: 48 }}>🏷️</span>
-          </div>
-        )}
+        {/* Full ad image — wrapped in its own clip container so the card border doesn't shave pixels */}
+        <div style={{ width: "100%", overflow: "hidden", flexShrink: 0 }}>
+          {ad.image_url ? (
+            <img
+              src={ad.image_url}
+              alt={ad.headline || ad.provider_name}
+              style={{ width: "100%", height: "auto", display: "block" }}
+              onError={e => { e.target.style.display = "none"; }}
+            />
+          ) : (
+            <div style={{
+              width: "100%", paddingTop: "100%", position: "relative",
+              background: `linear-gradient(135deg, ${NAVY}, ${TEAL})`,
+            }}>
+              <span style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%,-50%)", color: WHITE, fontSize: 48 }}>🏷️</span>
+            </div>
+          )}
+        </div>
 
         {/* Thin divider line between image and banner */}
         <div style={{ height: 2, background: expired ? MUTED : "#FFDB00", flexShrink: 0 }} />
