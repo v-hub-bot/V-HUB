@@ -510,34 +510,38 @@ export default function Classifieds() {
     setCurrentIndex(0);
   }, [filterArea, filterService]);
 
-  // Filter logic
+  // Filter logic — mirrors homepage search:
+  // Area: must match provider's actual service areas (exact village name match)
+  // Service: must match provider's actual services list or category name — NOT free-text body
+  // Both must be selected before any ads show (like homepage requires both filters)
+  const hasFilter = !!(filterArea || filterService);
+
   const visibleAds = ads.filter(ad => {
     if (isExpired(ad)) return false;
 
+    // Area filter — match against provider's actual service_areas list
     if (filterArea) {
-      const areaLower = filterArea.toLowerCase();
+      const areaLower = filterArea.toLowerCase().trim();
       const serves = Array.isArray(ad._provider_areas)
-        ? ad._provider_areas.some(a => a.toLowerCase().includes(areaLower))
-        : true;
+        ? ad._provider_areas.some(a => a.toLowerCase() === areaLower || a.toLowerCase().includes(areaLower))
+        : false; // if no area data, don't assume they serve it
       if (!serves) return false;
     }
 
+    // Service filter — match ONLY against provider's services list and category name
+    // NOT against headline/body (too loose — nail tech ads shouldn't show for lawn searches)
     if (filterService) {
-      const kw = filterService.toLowerCase();
-      const haystack = [
-        ad.provider_name || "",
-        ad.headline || "",
-        ad.body || "",
+      const kw = filterService.toLowerCase().trim();
+      const strictHaystack = [
         ...(ad._provider_services || []),
         ad._provider_category || "",
       ].join(" ").toLowerCase();
-      if (!haystack.includes(kw)) return false;
+      if (!strictHaystack.includes(kw)) return false;
     }
 
     return true;
   });
 
-  const hasFilter = true; // always show ads; dropdowns just filter them
   const currentAd = visibleAds[currentIndex] || null;
 
   const handlePrev = useCallback(() => {
