@@ -1599,18 +1599,7 @@ function ClassifiedAdSection({ provider, refreshKey = 0 }) {
               {aiGenerating && <div style={{ marginTop: 8, fontSize: 12, color: TEAL, fontFamily: SANS, fontWeight: 600 }}>🎨 Creating your custom image… almost there!</div>}
               {aiError && <div style={{ marginTop: 6, fontSize: 11, color: "#c00", fontFamily: SANS }}>{aiError}</div>}
             </div>
-            {/* Get Help from Admin */}
-            <div style={{ marginTop: 14, paddingTop: 12, borderTop: "1px dashed #C8B89A", textAlign: "center" }}>
-              <a
-                href={`mailto:admin@v-hub.us?subject=Help%20with%20My%20Ad%20%E2%80%94%20${encodeURIComponent(provider?.vh_number || "")}%20${encodeURIComponent(provider?.business_name || "")}&body=Hi%20V-HUB%20team%2C%0A%0AI%20need%20some%20help%20generating%20my%20%22Deals%20of%20the%20Week%22%20ad.%0A%0A%5BDescribe%20your%20issue%20here%5D%0A%0AThanks%2C%0A${encodeURIComponent(provider?.owner_name || "")}`}
-                style={{ display: "inline-flex", alignItems: "center", gap: 6, background: "none", border: `1.5px solid #00BFA5`, color: "#00BFA5", borderRadius: 6, padding: "9px 18px", fontSize: 12, fontWeight: 700, cursor: "pointer", fontFamily: "sans-serif", textDecoration: "none", letterSpacing: 0.5 }}
-              >
-                ✉️ Get Help from Admin
-              </a>
-              <div style={{ fontSize: 10, color: "#999", fontFamily: "sans-serif", marginTop: 5 }}>
-                Having trouble? Email us and we'll build your ad for you.
-              </div>
-            </div>
+
           </div>
 
           {/* Save + Preview buttons — context-aware: live ad vs draft */}
@@ -1688,6 +1677,19 @@ function ClassifiedAdSection({ provider, refreshKey = 0 }) {
           Build up to 3 ads · Upload your own image or use AI to generate one · Preview exactly how it will look · Mark one "Next Up" · Pay <strong>$20</strong> → runs live for <strong>7 days</strong> · You're never auto-charged again
         </div>
       )}
+
+      {/* ── GET HELP FROM ADMIN ── */}
+      <div style={{ marginTop: 10, textAlign: "center", paddingBottom: 4 }}>
+        <a
+          href={`mailto:admin@v-hub.us?subject=Help%20with%20My%20Ad%20%E2%80%94%20${encodeURIComponent(provider?.vh_number || "")}%20${encodeURIComponent(provider?.business_name || "")}&body=Hi%20V-HUB%20team%2C%0A%0AI%20need%20help%20with%20my%20Deals%20of%20the%20Week%20ad.%0A%0A%5BDescribe%20your%20issue%20here%5D%0A%0AThanks%2C%0A${encodeURIComponent(provider?.owner_name || "")}`}
+          style={{ display: "inline-flex", alignItems: "center", gap: 6, background: "none", border: "1.5px solid #00BFA5", color: "#00BFA5", borderRadius: 6, padding: "10px 20px", fontSize: 12, fontWeight: 700, cursor: "pointer", fontFamily: "sans-serif", textDecoration: "none", letterSpacing: 0.5 }}
+        >
+          ✉️ Get Help from Admin
+        </a>
+        <div style={{ fontSize: 10, color: "#999", fontFamily: "sans-serif", marginTop: 5 }}>
+          Having trouble? Email us and we'll build your ad for you.
+        </div>
+      </div>
 
       {/* ── AD PREVIEW MODAL ── */}
       {previewAd && (
