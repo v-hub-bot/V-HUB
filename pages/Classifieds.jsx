@@ -653,7 +653,8 @@ export default function Classifieds() {
 
     // Area filter — match against provider's actual service_areas list
     if (filterArea) {
-      const areaLower = filterArea.toLowerCase().trim();
+      // Strip "(All)" suffix from macro group selections e.g. "Eastport (All)" → "Eastport"
+      const areaLower = filterArea.toLowerCase().replace(/\s*\(all\)\s*$/i, "").trim();
       const areas = ad._provider_areas || [];
       // "ALL" means mobile provider — serves every village
       const serves = areas.includes("ALL") ||
