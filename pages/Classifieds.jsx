@@ -140,45 +140,49 @@ function AdCard({ ad, index, total, onPrev, onNext }) {
           )}
         </div>
 
-        {/* Bottom strip */}
-        <div style={{
-          padding: "14px 16px 16px",
-          background: "linear-gradient(180deg,#ffffff,#f7f4ef)",
-          borderTop: "1px solid #eee",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          gap: 12,
-          flexWrap: "wrap",
-        }}>
-          <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>
-            <div style={{ fontSize: 15, fontWeight: 900, color: NAVY }}>
-              {ad.provider_name}
-            </div>
-            {ad.headline && (
-              <div style={{ fontSize: 13, color: INK, fontStyle: "italic" }}>
-                {ad.headline}
-              </div>
-            )}
-            {ad.deal_expires_at && !expired && (
-              <div style={{ fontSize: 11, color: RED, fontWeight: 600 }}>
-                Offer expires {fmt(ad.deal_expires_at)}
-              </div>
-            )}
-          </div>
+      </div>
 
-          {!expired && ad._provider_entity_id && (
-            <button onClick={goToProvider} style={{
-              background: `linear-gradient(135deg, ${ORANGE}, #c93510)`,
-              color: WHITE, border: "none", borderRadius: 8,
-              fontWeight: 800, fontSize: 13, padding: "10px 18px",
-              cursor: "pointer", whiteSpace: "nowrap",
-              boxShadow: "0 2px 8px rgba(232,67,26,0.4)",
-            }}>
-              Contact Provider →
-            </button>
+      {/* Bottom strip — outside the card so it's always fully visible */}
+      <div style={{
+        padding: "14px 16px 16px",
+        background: "linear-gradient(180deg,#ffffff,#f7f4ef)",
+        borderRadius: "0 0 16px 16px",
+        border: expired ? `2px solid ${MUTED}` : "2px solid #FFDB00",
+        borderTop: "none",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        gap: 12,
+        flexWrap: "wrap",
+        marginTop: -2,
+      }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>
+          <div style={{ fontSize: 15, fontWeight: 900, color: NAVY }}>
+            {ad.provider_name}
+          </div>
+          {ad.headline && (
+            <div style={{ fontSize: 13, color: INK, fontStyle: "italic" }}>
+              {ad.headline}
+            </div>
+          )}
+          {ad.deal_expires_at && !expired && (
+            <div style={{ fontSize: 11, color: RED, fontWeight: 600 }}>
+              Offer expires {fmt(ad.deal_expires_at)}
+            </div>
           )}
         </div>
+
+        {!expired && ad._provider_entity_id && (
+          <button onClick={goToProvider} style={{
+            background: `linear-gradient(135deg, ${ORANGE}, #c93510)`,
+            color: WHITE, border: "none", borderRadius: 8,
+            fontWeight: 800, fontSize: 13, padding: "10px 18px",
+            cursor: "pointer", whiteSpace: "nowrap",
+            boxShadow: "0 2px 8px rgba(232,67,26,0.4)",
+          }}>
+            Contact Provider →
+          </button>
+        )}
       </div>
 
       {/* ── Left / Right nav arrows ── */}
