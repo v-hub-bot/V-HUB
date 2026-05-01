@@ -51,7 +51,8 @@ Deno.serve(async (req: Request) => {
     });
 
     console.log("returning live ads:", live.length, "at", now.toISOString());
-    return Response.json({ ads: live }, { headers: CORS });
+    const mapped = live.map(ad => ({ ...ad, _provider_entity_id: ad.provider_id || null }));
+    return Response.json({ ads: mapped }, { headers: CORS });
   } catch (err: any) {
     console.error("getDeals error:", err);
     return Response.json({ error: err.message, ads: [] }, { status: 500, headers: CORS });
