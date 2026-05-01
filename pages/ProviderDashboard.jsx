@@ -1137,6 +1137,7 @@ function ClassifiedAdSection({ provider, refreshKey = 0 }) {
   const handleGenerateAI = async () => {
     if (!aiPrompt.trim()) return;
     setAiError(""); setAiGenerating(true);
+    let imageGenSucceeded = false;
     try {
       // Step 1: Generate image (returns base64 data URI)
       const resp = await fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/generateAdImage", {
@@ -1163,6 +1164,7 @@ function ClassifiedAdSection({ provider, refreshKey = 0 }) {
       }
 
       // Step 3: Update form + persist to saved_images
+      imageGenSucceeded = true;
       setForm(p => ({ ...p, image_url: finalUrl }));
       setFilePreview(null); setFileObj(null);
       const existingRecord = editingSlot !== "new" ? editingSlot : null;
@@ -1179,7 +1181,7 @@ function ClassifiedAdSection({ provider, refreshKey = 0 }) {
       }
     } catch (genErr) {
       // Only show error if image was never successfully generated
-      if (!form.image_url) setAiError("Error generating. Please try again.");
+      if (!imageGenSucceeded) setAiError("Error generating. Please try again.");
     }
     finally { setAiGenerating(false); }
   };
