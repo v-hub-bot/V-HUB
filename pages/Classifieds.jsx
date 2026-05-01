@@ -69,9 +69,9 @@ function AdCard({ ad, active, onClick }) {
     <div
       onClick={!active ? onClick : undefined}
       style={{
-        transition: "transform 0.35s cubic-bezier(.4,0,.2,1), opacity 0.35s ease",
-        transform: active ? "scale(1)" : "scale(0.88)",
-        opacity: active ? 1 : 0.55,
+        transition: "transform 0.35s cubic-bezier(.4,0,.2,1)",
+        transform: "scale(1)",
+        opacity: 1,
         cursor: active ? "default" : "pointer",
         flexShrink: 0,
         width: "100%",
@@ -302,12 +302,10 @@ function PeekCarousel({ ads, currentIndex, onPrev, onNext, setIndex }) {
         <div
           onClick={onPrev}
           style={{
-            flex: "0 0 22%",
-            maxWidth: 160,
+            flex: "0 0 26%",
+            maxWidth: 200,
             cursor: "pointer",
-            transform: "scale(0.88)",
-            opacity: 0.55,
-            transition: "transform 0.35s cubic-bezier(.4,0,.2,1), opacity 0.35s",
+            transition: "transform 0.35s cubic-bezier(.4,0,.2,1)",
             transformOrigin: "right center",
           }}
         >
@@ -316,10 +314,11 @@ function PeekCarousel({ ads, currentIndex, onPrev, onNext, setIndex }) {
 
         {/* Center card — full size, popped out */}
         <div style={{
-          flex: "0 0 52%",
+          flex: "0 0 44%",
           maxWidth: 420,
           transition: "transform 0.35s cubic-bezier(.4,0,.2,1)",
           zIndex: 2,
+          filter: "drop-shadow(0 8px 24px rgba(0,0,0,0.45))",
         }}>
           <AdCard ad={activeAd} active={true} />
         </div>
@@ -328,12 +327,10 @@ function PeekCarousel({ ads, currentIndex, onPrev, onNext, setIndex }) {
         <div
           onClick={onNext}
           style={{
-            flex: "0 0 22%",
-            maxWidth: 160,
+            flex: "0 0 26%",
+            maxWidth: 200,
             cursor: "pointer",
-            transform: "scale(0.88)",
-            opacity: 0.55,
-            transition: "transform 0.35s cubic-bezier(.4,0,.2,1), opacity 0.35s",
+            transition: "transform 0.35s cubic-bezier(.4,0,.2,1)",
             transformOrigin: "left center",
           }}
         >
