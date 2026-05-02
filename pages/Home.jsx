@@ -408,7 +408,7 @@ function ProvDetail({ prov, areas, cats, svcs, onBack }) {
               </a>
             </div>
           )}
-          {prov.address && (
+          {prov.is_mobile !== true && prov.address && (
             <div style={{ fontSize: 12, color: INK, gridColumn: "1/-1", display: "flex", alignItems: "flex-start", gap: 4 }}>
               <b>📍</b> <span>{prov.address}</span>
             </div>

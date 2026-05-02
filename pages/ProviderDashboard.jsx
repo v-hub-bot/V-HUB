@@ -2840,7 +2840,7 @@ export default function ProviderDashboard() {
 
         <div style={shS}>Section 1 — Business Info</div>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px 16px", marginBottom: 20 }}>
-          {[["business_name","Business Name *"],["owner_name","Owner / Contact Name *"],["phone","Phone *"],["email","Business Email *"],["website","Website"],["address","Address"],["years_in_business","Years in Business"],["license_number","License Number"]].map(([k, l]) => (
+          {[["business_name","Business Name *"],["owner_name","Owner / Contact Name *"],["phone","Phone *"],["email","Business Email *"],["website","Website"],["address","Address"],["years_in_business","Years in Business"],["license_number","License Number"]].filter(([k]) => !(k === "address" && provider?.is_mobile)).map(([k, l]) => (
             <div key={k} style={{ gridColumn: k === "address" ? "1 / -1" : "auto" }}>
               <label style={lbS}>{l}</label>
               <input value={form[k] || ""} onChange={e => setForm(f => ({ ...f, [k]: e.target.value }))} style={inS} />
@@ -3045,7 +3045,7 @@ export default function ProviderDashboard() {
               ["📞 Phone", provider.phone],
               ["✉️ Email", provider.email],
               ["🌐 Website", provider.website],
-              ["📍 Address", provider.address],
+              ["📍 Address", provider.is_mobile ? null : provider.address],
               ["🕐 Hours", provider.hours_of_operation ? provider.hours_of_operation.split("\n")[0] + (provider.hours_of_operation.includes("\n") ? "…" : "") : null],
               ["🏆 Years in Business", provider.years_in_business ? `${provider.years_in_business} yrs` : null],
               ["🏷 License #", provider.license_number],
