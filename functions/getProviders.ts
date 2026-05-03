@@ -36,16 +36,18 @@ async function withRetry<T>(fn: () => Promise<T>, label = "op", maxAttempts = 3)
 }
 
 // Fetch all pages of an entity via direct REST API (bypasses SDK auth issues)
-async function fetchAllPages(entity: string, pageSize = 100): Promise<any[]> {
+async function fetchAllPages(entity: string, pageSize = 100, authHeader?: string): Promise<any[]> {
   const results: any[] = [];
   let skip = 0;
+  const headers: Record<string, string> = { "Content-Type": "application/json", "x-base44-app-id": APP_ID };
+  if (authHeader) headers["Authorization"] = authHeader;
   for (let page = 1; page <= 30; page++) {
     const resp = await fetch(
       `https://api.base44.app/api/apps/${APP_ID}/entities/${entity}?limit=${pageSize}&skip=${skip}`,
-      { headers: { "Content-Type": "application/json", "x-base44-app-id": APP_ID } }
+      { headers }
     );
     if (!resp.ok) {
-      console.error(`[getProviders] fetchAllPages ${entity} failed: ${resp.status}`);
+      console.error(`[getProviders] fetchAllPages ${entity} p${page} failed: ${resp.status} ${await resp.text().catch(()=>"")}`);
       break;
     }
     const data = await resp.json();
@@ -65,6 +67,7 @@ Deno.serve(async (req: Request) => {
     if (req.method !== "POST") return Response.json({ error: "Method not allowed" }, { status: 405, headers: CORS });
 
     const sr = createClientFromRequest(req).asServiceRole;
+    const authHeader = req.headers.get("Authorization") || undefined;
 
     let body: any = null;
     try { body = await req.json(); } catch {}
@@ -74,9 +77,9 @@ Deno.serve(async (req: Request) => {
       try {
         // Use direct REST API — SDK auth is flaky on unauthenticated public requests
         const [cats, svcs, areas] = await Promise.all([
-          fetchAllPages("Category", 200),
-          fetchAllPages("Service", 500),
-          fetchAllPages("ServiceArea", 500),
+          fetchAllPages("Category", 200, authHeader),
+          fetchAllPages("Service", 500, authHeader),
+          fetchAllPages("ServiceArea", 500, authHeader),
         ]);
         console.log(`[getProviders] lookup: cats=${cats.length} svcs=${svcs.length} areas=${areas.length}`);
         return Response.json({ ok: true, categories: cats, services: svcs, areas: areas }, { headers: CORS });
@@ -189,34 +192,32 @@ Deno.serve(async (req: Request) => {
     }
 
     // ── MAIN PROVIDER LIST ────────────────────────────────────────────
-    // Primary: SDK asServiceRole. Fallback: direct REST API (bypasses SDK auth flakiness)
+    // Use direct REST API — more reliable for public unauthenticated requests
     let providers: any[] = [];
 
     try {
-      let skip = 0;
-      const PAGE_SIZE = 100;
-      for (let page = 1; page <= 30; page++) {
-        const chunk = await sr.entities.Provider.list({ limit: PAGE_SIZE, skip });
-        if (!chunk || chunk.length === 0) break;
-        providers = providers.concat(chunk);
-        if (chunk.length < PAGE_SIZE) break;
-        skip += PAGE_SIZE;
-      }
-      console.log(`[getProviders] SDK loaded ${providers.length} providers`);
+      providers = await fetchAllPages("Provider", 100, authHeader);
+      console.log(`[getProviders] REST loaded ${providers.length} providers`);
     } catch (e: any) {
-      console.warn("[getProviders] SDK failed, trying direct REST:", e.message);
+      console.error("[getProviders] REST failed:", e.message);
     }
 
+    // Last resort: try SDK with no params (golden pattern — no limit/skip args on first call)
     if (providers.length === 0) {
-      console.log("[getProviders] Using direct REST API fallback");
-      providers = await fetchAllPages("Provider", 100);
-      console.log(`[getProviders] REST API loaded ${providers.length} providers`);
+      console.log("[getProviders] SDK fallback attempt");
+      try {
+        const chunk = await sr.entities.Provider.list();
+        if (Array.isArray(chunk)) providers = chunk;
+        console.log(`[getProviders] SDK fallback loaded ${providers.length} providers`);
+      } catch (e2: any) {
+        console.error("[getProviders] SDK fallback failed:", e2.message);
+      }
     }
 
     // Fetch approved reviews — use direct REST API (SDK auth flaky)
     let allReviews: any[] = [];
     try {
-      const allRevs = await fetchAllPages("ProviderReview", 200);
+      const allRevs = await fetchAllPages("ProviderReview", 200, authHeader);
       allReviews = allRevs.filter((r: any) => r.is_approved === true);
       console.log(`[getProviders] loaded ${allReviews.length} approved reviews`);
     } catch (e: any) {
