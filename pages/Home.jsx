@@ -980,7 +980,7 @@ export default function Home() {
     { id: "69d1822df3b2afb229b5badb", category_id: "69d09c14d5ee9e7be9aa301b", name: "HVAC" },
     { id: "69d1822df3b2afb229b5badc", category_id: "69d09c14d5ee9e7be9aa301b", name: "Plumbing" },
     { id: "69d1822df3b2afb229b5badd", category_id: "69d09c14d5ee9e7be9aa301b", name: "Roofing" },
-    { id: "69f7244f63a8db6b81eda66a", category_id: "69d09c14d5ee9e7be9aa301b", name: "Gutter Cleaning & Repair" },
+    { id: "69f7244f63a8db6b81eda66a", category_id: "69d09c14d5ee9e7be9aa301b", name: "Gutter Cleaning" },
     { id: "69d1822df3b2afb229b5badf", category_id: "69d09c14d5ee9e7be9aa301b", name: "Security & Home Watch" },
     { id: "69d1822df3b2afb229b5bade", category_id: "69d09c14d5ee9e7be9aa301b", name: "Handyman Services" },
     { id: "69d1822df3b2afb229b5bae3", category_id: "69d09c14d5ee9e7be9aa301b", name: "Flooring (Tile, Wood, Carpet)" },

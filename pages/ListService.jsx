@@ -54,7 +54,7 @@ const RED_RULE  = "#8B1A1A";
 const CATS = [
   { id: "c1", name: "Home Services", icon: "🏠", services: [
     "Home Improvements","General Repairs","Cleaning Services","Painting (Interior/Exterior)",
-    "Garage Door Services","Window Installation/Repair","HVAC","Plumbing","Roofing","Gutter Cleaning & Repair","Home Watch",
+    "Garage Door Services","Window Installation/Repair","HVAC","Plumbing","Roofing","Gutter Cleaning","Home Watch",
   ]},
   { id: "c2", name: "Home Systems & Utilities", icon: "💡", services: [
     "Handyman Services","Security & Home Watch","Pest Control","Appliance Repair",
@@ -360,7 +360,7 @@ export default function ListService() {
       { id: "69d1822df3b2afb229b5badb", category_id: "69d09c14d5ee9e7be9aa301b", name: "HVAC", is_active: true },
       { id: "69d1822df3b2afb229b5badc", category_id: "69d09c14d5ee9e7be9aa301b", name: "Plumbing", is_active: true },
       { id: "69d1822df3b2afb229b5badd", category_id: "69d09c14d5ee9e7be9aa301b", name: "Roofing", is_active: true },
-      { id: "69f7244f63a8db6b81eda66a", category_id: "69d09c14d5ee9e7be9aa301b", name: "Gutter Cleaning & Repair", is_active: true },
+      { id: "69f7244f63a8db6b81eda66a", category_id: "69d09c14d5ee9e7be9aa301b", name: "Gutter Cleaning", is_active: true },
       { id: "69d1822df3b2afb229b5bade", category_id: "69d181fe57b60e0aecf4067d", name: "Handyman Services", is_active: true },
       { id: "69d1822df3b2afb229b5badf", category_id: "69d181fe57b60e0aecf4067d", name: "Security & Home Watch", is_active: true },
       { id: "69d1822df3b2afb229b5bae0", category_id: "69d181fe57b60e0aecf4067d", name: "Pest Control", is_active: true },
