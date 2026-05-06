@@ -1552,8 +1552,9 @@ function AnalyticsTab({ providers, reviews, leads, stats, catMap, svcMap, fullSv
                 </div>
               </div>
 
-              <div style={{fontSize:10,color:T.brownLight,fontFamily:T.sans,textAlign:"right",marginTop:-4}}>
-                Data from Google Analytics property 534059288 · Range: {rangeLabels[gaData.range]||gaData.range}
+              <div style={{fontSize:10,color:T.brownLight,fontFamily:T.sans,marginTop:4,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+                <a href="https://analytics.google.com/analytics/web/#/p534059288/reports/intelligenthome" target="_blank" rel="noreferrer" style={{fontSize:12,color:T.teal,fontWeight:700,textDecoration:"none"}}>📊 Open Google Analytics →</a>
+                <span>Data from Google Analytics property 534059288 · Range: {rangeLabels[gaData.range]||gaData.range}</span>
               </div>
             </div>
           );
