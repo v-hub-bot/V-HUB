@@ -1560,7 +1560,7 @@ export default function Home() {
     keywords: "The Villages FL services, local service directory, home repair, landscaping, cleaning, pet care, golf cart services, The Villages Florida",
     ogTitle: "V-Hub — The Villages Local Services Directory",
     ogDescription: "Find local service providers across all 97 villages in The Villages, FL. No fees. No middlemen. Just neighbors serving neighbors.",
-    ogImage: "https://base44.app/api/apps/69d062aca815ce8e697894b1/files/mp/public/69d062aca815ce8e697894b1/f8bd6ba02_villages_park_photo.jpg",
+    ogImage: "https://base44.app/api/apps/69d062aca815ce8e697894b1/files/mp/public/69d062aca815ce8e697894b1/0e7cdf112_ronnie_clark_hero.jpg",
     canonical: "https://www.v-hub.us/",
   });
 
@@ -1640,7 +1640,7 @@ export default function Home() {
       {/* Preload logo so it's ready instantly on navigation */}
       <link rel="preload" as="image" href="https://base44.app/api/apps/69d062aca815ce8e697894b1/files/mp/public/69d062aca815ce8e697894b1/f14a7cbd0_logo_icon_small.png" />
       {/* Preload hero image — highest priority, loads with app */}
-      <link rel="preload" as="image" href="https://base44.app/api/apps/69d062aca815ce8e697894b1/files/mp/public/69d062aca815ce8e697894b1/f8bd6ba02_villages_park_photo.jpg" fetchpriority="high" />
+      <link rel="preload" as="image" href="https://base44.app/api/apps/69d062aca815ce8e697894b1/files/mp/public/69d062aca815ce8e697894b1/0e7cdf112_ronnie_clark_hero.jpg" fetchpriority="high" />
 
       <div style={{
         minHeight: "100vh",
@@ -1724,12 +1724,12 @@ export default function Home() {
 
         {/* PHOTO */}
         <img
-          src="https://base44.app/api/apps/69d062aca815ce8e697894b1/files/mp/public/69d062aca815ce8e697894b1/f8bd6ba02_villages_park_photo.jpg"
-          alt="Lake Sumter Landing"
+          src="https://base44.app/api/apps/69d062aca815ce8e697894b1/files/mp/public/69d062aca815ce8e697894b1/0e7cdf112_ronnie_clark_hero.jpg"
+          alt="Lake Sumter Landing sunset by Ronnie Clark"
           fetchpriority="high"
           loading="eager"
           decoding="sync"
-          style={{ width: "100%", height: 240, objectFit: "cover", objectPosition: "center 55%", display: "block" }}
+          style={{ width: "100%", height: "clamp(200px, 30vw, 340px)", objectFit: "cover", objectPosition: "center center", display: "block", maxWidth: "100%" }}
         />
 
         {/* CLASSIFIEDS — full width, bold red, white text — eye-catching price-tag style */}
