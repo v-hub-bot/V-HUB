@@ -1,4 +1,4 @@
-// FORCE_REBUILD_APR30_DEEPLINK
+// FORCE_REBUILD_1776768600
 // V-Hub Home — v2026-04-14c
 import React, { useState, useEffect, useRef } from "react"; // v3 - expanded content
 import { createPortal } from "react-dom";
@@ -264,21 +264,7 @@ function ProvDetail({ prov, areas, cats, svcs, onBack }) {
   }, [areas]);
 
   const resolvedServices = (prov.services || []).map(s => svcMap[s] || s).filter(Boolean);
-  const rawAreas = (prov.service_areas || []).map(a => areaMap[a] || MACRO_AREAS_MAP[a] || a).filter(Boolean);
-  // Smart area display: if serving 20+ villages, collapse to macro labels or "All Villages"
-  const resolvedAreas = (() => {
-    // Filter out raw UUIDs (unmapped IDs)
-    const cleanAreas = rawAreas.filter(a => !/^[0-9a-f]{24}$/i.test(a));
-    const totalAreas = Object.keys(areaMap).length || 114;
-    if (cleanAreas.length === 0) return [];
-    if (cleanAreas.length >= totalAreas * 0.9) return ["All Villages — The Villages, FL"];
-    // Check if contains macro group labels
-    const macroLabels = ["Historic Side", "Established Villages", "Newer Villages", "Eastport", "Family & Non-Age-Restricted"];
-    const hasMacro = cleanAreas.some(a => macroLabels.includes(a));
-    if (hasMacro) return cleanAreas.filter(a => macroLabels.includes(a));
-    if (cleanAreas.length > 20) return ["All Villages — The Villages, FL"];
-    return cleanAreas;
-  })();
+  const resolvedAreas    = (prov.service_areas || []).map(a => areaMap[a] || MACRO_AREAS_MAP[a] || a).filter(Boolean);
 
   useEffect(() => {
     ProviderReview.filter({ provider_id: prov.id })
@@ -408,7 +394,7 @@ function ProvDetail({ prov, areas, cats, svcs, onBack }) {
               </a>
             </div>
           )}
-          {prov.is_mobile !== true && prov.address && (
+          {prov.address && (
             <div style={{ fontSize: 12, color: INK, gridColumn: "1/-1", display: "flex", alignItems: "flex-start", gap: 4 }}>
               <b>📍</b> <span>{prov.address}</span>
             </div>
@@ -950,7 +936,7 @@ export default function Home() {
   const [svcs,     setSvcs]     = useState([]);
   const [results,  setResults]  = useState([]);
   const [searched, setSearched] = useState(false);
-  const [isLoading, setIsLoading] = useState(() => !!(new URLSearchParams(window.location.search).get("provider")));
+  const [isLoading, setIsLoading] = useState(false);
   const [selProv,  setSelProv]  = useState(null);
   const [selAreaR, setSelAreaR] = useState(null);
   const [selCatR,  setSelCatR]  = useState(null);
@@ -979,15 +965,14 @@ export default function Home() {
     { id: "69d1822df3b2afb229b5bada", category_id: "69d09c14d5ee9e7be9aa301b", name: "Window Installation/Repair" },
     { id: "69d1822df3b2afb229b5badb", category_id: "69d09c14d5ee9e7be9aa301b", name: "HVAC" },
     { id: "69d1822df3b2afb229b5badc", category_id: "69d09c14d5ee9e7be9aa301b", name: "Plumbing" },
-    { id: "69d1822df3b2afb229b5badd", category_id: "69d09c14d5ee9e7be9aa301b", name: "Roofing & Gutters" },
-    { id: "69d1822df3b2afb229b5badf", category_id: "69d09c14d5ee9e7be9aa301b", name: "Security & Home Watch" },
-    { id: "69d1822df3b2afb229b5bade", category_id: "69d09c14d5ee9e7be9aa301b", name: "Handyman Services" },
-    { id: "69d1822df3b2afb229b5bae3", category_id: "69d09c14d5ee9e7be9aa301b", name: "Flooring (Tile, Wood, Carpet)" },
-    { id: "69d1822df3b2afb229b5baee", category_id: "69d09c14d5ee9e7be9aa301b", name: "Pressure Washing" },
-    { id: "69d1822df3b2afb229b5baef", category_id: "69d09c14d5ee9e7be9aa301b", name: "Driveway Repair/Cleaning/Painting" },
+    { id: "69d1822df3b2afb229b5badd", category_id: "69d09c14d5ee9e7be9aa301b", name: "Roofing" },
+    { id: "69d1822df3b2afb229b5badf", category_id: "69d09c14d5ee9e7be9aa301b", name: "Home Watch" },
+    { id: "69d1822df3b2afb229b5bade", category_id: "69d181fe57b60e0aecf4067d", name: "Handyman Services" },
+    { id: "69d1822df3b2afb229b5badf", category_id: "69d181fe57b60e0aecf4067d", name: "Security & Home Watch" },
     { id: "69d1822df3b2afb229b5bae0", category_id: "69d181fe57b60e0aecf4067d", name: "Pest Control" },
     { id: "69d1822df3b2afb229b5bae1", category_id: "69d181fe57b60e0aecf4067d", name: "Appliance Repair" },
     { id: "69d1822df3b2afb229b5bae2", category_id: "69d181fe57b60e0aecf4067d", name: "Electrical & Lighting" },
+    { id: "69d1822df3b2afb229b5bae3", category_id: "69d181fe57b60e0aecf4067d", name: "Flooring (Tile, Wood, Carpet)" },
     { id: "69d1822df3b2afb229b5bae4", category_id: "69d181fe57b60e0aecf4067d", name: "Home Organization" },
     { id: "69d1822df3b2afb229b5bae5", category_id: "69d181fe57b60e0aecf4067d", name: "Smart Home Installation" },
     { id: "69d1822df3b2afb229b5bae6", category_id: "69d181fe57b60e0aecf4067d", name: "Pool & Spa Services" },
@@ -998,6 +983,9 @@ export default function Home() {
     { id: "69d1822df3b2afb229b5baeb", category_id: "69d09c14d5ee9e7be9aa301c", name: "Irrigation/Sprinkler Services" },
     { id: "69d1822df3b2afb229b5baec", category_id: "69d09c14d5ee9e7be9aa301c", name: "Landscaping" },
     { id: "69d1822df3b2afb229b5baed", category_id: "69d09c14d5ee9e7be9aa301c", name: "Hardscaping" },
+    { id: "69d1822df3b2afb229b5baee", category_id: "69d09c14d5ee9e7be9aa301c", name: "Pressure Washing" },
+    { id: "69d1822df3b2afb229b5baef", category_id: "69d09c14d5ee9e7be9aa301c", name: "Driveway Repair/Cleaning/Painting" },
+    { id: "69d1822df3b2afb229b5bae6", category_id: "69d09c14d5ee9e7be9aa301c", name: "Pool & Spa Services" },
     { id: "69d1822df3b2afb229b5baf0", category_id: "69d09c14d5ee9e7be9aa301d", name: "Rentals" },
     { id: "69d1822df3b2afb229b5baf1", category_id: "69d09c14d5ee9e7be9aa301d", name: "Repairs" },
     { id: "69d1822df3b2afb229b5baf2", category_id: "69d09c14d5ee9e7be9aa301d", name: "Detailing" },
@@ -1044,85 +1032,51 @@ export default function Home() {
     // Village list using REAL entity IDs — matches provider service_areas exactly
     const VILLAGE_DATA = [
       { id: "69e9a307d1bc6cfe7247eac2", name: "Alden Bungalows" },
-      { id: "69d06c54c9c22e67aed3c0ff", name: "Alhambra" },
       { id: "69e9a307d1bc6cfe7247eaa1", name: "Amelia" },
       { id: "69e9a307d1bc6cfe7247eac3", name: "Antrim Dells" },
       { id: "69e9a307d1bc6cfe7247eaa2", name: "Ashland" },
       { id: "69e9a307d1bc6cfe7247eaa3", name: "Belvedere" },
-      { id: "69d06c54c9c22e67aed3c10c", name: "Belle Aire" },
       { id: "69e9a307d1bc6cfe7247eaa4", name: "Bonita" },
       { id: "69e9a307d1bc6cfe7247eaa5", name: "Bonnybrook" },
-      { id: "69d06c54c9c22e67aed3c121", name: "Bradford" },
       { id: "69e9a307d1bc6cfe7247ea92", name: "Briar Meadow" },
       { id: "69e9a307d1bc6cfe7247eaa6", name: "Bridgeport at Creekside Landing" },
-      { id: "69e047e27ddcca3eaa81600e", name: "Bridgeport at Laurel Valley" },
       { id: "69e9a307d1bc6cfe7247eaa7", name: "Bridgeport at Lake Miona" },
       { id: "69e9a307d1bc6cfe7247eaa8", name: "Bridgeport at Lake Shore Cottages" },
       { id: "69e9a307d1bc6cfe7247eaa9", name: "Bridgeport at Lake Sumter" },
-      { id: "69e047e27ddcca3eaa81600f", name: "Bridgeport at Mission Hills" },
+      { id: "69e047e27ddcca3eaa81600e", name: "Bridgeport at Laurel Valley" },
       { id: "69e9a307d1bc6cfe7247eaaa", name: "Bridgeport at Miona Shores" },
-      { id: "69d06c54c9c22e67aed3c136", name: "Bison Valley" },
+      { id: "69e047e27ddcca3eaa81600f", name: "Bridgeport at Mission Hills" },
       { id: "69e9a307d1bc6cfe7247eaab", name: "Buttonwood" },
       { id: "69e9a307d1bc6cfe7247eaac", name: "Cabanas at Creekside Landing" },
-      { id: "69d06c54c9c22e67aed3c110", name: "Calumet Grove" },
       { id: "69e9a307d1bc6cfe7247eaad", name: "Caroline" },
-      { id: "69d06c54c9c22e67aed3c122", name: "Cason Hammock" },
       { id: "69e047e27ddcca3eaa816010", name: "Charlotte" },
-      { id: "69d06c54c9c22e67aed3c112", name: "Chatham" },
-      { id: "69d06c54c9c22e67aed3c123", name: "Chitty Chatty" },
-      { id: "69d06c54c9c22e67aed3c124", name: "Citrus Grove" },
       { id: "69e047e27ddcca3eaa816011", name: "Collier" },
-      { id: "69d06c54c9c22e67aed3c100", name: "Country Club Hills" },
-      { id: "69d06c54c9c22e67aed3c134", name: "Dabney" },
       { id: "69e9a307d1bc6cfe7247ea93", name: "De Allende" },
       { id: "69e9a307d1bc6cfe7247ea94", name: "De La Vista" },
-      { id: "69d06c54c9c22e67aed3c101", name: "Del Mar" },
-      { id: "69d06c54c9c22e67aed3c125", name: "DeLuna" },
-      { id: "69d06c54c9c22e67aed3c126", name: "DeSoto" },
       { id: "69e047e27ddcca3eaa816012", name: "Dunedin" },
       { id: "69e9a307d1bc6cfe7247eaae", name: "Duval" },
       { id: "69d06c4a4f1e1017a77a701b", name: "Eastport (All)" },
-      { id: "69d06c54c9c22e67aed3c102", name: "El Cortez" },
       { id: "69d06c4a4f1e1017a77a7019", name: "Established Villages (All)" },
       { id: "69d06c4a4f1e1017a77a701c", name: "Family / Non-Age-Restricted (All)" },
-      { id: "69d06c54c9c22e67aed3c127", name: "Fenney" },
       { id: "69e047e27ddcca3eaa816013", name: "Fernandina" },
       { id: "69e047e27ddcca3eaa816014", name: "Gilchrist" },
-      { id: "69d06c54c9c22e67aed3c114", name: "Glenbrook" },
       { id: "69e9a307d1bc6cfe7247eab0", name: "Haciendas of Mission Hills" },
-      { id: "69d06c54c9c22e67aed3c103", name: "Hacienda" },
       { id: "69e9a307d1bc6cfe7247eaaf", name: "Hadley" },
-      { id: "69d06c54c9c22e67aed3c128", name: "Hammock at Fenney" },
-      { id: "69d06c54c9c22e67aed3c129", name: "Hawkins" },
       { id: "69e9a307d1bc6cfe7247eab1", name: "Hemingway" },
       { id: "69e047e27ddcca3eaa816015", name: "Hillsborough" },
       { id: "69d06c4a4f1e1017a77a7018", name: "Historic Side (All)" },
       { id: "69e047e27ddcca3eaa816016", name: "LaBelle" },
       { id: "69e9a307d1bc6cfe7247eab2", name: "Lago Vista" },
-      { id: "69d06c54c9c22e67aed3c133", name: "Lake Denham" },
       { id: "69e047e27ddcca3eaa816017", name: "Lake Deaton" },
       { id: "69e9a307d1bc6cfe7247eab3", name: "Lakeshore Cottages" },
       { id: "69e9a307d1bc6cfe7247eab4", name: "Largo" },
-      { id: "69d06c54c9c22e67aed3c104", name: "La Reynalda" },
-      { id: "69d06c54c9c22e67aed3c105", name: "La Zamora" },
       { id: "69e9a307d1bc6cfe7247eab5", name: "Liberty Park" },
-      { id: "69d06c54c9c22e67aed3c12a", name: "Linden" },
       { id: "69e9a307d1bc6cfe7247eab6", name: "Lynnhaven" },
       { id: "69e9a307d1bc6cfe7247eab7", name: "Mallory Square" },
-      { id: "69d06c54c9c22e67aed3c12b", name: "Marsh Bend" },
-      { id: "69d06c54c9c22e67aed3c12c", name: "McClure" },
-      { id: "69d06c54c9c22e67aed3c139", name: "Middleton" },
-      { id: "69d06c54c9c22e67aed3c106", name: "Mira Mesa" },
-      { id: "69d06c54c9c22e67aed3c12d", name: "Monarch Grove" },
-      { id: "69d06c54c9c22e67aed3c131", name: "Moultrie Creek" },
       { id: "69d06c4a4f1e1017a77a701a", name: "Newer Villages (All)" },
-      { id: "69d06c54c9c22e67aed3c132", name: "Newell" },
       { id: "69e9a307d1bc6cfe7247eac5", name: "Oak Hollow" },
-      { id: "69d06c54c9c22e67aed3c137", name: "Oak Meadows" },
-      { id: "69d06c54c9c22e67aed3c107", name: "Orange Blossom Gardens" },
       { id: "69e047e27ddcca3eaa816018", name: "Osceola Hills" },
       { id: "69e9a307d1bc6cfe7247eac4", name: "Osceola Hills at Soaring Eagle Preserve" },
-      { id: "69d06c54c9c22e67aed3c138", name: "Oxford Oaks" },
       { id: "69e9a307d1bc6cfe7247ea95", name: "Palo Alto" },
       { id: "69e9a307d1bc6cfe7247eab8", name: "Pennecamp" },
       { id: "69e91929e9a419d0ed14129e", name: "Piedmont" },
@@ -1131,62 +1085,27 @@ export default function Home() {
       { id: "69e047e27ddcca3eaa816019", name: "Pinellas" },
       { id: "69e9a307d1bc6cfe7247eab9", name: "Poinciana" },
       { id: "69e9a307d1bc6cfe7247ea98", name: "Polo Ridge" },
-      { id: "69d06c54c9c22e67aed3c12e", name: "Richmond" },
       { id: "69e9a307d1bc6cfe7247ea99", name: "Rio Grande" },
       { id: "69e9a307d1bc6cfe7247ea9a", name: "Rio Ponderosa" },
       { id: "69e9a307d1bc6cfe7247ea9b", name: "Rio Ranchero" },
       { id: "69e9a307d1bc6cfe7247eaba", name: "Sabal Chase" },
       { id: "69e047e27ddcca3eaa81601a", name: "Sanibel" },
-      { id: "69d06c54c9c22e67aed3c11c", name: "Santiago" },
       { id: "69e9a307d1bc6cfe7247ea9c", name: "Santo Domingo" },
-      { id: "69d06c54c9c22e67aed3c135", name: "Shady Brook" },
-      { id: "69d06c54c9c22e67aed3c108", name: "Silver Lake" },
-      { id: "69d06c54c9c22e67aed3c109", name: "Spring Arbor" },
       { id: "69e9a307d1bc6cfe7247ea9d", name: "Springdale" },
       { id: "69e9a307d1bc6cfe7247eabb", name: "St. Charles" },
-      { id: "69d06c54c9c22e67aed3c12f", name: "St. Catherine" },
       { id: "69e9a307d1bc6cfe7247eabc", name: "St. James" },
-      { id: "69d06c54c9c22e67aed3c130", name: "St. Johns" },
       { id: "69e9a307d1bc6cfe7247ea9e", name: "Summerhill" },
       { id: "69e9a307d1bc6cfe7247eabd", name: "Sunset Pointe" },
       { id: "69e9a307d1bc6cfe7247eabe", name: "Tall Trees" },
       { id: "69e9a307d1bc6cfe7247eabf", name: "Tamarind Grove" },
       { id: "69e9a307d1bc6cfe7247ea9f", name: "Tierra Del Sol" },
-      { id: "69d06c54c9c22e67aed3c10a", name: "Valle Verde" },
+      { id: "69e9a307d1bc6cfe7247eac0", name: "Virginia Trace" },
       { id: "69e9a307d1bc6cfe7247eac6", name: "Waters Edge" },
       { id: "69e9a307d1bc6cfe7247eac7", name: "Well Point" },
       { id: "69e9a307d1bc6cfe7247eac1", name: "Winifred" },
       { id: "69e9a307d1bc6cfe7247eaa0", name: "Woodbury" },
-      { id: "69e047e27ddcca3eaa81601b", name: "Brownwood" },
     ];
             setAreas(VILLAGE_DATA);
-    // Track homepage visit for site traffic analytics
-    fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/trackEvent", {
-      method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ provider_id: "SITE", event_type: "homepage_view", source: "homepage" }),
-    }).catch(() => {});
-
-    // ── Deep-link from Deals of the Week: /?provider=<entity_id> ──
-    // Fetch a single provider by ID instantly instead of loading all 500+
-    const urlParams = new URLSearchParams(window.location.search);
-    const deepLinkId = urlParams.get("provider");
-    if (deepLinkId) {
-      fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/getProviders", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ get_single: true, provider_id: deepLinkId }),
-      })
-        .then(r => r.json())
-        .then(data => {
-          const found = data.provider || null;
-          if (found) {
-            setSelProv(found);
-          }
-          setIsLoading(false);
-          window.history.replaceState({}, "", "/Home");
-        })
-        .catch(() => { setIsLoading(false); });
-    }
   }, []);
 
 
@@ -1246,7 +1165,7 @@ export default function Home() {
 
     // ── Legacy ID lookup maps ──────────────────────────────────────────────
     const LEGACY_VA = {"va001":"Alhambra","va002":"Amelia","va003":"Ashland","va004":"Belle Aire","va005":"Belvedere","va006":"Bonita","va007":"Bonnybrook","va008":"Bradford","va009":"Briar Meadow","va010":"Bridgeport at Creekside Landing","va011":"Bridgeport at Lake Miona","va012":"Bridgeport at Lake Sumter","va013":"Bridgeport at Laurel Valley","va014":"Bridgeport at Miona Shores","va015":"Bridgeport at Mission Hills","va016":"Buttonwood","va017":"Calumet Grove","va018":"Caroline","va019":"Cason Hammock","va020":"Charlotte","va021":"Chatham","va022":"Chitty Chatty","va023":"Citrus Grove","va024":"Collier","va025":"Collier at Alden Bungalows","va026":"Collier at Antrim Dells","va027":"Country Club Hills","va028":"Dabney","va029":"De Allende","va030":"De La Vista","va031":"Del Mar","va032":"DeLuna","va033":"DeSoto","va034":"Dunedin","va035":"Duval","va036":"El Cortez","va037":"Fenney","va038":"Fernandina","va039":"Gilchrist","va040":"Glenbrook","va041":"Hacienda","va042":"Haciendas of Mission Hills","va043":"Hadley","va044":"Hammock at Fenney","va045":"Hawkins","va046":"Hemingway","va047":"Hillsborough","va048":"La Reynalda","va049":"La Zamora","va050":"LaBelle","va051":"Lake Deaton","va052":"Lake Denham","va053":"Lakeshore Cottages","va054":"Largo","va055":"Liberty Park","va056":"Linden","va057":"Lynnhaven","va058":"Mallory Square","va059":"Marsh Bend","va060":"McClure","va061":"Mira Mesa","va062":"Monarch Grove","va063":"Newell","va064":"Orange Blossom Gardens","va065":"Osceola Hills","va066":"Osceola Hills at Soaring Eagle Preserve","va067":"Palo Alto","va068":"Pennecamp","va069":"Piedmont","va070":"Pine Hills","va071":"Pine Ridge","va072":"Pinellas","va073":"Poinciana","va074":"Polo Ridge","va075":"Richmond","va076":"Rio Grande","va077":"Rio Ponderosa","va078":"Rio Ranchero","va079":"Sabal Chase","va080":"Sanibel","va081":"Santiago","va082":"Santo Domingo","va083":"Silver Lake","va084":"Springdale","va085":"St. Catherine","va086":"St. Charles","va087":"St. James","va088":"St. Johns","va089":"Summerhill","va090":"Sunset Pointe","va091":"Tall Trees","va092":"Tamarind Grove","va093":"Tierra Del Sol","va094":"Valle Verde","va095":"Virginia Trace","va096":"Winifred","va097":"Woodbury","va098":"Bison Valley","va099":"Country Club","va100":"Middleton","va101":"Moultrie Creek","va102":"Oak Meadows","va103":"Orange Blossom","va104":"Oxford Oaks","va105":"Shady Brook","va106":"Spring Arbor"};
-    const LEGACY_SVC_MAP = {"s01":"Home Improvements","s02":"General Repairs","s03":"Cleaning Services","s04":"Painting (Interior/Exterior)","s05":"Garage Door Services","s06":"Window Installation/Repair","s07":"HVAC","s08":"Plumbing","s09":"Roofing & Gutters","s10":"Handyman Services","s11":"Security & Home Watch","s12":"Pest Control","s13":"Appliance Repair","s14":"Electrical & Lighting","s15":"Flooring (Tile, Wood, Carpet)","s16":"Home Organization","s17":"Smart Home Installation","s18":"Pool & Spa Services","s19":"Lawn Mowing","s20":"Sod Installation","s21":"Tree Trimming & Pruning/Removal","s22":"Lawn Fertilization","s23":"Irrigation/Sprinkler Services","s24":"Landscaping","s25":"Hardscaping","s26":"Pressure Washing","s27":"Driveway Repair/Cleaning/Painting","s28":"Rentals","s29":"Repairs","s30":"Detailing","s31":"Lighting Upgrades","s32":"Improvements/Customizations","s33":"Battery Replacement","s34":"Tire Services","s35":"Auto Repairs","s36":"Auto Detailing","s37":"Oil Changes","s38":"Tire Services","s39":"Mobile Mechanic","s40":"Barber / Stylist","s41":"Nail Technicians","s42":"Spa Services","s43":"Home Health Aides","s44":"Massage Therapists","s45":"Personal Trainers","s46":"Makeup Artists","s47":"Veterinary Services","s48":"Grooming","s49":"Pet Sitting/Walking","s50":"Pet Training","s51":"Mobile Grooming","s52":"Medical Transport","s53":"Airport Transport","s54":"Local Rides","s55":"Errand Services","s56":"Courier/Delivery Services","s57":"Accounting & Bookkeeping","s58":"Notary Services","s59":"IT Support","s60":"Legal Services","s61":"Business Consulting","s62":"Tax Preparation","s63":"Home Watch","s64":"Pool & Spa Services","s65":"Vehicle Transport"};
+    const LEGACY_SVC_MAP = {"s01":"Home Improvements","s02":"General Repairs","s03":"Cleaning Services","s04":"Painting (Interior/Exterior)","s05":"Garage Door Services","s06":"Window Installation/Repair","s07":"HVAC","s08":"Plumbing","s09":"Roofing","s10":"Handyman Services","s11":"Security & Home Watch","s12":"Pest Control","s13":"Appliance Repair","s14":"Electrical & Lighting","s15":"Flooring (Tile, Wood, Carpet)","s16":"Home Organization","s17":"Smart Home Installation","s18":"Pool & Spa Services","s19":"Lawn Mowing","s20":"Sod Installation","s21":"Tree Trimming & Pruning/Removal","s22":"Lawn Fertilization","s23":"Irrigation/Sprinkler Services","s24":"Landscaping","s25":"Hardscaping","s26":"Pressure Washing","s27":"Driveway Repair/Cleaning/Painting","s28":"Rentals","s29":"Repairs","s30":"Detailing","s31":"Lighting Upgrades","s32":"Improvements/Customizations","s33":"Battery Replacement","s34":"Tire Services","s35":"Auto Repairs","s36":"Auto Detailing","s37":"Oil Changes","s38":"Tire Services","s39":"Mobile Mechanic","s40":"Barber / Stylist","s41":"Nail Technicians","s42":"Spa Services","s43":"Home Health Aides","s44":"Massage Therapists","s45":"Personal Trainers","s46":"Makeup Artists","s47":"Veterinary Services","s48":"Grooming","s49":"Pet Sitting/Walking","s50":"Pet Training","s51":"Mobile Grooming","s52":"Medical Transport","s53":"Airport Transport","s54":"Local Rides","s55":"Errand Services","s56":"Courier/Delivery Services","s57":"Accounting & Bookkeeping","s58":"Notary Services","s59":"IT Support","s60":"Legal Services","s61":"Business Consulting","s62":"Tax Preparation","s63":"Home Watch","s64":"Pool & Spa Services","s65":"Vehicle Transport"};
     // Macro entity ID → group name (for old test providers)
     const MACRO_AREA = {"69d06c4a4f1e1017a77a7018":"historic","69d06c4a4f1e1017a77a7019":"established","69d06c4a4f1e1017a77a701a":"newer","69d06c4a4f1e1017a77a701b":"eastport","69d06c4a4f1e1017a77a701c":"family"};
 
@@ -1560,7 +1479,7 @@ export default function Home() {
     keywords: "The Villages FL services, local service directory, home repair, landscaping, cleaning, pet care, golf cart services, The Villages Florida",
     ogTitle: "V-Hub — The Villages Local Services Directory",
     ogDescription: "Find local service providers across all 97 villages in The Villages, FL. No fees. No middlemen. Just neighbors serving neighbors.",
-    ogImage: "https://base44.app/api/apps/69d062aca815ce8e697894b1/files/mp/public/69d062aca815ce8e697894b1/0e7cdf112_ronnie_clark_hero.jpg",
+    ogImage: "https://media.base44.com/images/public/69d062aca815ce8e697894b1/0e7cdf112_ronnie_clark_hero.jpg",
     canonical: "https://www.v-hub.us/",
   });
 
@@ -1570,13 +1489,13 @@ export default function Home() {
   const para = { margin: "0 0 8px 0", fontSize: 11, color: INK, fontFamily: "'Times New Roman', serif", lineHeight: 1.75, textAlign: "justify" };
   const rule = { height: 2, background: INK, margin: "10px 0", opacity: 0.15 };
 
+  if (selProv)  return <ProvDetail prov={selProv} areas={areas} cats={cats} svcs={svcs} onBack={() => setSelProv(null)} />;
   if (isLoading) return (
-    <div style={{ background: "#F0E6C8", minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", gap: 16 }}>
-      <div style={{ fontSize: 40 }}>🏡</div>
-      <div style={{ fontFamily: "Georgia, serif", fontSize: 18, color: "#3b2a1a" }}>Loading…</div>
+    <div style={{ background: "#f5f0e8", minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", gap: 16 }}>
+      <div style={{ fontSize: 40 }}>🔍</div>
+      <div style={{ fontFamily: "Georgia, serif", fontSize: 20, color: "#3b2a1a" }}>Finding providers near you...</div>
     </div>
   );
-  if (selProv)  return <ProvDetail prov={selProv} areas={areas} cats={cats} svcs={svcs} onBack={() => setSelProv(null)} />;
   if (searched) return <Results results={results} areas={areas} cats={cats} svcs={svcs} onReset={reset} onSel={setSelProv} selArea={selAreaR} selCatId={selCatR} />;
 
   return (
@@ -1640,7 +1559,7 @@ export default function Home() {
       {/* Preload logo so it's ready instantly on navigation */}
       <link rel="preload" as="image" href="https://base44.app/api/apps/69d062aca815ce8e697894b1/files/mp/public/69d062aca815ce8e697894b1/f14a7cbd0_logo_icon_small.png" />
       {/* Preload hero image — highest priority, loads with app */}
-      <link rel="preload" as="image" href="https://base44.app/api/apps/69d062aca815ce8e697894b1/files/mp/public/69d062aca815ce8e697894b1/0e7cdf112_ronnie_clark_hero.jpg" fetchpriority="high" />
+      <link rel="preload" as="image" href="https://media.base44.com/images/public/69d062aca815ce8e697894b1/0e7cdf112_ronnie_clark_hero.jpg" fetchpriority="high" />
 
       <div style={{
         minHeight: "100vh",
@@ -1724,28 +1643,27 @@ export default function Home() {
 
         {/* PHOTO */}
         <img
-          src="https://base44.app/api/apps/69d062aca815ce8e697894b1/files/mp/public/69d062aca815ce8e697894b1/0e7cdf112_ronnie_clark_hero.jpg"
-          alt="Lake Sumter Landing sunset by Ronnie Clark"
+          src="https://media.base44.com/images/public/69d062aca815ce8e697894b1/0e7cdf112_ronnie_clark_hero.jpg"
+          alt="Lake Sumter Landing"
           fetchpriority="high"
           loading="eager"
           decoding="sync"
-          style={{ width: "100%", height: "clamp(200px, 30vw, 340px)", objectFit: "cover", objectPosition: "center center", display: "block", maxWidth: "100%" }}
+          style={{ width: "100%", height: 240, objectFit: "cover", objectPosition: "center 55%", display: "block" }}
         />
 
-        {/* CLASSIFIEDS — full width, bold red, white text — eye-catching price-tag style */}
+        {/* CLASSIFIEDS — full width, thick red border, links to Classifieds */}
         <a href="/Classifieds" style={{ textDecoration: "none", display: "block", width: "100%" }}>
           <div style={{
-            background: "linear-gradient(160deg, #D10000 0%, #A80000 45%, #820000 100%)",
-            boxShadow: "0 5px 22px rgba(180,0,0,0.7), inset 0 2px 0 rgba(255,100,100,0.25), inset 0 -2px 0 rgba(0,0,0,0.3)",
+            border: "4px solid #CC0000",
+            outline: "1.5px solid #CC0000",
+            outlineOffset: "0px",
+            boxShadow: "0 0 10px 2px rgba(204,0,0,0.3)",
+            background: PAPER,
             width: "100%", boxSizing: "border-box",
             cursor: "pointer",
-            padding: "15px 16px 13px",
-            textAlign: "center",
-            borderTop: "3px solid #FF4444",
-            borderBottom: "3px solid #5A0000",
           }}>
-            <div style={{ fontSize: 19, fontWeight: 900, letterSpacing: 2, color: "#FFFFFF", textTransform: "uppercase", fontFamily: "'Helvetica Neue', Arial, sans-serif", textShadow: "0 2px 6px rgba(0,0,0,0.6), 0 0 20px rgba(255,80,80,0.4)", lineHeight: 1.2 }}>🔥 Deals of the Week!</div>
-            <div style={{ fontSize: 12, fontWeight: 700, color: "rgba(255,255,255,0.92)", fontFamily: "'Helvetica Neue', Arial, sans-serif", marginTop: 4, letterSpacing: 1, textShadow: "0 1px 3px rgba(0,0,0,0.5)" }}>CLICK HERE — SEE THIS WEEK'S DEALS →</div>
+            <div style={{ padding: "5px 16px 2px", textAlign: "center", fontSize: 13, fontWeight: 900, letterSpacing: 2, color: "#CC0000", textTransform: "uppercase", fontFamily: "'Times New Roman', serif" }}>🔥 Deals of the Week!</div>
+            <div style={{ padding: "0 16px 5px", textAlign: "center", fontSize: 11, fontStyle: "italic", color: "#CC0000", fontFamily: "'Times New Roman', serif", opacity: 0.8 }}>Click here to see this week's deals →</div>
           </div>
         </a>
 

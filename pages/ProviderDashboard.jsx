@@ -1,9 +1,7 @@
-// FORCE-NEW-BUNDLE-APR30-v4-EDIT-PULLADD
 // FORCE_REBUILD_1776768600
 // BUILD_FORCE_2026_04_22_T0400
 // CACHE-BUST-1776743534-FIX
 // build-1776559362 
-const _FORCE_REBUILD_APR30_V4 = "edit-pull-v4"; // force new bundle hash
 // @build 2026-04-18-b
 // ProviderDashboard — REBUILD 1776411339
 import React, { useState, useEffect, useRef } from "react";
@@ -41,7 +39,7 @@ const SANS      = "'Helvetica Neue', Arial, sans-serif";
 const SERIF     = "'Times New Roman', Georgia, serif";
 
 // ── Legacy short-code lookup maps (providers created before entity migration)
-const LEGACY_SVC = {"s01":"Home Improvements","s02":"General Repairs","s03":"Cleaning Services","s04":"Painting (Interior/Exterior)","s05":"Garage Door Services","s06":"Window Installation/Repair","s07":"HVAC","s08":"Plumbing","s09":"Roofing & Gutters","s10":"Handyman Services","s11":"Security & Home Watch","s12":"Pest Control","s13":"Appliance Repair","s14":"Electrical & Lighting","s15":"Flooring (Tile, Wood, Carpet)","s16":"Home Organization","s17":"Smart Home Installation","s18":"Pool & Spa Services","s19":"Lawn Mowing","s20":"Sod Installation","s21":"Tree Trimming & Pruning/Removal","s22":"Lawn Fertilization","s23":"Irrigation/Sprinkler Services","s24":"Landscaping","s25":"Hardscaping","s26":"Pressure Washing","s27":"Driveway Repair/Cleaning/Painting","s28":"Rentals","s29":"Repairs","s30":"Detailing","s31":"Lighting Upgrades","s32":"Improvements/Customizations","s33":"Battery Replacement","s34":"Tire Services","s35":"Auto Repairs","s36":"Auto Detailing","s37":"Oil Changes","s38":"Tire Services","s39":"Mobile Mechanic","s40":"Barber / Stylist","s41":"Nail Technicians","s42":"Spa Services","s43":"Home Health Aides","s44":"Massage Therapists","s45":"Personal Trainers","s46":"Makeup Artists","s47":"Veterinary Services","s48":"Grooming","s49":"Pet Sitting/Walking","s50":"Pet Training","s51":"Mobile Grooming","s52":"Medical Transport","s53":"Airport Transport","s54":"Local Rides","s55":"Errand Services","s56":"Courier/Delivery Services","s57":"Accounting & Bookkeeping","s58":"Notary Services","s59":"IT Support","s60":"Legal Services","s61":"Business Consulting","s62":"Tax Preparation","s63":"Home Watch","s64":"Pool & Spa Services","s65":"Vehicle Transport"};
+const LEGACY_SVC = {"s01":"Home Improvements","s02":"General Repairs","s03":"Cleaning Services","s04":"Painting (Interior/Exterior)","s05":"Garage Door Services","s06":"Window Installation/Repair","s07":"HVAC","s08":"Plumbing","s09":"Roofing","s10":"Handyman Services","s11":"Security & Home Watch","s12":"Pest Control","s13":"Appliance Repair","s14":"Electrical & Lighting","s15":"Flooring (Tile, Wood, Carpet)","s16":"Home Organization","s17":"Smart Home Installation","s18":"Pool & Spa Services","s19":"Lawn Mowing","s20":"Sod Installation","s21":"Tree Trimming & Pruning/Removal","s22":"Lawn Fertilization","s23":"Irrigation/Sprinkler Services","s24":"Landscaping","s25":"Hardscaping","s26":"Pressure Washing","s27":"Driveway Repair/Cleaning/Painting","s28":"Rentals","s29":"Repairs","s30":"Detailing","s31":"Lighting Upgrades","s32":"Improvements/Customizations","s33":"Battery Replacement","s34":"Tire Services","s35":"Auto Repairs","s36":"Auto Detailing","s37":"Oil Changes","s38":"Tire Services","s39":"Mobile Mechanic","s40":"Barber / Stylist","s41":"Nail Technicians","s42":"Spa Services","s43":"Home Health Aides","s44":"Massage Therapists","s45":"Personal Trainers","s46":"Makeup Artists","s47":"Veterinary Services","s48":"Grooming","s49":"Pet Sitting/Walking","s50":"Pet Training","s51":"Mobile Grooming","s52":"Medical Transport","s53":"Airport Transport","s54":"Local Rides","s55":"Errand Services","s56":"Courier/Delivery Services","s57":"Accounting & Bookkeeping","s58":"Notary Services","s59":"IT Support","s60":"Legal Services","s61":"Business Consulting","s62":"Tax Preparation","s63":"Home Watch","s64":"Pool & Spa Services","s65":"Vehicle Transport"};
 const LEGACY_AREA = {"va001":"Alhambra","va002":"Amelia","va003":"Ashland","va004":"Belle Aire","va005":"Belvedere","va006":"Bonita","va007":"Bonnybrook","va008":"Bradford","va009":"Briar Meadow","va010":"Bridgeport at Creekside Landing","va011":"Bridgeport at Lake Miona","va012":"Bridgeport at Lake Sumter","va013":"Bridgeport at Laurel Valley","va014":"Bridgeport at Miona Shores","va015":"Bridgeport at Mission Hills","va016":"Buttonwood","va017":"Calumet Grove","va018":"Caroline","va019":"Cason Hammock","va020":"Charlotte","va021":"Chatham","va022":"Chitty Chatty","va023":"Citrus Grove","va024":"Collier","va025":"Collier at Alden Bungalows","va026":"Collier at Antrim Dells","va027":"Country Club Hills","va028":"Dabney","va029":"De Allende","va030":"De La Vista","va031":"Del Mar","va032":"DeLuna","va033":"DeSoto","va034":"Dunedin","va035":"Duval","va036":"El Cortez","va037":"Fenney","va038":"Fernandina","va039":"Gilchrist","va040":"Glenbrook","va041":"Hacienda","va042":"Haciendas of Mission Hills","va043":"Hadley","va044":"Hammock at Fenney","va045":"Hawkins","va046":"Hemingway","va047":"Hillsborough","va048":"La Reynalda","va049":"La Zamora","va050":"LaBelle","va051":"Lake Deaton","va052":"Lake Denham","va053":"Lakeshore Cottages","va054":"Largo","va055":"Liberty Park","va056":"Linden","va057":"Lynnhaven","va058":"Mallory Square","va059":"Marsh Bend","va060":"McClure","va061":"Mira Mesa","va062":"Monarch Grove","va063":"Newell","va064":"Orange Blossom Gardens","va065":"Osceola Hills","va066":"Osceola Hills at Soaring Eagle Preserve","va067":"Palo Alto","va068":"Pennecamp","va069":"Piedmont","va070":"Pine Hills","va071":"Pine Ridge","va072":"Pinellas","va073":"Poinciana","va074":"Polo Ridge","va075":"Richmond","va076":"Rio Grande","va077":"Rio Ponderosa","va078":"Rio Ranchero","va079":"Sabal Chase","va080":"Sanibel","va081":"Santiago","va082":"Santo Domingo","va083":"Silver Lake","va084":"Springdale","va085":"St. Catherine","va086":"St. Charles","va087":"St. James","va088":"St. Johns","va089":"Summerhill","va090":"Sunset Pointe","va091":"Tall Trees","va092":"Tamarind Grove","va093":"Tierra Del Sol","va094":"Valle Verde","va095":"Virginia Trace","va096":"Winifred","va097":"Woodbury"};
 
 // ── Helpers ───────────────────────────────────────────────────────────────
@@ -213,7 +211,7 @@ function StatusBanner({ provider, onUpgrade, onCancel, onManageBilling, paymentL
 // Legacy short-code → real service name map (for providers created before entity migration)
 const LEGACY_SVC_NAMES = {
   s01:"Home Improvements",s02:"General Repairs",s03:"Cleaning Services",s04:"Painting (Interior/Exterior)",
-  s05:"Garage Door Services",s06:"Window Installation/Repair",s07:"HVAC",s08:"Plumbing",s09:"Roofing & Gutters",
+  s05:"Garage Door Services",s06:"Window Installation/Repair",s07:"HVAC",s08:"Plumbing",s09:"Roofing",
   s10:"Handyman Services",s11:"Security & Home Watch",s12:"Pest Control",s13:"Appliance Repair",
   s14:"Electrical & Lighting",s15:"Flooring (Tile, Wood, Carpet)",s16:"Home Organization",
   s17:"Smart Home Installation",s18:"Pool & Spa Services",s19:"Lawn Mowing",s20:"Sod Installation",
@@ -977,16 +975,8 @@ function LoginScreen({ onLogin, onForgot }) {
 //   saved_images[]  → up to 3 stored image URLs per ad
 //
 // Flow: Build ad → save to queue → preview it → mark "next" →
-//       pay $20 via Stripe → goes live immediately for 7 days.
+//       pay $10 via Stripe → goes live immediately for 7 days.
 //       NOT charged again until they manually launch another ad.
-
-// Convert Base44 storage API URL to public CDN URL
-function toCDNUrl(apiUrl) {
-  if (!apiUrl) return apiUrl;
-  const match = apiUrl.match(/\/files\/mp\/public\/([^\/]+)\/(.+)$/);
-  if (match) return `https://media.base44.com/images/public/${match[1]}/${match[2]}`;
-  return apiUrl;
-}
 
 function ClassifiedAdSection({ provider, refreshKey = 0 }) {
   const sectionRef = React.useRef(null);
@@ -1007,7 +997,6 @@ function ClassifiedAdSection({ provider, refreshKey = 0 }) {
   const [filePreview, setFilePreview] = React.useState(null);
   const [fileObj, setFileObj]         = React.useState(null);
   const [uploading, setUploading]     = React.useState(false);
-  const [sectDbAreas, setSectDbAreas]  = React.useState([]);
 
   const [showImagePicker, setShowImagePicker] = React.useState(false);
   const [aiPrompt, setAiPrompt]   = React.useState("");
@@ -1069,24 +1058,12 @@ function ClassifiedAdSection({ provider, refreshKey = 0 }) {
   const liveExpired = liveAd?.deal_expires_at && new Date(liveAd.deal_expires_at) < new Date();
 
   // Local areaNames for location display in ad editor
-  // Load real ServiceArea names from DB so IDs resolve correctly
-  React.useEffect(() => {
-    ServiceArea.list().then(areas => setSectDbAreas(areas || [])).catch(() => {});
-  }, []);
   const areaNames = React.useMemo(() => {
     if (!provider) return [];
     const ids = provider.service_areas || [];
-    if (sectDbAreas.length > 0) {
-      return ids.map(id => {
-        const a = sectDbAreas.find(x => x.id === id);
-        if (!a) return null;
-        const n = a.name || "";
-        return n.includes(" — ") ? n.split(" — ").pop().trim() : n;
-      }).filter(Boolean);
-    }
-    // Fallback: show IDs until areas load (better than legacy hardcoded map)
-    return ids;
-  }, [provider, sectDbAreas]);
+    const areaMap = { "69d06c4ad9b0c2b3a2f9e1a1": "Historic Side", "69d06c4ad9b0c2b3a2f9e1a2": "Established Villages", "69d06c4ad9b0c2b3a2f9e1a3": "Newer Villages", "69d06c4ad9b0c2b3a2f9e1a4": "Eastport", "69d06c4ad9b0c2b3a2f9e1a5": "Family/Non-Age-Restricted" };
+    return ids.map(id => areaMap[id] || id).filter(Boolean);
+  }, [provider]);
 
   // ── Open editor ──────────────────────────────────────────────────────────
   const openEdit = (slot, dealType) => {
@@ -1124,9 +1101,8 @@ function ClassifiedAdSection({ provider, refreshKey = 0 }) {
       const upResp = await fetch("https://api.base44.app/api/apps/69d06ada8019d7e9edf7f8e8/storage/upload", { method: "POST", body: fd });
       const upData = await upResp.json();
       if (upData.url) {
-        const cdnUrl = toCDNUrl(upData.url);
-        setForm(p => ({ ...p, image_url: cdnUrl }));
-        setFilePreview(cdnUrl);
+        setForm(p => ({ ...p, image_url: upData.url }));
+        setFilePreview(upData.url);
         setFileObj(null);
       }
     } catch { /* keep filePreview, will re-upload on save */ }
@@ -1137,52 +1113,28 @@ function ClassifiedAdSection({ provider, refreshKey = 0 }) {
   const handleGenerateAI = async () => {
     if (!aiPrompt.trim()) return;
     setAiError(""); setAiGenerating(true);
-    let imageGenSucceeded = false;
     try {
-      // Step 1: Generate image (returns base64 data URI)
       const resp = await fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/generateAdImage", {
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ prompt: aiPrompt, provider_id: provider.id }),
       });
       const data = await resp.json();
-      if (!data.url) { setAiError("Generation failed: " + (data.error || "unknown error")); return; }
-
-      let finalUrl = data.url;
-
-      // Step 2: Immediately upload base64 to CDN so we get a real URL
-      if (finalUrl.startsWith("data:image/")) {
-        try {
-          const base64Data = finalUrl.split(",")[1];
-          const byteArr = Uint8Array.from(atob(base64Data), c => c.charCodeAt(0));
-          const imgBlob = new Blob([byteArr], { type: "image/png" });
-          const fd = new FormData();
-          fd.append("file", imgBlob, `ai_ad_${provider.id}_${Date.now()}.png`);
-          const upResp = await fetch("https://api.base44.app/api/apps/69d06ada8019d7e9edf7f8e8/storage/upload", { method: "POST", body: fd });
-          const upData = await upResp.json().catch(() => ({}));
-          if (upData.url) finalUrl = toCDNUrl(upData.url) || finalUrl;
-        } catch { /* keep data URI as fallback — save will retry upload */ }
-      }
-
-      // Step 3: Update form + persist to saved_images
-      imageGenSucceeded = true;
-      setForm(p => ({ ...p, image_url: finalUrl }));
-      setFilePreview(null); setFileObj(null);
-      const existingRecord = editingSlot !== "new" ? editingSlot : null;
-      if (existingRecord?.id) {
-        try {
+      if (data.url) {
+        setForm(p => ({ ...p, image_url: data.url }));
+        setFilePreview(null); setFileObj(null);
+        // Persist to saved_images on existing record
+        const existingRecord = editingSlot !== "new" ? editingSlot : null;
+        if (existingRecord?.id) {
           const existingSaved = existingRecord.saved_images || [];
-          const newSaved = [finalUrl, ...existingSaved.filter(u => u !== finalUrl)].slice(0, 3);
-          await ClassifiedAd.update(existingRecord.id, { ai_prompt: aiPrompt, image_url: finalUrl, saved_images: newSaved });
+          const newSaved = [data.url, ...existingSaved.filter(u => u !== data.url)].slice(0, 3);
+          await ClassifiedAd.update(existingRecord.id, { ai_prompt: aiPrompt, image_url: data.url, saved_images: newSaved });
           await loadAds();
           const fresh = await ClassifiedAd.filter({ provider_id: provider.id });
           const updated = fresh.find(a => a.id === existingRecord.id);
           if (updated) setEditingSlot(updated);
-        } catch { /* non-critical — image is set, save will persist it */ }
-      }
-    } catch (genErr) {
-      // Only show error if image was never successfully generated
-      if (!imageGenSucceeded) setAiError("Error generating. Please try again.");
-    }
+        }
+      } else { setAiError("Generation failed: " + (data.error || "unknown error")); }
+    } catch { setAiError("Error generating. Please try again."); }
     finally { setAiGenerating(false); }
   };
 
@@ -1193,18 +1145,13 @@ function ClassifiedAdSection({ provider, refreshKey = 0 }) {
     setSaveErr(""); setSaving(true); setSaveMsg("");
     try {
       let imageUrl = form.image_url;
-      // If a new file was manually picked, convert it to a data URI and use it directly
       if (fileObj) {
-        try {
-          const reader = new FileReader();
-          imageUrl = await new Promise((res, rej) => {
-            reader.onload = e => res(e.target.result);
-            reader.onerror = rej;
-            reader.readAsDataURL(fileObj);
-          });
-        } catch { /* keep existing imageUrl */ }
+        const fd = new FormData();
+        fd.append("file", fileObj);
+        const upResp = await fetch("https://api.base44.app/api/apps/69d06ada8019d7e9edf7f8e8/storage/upload", { method: "POST", body: fd });
+        const upData = await upResp.json();
+        imageUrl = upData.url || imageUrl;
       }
-      // imageUrl is now either: a CDN URL (from AI gen), a data URI (file pick or AI fallback), or existing URL
       const existingRecord = editingSlot !== "new" ? editingSlot : null;
       const existingSaved = existingRecord?.saved_images || [];
       const newSaved = imageUrl && !existingSaved.includes(imageUrl)
@@ -1252,12 +1199,6 @@ function ClassifiedAdSection({ provider, refreshKey = 0 }) {
   const handleDeleteQueued = async (ad) => {
     if (!window.confirm("Delete this queued ad?")) return;
     await ClassifiedAd.delete(ad.id);
-    await loadAds();
-  };
-
-  const handlePullLiveAd = async () => {
-    if (!window.confirm("Pull this ad? It will stop showing on Deals of the Week immediately. No refund is issued — you already paid for the 7-day run.")) return;
-    await ClassifiedAd.update(liveAd.id, { is_active: false });
     await loadAds();
   };
 
@@ -1321,7 +1262,7 @@ function ClassifiedAdSection({ provider, refreshKey = 0 }) {
           <div style={{ fontSize: 12, color: INK_FADE, fontFamily: SANS, lineHeight: 1.8, marginBottom: 14 }}>
             <span style={{ color: NAVY, fontWeight: 700 }}>Step 1</span> — Build your ad (headline, image, description)<br/>
             <span style={{ color: NAVY, fontWeight: 700 }}>Step 2</span> — Preview it exactly as visitors will see it<br/>
-            <span style={{ color: NAVY, fontWeight: 700 }}>Step 3</span> — Pay <strong>$20</strong> via Stripe · runs 7 days · no auto-charge
+            <span style={{ color: NAVY, fontWeight: 700 }}>Step 3</span> — Pay <strong>$10</strong> via Stripe · runs 7 days · no auto-charge
           </div>
           <button data-testid="create-first-ad-btn" onClick={() => { setDealTypeStep(true); setTimeout(() => sectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 50); }} style={{ background: `linear-gradient(180deg,#9A6030,${BROWN_BTN})`, color: PAPER, border: `2px solid ${NAVY}`, borderRadius: 6, padding: "11px 28px", fontSize: 13, fontWeight: 900, cursor: "pointer", fontFamily: SERIF }}>
             ✚ Create My First Ad
@@ -1337,11 +1278,7 @@ function ClassifiedAdSection({ provider, refreshKey = 0 }) {
               <span style={{ fontSize: 13, fontWeight: 900, color: "#1B5E20", fontFamily: SERIF }}>🟢 Live Now:</span>
               <span style={{ fontSize: 13, color: "#2E7D32", fontFamily: SANS, fontWeight: 700 }}>{liveAd.headline}</span>
             </div>
-            <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-              <button onClick={() => openPreviewQueued(liveAd)} style={{ background: "none", border: `1.5px solid ${TEAL}`, color: TEAL, borderRadius: 4, padding: "4px 10px", fontSize: 11, cursor: "pointer", fontFamily: SANS, fontWeight: 700 }}>👁 Preview</button>
-              <button onClick={() => openEdit(liveAd)} style={{ background: "none", border: `1.5px solid ${BROWN_BTN}`, color: BROWN_BTN, borderRadius: 4, padding: "4px 10px", fontSize: 11, cursor: "pointer", fontFamily: SANS, fontWeight: 700 }}>✏ Edit</button>
-              <button onClick={handlePullLiveAd} style={{ background: "none", border: "1.5px solid #c00", color: "#c00", borderRadius: 4, padding: "4px 10px", fontSize: 11, cursor: "pointer", fontFamily: SANS, fontWeight: 700 }}>⏹ Pull Ad</button>
-            </div>
+            <button onClick={() => openPreviewQueued(liveAd)} style={{ background: "none", border: `1.5px solid ${TEAL}`, color: TEAL, borderRadius: 4, padding: "4px 10px", fontSize: 11, cursor: "pointer", fontFamily: SANS, fontWeight: 700 }}>👁 Preview</button>
           </div>
           {liveAd.deal_expires_at && (
             <div style={{ fontSize: 11, color: "#388E3C", fontFamily: SANS }}>
@@ -1363,8 +1300,8 @@ function ClassifiedAdSection({ provider, refreshKey = 0 }) {
           <div style={{ fontSize: 12, color: INK, fontFamily: SANS, lineHeight: 1.7, marginBottom: 10 }}>
             <strong>"{liveAd.headline}"</strong> has expired.{" "}
             {nextUp
-              ? <>Pick <strong>"{nextUp.headline}"</strong> below and pay <strong>$20</strong> to go live for another 7 days.</>
-              : <>Build a new ad or mark a queued one "Next Up", then pay <strong>$20</strong> to go live.</>}
+              ? <>Pick <strong>"{nextUp.headline}"</strong> below and pay <strong>$10</strong> to go live for another 7 days.</>
+              : <>Build a new ad or mark a queued one "Next Up", then pay <strong>$10</strong> to go live.</>}
           </div>
           {checkoutErr && <div style={{ marginTop: 8, fontSize: 12, color: "#c00", fontFamily: SANS }}>{checkoutErr}</div>}
         </div>
@@ -1420,12 +1357,12 @@ function ClassifiedAdSection({ provider, refreshKey = 0 }) {
             ✅ Ready to Launch — <span style={{ color: INK }}>"{nextUp.headline}"</span>
           </div>
           <div style={{ fontSize: 12, color: INK_FADE, fontFamily: SANS, lineHeight: 1.7, marginBottom: 10 }}>
-            Pay <strong style={{ color: INK }}>$20</strong> to go live for <strong style={{ color: INK }}>7 days</strong>. You won't be charged again unless you launch another ad.
+            Pay <strong style={{ color: INK }}>$10</strong> to go live for <strong style={{ color: INK }}>7 days</strong>. You won't be charged again unless you launch another ad.
           </div>
           <div style={{ display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center" }}>
             <button disabled={checkoutLoading} onClick={() => handleCheckout(nextUp)}
               style={{ background: "linear-gradient(180deg,#1A6B3C,#145530)", color: "#fff", border: "2px solid #1A6B3C", borderRadius: 6, padding: "11px 28px", fontSize: 13, fontWeight: 900, cursor: checkoutLoading ? "not-allowed" : "pointer", fontFamily: SERIF, opacity: checkoutLoading ? 0.7 : 1 }}>
-              {checkoutLoading ? "Redirecting to Stripe…" : `💳 Pay $20 — Launch Ad for 7 Days →`}
+              {checkoutLoading ? "Redirecting to Stripe…" : `💳 Pay $10 — Launch Ad for 7 Days →`}
             </button>
             <button onClick={() => openPreviewQueued(nextUp)} style={{ background: "none", border: `1.5px solid ${TEAL}`, color: TEAL, borderRadius: 6, padding: "10px 16px", fontSize: 12, cursor: "pointer", fontFamily: SANS, fontWeight: 700 }}>👁 Preview First</button>
           </div>
@@ -1436,7 +1373,7 @@ function ClassifiedAdSection({ provider, refreshKey = 0 }) {
       {/* Hint: they have queued ads but haven't marked one Next */}
       {queued.length > 0 && !nextUp && editingSlot === null && (
         <div style={{ background: "#EFF8FF", border: "1.5px solid #1565C0", borderRadius: 8, padding: "10px 14px", marginBottom: 14, fontSize: 12, color: "#1565C0", fontFamily: SANS, lineHeight: 1.7 }}>
-          ⏭ <strong>Ready to go live?</strong> Click <strong>"Set Next"</strong> on the ad you want to run, then pay $20 to launch it for 7 days.
+          ⏭ <strong>Ready to go live?</strong> Click <strong>"Set Next"</strong> on the ad you want to run, then pay $10 to launch it for 7 days.
         </div>
       )}
 
@@ -1599,7 +1536,6 @@ function ClassifiedAdSection({ provider, refreshKey = 0 }) {
               {aiGenerating && <div style={{ marginTop: 8, fontSize: 12, color: TEAL, fontFamily: SANS, fontWeight: 600 }}>🎨 Creating your custom image… almost there!</div>}
               {aiError && <div style={{ marginTop: 6, fontSize: 11, color: "#c00", fontFamily: SANS }}>{aiError}</div>}
             </div>
-
           </div>
 
           {/* Save + Preview buttons — context-aware: live ad vs draft */}
@@ -1628,13 +1564,13 @@ function ClassifiedAdSection({ provider, refreshKey = 0 }) {
                     <div style={{ fontSize: 13, fontWeight: 900, color: "#1B5E20", fontFamily: SERIF, marginBottom: 6 }}>✅ Ad saved!</div>
                     <div style={{ fontSize: 12, color: INK_FADE, fontFamily: SANS, lineHeight: 1.8, marginBottom: 12 }}>
                       Your ad <strong style={{ color: INK }}>"{savedAdRecord.headline}"</strong> is ready.<br/>
-                      Preview it first, then pay <strong style={{ color: INK }}>$20</strong> to post it live for <strong style={{ color: INK }}>7 days</strong>.<br/>
+                      Preview it first, then pay <strong style={{ color: INK }}>$10</strong> to post it live for <strong style={{ color: INK }}>7 days</strong>.<br/>
                       <span style={{ fontSize: 11 }}>You won't be charged again unless you manually launch another ad.</span>
                     </div>
                     <div style={{ display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center" }}>
                       <button data-testid="pay-now-btn" disabled={checkoutLoading} onClick={() => { closeEdit(); handleCheckout(savedAdRecord); }}
                         style={{ background: "linear-gradient(180deg,#1A6B3C,#145530)", color: "#fff", border: "2px solid #1A6B3C", borderRadius: 6, padding: "11px 24px", fontSize: 13, fontWeight: 900, cursor: checkoutLoading ? "not-allowed" : "pointer", fontFamily: SERIF, opacity: checkoutLoading ? 0.7 : 1 }}>
-                        {checkoutLoading ? "Redirecting to Stripe…" : "💳 Pay $20 — Post Live for 7 Days →"}
+                        {checkoutLoading ? "Redirecting to Stripe…" : "💳 Pay $10 — Post Live for 7 Days →"}
                       </button>
                       <button onClick={() => { setPreviewAd({ ...savedAdRecord, image_url: filePreview || savedAdRecord.image_url }); setPreviewFromEditor(false); }}
                         style={{ background: "none", border: `1.5px solid ${TEAL}`, color: TEAL, borderRadius: 6, padding: "10px 16px", fontSize: 12, cursor: "pointer", fontFamily: SANS, fontWeight: 700 }}>
@@ -1674,22 +1610,9 @@ function ClassifiedAdSection({ provider, refreshKey = 0 }) {
       {editingSlot === null && (
         <div style={{ fontSize: 11, color: INK_FADE, fontFamily: SANS, lineHeight: 1.9, background: PAPER, border: `1px solid ${PAPER_DK}`, borderRadius: 6, padding: "8px 12px" }}>
           <strong style={{ fontFamily: SERIF, color: INK }}>How Deals of the Week works:</strong>{" "}
-          Build up to 3 ads · Upload your own image or use AI to generate one · Preview exactly how it will look · Mark one "Next Up" · Pay <strong>$20</strong> → runs live for <strong>7 days</strong> · You're never auto-charged again
+          Build up to 3 ads · Upload your own image or use AI to generate one · Preview exactly how it will look · Mark one "Next Up" · Pay <strong>$10</strong> → runs live for <strong>7 days</strong> · You're never auto-charged again
         </div>
       )}
-
-      {/* ── GET HELP FROM ADMIN ── */}
-      <div style={{ marginTop: 10, textAlign: "center", paddingBottom: 4 }}>
-        <a
-          href={`mailto:admin@v-hub.us?subject=Help%20with%20My%20Ad%20%E2%80%94%20${encodeURIComponent(provider?.vh_number || "")}%20${encodeURIComponent(provider?.business_name || "")}&body=Hi%20V-HUB%20team%2C%0A%0AI%20need%20help%20with%20my%20Deals%20of%20the%20Week%20ad.%0A%0A%5BDescribe%20your%20issue%20here%5D%0A%0AThanks%2C%0A${encodeURIComponent(provider?.owner_name || "")}`}
-          style={{ display: "inline-flex", alignItems: "center", gap: 6, background: "none", border: "1.5px solid #00BFA5", color: "#00BFA5", borderRadius: 6, padding: "10px 20px", fontSize: 12, fontWeight: 700, cursor: "pointer", fontFamily: "sans-serif", textDecoration: "none", letterSpacing: 0.5 }}
-        >
-          ✉️ Get Help from Admin
-        </a>
-        <div style={{ fontSize: 10, color: "#999", fontFamily: "sans-serif", marginTop: 5 }}>
-          Having trouble? Email us and we'll build your ad for you.
-        </div>
-      </div>
 
       {/* ── AD PREVIEW MODAL ── */}
       {previewAd && (
@@ -1705,35 +1628,46 @@ function ClassifiedAdSection({ provider, refreshKey = 0 }) {
               <span style={{ fontSize: 12, fontWeight: 700, fontFamily: SANS, letterSpacing: 0.5 }}>👁 Preview — How Visitors Will See Your Ad</span>
               <button onClick={() => setPreviewAd(null)} style={{ background: "none", border: "none", color: PAPER, fontSize: 20, cursor: "pointer", lineHeight: 1 }}>✕</button>
             </div>
-            {/* Ad card — CLEAN style matching Classifieds page */}
+            {/* Ad card — exact same style as Classifieds page */}
             {(() => {
               const ad = previewAd;
               const fmtD = d => new Date(d).toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"});
-              const imgSrc = ad.image_url || "";
+              const days = ad.deal_expires_at ? Math.ceil((new Date(ad.deal_expires_at) - new Date().setHours(0,0,0,0)) / 86400000) : null;
+              let badge = null;
+              if (days !== null) {
+                if (days < 0)    badge = <span style={{ display:"inline-block", marginTop:4, padding:"2px 8px", background:"#7B0000", color:"#fff", fontSize:9, fontWeight:700, borderRadius:2, letterSpacing:0.5, textTransform:"uppercase" }}>Expired</span>;
+                else if (days===0) badge = <span style={{ display:"inline-block", marginTop:4, padding:"2px 8px", background:"#C62828", color:"#fff", fontSize:9, fontWeight:700, borderRadius:2, letterSpacing:0.5, textTransform:"uppercase" }}>Ends Today!</span>;
+                else if (days<=3) badge = <span style={{ display:"inline-block", marginTop:4, padding:"2px 8px", background:"#E65100", color:"#fff", fontSize:9, fontWeight:700, borderRadius:2, letterSpacing:0.5, textTransform:"uppercase" }}>Ends in {days} day{days!==1?"s":""}!</span>;
+                else              badge = <span style={{ display:"inline-block", marginTop:4, padding:"2px 8px", background:"#1A6B3C", color:"#fff", fontSize:9, fontWeight:700, borderRadius:2, letterSpacing:0.5, textTransform:"uppercase" }}>Thru {fmtD(ad.deal_expires_at)}</span>;
+              }
               return (
-                <div style={{ background:"#fff", borderRadius:14, overflow:"hidden", boxShadow:"0 4px 20px rgba(0,0,0,0.25)", border:"2px solid #1B3D6F" }}>
-                  {/* Full image */}
-                  {imgSrc ? (
-                    <img src={imgSrc} alt={ad.headline} style={{ width:"100%", display:"block", maxHeight:400, objectFit:"cover" }} />
-                  ) : (
-                    <div style={{ background:"linear-gradient(135deg,#1B3D6F,#00BFA5)", height:180, display:"flex", alignItems:"center", justifyContent:"center" }}>
-                      <span style={{ color:"#fff", fontSize:40 }}>🏷️</span>
-                    </div>
+                <div style={{ background:"#F0E6C8", border:"2px solid #1C0F00", display:"flex", flexDirection:"column", overflow:"hidden", boxShadow:"3px 3px 12px rgba(0,0,0,0.4)" }}>
+                  <div style={{ background:"#1C0F00", padding:"10px 14px 9px", textAlign:"center" }}>
+                    <div style={{ fontSize:9, color:"#C8B07A", fontFamily:SANS, letterSpacing:2, textTransform:"uppercase", marginBottom:4 }}>✦ Deal of the Week ✦</div>
+                    <div style={{ fontSize:17, fontWeight:900, color:YELLOW, textTransform:"uppercase", letterSpacing:0.5, lineHeight:1.25, fontFamily:SERIF }}>{ad.headline || "Your Headline Here"}</div>
+                    {badge}
+                  </div>
+                  {ad.image_url && (
+                    <img src={ad.image_url} alt={ad.headline} style={{ width:"100%", height:160, objectFit:"cover", display:"block", borderBottom:"1px solid #C8B07A" }} />
                   )}
-                  {/* Bottom strip */}
-                  <div style={{ padding:"14px 16px 16px", background:"#fff", display:"flex", alignItems:"center", justifyContent:"space-between", gap:12, flexWrap:"wrap" }}>
-                    <div style={{ display:"flex", flexDirection:"column", gap:3 }}>
-                      <div style={{ fontSize:15, fontWeight:900, color:"#1B3D6F" }}>{ad.provider_name || provider.business_name}</div>
-                      {ad.deal_expires_at && (
-                        <div style={{ fontSize:11, color:"#CC0000", fontWeight:600 }}>Offer expires {fmtD(ad.deal_expires_at)}</div>
-                      )}
-                      {!ad.deal_expires_at && (
-                        <div style={{ fontSize:11, color:"#CC0000", fontWeight:600 }}>Offer expires May 14, 2026 (example)</div>
-                      )}
-                    </div>
-                    <div style={{ background:"linear-gradient(135deg,#E8431A,#c93510)", color:"#fff", border:"none", borderRadius:8, fontWeight:800, fontSize:13, padding:"10px 18px", boxShadow:"0 2px 8px rgba(232,67,26,0.4)" }}>
-                      Contact Provider →
-                    </div>
+                  {!ad.image_url && (
+                    <div style={{ width:"100%", height:100, background:PAPER_MID, display:"flex", alignItems:"center", justifyContent:"center", fontSize:13, color:INK_FADE, fontFamily:SANS, fontStyle:"italic" }}>No image selected</div>
+                  )}
+                  <div style={{ padding:"14px 16px 8px", fontSize:14, color:"#1C0F00", lineHeight:1.8, fontFamily:SERIF }}>{ad.body || "Your deal description will appear here."}</div>
+                  {/* Location info — smart display based on mobile/B&M/hybrid */}
+                  <div style={{ padding:"2px 16px 10px", display:"flex", flexDirection:"column", gap:3 }}>
+                    {ad._provider_is_mobile && Array.isArray(ad._provider_areas) && ad._provider_areas.length > 0 && (
+                      <div style={{ fontSize:12, color:"#00836B", fontWeight:700, fontFamily:SANS }}>🗺️ Serves: {ad._provider_areas.join(" · ")}</div>
+                    )}
+                    {!ad._provider_is_mobile && ad._provider_address && (
+                      <div style={{ fontSize:12, color:"#00836B", fontWeight:700, fontFamily:SANS }}>📍 Located at: {ad._provider_address}</div>
+                    )}
+                    {ad._provider_is_mobile && ad._provider_address && (
+                      <div style={{ fontSize:12, color:"#5C7A6B", fontFamily:SANS }}>📍 Also at: {ad._provider_address}</div>
+                    )}
+                  </div>
+                  <div style={{ borderTop:"1px solid #C8B07A", background:"#E4D5A8", padding:"9px 14px", display:"flex", justifyContent:"space-between", alignItems:"center", gap:8, flexWrap:"wrap" }}>
+                    <div style={{ fontSize:13, fontWeight:900, color:NAVY, fontFamily:SANS }}>{ad.provider_name || provider.business_name}</div>
                   </div>
                 </div>
               );
@@ -1748,7 +1682,7 @@ function ClassifiedAdSection({ provider, refreshKey = 0 }) {
                   {nextUp?.id === previewAd.id && (
                     <button disabled={checkoutLoading} onClick={() => { setPreviewAd(null); handleCheckout(previewAd); }}
                       style={{ background: "linear-gradient(180deg,#1A6B3C,#145530)", color: "#fff", border: "2px solid #1A6B3C", borderRadius: 6, padding: "10px 22px", fontSize: 13, fontWeight: 900, cursor: "pointer", fontFamily: SERIF }}>
-                      {checkoutLoading ? "Redirecting…" : "💳 Looks good — Pay $20 & Go Live →"}
+                      {checkoutLoading ? "Redirecting…" : "💳 Looks good — Pay $10 & Go Live →"}
                     </button>
                   )}
                   <button onClick={() => setPreviewAd(null)} style={{ background: "none", border: `1.5px solid ${PAPER_DK}`, color: PAPER, borderRadius: 6, padding: "8px 18px", fontSize: 12, cursor: "pointer", fontFamily: SANS }}>✕ Close</button>
@@ -1948,7 +1882,7 @@ function ReviewsSection({ provider }) {
 function AnalyticsDashboard({ provider, reviews }) {
   const [analytics, setAnalytics] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [range, setRange] = useState(30);
+  const [range, setRange] = useState(30); // days
 
   useEffect(() => {
     if (!provider?.id) return;
@@ -1958,78 +1892,60 @@ function AnalyticsDashboard({ provider, reviews }) {
   const loadAnalytics = async () => {
     setLoading(true);
     try {
+      // Pull all analytic events for this provider
       const events = await ProviderAnalytic.filter({ provider_id: provider.id });
+
       const cutoff = new Date();
       cutoff.setDate(cutoff.getDate() - range);
       const cutoffKey = cutoff.toISOString().slice(0, 10);
+
       const inRange = (events || []).filter(e => (e.date_key || "") >= cutoffKey);
       const allTime = events || [];
 
-      const searches  = inRange.filter(e => e.event_type === "search_appearance");
-      const views     = inRange.filter(e => e.event_type === "profile_view");
-      const adClicks  = inRange.filter(e => e.event_type === "classified_ad_click" || e.event_type === "ad_click");
-      const leads     = inRange.filter(e => e.event_type === "lead_inquiry");
+      // Tally by type
+      const searches   = inRange.filter(e => e.event_type === "search_appearance");
+      const views      = inRange.filter(e => e.event_type === "profile_view");
+      const adClicks   = inRange.filter(e => e.event_type === "classified_click");
+      const leads      = inRange.filter(e => e.event_type === "lead_inquiry");
 
-      // Search breakdown by service — use service_name, fallback to category_name, then "General Browse"
+      // Searches by service
       const byService = {};
       searches.forEach(e => {
-        const k = e.service_name || e.category_name || null;
-        if (k) { byService[k] = (byService[k]||0)+1; }
-        // null = area-only or no-filter search — count separately
+        const k = e.service_name || "General Search";
+        byService[k] = (byService[k] || 0) + 1;
       });
-      const generalBrowseCount = searches.filter(e => !e.service_name && !e.category_name).length;
-      if (generalBrowseCount > 0) byService["General Browse"] = generalBrowseCount;
 
-      // Activity by area
+      // Searches + views by area/village
       const byArea = {};
-      [...searches,...views].forEach(e => { const k=e.area_name||"Unknown"; if(k&&k!=="Unknown") byArea[k]=(byArea[k]||0)+1; });
+      [...searches, ...views].forEach(e => {
+        const k = e.area_name || "Unknown";
+        if (k && k !== "Unknown") byArea[k] = (byArea[k] || 0) + 1;
+      });
 
-      // Views by source (if available)
-      const bySource = {};
-      views.forEach(e => { const k=e.source||"Direct"; bySource[k]=(bySource[k]||0)+1; });
-
-      // 30-day daily trend
+      // Daily trend — last 14 days
       const trend = {};
       const today = new Date();
-      const trendDays = Math.min(range, 30);
-      for (let i = trendDays-1; i >= 0; i--) {
-        const d = new Date(today); d.setDate(d.getDate()-i);
-        trend[d.toISOString().slice(0,10)] = 0;
+      for (let i = 13; i >= 0; i--) {
+        const d = new Date(today);
+        d.setDate(d.getDate() - i);
+        trend[d.toISOString().slice(0, 10)] = 0;
       }
-      inRange.forEach(e => { if(e.date_key && trend[e.date_key]!==undefined) trend[e.date_key]++; });
-
-      // Weekly breakdown for longer ranges
-      const weeklyData = {};
-      allTime.forEach(e => {
-        if (!e.date_key) return;
-        const d = new Date(e.date_key);
-        const weekStart = new Date(d);
-        weekStart.setDate(d.getDate() - d.getDay());
-        const wk = weekStart.toISOString().slice(0,10);
-        if (!weeklyData[wk]) weeklyData[wk] = { searches:0, views:0, leads:0, adClicks:0 };
-        if (e.event_type==="search_appearance") weeklyData[wk].searches++;
-        else if (e.event_type==="profile_view") weeklyData[wk].views++;
-        else if (e.event_type==="lead_inquiry") weeklyData[wk].leads++;
-        else if (e.event_type==="classified_ad_click"||e.event_type==="ad_click") weeklyData[wk].adClicks++;
+      inRange.forEach(e => {
+        if (e.date_key && trend[e.date_key] !== undefined) trend[e.date_key]++;
       });
-      const recentWeeks = Object.entries(weeklyData).sort((a,b)=>a[0].localeCompare(b[0])).slice(-8);
 
       setAnalytics({
         searches: searches.length,
         views: views.length,
         adClicks: adClicks.length,
         leads: leads.length,
-        allTimeSearches: allTime.filter(e=>e.event_type==="search_appearance").length,
-        allTimeViews: allTime.filter(e=>e.event_type==="profile_view").length,
-        allTimeAdClicks: allTime.filter(e=>e.event_type==="classified_ad_click"||e.event_type==="ad_click").length,
-        allTimeLeads: allTime.filter(e=>e.event_type==="lead_inquiry").length,
-        byService: Object.entries(byService).sort((a,b)=>b[1]-a[1]).slice(0,8),
-        byArea: Object.entries(byArea).sort((a,b)=>b[1]-a[1]).slice(0,8),
-        bySource: Object.entries(bySource).sort((a,b)=>b[1]-a[1]).slice(0,6),
+        allTimeSearches: allTime.filter(e => e.event_type === "search_appearance").length,
+        allTimeViews: allTime.filter(e => e.event_type === "profile_view").length,
+        byService: Object.entries(byService).sort((a, b) => b[1] - a[1]).slice(0, 8),
+        byArea: Object.entries(byArea).sort((a, b) => b[1] - a[1]).slice(0, 8),
         trend: Object.entries(trend),
-        recentWeeks,
       });
-    } catch(e) {
+    } catch (e) {
       console.error("Analytics load error:", e);
       setAnalytics(null);
     } finally {
@@ -2037,20 +1953,17 @@ function AnalyticsDashboard({ provider, reviews }) {
     }
   };
 
-  const maxTrend = analytics ? Math.max(1,...analytics.trend.map(([,v])=>v)) : 1;
-  const hasAd = provider?.classifieds_addon;
-  const avgRating = reviews.length>0 ? (reviews.reduce((s,r)=>s+(r.rating||0),0)/reviews.length).toFixed(1) : null;
+  const maxTrend = analytics ? Math.max(1, ...analytics.trend.map(([, v]) => v)) : 1;
 
   return (
-    <div style={{marginBottom:24}}>
-
-      {/* Header + range selector */}
-      <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:14,flexWrap:"wrap",gap:8}}>
-        <div style={{...shS,marginBottom:0,borderBottom:"none",paddingBottom:0}}>📊 Your Performance Report</div>
-        <div style={{display:"flex",gap:4}}>
-          {[7,30,90].map(d=>(
-            <button key={d} onClick={()=>setRange(d)}
-              style={{background:range===d?TEAL:PAPER_MID,color:range===d?"#fff":INK,border:`1.5px solid ${range===d?TEAL:PAPER_DK}`,borderRadius:20,padding:"4px 12px",fontSize:11,cursor:"pointer",fontFamily:SANS,fontWeight:range===d?700:400}}>
+    <div style={{ marginBottom: 24 }}>
+      {/* Header row */}
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14, flexWrap: "wrap", gap: 8 }}>
+        <div style={{ ...shS, marginBottom: 0, borderBottom: "none", paddingBottom: 0 }}>📊 Your Activity Report</div>
+        <div style={{ display: "flex", gap: 4 }}>
+          {[7, 30, 90].map(d => (
+            <button key={d} onClick={() => setRange(d)}
+              style={{ background: range === d ? TEAL : PAPER_MID, color: range === d ? "#fff" : INK, border: `1.5px solid ${range === d ? TEAL : PAPER_DK}`, borderRadius: 20, padding: "4px 12px", fontSize: 11, cursor: "pointer", fontFamily: SANS, fontWeight: range === d ? 700 : 400 }}>
               {d}d
             </button>
           ))}
@@ -2058,129 +1971,82 @@ function AnalyticsDashboard({ provider, reviews }) {
       </div>
 
       {loading ? (
-        <div style={{padding:"20px 0",textAlign:"center",fontSize:13,color:INK_FADE,fontFamily:SANS}}>Loading your stats…</div>
+        <div style={{ padding: "20px 0", textAlign: "center", fontSize: 13, color: INK_FADE, fontFamily: SANS }}>Loading your stats…</div>
       ) : !analytics ? (
-        <div style={{padding:"16px 0",textAlign:"center",fontSize:13,color:INK_FADE,fontFamily:SANS,fontStyle:"italic"}}>Stats not available right now.</div>
+        <div style={{ padding: "16px 0", textAlign: "center", fontSize: 13, color: INK_FADE, fontFamily: SANS, fontStyle: "italic" }}>Stats not available.</div>
       ) : (
         <>
-
-          {/* ── 4 KPI cards ── */}
-          <div style={{display:"grid",gridTemplateColumns:"repeat(2,1fr)",gap:8,marginBottom:14}}>
+          {/* ── Top 4 stat cards ── */}
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 8, marginBottom: 14 }}>
             {[
-              { icon:"🔍", label:"Search Appearances", value:analytics.searches, sub:`Last ${range} days — times you showed up`, color:TEAL },
-              { icon:"👁", label:"Profile Views", value:analytics.views, sub:`Last ${range} days — people who clicked you`, color:BROWN_BTN },
-              { icon:"📩", label:"Leads Received", value:analytics.leads, sub:`Last ${range} days — contact requests`, color:"#1A6B3C" },
-              { icon:"📰", label:"Classified Ad Clicks", value:hasAd?analytics.adClicks:"—", sub:hasAd?`Last ${range} days`:"Not active on your plan", color:hasAd?"#7B3FA0":"#bbb" },
-            ].map(({icon,label,value,sub,color})=>(
-              <div key={label} style={{background:PAPER_MID,border:`1.5px solid ${PAPER_DK}`,borderRadius:8,padding:"14px 12px",textAlign:"center"}}>
-                <div style={{fontSize:22,marginBottom:4}}>{icon}</div>
-                <div style={{fontSize:28,fontWeight:900,color,fontFamily:SANS,lineHeight:1}}>{value}</div>
-                <div style={{fontSize:11,color:INK,fontFamily:SANS,marginTop:4,fontWeight:700,lineHeight:1.4}}>{label}</div>
-                <div style={{fontSize:10,color:INK_FADE,fontFamily:SANS,marginTop:2}}>{sub}</div>
+              { icon: "🔍", label: "Times You Appeared in Search", value: analytics.searches, sub: `${range}-day window`, color: TEAL },
+              { icon: "👁", label: "People Clicked Your Profile", value: analytics.views, sub: `${range}-day window`, color: BROWN_BTN },
+              { icon: "📰", label: "Classified Ad Clicks", value: analytics.adClicks, sub: provider.classifieds_addon ? `${range}-day window` : "Add-on not active", color: "#7B3FA0" },
+              { icon: "⭐", label: "Reviews", value: reviews.length, sub: "All time", color: "#B8860B" },
+            ].map(({ icon, label, value, sub, color }) => (
+              <div key={label} style={{ background: PAPER_MID, border: `1.5px solid ${PAPER_DK}`, borderRadius: 8, padding: "14px 12px", textAlign: "center" }}>
+                <div style={{ fontSize: 20, marginBottom: 4 }}>{icon}</div>
+                <div style={{ fontSize: 26, fontWeight: 900, color, fontFamily: SANS, lineHeight: 1 }}>{value}</div>
+                <div style={{ fontSize: 11, color: INK, fontFamily: SANS, marginTop: 4, fontWeight: 700, lineHeight: 1.4 }}>{label}</div>
+                <div style={{ fontSize: 10, color: INK_FADE, fontFamily: SANS, marginTop: 2 }}>{sub}</div>
               </div>
             ))}
           </div>
 
-          {/* ── All-time totals bar ── */}
-          <div style={{background:PAPER,border:`1px solid ${PAPER_DK}`,borderRadius:8,padding:"12px 14px",marginBottom:14}}>
-            <div style={{fontSize:10,fontWeight:700,color:INK_FADE,textTransform:"uppercase",letterSpacing:1,fontFamily:SANS,marginBottom:8}}>All-Time Totals</div>
-            <div style={{display:"grid",gridTemplateColumns:"repeat(2,1fr)",gap:8}}>
-              {[
-                ["🔍 Searches",analytics.allTimeSearches,TEAL],
-                ["👁 Profile Views",analytics.allTimeViews,BROWN_BTN],
-                ["📩 Leads",analytics.allTimeLeads,"#1A6B3C"],
-                ["📰 Ad Clicks",analytics.allTimeAdClicks,"#7B3FA0"],
-                ["⭐ Reviews",reviews.length,"#B8860B"],
-                ["🌟 Avg Rating",avgRating||"—","#B8860B"],
-              ].map(([l,v,c])=>(
-                <div key={l} style={{display:"flex",alignItems:"center",gap:8,background:PAPER_MID,borderRadius:6,padding:"8px 10px"}}>
-                  <div style={{fontSize:20,fontWeight:900,color:c,fontFamily:SANS,minWidth:36}}>{typeof v==="number"?v.toLocaleString():v}</div>
-                  <div style={{fontSize:11,color:INK_FADE,fontFamily:SANS}}>{l}</div>
-                </div>
-              ))}
+          {/* ── All-time totals ── */}
+          <div style={{ background: PAPER, border: `1px solid ${PAPER_DK}`, borderRadius: 8, padding: "10px 14px", marginBottom: 14, display: "flex", gap: 20, flexWrap: "wrap", justifyContent: "center" }}>
+            <div style={{ fontSize: 12, color: INK_FADE, fontFamily: SANS, textAlign: "center" }}>
+              <span style={{ fontWeight: 900, color: INK, fontSize: 16 }}>{analytics.allTimeSearches.toLocaleString()}</span>
+              <br />All-time search appearances
+            </div>
+            <div style={{ fontSize: 12, color: INK_FADE, fontFamily: SANS, textAlign: "center" }}>
+              <span style={{ fontWeight: 900, color: INK, fontSize: 16 }}>{analytics.allTimeViews.toLocaleString()}</span>
+              <br />All-time profile views
+            </div>
+            <div style={{ fontSize: 12, color: INK_FADE, fontFamily: SANS, textAlign: "center" }}>
+              <span style={{ fontWeight: 900, color: INK, fontSize: 16 }}>{analytics.leads}</span>
+              <br />Leads in {range} days
             </div>
           </div>
 
-          {/* ── 14-day trend chart ── */}
-          {analytics.trend.some(([,v])=>v>0) && (
-            <div style={{background:PAPER_MID,border:`1.5px solid ${PAPER_DK}`,borderRadius:8,padding:"14px 14px 10px",marginBottom:14}}>
-              <div style={{fontSize:11,fontWeight:700,color:INK_FADE,textTransform:"uppercase",letterSpacing:1,fontFamily:SANS,marginBottom:10}}>
-                📈 Daily Activity Trend
-              </div>
-              <div style={{display:"flex",alignItems:"flex-end",gap:2,height:60}}>
-                {analytics.trend.map(([date,count])=>{
-                  const h = Math.max(2,Math.round((count/maxTrend)*52));
-                  const isToday = date===new Date().toISOString().slice(0,10);
-                  const lbl = new Date(date+"T12:00:00").toLocaleDateString("en-US",{weekday:"short"});
+          {/* ── 14-day trend bar chart ── */}
+          {analytics.trend.some(([, v]) => v > 0) && (
+            <div style={{ background: PAPER_MID, border: `1.5px solid ${PAPER_DK}`, borderRadius: 8, padding: "14px 14px 10px", marginBottom: 14 }}>
+              <div style={{ fontSize: 11, fontWeight: 700, color: INK_FADE, textTransform: "uppercase", letterSpacing: 1, fontFamily: SANS, marginBottom: 10 }}>14-Day Activity Trend</div>
+              <div style={{ display: "flex", alignItems: "flex-end", gap: 3, height: 52 }}>
+                {analytics.trend.map(([date, count]) => {
+                  const h = Math.max(4, Math.round((count / maxTrend) * 48));
+                  const isToday = date === new Date().toISOString().slice(0, 10);
                   return (
-                    <div key={date} style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",gap:1,height:"100%",justifyContent:"flex-end"}} title={`${date}: ${count} events`}>
-                      {count>0 && <div style={{fontSize:7,color:INK_FADE,fontFamily:SANS}}>{count}</div>}
-                      <div style={{width:"100%",height:h,background:isToday?TEAL:BROWN_BTN,borderRadius:"2px 2px 0 0",opacity:count===0?0.15:1,transition:"height 0.3s"}}/>
+                    <div key={date} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 2, height: "100%", justifyContent: "flex-end" }} title={`${date}: ${count} events`}>
+                      <div style={{ width: "100%", height: h, background: isToday ? TEAL : BROWN_BTN, borderRadius: "2px 2px 0 0", opacity: count === 0 ? 0.2 : 1, transition: "height 0.3s" }} />
                     </div>
                   );
                 })}
               </div>
-              <div style={{display:"flex",justifyContent:"space-between",marginTop:4,fontSize:9,color:INK_FADE,fontFamily:SANS}}>
+              <div style={{ display: "flex", justifyContent: "space-between", marginTop: 4, fontSize: 9, color: INK_FADE, fontFamily: SANS }}>
                 <span>{analytics.trend[0]?.[0]?.slice(5)}</span>
-                <span style={{color:TEAL,fontWeight:700}}>Today</span>
+                <span style={{ color: TEAL, fontWeight: 700 }}>Today</span>
               </div>
             </div>
           )}
 
-          {/* ── What are people searching for? ── */}
-          {analytics.byService.length>0 && (() => {
-            const named = analytics.byService.filter(([s])=>s!=="General Browse");
-            const browseCnt = (analytics.byService.find(([s])=>s==="General Browse")||[])[1]||0;
-            return (
-              <div style={{background:PAPER_MID,border:`1.5px solid ${PAPER_DK}`,borderRadius:8,padding:"14px",marginBottom:14}}>
-                <div style={{fontSize:11,fontWeight:700,color:INK_FADE,textTransform:"uppercase",letterSpacing:1,fontFamily:SANS,marginBottom:10}}>
-                  🔍 What Customers Searched For
-                </div>
-                {named.length===0 && (
-                  <div style={{fontSize:12,color:INK_FADE,fontFamily:SANS,fontStyle:"italic",textAlign:"center",padding:"8px 0"}}>
-                    Most visitors found you through general browsing — no specific service filter used yet.
-                  </div>
-                )}
-                {named.map(([svc,cnt])=>{
-                  const pct = Math.round((cnt/(analytics.searches||1))*100);
-                  return (
-                    <div key={svc} style={{marginBottom:7}}>
-                      <div style={{display:"flex",justifyContent:"space-between",fontSize:12,fontFamily:SANS,marginBottom:2}}>
-                        <span style={{color:INK,fontWeight:600}}>{svc}</span>
-                        <span style={{color:INK_FADE}}>{cnt}x ({pct}%)</span>
-                      </div>
-                      <div style={{background:PAPER_DK,borderRadius:3,height:6}}>
-                        <div style={{background:TEAL,borderRadius:3,height:6,width:`${pct}%`,transition:"width 0.4s"}}/>
-                      </div>
-                    </div>
-                  );
-                })}
-                {browseCnt>0 && (
-                  <div style={{fontSize:11,color:INK_FADE,fontFamily:SANS,marginTop:named.length>0?8:0,padding:"6px 10px",background:PAPER,borderRadius:4,border:`1px solid ${PAPER_DK}`}}>
-                    + {browseCnt} appearance{browseCnt>1?"s":""} from general browsing (no service filter)
-                  </div>
-                )}
+          {/* ── What are people searching? ── */}
+          {analytics.byService.length > 0 && (
+            <div style={{ background: PAPER_MID, border: `1.5px solid ${PAPER_DK}`, borderRadius: 8, padding: "14px", marginBottom: 14 }}>
+              <div style={{ fontSize: 11, fontWeight: 700, color: INK_FADE, textTransform: "uppercase", letterSpacing: 1, fontFamily: SANS, marginBottom: 10 }}>
+                🔍 What Customers Searched For
               </div>
-            );
-          })()}
-
-          {/* ── Where are customers finding you? (by area) ── */}
-          {analytics.byArea.length>0 && (
-            <div style={{background:PAPER_MID,border:`1.5px solid ${PAPER_DK}`,borderRadius:8,padding:"14px",marginBottom:14}}>
-              <div style={{fontSize:11,fontWeight:700,color:INK_FADE,textTransform:"uppercase",letterSpacing:1,fontFamily:SANS,marginBottom:10}}>
-                📍 Activity by Village / Area
-              </div>
-              {analytics.byArea.map(([area,cnt])=>{
-                const maxA = analytics.byArea[0]?.[1]||1;
-                const pct = Math.round((cnt/maxA)*100);
+              {analytics.byService.map(([svc, cnt]) => {
+                const pct = Math.round((cnt / (analytics.searches || 1)) * 100);
                 return (
-                  <div key={area} style={{marginBottom:7}}>
-                    <div style={{display:"flex",justifyContent:"space-between",fontSize:12,fontFamily:SANS,marginBottom:2}}>
-                      <span style={{color:INK,fontWeight:600}}>{area}</span>
-                      <span style={{color:INK_FADE}}>{cnt} interactions</span>
+                  <div key={svc} style={{ marginBottom: 7 }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, fontFamily: SANS, marginBottom: 2 }}>
+                      <span style={{ color: INK, fontWeight: svc !== "General Search" ? 700 : 400 }}>{svc}</span>
+                      <span style={{ color: INK_FADE }}>{cnt}x</span>
                     </div>
-                    <div style={{background:PAPER_DK,borderRadius:3,height:6}}>
-                      <div style={{background:BROWN_BTN,borderRadius:3,height:6,width:`${pct}%`,transition:"width 0.4s"}}/>
+                    <div style={{ background: PAPER_DK, borderRadius: 3, height: 6 }}>
+                      <div style={{ background: TEAL, borderRadius: 3, height: 6, width: `${pct}%`, transition: "width 0.4s" }} />
                     </div>
                   </div>
                 );
@@ -2188,49 +2054,48 @@ function AnalyticsDashboard({ provider, reviews }) {
             </div>
           )}
 
-          {/* ── Ad performance (if active) ── */}
-          {hasAd && (
-            <div style={{background:"#f5f0ff",border:"1.5px solid #d0b8f0",borderRadius:8,padding:"14px",marginBottom:14}}>
-              <div style={{fontSize:11,fontWeight:700,color:"#7B3FA0",textTransform:"uppercase",letterSpacing:1,fontFamily:SANS,marginBottom:8}}>
-                📰 Classified Ad Performance
+          {/* ── Where are customers coming from? ── */}
+          {analytics.byArea.length > 0 && (
+            <div style={{ background: PAPER_MID, border: `1.5px solid ${PAPER_DK}`, borderRadius: 8, padding: "14px", marginBottom: 14 }}>
+              <div style={{ fontSize: 11, fontWeight: 700, color: INK_FADE, textTransform: "uppercase", letterSpacing: 1, fontFamily: SANS, marginBottom: 10 }}>
+                📍 Where Customers Are Coming From
               </div>
-              <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:8,textAlign:"center"}}>
-                <div>
-                  <div style={{fontSize:22,fontWeight:900,color:"#7B3FA0",fontFamily:SANS}}>{analytics.adClicks}</div>
-                  <div style={{fontSize:10,color:INK_FADE,fontFamily:SANS}}>Clicks ({range}d)</div>
-                </div>
-                <div>
-                  <div style={{fontSize:22,fontWeight:900,color:"#7B3FA0",fontFamily:SANS}}>{analytics.allTimeAdClicks}</div>
-                  <div style={{fontSize:10,color:INK_FADE,fontFamily:SANS}}>All-Time Clicks</div>
-                </div>
-                <div>
-                  <div style={{fontSize:22,fontWeight:900,color:"#7B3FA0",fontFamily:SANS}}>{analytics.views>0?Math.round((analytics.adClicks/analytics.views)*100):0}%</div>
-                  <div style={{fontSize:10,color:INK_FADE,fontFamily:SANS}}>Click-Through Rate</div>
-                </div>
-              </div>
+              {analytics.byArea.map(([area, cnt]) => {
+                const maxArea = analytics.byArea[0]?.[1] || 1;
+                const pct = Math.round((cnt / maxArea) * 100);
+                return (
+                  <div key={area} style={{ marginBottom: 7 }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, fontFamily: SANS, marginBottom: 2 }}>
+                      <span style={{ color: INK, fontWeight: 700 }}>📍 {area}</span>
+                      <span style={{ color: INK_FADE }}>{cnt} searches</span>
+                    </div>
+                    <div style={{ background: PAPER_DK, borderRadius: 3, height: 6 }}>
+                      <div style={{ background: BROWN_BTN, borderRadius: 3, height: 6, width: `${pct}%`, transition: "width 0.4s" }} />
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           )}
 
-          {/* Empty state */}
-          {analytics.searches===0 && analytics.views===0 && analytics.adClicks===0 && analytics.leads===0 && (
-            <div style={{background:PAPER,border:`1px dashed ${PAPER_DK}`,borderRadius:8,padding:"16px",textAlign:"center",marginBottom:8}}>
-              <div style={{fontSize:13,color:INK_FADE,fontFamily:SANS,fontStyle:"italic",lineHeight:1.8}}>
-                No activity in the last {range} days yet.<br/>
+          {/* Empty state — no data yet */}
+          {analytics.searches === 0 && analytics.views === 0 && analytics.adClicks === 0 && (
+            <div style={{ background: PAPER, border: `1px dashed ${PAPER_DK}`, borderRadius: 8, padding: "16px", textAlign: "center", marginBottom: 8 }}>
+              <div style={{ fontSize: 13, color: INK_FADE, fontFamily: SANS, fontStyle: "italic", lineHeight: 1.8 }}>
+                No activity recorded in the last {range} days yet.<br />
                 As customers search V-Hub, your real stats will appear here.
               </div>
             </div>
           )}
 
-          <div style={{fontSize:10,color:INK_FADE,fontFamily:SANS,fontStyle:"italic",textAlign:"right",marginTop:4}}>
-            All data is from real customer interactions — updated live.
+          <div style={{ fontSize: 10, color: INK_FADE, fontFamily: SANS, fontStyle: "italic", textAlign: "right", marginTop: 4 }}>
+            All data is from real customer interactions — never estimated.
           </div>
         </>
       )}
     </div>
   );
 }
-
-
 
 
 export default function ProviderDashboard() {
@@ -2840,7 +2705,7 @@ export default function ProviderDashboard() {
 
         <div style={shS}>Section 1 — Business Info</div>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px 16px", marginBottom: 20 }}>
-          {[["business_name","Business Name *"],["owner_name","Owner / Contact Name *"],["phone","Phone *"],["email","Business Email *"],["website","Website"],["address","Address"],["years_in_business","Years in Business"],["license_number","License Number"]].filter(([k]) => !(k === "address" && provider?.is_mobile)).map(([k, l]) => (
+          {[["business_name","Business Name *"],["owner_name","Owner / Contact Name *"],["phone","Phone *"],["email","Business Email *"],["website","Website"],["address","Address"],["years_in_business","Years in Business"],["license_number","License Number"]].map(([k, l]) => (
             <div key={k} style={{ gridColumn: k === "address" ? "1 / -1" : "auto" }}>
               <label style={lbS}>{l}</label>
               <input value={form[k] || ""} onChange={e => setForm(f => ({ ...f, [k]: e.target.value }))} style={inS} />
@@ -3045,7 +2910,7 @@ export default function ProviderDashboard() {
               ["📞 Phone", provider.phone],
               ["✉️ Email", provider.email],
               ["🌐 Website", provider.website],
-              ["📍 Address", provider.is_mobile ? null : provider.address],
+              ["📍 Address", provider.address],
               ["🕐 Hours", provider.hours_of_operation ? provider.hours_of_operation.split("\n")[0] + (provider.hours_of_operation.includes("\n") ? "…" : "") : null],
               ["🏆 Years in Business", provider.years_in_business ? `${provider.years_in_business} yrs` : null],
               ["🏷 License #", provider.license_number],
@@ -3131,7 +2996,7 @@ export default function ProviderDashboard() {
         {/* ── CLASSIFIED AD SECTION ─────────────────────────── */}
         <div style={{ ...shS, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <span>📰 Deals of the Week</span>
-          <span style={{ fontSize: 10, fontWeight: 400, color: INK_FADE, fontFamily: SANS, letterSpacing: 0.5 }}>$20/week · 7-day ad</span>
+          <span style={{ fontSize: 10, fontWeight: 400, color: INK_FADE, fontFamily: SANS, letterSpacing: 0.5 }}>$10/week · 7-day ad</span>
         </div>
         <ClassifiedAdSection provider={provider} refreshKey={adsRefreshKey} />
 

@@ -181,7 +181,7 @@ function MagicLinkGate({ onUnlock }) {
 function Overview({ providers, reviews, leads, fullAreaMap }) {
   const active = providers.filter(p => p.is_active).length;
   const trial = providers.filter(p => p.subscription_status === "trial").length;
-  const paid = providers.filter(p => ["active", "paid"].includes(p.subscription_status) && p.stripe_subscription_id).length;
+  const paid = providers.filter(p => ["active", "paid"].includes(p.subscription_status)).length;
   const expiring = providers.filter(p => { const d = daysLeft(p.trial_end_date); return d !== null && d >= 0 && d <= 7; });
   const expired = providers.filter(p => { const d = daysLeft(p.trial_end_date); return d !== null && d < 0 && p.is_active; }).length;
   const totalViews = providers.reduce((s, p) => s + (p.profile_views || 0), 0);
@@ -1140,8 +1140,7 @@ function DealsTab({ providers, classifiedAds }) {
   const liveAds  = (classifiedAds || []).filter(a => a.is_active && (daysLeft(a.deal_expires_at) === null || daysLeft(a.deal_expires_at) >= 0));
   const expiredAds = (classifiedAds || []).filter(a => a.is_active && daysLeft(a.deal_expires_at) !== null && daysLeft(a.deal_expires_at) < 0);
   const queuedAds  = (classifiedAds || []).filter(a => !a.is_active);
-  const paidLiveAds = liveAds.filter(a => a.classifieds_stripe_subscription_id);
-  const totalRevenue = paidLiveAds.length * 10;
+  const totalRevenue = liveAds.length * 10;
 
   return (
     <div>
@@ -1240,7 +1239,7 @@ function DealsTab({ providers, classifiedAds }) {
                           }
                         </span>
                       )}
-                      {live.classifieds_stripe_subscription_id && <span style={{ fontSize: 10, fontFamily: T.sans, color: "#2E7D32", fontWeight: 700 }}>💰 $20 paid</span>}
+                      <span style={{ fontSize: 10, fontFamily: T.sans, color: "#2E7D32", fontWeight: 700 }}>💰 $10 paid</span>
                     </div>
                     {live.deal_expires_at && (
                       <div style={{ fontSize: 10, color: "#888", fontFamily: T.sans, marginTop: 2 }}>
@@ -1290,9 +1289,8 @@ function DealsTab({ providers, classifiedAds }) {
 }
 
 // ── ANALYTICS TAB ─────────────────────────────────────────────────────────────
-function AnalyticsTab({ providers, reviews, leads, stats, catMap, svcMap, fullSvcMap, classifiedAds, siteViewsByDay, adClicksByDay, totalSiteViews, totalAdClicks, gaData, onRefreshGA, gaLoading }) {
+function AnalyticsTab({ providers, reviews, leads, stats, catMap, svcMap, fullSvcMap, classifiedAds }) {
   const [timeRange, setTimeRange] = React.useState("30d");
-  const [gaRange, setGaRange] = React.useState("30d");
 
   const now = new Date();
   const rangeMs = { "24h": 86400000, "7d": 7*86400000, "30d": 30*86400000, "365d": 365*86400000 };
@@ -1302,25 +1300,44 @@ function AnalyticsTab({ providers, reviews, leads, stats, catMap, svcMap, fullSv
   const filteredReviews = reviews.filter(r => r.created_date && new Date(r.created_date) >= cutoff);
   const filteredProviders = providers.filter(p => p.created_date && new Date(p.created_date) >= cutoff);
 
-  const paid = providers.filter(p => ["active","paid"].includes(p.subscription_status) && p.stripe_subscription_id).length;
+  const paid = providers.filter(p => ["active","paid"].includes(p.subscription_status)).length;
   const trial = providers.filter(p => p.subscription_status === "trial").length;
+  const inactive = providers.filter(p => ["inactive","expired","cancelled"].includes(p.subscription_status)).length;
   const activeAds = (classifiedAds||[]).filter(a => {
     if (!a.is_active) return false;
     if (a.deal_expires_at && new Date(a.deal_expires_at) < now) return false;
     return true;
   });
-  const paidActiveAds = activeAds.filter(a => a.classifieds_stripe_subscription_id);
-  const dealsRevenue = paidActiveAds.length * 10;
+  const dealsRevenue = activeAds.length * 10;
   const totalRevenue = (paid * 12) + dealsRevenue;
 
-  const totalViews = providers.reduce((s,p)=>s+(p.profile_views||0),0);
-  const totalSearchAppearances = providers.reduce((s,p)=>s+(p.search_appearances||0),0);
-  const totalAdClicksInternal = providers.reduce((s,p)=>s+(p.ad_clicks||0),0);
-  const totalLeadsInternal = providers.reduce((s,p)=>s+(p.lead_count||0),0);
+  const byMonth = {};
+  providers.forEach(p => {
+    if (!p.created_date) return;
+    const d = new Date(p.created_date);
+    const k = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}`;
+    byMonth[k] = (byMonth[k]||0) + 1;
+  });
+  const months = Object.entries(byMonth).sort((a,b)=>a[0].localeCompare(b[0])).slice(-12);
+  const maxM = Math.max(...months.map(m=>m[1]),1);
 
-  const topViewedProviders = [...providers].filter(p=>p.profile_views>0).sort((a,b)=>(b.profile_views||0)-(a.profile_views||0)).slice(0,10);
-  const topSearchedProviders = [...providers].filter(p=>p.search_appearances>0).sort((a,b)=>(b.search_appearances||0)-(a.search_appearances||0)).slice(0,10);
-  const topAdClickProviders = [...providers].filter(p=>p.ad_clicks>0).sort((a,b)=>(b.ad_clicks||0)-(a.ad_clicks||0)).slice(0,10);
+  const subMap2 = {};
+  providers.forEach(p => { const s = p.subscription_status||"unknown"; subMap2[s]=(subMap2[s]||0)+1; });
+  const subColors = { active:"#00BFA5", paid:"#00BFA5", trial:"#FFDB00", inactive:"#aaa", expired:"#E8431A", cancelled:"#E8431A", unknown:"#ccc" };
+
+  const svcCount = {};
+  providers.forEach(p => (Array.isArray(p.services)?p.services:[]).forEach(s => {
+    const n = fullSvcMap[s]||svcMap[s]||s;
+    svcCount[n] = (svcCount[n]||0)+1;
+  }));
+  const topSvcs = Object.entries(svcCount).sort((a,b)=>b[1]-a[1]).slice(0,8);
+  const maxS = Math.max(...topSvcs.map(s=>s[1]),1);
+
+  const topViewedProviders = [...providers].filter(p=>p.profile_views>0).sort((a,b)=>(b.profile_views||0)-(a.profile_views||0)).slice(0,8);
+  const maxViews = Math.max(...topViewedProviders.map(p=>p.profile_views||0),1);
+
+  const topSearchedProviders = [...providers].filter(p=>p.search_appearances>0).sort((a,b)=>(b.search_appearances||0)-(a.search_appearances||0)).slice(0,8);
+  const maxSearch = Math.max(...topSearchedProviders.map(p=>p.search_appearances||0),1);
 
   const topSearches = [...stats].sort((a,b)=>(b.search_count||0)-(a.search_count||0)).slice(0,10);
   const maxSrch = Math.max(...topSearches.map(s=>s.search_count||0),1);
@@ -1336,48 +1353,17 @@ function AnalyticsTab({ providers, reviews, leads, stats, catMap, svcMap, fullSv
   const maxRatCount = Math.max(...Object.values(ratingDist),1);
   const avgRating = reviews.length>0?(reviews.reduce((s,r)=>s+(r.rating||0),0)/reviews.length).toFixed(1):"—";
 
+  const totalViews = providers.reduce((s,p)=>s+(p.profile_views||0),0);
+  const totalSearchAppearances = providers.reduce((s,p)=>s+(p.search_appearances||0),0);
+
   const rangeLabels = {"24h":"Last 24 Hours","7d":"Last 7 Days","30d":"Last 30 Days","365d":"Last 12 Months"};
-
-  const PAGE_LABELS = {
-    "/Home": "🏠 Homepage",
-    "/": "🏠 Homepage (root)",
-    "/ProviderDashboard": "🔧 Provider Hub",
-    "/Classifieds": "📰 Classifieds / Deals",
-    "/ListService": "📝 List Your Service",
-    "/Wekcadmin": "🔐 Admin",
-    "/Privacy": "📄 Privacy Policy",
-    "/Terms": "📄 Terms",
-    "/SearchResults": "🔍 Search Results",
-  };
-
-  const SOURCE_COLORS = {
-    "Direct": "#1B3D6F",
-    "Organic Social": "#00BFA5",
-    "Organic Search": "#1A6B3C",
-    "Unassigned": "#aaa",
-    "Paid Search": "#E8431A",
-    "Email": "#7B3FA0",
-    "Referral": "#FFDB00",
-  };
-
-  const DEVICE_ICONS = { mobile: "📱", desktop: "💻", tablet: "📟" };
-  const DEVICE_COLORS = { mobile: "#00BFA5", desktop: "#1B3D6F", tablet: "#E8431A" };
-
-  // Format seconds as m:ss
-  const fmtDuration = (s) => {
-    if (!s || s <= 0) return "0:00";
-    const m = Math.floor(s/60);
-    const sec = Math.floor(s%60);
-    return `${m}:${String(sec).padStart(2,"0")}`;
-  };
 
   return (
     <div style={{display:"flex",flexDirection:"column",gap:14}}>
 
-      {/* ── Internal Range Filter ─── */}
       <div style={{...S.card,padding:"10px 16px"}}>
         <div style={{display:"flex",alignItems:"center",gap:8,flexWrap:"wrap"}}>
-          <span style={{fontSize:12,fontWeight:700,color:T.brownLight,fontFamily:T.sans,marginRight:4}}>INTERNAL DATA RANGE:</span>
+          <span style={{fontSize:12,fontWeight:700,color:T.brownLight,fontFamily:T.sans,marginRight:4}}>TIME RANGE:</span>
           {["24h","7d","30d","365d"].map(r=>(
             <button key={r} onClick={()=>setTimeRange(r)} style={{...S.filterBtn(timeRange===r),fontSize:12,padding:"5px 14px"}}>
               {r==="24h"?"24 Hours":r==="7d"?"7 Days":r==="30d"?"30 Days":"12 Months"}
@@ -1386,9 +1372,8 @@ function AnalyticsTab({ providers, reviews, leads, stats, catMap, svcMap, fullSv
         </div>
       </div>
 
-      {/* ── Activity ─── */}
       <div style={S.card}>
-        <div style={S.secTitle}>📬 Platform Activity — {rangeLabels[timeRange]}</div>
+        <div style={S.secTitle}>📬 Activity — {rangeLabels[timeRange]}</div>
         <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:8}}>
           {[["New Providers",filteredProviders.length,T.teal],["New Leads",filteredLeads.length,"#1A6B3C"],["New Reviews",filteredReviews.length,T.gold]].map(([l,v,c])=>(
             <div key={l} style={{textAlign:"center",background:T.parchment,borderRadius:6,padding:"12px 6px"}}>
@@ -1399,361 +1384,201 @@ function AnalyticsTab({ providers, reviews, leads, stats, catMap, svcMap, fullSv
         </div>
       </div>
 
-      {/* ══════════════════════════════════════════════════════════
-          GOOGLE ANALYTICS — REAL TRAFFIC DATA
-      ══════════════════════════════════════════════════════════ */}
-      <div style={{...S.card,border:"2px solid #00BFA5"}}>
-        <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:8,marginBottom:12}}>
-          <div style={{...S.secTitle,marginBottom:0}}>
-            🌐 Google Analytics — Real Traffic
-            <span style={{fontSize:10,background:"#00BFA5",color:"#fff",borderRadius:10,padding:"2px 8px",marginLeft:8,fontFamily:T.sans}}>LIVE</span>
-          </div>
-          <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
-            {["7d","30d","365d"].map(r=>(
-              <button key={r} onClick={()=>{ setGaRange(r); onRefreshGA&&onRefreshGA(r); }} style={{...S.filterBtn(gaRange===r),fontSize:11,padding:"4px 12px"}}>
-                {r==="7d"?"7 Days":r==="30d"?"30 Days":"12 Months"}
-              </button>
-            ))}
-            <button onClick={()=>onRefreshGA&&onRefreshGA(gaRange)} style={{fontSize:11,padding:"4px 10px",background:"#fff",border:"1px solid #ddd",borderRadius:4,cursor:"pointer",fontFamily:T.sans}}>
-              {gaLoading?"⏳":"🔄"} Refresh
-            </button>
-          </div>
-        </div>
-
-        {gaLoading && (
-          <div style={{textAlign:"center",padding:20,color:T.brownLight,fontFamily:T.sans}}>Loading Google Analytics data…</div>
-        )}
-
-        {!gaLoading && !gaData && (
-          <div style={{textAlign:"center",padding:20,color:"#E8431A",fontFamily:T.sans,fontSize:13}}>
-            ⚠️ GA4 data unavailable. Check the Google Analytics connector is still authorized.
-          </div>
-        )}
-
-        {!gaLoading && gaData && (() => {
-          const { totals, daily, sources, devices, pages } = gaData;
-          const maxDaily = Math.max(...(daily||[]).map(d=>d.users),1);
-          const totalSessions = sources.reduce((s,x)=>s+x.sessions,0)||1;
-          const totalDevSess = devices.reduce((s,x)=>s+x.sessions,0)||1;
-
-          return (
-            <div style={{display:"flex",flexDirection:"column",gap:14}}>
-
-              {/* KPI row */}
-              <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:8}}>
-                {[
-                  ["👥 Total Visitors", totals.users.toLocaleString(), T.teal],
-                  ["✨ New Visitors", totals.newUsers.toLocaleString(), "#1A6B3C"],
-                  ["📄 Page Views", totals.pageViews.toLocaleString(), T.brown],
-                  ["🔁 Sessions", totals.sessions.toLocaleString(), "#1B3D6F"],
-                  ["📉 Bounce Rate", `${(totals.bounceRate*100).toFixed(1)}%`, totals.bounceRate>0.6?"#E8431A":"#1A6B3C"],
-                  ["⏱ Avg. Session", fmtDuration(totals.avgSessionDuration), "#7B3FA0"],
-                ].map(([l,v,c])=>(
-                  <div key={l} style={{textAlign:"center",background:T.parchment,borderRadius:6,padding:"12px 6px"}}>
-                    <div style={{fontSize:22,fontWeight:800,color:c,fontFamily:T.sans}}>{v}</div>
-                    <div style={{fontSize:10,color:T.brownLight,fontFamily:T.sans,textTransform:"uppercase",letterSpacing:0.5,marginTop:2}}>{l}</div>
-                  </div>
-                ))}
-              </div>
-
-              {/* Daily visitors chart */}
-              <div>
-                <div style={{fontSize:11,fontWeight:700,color:T.brownLight,textTransform:"uppercase",letterSpacing:1,marginBottom:8,fontFamily:T.sans}}>Daily Visitors</div>
-                <div style={{display:"flex",alignItems:"flex-end",gap:2,height:70,background:T.parchment,borderRadius:6,padding:"8px 8px 0"}}>
-                  {(daily||[]).map(d=>{
-                    const day = new Date(d.date+"T12:00:00").toLocaleDateString("en-US",{month:"short",day:"numeric"});
-                    const pct = (d.users/maxDaily)*54;
-                    return (
-                      <div key={d.date} title={`${day}: ${d.users} visitors`} style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",gap:1,cursor:"default"}}>
-                        <div style={{fontSize:7,color:T.brownLight,fontFamily:T.sans}}>{d.users>0?d.users:""}</div>
-                        <div style={{width:"100%",background:T.teal,borderRadius:"2px 2px 0 0",height:`${Math.max(pct,d.users>0?3:1)}px`,transition:"height 0.3s"}}/>
-                      </div>
-                    );
-                  })}
-                </div>
-                <div style={{display:"flex",justifyContent:"space-between",marginTop:2}}>
-                  <span style={{fontSize:9,color:T.brownLight,fontFamily:T.sans}}>{daily?.[0]?.date?.slice(5)||""}</span>
-                  <span style={{fontSize:9,color:T.brownLight,fontFamily:T.sans}}>{daily?.[daily.length-1]?.date?.slice(5)||""}</span>
-                </div>
-              </div>
-
-              {/* Traffic Sources + Device split side by side */}
-              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}>
-
-                {/* Traffic Sources */}
-                <div>
-                  <div style={{fontSize:11,fontWeight:700,color:T.brownLight,textTransform:"uppercase",letterSpacing:1,marginBottom:8,fontFamily:T.sans}}>📡 Traffic Sources</div>
-                  <div style={{display:"flex",flexDirection:"column",gap:5}}>
-                    {(sources||[]).map(s=>{
-                      const pct = Math.round((s.sessions/totalSessions)*100);
-                      const color = SOURCE_COLORS[s.channel] || "#888";
-                      return (
-                        <div key={s.channel}>
-                          <div style={{display:"flex",justifyContent:"space-between",marginBottom:2}}>
-                            <span style={{fontSize:11,fontFamily:T.sans,color:T.brown,fontWeight:600}}>{s.channel}</span>
-                            <span style={{fontSize:11,fontFamily:T.sans,color:T.brownLight}}>{s.sessions} sessions ({pct}%)</span>
-                          </div>
-                          <div style={{height:6,background:"#e8e0d0",borderRadius:3}}>
-                            <div style={{height:"100%",width:`${pct}%`,background:color,borderRadius:3,transition:"width 0.4s"}}/>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                {/* Device Breakdown */}
-                <div>
-                  <div style={{fontSize:11,fontWeight:700,color:T.brownLight,textTransform:"uppercase",letterSpacing:1,marginBottom:8,fontFamily:T.sans}}>📱 Device Breakdown</div>
-                  <div style={{display:"flex",flexDirection:"column",gap:8}}>
-                    {(devices||[]).map(d=>{
-                      const pct = Math.round((d.sessions/totalDevSess)*100);
-                      const color = DEVICE_COLORS[d.device] || "#888";
-                      const icon = DEVICE_ICONS[d.device] || "📡";
-                      return (
-                        <div key={d.device}>
-                          <div style={{display:"flex",justifyContent:"space-between",marginBottom:2}}>
-                            <span style={{fontSize:12,fontFamily:T.sans,color:T.brown,fontWeight:600,textTransform:"capitalize"}}>{icon} {d.device}</span>
-                            <span style={{fontSize:11,fontFamily:T.sans,color:T.brownLight}}>{pct}% ({d.sessions})</span>
-                          </div>
-                          <div style={{height:8,background:"#e8e0d0",borderRadius:4}}>
-                            <div style={{height:"100%",width:`${pct}%`,background:color,borderRadius:4,transition:"width 0.4s"}}/>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              </div>
-
-              {/* Top Pages */}
-              <div>
-                <div style={{fontSize:11,fontWeight:700,color:T.brownLight,textTransform:"uppercase",letterSpacing:1,marginBottom:8,fontFamily:T.sans}}>📄 Top Pages by Views</div>
-                <div style={{display:"flex",flexDirection:"column",gap:4}}>
-                  {(pages||[]).filter(p=>p.views>0).map((p,i)=>{
-                    const label = PAGE_LABELS[p.path] || p.path;
-                    const maxPV = pages[0]?.views||1;
-                    const pct = Math.round((p.views/maxPV)*100);
-                    return (
-                      <div key={p.path} style={{display:"flex",alignItems:"center",gap:8}}>
-                        <div style={{fontSize:11,color:T.brownLight,fontFamily:T.sans,width:16,textAlign:"right"}}>{i+1}.</div>
-                        <div style={{flex:1}}>
-                          <div style={{display:"flex",justifyContent:"space-between",marginBottom:2}}>
-                            <span style={{fontSize:12,fontFamily:T.sans,color:T.brown,fontWeight:600}}>{label}</span>
-                            <span style={{fontSize:11,fontFamily:T.sans,color:T.brownLight}}>{p.views.toLocaleString()} views / {p.users} users</span>
-                          </div>
-                          <div style={{height:5,background:"#e8e0d0",borderRadius:3}}>
-                            <div style={{height:"100%",width:`${pct}%`,background:"#1B3D6F",borderRadius:3}}/>
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-
-              <div style={{fontSize:10,color:T.brownLight,fontFamily:T.sans,marginTop:4,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-                <a href="https://analytics.google.com/analytics/web/#/p534059288/reports/intelligenthome" target="_blank" rel="noreferrer" style={{fontSize:12,color:T.teal,fontWeight:700,textDecoration:"none"}}>📊 Open Google Analytics →</a>
-                <span>Data from Google Analytics property 534059288 · Range: {rangeLabels[gaData.range]||gaData.range}</span>
-              </div>
-            </div>
-          );
-        })()}
-      </div>
-
-      {/* ══════════════════════════════════════════════════════════
-          PROVIDER ENGAGEMENT — Internal Data
-      ══════════════════════════════════════════════════════════ */}
       <div style={S.card}>
-        <div style={S.secTitle}>👁️ Provider Engagement (Internal Tracking — All-Time)</div>
-        <div style={{display:"grid",gridTemplateColumns:"repeat(2,1fr)",gap:8,marginBottom:14}}>
-          {[
-            ["Total Profile Views",totalViews,T.brown,"Clicks into a provider's profile"],
-            ["Search Appearances",totalSearchAppearances,T.teal,"Times providers appeared in searches"],
-            ["Ad Clicks (Classifieds)",totalAdClicksInternal,"#7B3FA0","Clicks on Deals of the Week ads"],
-            ["Leads Sent",leads.length,"#1A6B3C","Contact form submissions"],
-          ].map(([l,v,c,sub])=>(
-            <div key={l} style={{textAlign:"center",background:T.parchment,borderRadius:6,padding:"14px 6px"}}>
-              <div style={{fontSize:26,fontWeight:800,color:c,fontFamily:T.sans}}>{(v||0).toLocaleString()}</div>
+        <div style={S.secTitle}>👁️ Platform Engagement (All-Time)</div>
+        <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:8}}>
+          {[["Total Profile Views",totalViews,T.brown],["Search Appearances",totalSearchAppearances,T.teal],["Total Leads Sent",leads.length,"#1A6B3C"]].map(([l,v,c])=>(
+            <div key={l} style={{textAlign:"center",background:T.parchment,borderRadius:6,padding:"12px 6px"}}>
+              <div style={{fontSize:26,fontWeight:800,color:c,fontFamily:T.sans}}>{v.toLocaleString()}</div>
               <div style={{fontSize:10,color:T.brownLight,fontFamily:T.sans,textTransform:"uppercase",letterSpacing:0.5}}>{l}</div>
-              <div style={{fontSize:9,color:"#aaa",fontFamily:T.sans,marginTop:2}}>{sub}</div>
             </div>
           ))}
         </div>
       </div>
 
-      {/* ── Top Providers by Profile Views ─── */}
-      <div style={S.card}>
-        <div style={S.secTitle}>🏆 Top Providers — Profile Views</div>
-        {topViewedProviders.length === 0 ? (
-          <div style={{color:T.brownLight,fontSize:12,fontFamily:T.sans,textAlign:"center",padding:10}}>No profile view data yet.</div>
-        ) : (
-          <div style={{display:"flex",flexDirection:"column",gap:6}}>
-            {topViewedProviders.map((p,i)=>{
-              const maxV = topViewedProviders[0]?.profile_views||1;
-              const pct = Math.round(((p.profile_views||0)/maxV)*100);
-              return (
-                <div key={p.id} style={{display:"flex",alignItems:"center",gap:8}}>
-                  <div style={{fontSize:11,color:T.brownLight,fontFamily:T.sans,width:18,textAlign:"right"}}>{i+1}.</div>
-                  <div style={{flex:1}}>
-                    <div style={{display:"flex",justifyContent:"space-between",marginBottom:2}}>
-                      <span style={{fontSize:12,fontFamily:T.sans,color:T.brown,fontWeight:600}}>{p.business_name}</span>
-                      <span style={{fontSize:11,fontFamily:T.sans,color:T.brownLight}}>{(p.profile_views||0).toLocaleString()} views</span>
-                    </div>
-                    <div style={{height:6,background:"#e8e0d0",borderRadius:3}}>
-                      <div style={{height:"100%",width:`${pct}%`,background:T.brown,borderRadius:3}}/>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        )}
-      </div>
-
-      {/* ── Top Providers by Search Appearances ─── */}
-      <div style={S.card}>
-        <div style={S.secTitle}>🔍 Top Providers — Search Appearances</div>
-        {topSearchedProviders.length === 0 ? (
-          <div style={{color:T.brownLight,fontSize:12,fontFamily:T.sans,textAlign:"center",padding:10}}>No search data yet.</div>
-        ) : (
-          <div style={{display:"flex",flexDirection:"column",gap:6}}>
-            {topSearchedProviders.map((p,i)=>{
-              const maxS = topSearchedProviders[0]?.search_appearances||1;
-              const pct = Math.round(((p.search_appearances||0)/maxS)*100);
-              return (
-                <div key={p.id} style={{display:"flex",alignItems:"center",gap:8}}>
-                  <div style={{fontSize:11,color:T.brownLight,fontFamily:T.sans,width:18,textAlign:"right"}}>{i+1}.</div>
-                  <div style={{flex:1}}>
-                    <div style={{display:"flex",justifyContent:"space-between",marginBottom:2}}>
-                      <span style={{fontSize:12,fontFamily:T.sans,color:T.brown,fontWeight:600}}>{p.business_name}</span>
-                      <span style={{fontSize:11,fontFamily:T.sans,color:T.brownLight}}>{(p.search_appearances||0).toLocaleString()} appearances</span>
-                    </div>
-                    <div style={{height:6,background:"#e8e0d0",borderRadius:3}}>
-                      <div style={{height:"100%",width:`${pct}%`,background:T.teal,borderRadius:3}}/>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        )}
-      </div>
-
-      {/* ── Top Providers by Ad Clicks ─── */}
-      {topAdClickProviders.length > 0 && (
-        <div style={S.card}>
-          <div style={S.secTitle}>📰 Top Providers — Classified Ad Clicks</div>
-          <div style={{display:"flex",flexDirection:"column",gap:6}}>
-            {topAdClickProviders.map((p,i)=>{
-              const maxA = topAdClickProviders[0]?.ad_clicks||1;
-              const pct = Math.round(((p.ad_clicks||0)/maxA)*100);
-              return (
-                <div key={p.id} style={{display:"flex",alignItems:"center",gap:8}}>
-                  <div style={{fontSize:11,color:T.brownLight,fontFamily:T.sans,width:18,textAlign:"right"}}>{i+1}.</div>
-                  <div style={{flex:1}}>
-                    <div style={{display:"flex",justifyContent:"space-between",marginBottom:2}}>
-                      <span style={{fontSize:12,fontFamily:T.sans,color:T.brown,fontWeight:600}}>{p.business_name}</span>
-                      <span style={{fontSize:11,fontFamily:T.sans,color:T.brownLight}}>{(p.ad_clicks||0).toLocaleString()} clicks</span>
-                    </div>
-                    <div style={{height:6,background:"#e8e0d0",borderRadius:3}}>
-                      <div style={{height:"100%",width:`${pct}%`,background:"#7B3FA0",borderRadius:3}}/>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      )}
-
-      {/* ── Top Searches ─── */}
-      {topSearches.length > 0 && (
-        <div style={S.card}>
-          <div style={S.secTitle}>🔎 Top Service Searches</div>
-          <div style={{display:"flex",flexDirection:"column",gap:5}}>
-            {topSearches.map((s,i)=>{
-              const pct = Math.round(((s.search_count||0)/maxSrch)*100);
-              return (
-                <div key={i} style={{display:"flex",alignItems:"center",gap:8}}>
-                  <div style={{fontSize:11,color:T.brownLight,fontFamily:T.sans,width:18,textAlign:"right"}}>{i+1}.</div>
-                  <div style={{flex:1}}>
-                    <div style={{display:"flex",justifyContent:"space-between",marginBottom:2}}>
-                      <span style={{fontSize:12,fontFamily:T.sans,color:T.brown,fontWeight:600}}>{s.service_name||s.category_name||"—"}</span>
-                      <span style={{fontSize:11,fontFamily:T.sans,color:T.brownLight}}>{s.search_count} searches</span>
-                    </div>
-                    <div style={{height:5,background:"#e8e0d0",borderRadius:3}}>
-                      <div style={{height:"100%",width:`${pct}%`,background:"#E8431A",borderRadius:3}}/>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      )}
-
-      {/* ── 7-Day Leads Chart ─── */}
-      <div style={S.card}>
-        <div style={S.secTitle}>📩 Leads — Last 7 Days</div>
-        <div style={{display:"flex",alignItems:"flex-end",gap:6,height:70,background:T.parchment,borderRadius:6,padding:"8px 8px 0"}}>
-          {last7Leads.map(d=>{
-            const day=new Date(d.date+"T12:00:00").toLocaleDateString("en-US",{weekday:"short"});
-            return (
-              <div key={d.date} style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",gap:1}}>
-                <div style={{fontSize:9,color:T.brownLight,fontFamily:T.sans}}>{d.count||""}</div>
-                <div style={{width:"100%",background:"#1A6B3C",borderRadius:"2px 2px 0 0",height:`${Math.max((d.count/maxDayLeads)*50,d.count>0?4:1)}px`}}/>
-                <div style={{fontSize:8,color:T.brownLight,fontFamily:T.sans}}>{day}</div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* ── Revenue Snapshot ─── */}
       <div style={S.card}>
         <div style={S.secTitle}>💰 Revenue Snapshot</div>
-        <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:8}}>
-          {[
-            ["Paid Subscribers",paid,"#1A6B3C"],
-            ["Trial Accounts",trial,T.gold],
-            ["Active Deals",activeAds.length,"#7B3FA0"],
-            ["Monthly Sub Revenue",`$${(paid*12).toLocaleString()}`,T.teal],
-            ["Deals Revenue",`$${dealsRevenue}`,T.brown],
-            ["Est. Monthly Total",`$${totalRevenue.toLocaleString()}`,"#E8431A"],
-          ].map(([l,v,c])=>(
+        <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:8,marginBottom:10}}>
+          {[["Est. MRR",`$${paid*12}`,T.green],["Paid Providers",paid,T.teal],["On Trial",trial,T.gold]].map(([l,v,c])=>(
             <div key={l} style={{textAlign:"center",background:T.parchment,borderRadius:6,padding:"12px 6px"}}>
-              <div style={{fontSize:20,fontWeight:800,color:c,fontFamily:T.sans}}>{v}</div>
-              <div style={{fontSize:10,color:T.brownLight,fontFamily:T.sans,textTransform:"uppercase",letterSpacing:0.5,marginTop:2}}>{l}</div>
+              <div style={{fontSize:24,fontWeight:800,color:c,fontFamily:T.sans}}>{v}</div>
+              <div style={{fontSize:10,color:T.brownLight,fontFamily:T.sans,textTransform:"uppercase",letterSpacing:0.5}}>{l}</div>
             </div>
           ))}
         </div>
+        <div style={{borderTop:`1px solid ${T.border}`,paddingTop:10}}>
+          <div style={{fontSize:11,fontWeight:700,color:T.brownLight,textTransform:"uppercase",letterSpacing:1,marginBottom:8,fontFamily:T.sans}}>Deals of the Week</div>
+          <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:8}}>
+            {[["Active Ads",activeAds.length,T.teal],["Ad Revenue (week)",`$${dealsRevenue}`,"#1A6B3C"],["Est. Total Revenue",`$${totalRevenue}`,T.green]].map(([l,v,c])=>(
+              <div key={l} style={{textAlign:"center",background:T.parchment,borderRadius:6,padding:"12px 6px"}}>
+                <div style={{fontSize:20,fontWeight:800,color:c,fontFamily:T.sans}}>{v}</div>
+                <div style={{fontSize:10,color:T.brownLight,fontFamily:T.sans,textTransform:"uppercase",letterSpacing:0.5}}>{l}</div>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
 
-      {/* ── Rating Distribution ─── */}
       <div style={S.card}>
-        <div style={S.secTitle}>⭐ Rating Distribution ({reviews.length} reviews · avg {avgRating})</div>
-        <div style={{display:"flex",flexDirection:"column",gap:4}}>
-          {[5,4,3,2,1].map(star=>{
-            const cnt = ratingDist[star]||0;
-            const pct = Math.round((cnt/maxRatCount)*100);
-            return (
-              <div key={star} style={{display:"flex",alignItems:"center",gap:8}}>
-                <div style={{fontSize:12,fontFamily:T.sans,color:T.brown,width:28,textAlign:"right"}}>{star}★</div>
-                <div style={{flex:1,height:12,background:"#e8e0d0",borderRadius:4}}>
-                  <div style={{height:"100%",width:`${pct}%`,background:T.gold,borderRadius:4}}/>
+        <div style={S.secTitle}>📊 Subscription Breakdown</div>
+        <div style={{display:"flex",flexWrap:"wrap",gap:8,marginBottom:10}}>
+          {Object.entries(subMap2).sort((a,b)=>b[1]-a[1]).map(([s,c])=>(
+            <div key={s} style={{display:"flex",alignItems:"center",gap:6,background:T.parchment,borderRadius:20,padding:"5px 12px"}}>
+              <div style={{width:10,height:10,borderRadius:"50%",background:subColors[s]||"#ccc"}}></div>
+              <span style={{fontSize:12,color:T.brownDark,textTransform:"capitalize",fontFamily:T.sans}}>{s}</span>
+              <span style={{fontSize:13,fontWeight:800,color:T.brown,fontFamily:T.sans}}>{c}</span>
+            </div>
+          ))}
+        </div>
+        <div style={{fontSize:11,color:T.brownLight,fontFamily:T.sans}}>Total: {providers.length} providers · {inactive} inactive/expired</div>
+      </div>
+
+      <div style={S.card}>
+        <div style={S.secTitle}>📈 Provider Signups by Month</div>
+        {months.length===0 ? <div style={{color:"#aaa",fontSize:13}}>No data yet</div> :
+          <div style={{display:"flex",alignItems:"flex-end",gap:4,height:90,padding:"0 4px"}}>
+            {months.map(([mo,cnt])=>(
+              <div key={mo} style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",gap:2}}>
+                <div style={{fontSize:9,color:T.brownLight,fontFamily:T.sans,fontWeight:700}}>{cnt}</div>
+                <div style={{width:"100%",background:T.brown,borderRadius:"3px 3px 0 0",height:`${Math.max((cnt/maxM)*60,4)}px`}}></div>
+                <div style={{fontSize:8,color:T.brownLight,fontFamily:T.sans,transform:"rotate(-45deg)",transformOrigin:"top left",marginLeft:6,whiteSpace:"nowrap"}}>
+                  {mo.split("-")[1]}/{mo.split("-")[0].slice(2)}
                 </div>
-                <div style={{fontSize:11,fontFamily:T.sans,color:T.brownLight,width:30}}>{cnt}</div>
+              </div>
+            ))}
+          </div>
+        }
+      </div>
+
+      <div style={S.card}>
+        <div style={S.secTitle}>📨 Leads Sent — Last 7 Days</div>
+        <div style={{display:"flex",alignItems:"flex-end",gap:6,height:70}}>
+          {last7Leads.map(({date,count})=>{
+            const d=new Date(date+"T12:00:00");
+            const label=d.toLocaleDateString("en-US",{weekday:"short"});
+            return (
+              <div key={date} style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",gap:2}}>
+                <div style={{fontSize:9,color:T.brownLight,fontWeight:700,fontFamily:T.sans}}>{count||""}</div>
+                <div style={{width:"100%",background:count>0?"#1A6B3C":"#e0d8c8",borderRadius:"3px 3px 0 0",height:`${Math.max((count/maxDayLeads)*50,3)}px`}}></div>
+                <div style={{fontSize:9,color:T.brownLight,fontFamily:T.sans}}>{label}</div>
               </div>
             );
           })}
         </div>
+        <div style={{marginTop:8,fontSize:11,color:T.brownLight,fontFamily:T.sans}}>
+          {last7Leads.reduce((s,d)=>s+d.count,0)} leads in last 7 days · {leads.length} all-time
+        </div>
+      </div>
+
+      {topViewedProviders.length>0 && (
+        <div style={S.card}>
+          <div style={S.secTitle}>🏆 Most Viewed Providers</div>
+          {topViewedProviders.map((p,i)=>(
+            <div key={p.id} style={{display:"flex",alignItems:"center",gap:8,marginBottom:6}}>
+              <div style={{fontSize:11,color:T.brownLight,fontFamily:T.sans,width:16,textAlign:"right",flexShrink:0}}>{i+1}</div>
+              <div style={{fontSize:12,color:T.brownDark,fontFamily:T.sans,width:140,flexShrink:0,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{p.business_name}</div>
+              <div style={{flex:1,background:T.parchmentDark,borderRadius:4,height:16}}>
+                <div style={{width:`${((p.profile_views||0)/maxViews)*100}%`,background:T.brown,borderRadius:4,height:"100%",minWidth:20,display:"flex",alignItems:"center",paddingLeft:5}}>
+                  <span style={{fontSize:9,color:"#fff",fontFamily:T.sans}}>{p.profile_views}</span>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {topSearchedProviders.length>0 && (
+        <div style={S.card}>
+          <div style={S.secTitle}>🔎 Most Appeared in Searches</div>
+          {topSearchedProviders.map((p,i)=>(
+            <div key={p.id} style={{display:"flex",alignItems:"center",gap:8,marginBottom:6}}>
+              <div style={{fontSize:11,color:T.brownLight,fontFamily:T.sans,width:16,textAlign:"right",flexShrink:0}}>{i+1}</div>
+              <div style={{fontSize:12,color:T.brownDark,fontFamily:T.sans,width:140,flexShrink:0,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{p.business_name}</div>
+              <div style={{flex:1,background:T.parchmentDark,borderRadius:4,height:16}}>
+                <div style={{width:`${((p.search_appearances||0)/maxSearch)*100}%`,background:T.teal,borderRadius:4,height:"100%",minWidth:20,display:"flex",alignItems:"center",paddingLeft:5}}>
+                  <span style={{fontSize:9,color:"#fff",fontFamily:T.sans}}>{p.search_appearances}</span>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {topSearches.length>0 && (
+        <div style={S.card}>
+          <div style={S.secTitle}>🔍 Top Search Terms</div>
+          {topSearches.map((s,i)=>(
+            <div key={i} style={{display:"flex",alignItems:"center",gap:8,marginBottom:5}}>
+              <div style={{fontSize:11,color:T.brownLight,fontFamily:T.sans,width:16,textAlign:"right",flexShrink:0}}>{i+1}</div>
+              <div style={{fontSize:11,color:T.brownDark,fontFamily:T.sans,width:150,flexShrink:0,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>
+                {s.service_name}{s.area_key?` · ${s.area_key}`:""}
+              </div>
+              <div style={{flex:1,background:T.parchmentDark,borderRadius:4,height:16}}>
+                <div style={{width:`${((s.search_count||0)/maxSrch)*100}%`,background:"#1A6B3C",borderRadius:4,height:"100%",minWidth:20,display:"flex",alignItems:"center",paddingLeft:5}}>
+                  <span style={{fontSize:9,color:"#fff",fontFamily:T.sans}}>{s.search_count}x</span>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      <div style={S.card}>
+        <div style={S.secTitle}>🛠️ Top Services Offered</div>
+        {topSvcs.length===0 ? <div style={{color:"#aaa",fontSize:13}}>No data yet</div> :
+          topSvcs.map(([svc,cnt])=>(
+            <div key={svc} style={{display:"flex",alignItems:"center",gap:8,marginBottom:5}}>
+              <div style={{fontSize:11,color:T.brownLight,fontFamily:T.sans,width:150,flexShrink:0,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{svc}</div>
+              <div style={{flex:1,background:T.parchmentDark,borderRadius:4,height:16}}>
+                <div style={{width:`${(cnt/maxS)*100}%`,background:T.teal,borderRadius:4,height:"100%",minWidth:16,display:"flex",alignItems:"center",paddingLeft:5}}>
+                  <span style={{fontSize:9,color:"#fff"}}>{cnt}</span>
+                </div>
+              </div>
+            </div>
+          ))
+        }
+      </div>
+
+      <div style={S.card}>
+        <div style={S.secTitle}>⭐ Review Stats</div>
+        <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:8,marginBottom:12}}>
+          {[["Total Reviews",reviews.length,T.brown],["Avg Rating",avgRating,T.gold],["Pending Approval",reviews.filter(r=>!r.is_approved).length,T.red]].map(([l,v,c])=>(
+            <div key={l} style={{textAlign:"center",background:T.parchment,borderRadius:6,padding:"12px 6px"}}>
+              <div style={{fontSize:24,fontWeight:800,color:c,fontFamily:T.sans}}>{v}</div>
+              <div style={{fontSize:10,color:T.brownLight,fontFamily:T.sans,textTransform:"uppercase",letterSpacing:0.5}}>{l}</div>
+            </div>
+          ))}
+        </div>
+        <div style={{fontSize:11,fontWeight:700,color:T.brownLight,textTransform:"uppercase",letterSpacing:1,marginBottom:8,fontFamily:T.sans}}>Rating Distribution</div>
+        {[5,4,3,2,1].map(star=>(
+          <div key={star} style={{display:"flex",alignItems:"center",gap:8,marginBottom:4}}>
+            <div style={{fontSize:11,color:T.gold,width:30,textAlign:"right",flexShrink:0,letterSpacing:-1}}>{"★".repeat(star)}</div>
+            <div style={{flex:1,background:T.parchmentDark,borderRadius:4,height:14}}>
+              <div style={{width:`${(ratingDist[star]/maxRatCount)*100}%`,background:T.gold,borderRadius:4,height:"100%",minWidth:ratingDist[star]>0?20:0,display:"flex",alignItems:"center",paddingLeft:4}}>
+                {ratingDist[star]>0&&<span style={{fontSize:9,color:"#fff"}}>{ratingDist[star]}</span>}
+              </div>
+            </div>
+            <div style={{fontSize:11,color:T.brownLight,fontFamily:T.sans,width:20}}>{ratingDist[star]}</div>
+          </div>
+        ))}
+      </div>
+
+      <div style={{...S.card,borderLeft:`4px solid ${T.teal}`}}>
+        <div style={S.secTitle}>🌐 External Traffic (Google Analytics)</div>
+        <div style={{fontSize:12,color:T.brownDark,fontFamily:T.sans,marginBottom:10}}>
+          For site visitors, page views, and traffic sources, open GA4 directly:
+        </div>
+        <a href="https://analytics.google.com/analytics/web/#/p490233278/reports/reportinghub"
+           target="_blank" rel="noopener noreferrer"
+           style={{display:"inline-block",padding:"10px 20px",background:T.teal,color:"#fff",borderRadius:6,fontWeight:700,fontSize:13,textDecoration:"none"}}>
+          📊 Open Google Analytics →
+        </a>
+        <div style={{marginTop:6,fontSize:10,color:"#aaa",fontFamily:T.sans}}>Property: G-1EJ40FW9E1 · www.v-hub.us</div>
       </div>
 
     </div>
   );
 }
-
 
 // ── ADD PROVIDER TAB ──────────────────────────────────────────────────────────
 function AddProviderTab({ onAdded, categories, services: allServices, serviceAreas: allAreas, adminPin }) {
@@ -2113,13 +1938,6 @@ function Dashboard({ adminPin }) {
   const [categories, setCategories] = useState([]);
   const [services, setServices] = useState([]);
   const [serviceAreas, setServiceAreas] = useState([]);
-  const [siteViewsByDay, setSiteViewsByDay] = useState({});
-  const [adClicksByDay, setAdClicksByDay] = useState({});
-  const [totalSiteViews, setTotalSiteViews] = useState(0);
-  const [totalAdClicks, setTotalAdClicks] = useState(0);
-  const [gaData, setGaData] = useState(null);
-  const [gaLoading, setGaLoading] = useState(false);
-  const [gaRange, setGaRange] = useState("30d");
   const [tab, setTab] = useState("Overview");
   const [loading, setLoading] = useState(true);
   const [toast, setToast] = useState(null); // { msg, type: "success"|"error" }
@@ -2134,7 +1952,7 @@ function Dashboard({ adminPin }) {
       const res = await fetch(`https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/getAdminData`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ pin: adminPin, gaRange }),
+        body: JSON.stringify({ pin: adminPin }),
       });
       const data = await res.json();
       if (data.error) throw new Error(data.error);
@@ -2146,32 +1964,11 @@ function Dashboard({ adminPin }) {
       setCategories(Array.isArray(data.categories) ? data.categories.filter(c => c.is_active) : []);
       setServices(Array.isArray(data.services) ? data.services : []);
       setServiceAreas(Array.isArray(data.serviceAreas) ? data.serviceAreas : []);
-      setSiteViewsByDay(data.siteViewsByDay || {});
-      setAdClicksByDay(data.adClicksByDay || {});
-      setTotalSiteViews(data.totalSiteViews || 0);
-      setTotalAdClicks(data.totalAdClicks || 0);
-      setGaData(data.gaData || null);
     } catch (e) { console.error('Admin data load error:', e); }
     setLoading(false);
   };
 
   useEffect(() => { load(); }, []);
-
-  const refreshGA = async (range) => {
-    const r = range || gaRange;
-    setGaRange(r);
-    setGaLoading(true);
-    try {
-      const res = await fetch(`https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/getAdminData`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ pin: adminPin, gaRange: r }),
-      });
-      const data = await res.json();
-      if (data.gaData) setGaData(data.gaData);
-    } catch(e) { console.error('GA refresh error:', e); }
-    setGaLoading(false);
-  };
 
   // Build lookup maps: id → name (entity IDs)
   const catMap = {}; categories.forEach(c => { catMap[c.id] = c.name; });
@@ -2280,7 +2077,7 @@ function Dashboard({ adminPin }) {
         {tab === "Reviews" && <ReviewsTab reviews={reviews} setReviews={setReviews} providers={providers} adminPin={adminPin} />}
         {tab === "Leads" && <LeadsTab leads={leads} providers={providers} />}
         {tab === "Deals" && <DealsTab providers={providers} classifiedAds={classifiedAds} />}
-        {tab === "Analytics" && <AnalyticsTab providers={providers} reviews={reviews} leads={leads} stats={stats} catMap={catMap} svcMap={svcMap} fullSvcMap={fullSvcMap} classifiedAds={classifiedAds} siteViewsByDay={siteViewsByDay} adClicksByDay={adClicksByDay} totalSiteViews={totalSiteViews} totalAdClicks={totalAdClicks} gaData={gaData} gaLoading={gaLoading} onRefreshGA={refreshGA} />}
+        {tab === "Analytics" && <AnalyticsTab providers={providers} reviews={reviews} leads={leads} stats={stats} catMap={catMap} svcMap={svcMap} fullSvcMap={fullSvcMap} classifiedAds={classifiedAds} />}
         {tab === "Add Provider" && <AddProviderTab onAdded={p => { setProviders(prev => [p, ...prev]); setTab("Providers"); }} categories={categories} services={services} serviceAreas={serviceAreas} adminPin={adminPin} />}
       </div>
     </div>
