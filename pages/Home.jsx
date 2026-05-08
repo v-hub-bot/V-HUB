@@ -1,4 +1,4 @@
-// FORCE_REBUILD_1776768600
+// FORCE_REBUILD_MAY8_HERO_v2
 // V-Hub Home — v2026-04-14c
 import React, { useState, useEffect, useRef } from "react"; // v3 - expanded content
 import { createPortal } from "react-dom";
