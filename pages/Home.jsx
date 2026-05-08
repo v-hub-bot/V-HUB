@@ -1560,7 +1560,7 @@ export default function Home() {
     keywords: "The Villages FL services, local service directory, home repair, landscaping, cleaning, pet care, golf cart services, The Villages Florida",
     ogTitle: "V-Hub — The Villages Local Services Directory",
     ogDescription: "Find local service providers across all 97 villages in The Villages, FL. No fees. No middlemen. Just neighbors serving neighbors.",
-    ogImage: "https://media.base44.com/images/public/69d062aca815ce8e697894b1/f19aa517d_generated_image.png",
+    ogImage: "https://base44.app/api/apps/69d062aca815ce8e697894b1/files/mp/public/69d062aca815ce8e697894b1/f8bd6ba02_villages_park_photo.jpg",
     canonical: "https://www.v-hub.us/",
   });
 
@@ -1640,7 +1640,7 @@ export default function Home() {
       {/* Preload logo so it's ready instantly on navigation */}
       <link rel="preload" as="image" href="https://base44.app/api/apps/69d062aca815ce8e697894b1/files/mp/public/69d062aca815ce8e697894b1/f14a7cbd0_logo_icon_small.png" />
       {/* Preload hero image — highest priority, loads with app */}
-      <link rel="preload" as="image" href="https://media.base44.com/images/public/69d062aca815ce8e697894b1/f19aa517d_generated_image.png" fetchpriority="high" />
+      <link rel="preload" as="image" href="https://base44.app/api/apps/69d062aca815ce8e697894b1/files/mp/public/69d062aca815ce8e697894b1/f8bd6ba02_villages_park_photo.jpg" fetchpriority="high" />
 
       <div style={{
         minHeight: "100vh",
@@ -1724,7 +1724,7 @@ export default function Home() {
 
         {/* PHOTO */}
         <img
-          src="https://media.base44.com/images/public/69d062aca815ce8e697894b1/f19aa517d_generated_image.png"
+          src="https://base44.app/api/apps/69d062aca815ce8e697894b1/files/mp/public/69d062aca815ce8e697894b1/f8bd6ba02_villages_park_photo.jpg"
           alt="Lake Sumter Landing"
           fetchpriority="high"
           loading="eager"
