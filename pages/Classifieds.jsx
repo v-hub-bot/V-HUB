@@ -404,7 +404,7 @@ export default function Classifieds() {
   const [filterArea, setFilterArea] = useState("");
   const [filterService, setFilterService] = useState("");
   const [currentIndex, setCurrentIndex]   = useState(0);
-  const [showAll, setShowAll]             = useState(false);
+  const [showAll, setShowAll]             = useState(true);
   // Dropdown state
   const [svcOpen,  setSvcOpen]  = useState(false);
   const [vilOpen,  setVilOpen]  = useState(false);
