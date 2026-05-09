@@ -89,6 +89,19 @@ Deno.serve(async (req: Request) => {
       }
     }
 
+    // ── SITE SETTINGS (hero image, etc.) ─────────────────────────────
+    if (body?.get_site_settings === true) {
+      try {
+        const settings = await withRetry(() => sr.entities.SiteSetting.list(), "site-settings");
+        const result: Record<string, string> = {};
+        (settings || []).forEach((s: any) => { if (s.key) result[s.key] = s.value || ""; });
+        return Response.json({ ok: true, settings: result }, { headers: CORS });
+      } catch (e: any) {
+        console.error("[getProviders] site settings failed:", e.message);
+        return Response.json({ ok: false, settings: {}, error: e.message }, { headers: CORS });
+      }
+    }
+
     // ── REVIEWS ───────────────────────────────────────────────────────
     if (body?.get_reviews === true) {
       const { provider_id } = body;

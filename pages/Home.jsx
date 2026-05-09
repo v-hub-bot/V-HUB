@@ -736,6 +736,9 @@ export default function Home() {
   const [providers, setProviders] = useState([]);
   const [loading,   setLoading]   = useState(true);
   const [currentUser, setCurrentUser] = useState(null);
+  const [heroImageUrl, setHeroImageUrl] = useState("https://media.base44.com/images/public/69d06ada8019d7e9edf7f8e8/ab660a5a8_0e7cdf112_ronnie_clark_hero.jpg");
+  const [heroImageAlt, setHeroImageAlt] = useState("Lake Sumter Landing sunset by Ronnie Clark");
+  const [heroCredit, setHeroCredit] = useState("© Photo: Ronnie Clark");
 
   const [selSvc,   setSelSvc]   = useState(null);
   const [selArea,  setSelArea]  = useState(null);
@@ -753,8 +756,9 @@ export default function Home() {
         body: JSON.stringify({ get_lookup_data: true }),
       }).then(r => r.json()).catch(() => ({ categories: [], services: [], areas: [] })),
       fetch(API_BASE + "/getProviders", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({}) }).then(r => r.json()).catch(() => ({ providers: [] })),
+      fetch(API_BASE + "/getProviders", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ get_site_settings: true }) }).then(r => r.json()).catch(() => ({ settings: {} })),
       User.me().catch(() => null),
-    ]).then(([lookup, provData, u]) => {
+    ]).then(([lookup, provData, settingsData, u]) => {
       setAreas(lookup.areas || []);
       setCats(lookup.categories || []);
       setSvcs(lookup.services || []);
@@ -762,6 +766,11 @@ export default function Home() {
       const active = (provData.providers || []).filter(p => p.is_active && p.is_visible);
       setProviders(active);
       setCurrentUser(u);
+      // Apply site settings (hero image, etc.)
+      const s = settingsData.settings || {};
+      if (s.hero_image_url) setHeroImageUrl(s.hero_image_url);
+      if (s.hero_image_alt) setHeroImageAlt(s.hero_image_alt);
+      if (s.hero_image_credit) setHeroCredit(s.hero_image_credit);
     }).catch(console.error).finally(() => setLoading(false));
   }, []);
 
@@ -858,9 +867,14 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Hero image */}
-        <div style={{ borderRadius: 8, overflow: "hidden", marginBottom: 18, border: "2px solid " + PAPER_DK, maxHeight: 220 }}>
-          <img src="https://base44.app/api/apps/69d062aca815ce8e697894b1/files/mp/public/69d062aca815ce8e697894b1/dabd06d08_villages_park_photo_credited.jpg" alt="V-Hub The Villages" style={{ width: "100%", height: 220, objectFit: "cover" }} />
+        {/* Hero image — dynamic from SiteSetting entity (change via Admin > Site Settings) */}
+        <div style={{ borderRadius: 8, overflow: "hidden", marginBottom: 18, border: "2px solid " + PAPER_DK, maxHeight: 220, position: "relative" }}>
+          <img src={heroImageUrl} alt={heroImageAlt} style={{ width: "100%", height: 220, objectFit: "cover", display: "block" }} />
+          {heroCredit && (
+            <div style={{ position: "absolute", bottom: 0, right: 0, background: "rgba(255,248,220,0.88)", color: INK_FADE, fontSize: 9, padding: "2px 7px", fontFamily: "Georgia, serif", letterSpacing: 0.3 }}>
+              {heroCredit}
+            </div>
+          )}
         </div>
 
         {/* Deals of the Week — sale tag style */}
