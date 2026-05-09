@@ -860,7 +860,7 @@ export default function Home() {
 
         {/* Hero image */}
         <div style={{ borderRadius: 8, overflow: "hidden", marginBottom: 18, border: "2px solid " + PAPER_DK, maxHeight: 220 }}>
-          <img src="https://media.base44.com/images/public/69d062aca815ce8e697894b1/1148d0041_V-HublocalservicesinTheVillages.png" alt="V-Hub The Villages" style={{ width: "100%", height: 220, objectFit: "cover" }} />
+          <img src="https://base44.app/api/apps/69d062aca815ce8e697894b1/files/mp/public/69d062aca815ce8e697894b1/dabd06d08_villages_park_photo_credited.jpg" alt="V-Hub The Villages" style={{ width: "100%", height: 220, objectFit: "cover" }} />
         </div>
 
         {/* Deals of the Week — sale tag style */}
