@@ -736,7 +736,7 @@ export default function Home() {
   const [providers, setProviders] = useState([]);
   const [loading,   setLoading]   = useState(true);
   const [currentUser, setCurrentUser] = useState(null);
-  const [heroImageUrl, setHeroImageUrl] = useState("https://media.base44.com/images/public/69d06ada8019d7e9edf7f8e8/ab660a5a8_0e7cdf112_ronnie_clark_hero.jpg");
+  const [heroImageUrl, setHeroImageUrl] = useState("https://base44.app/api/apps/69d062aca815ce8e697894b1/files/mp/public/69d062aca815ce8e697894b1/3f2486cbf_ronnie_clark_sunset2.jpg");
   const [heroImageAlt, setHeroImageAlt] = useState("Lake Sumter Landing sunset by Ronnie Clark");
   const [heroCredit, setHeroCredit] = useState("© Photo: Ronnie Clark");
 
