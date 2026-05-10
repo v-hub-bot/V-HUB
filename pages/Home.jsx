@@ -1,4 +1,4 @@
-// FORCE_REBUILD_1776768600
+// FORCE_REBUILD_1778436497
 // V-Hub Home — v2026-04-14c
 import React, { useState, useEffect, useRef } from "react"; // v3 - expanded content
 import { createPortal } from "react-dom";
@@ -1479,7 +1479,7 @@ export default function Home() {
     keywords: "The Villages FL services, local service directory, home repair, landscaping, cleaning, pet care, golf cart services, The Villages Florida",
     ogTitle: "V-Hub — The Villages Local Services Directory",
     ogDescription: "Find local service providers across all 97 villages in The Villages, FL. No fees. No middlemen. Just neighbors serving neighbors.",
-    ogImage: "https://base44.app/api/apps/69d062aca815ce8e697894b1/files/mp/public/69d062aca815ce8e697894b1/c84d0f3bd_ronnie_clark_hero_final.jpg",
+    ogImage: "https://media.base44.com/images/public/69d062aca815ce8e697894b1/c84d0f3bd_ronnie_clark_hero_final.jpg",
     canonical: "https://www.v-hub.us/",
   });
 
@@ -1559,7 +1559,7 @@ export default function Home() {
       {/* Preload logo so it's ready instantly on navigation */}
       <link rel="preload" as="image" href="https://base44.app/api/apps/69d062aca815ce8e697894b1/files/mp/public/69d062aca815ce8e697894b1/f14a7cbd0_logo_icon_small.png" />
       {/* Preload hero image — highest priority, loads with app */}
-      <link rel="preload" as="image" href="https://base44.app/api/apps/69d062aca815ce8e697894b1/files/mp/public/69d062aca815ce8e697894b1/c84d0f3bd_ronnie_clark_hero_final.jpg" fetchpriority="high" />
+      <link rel="preload" as="image" href="https://media.base44.com/images/public/69d062aca815ce8e697894b1/c84d0f3bd_ronnie_clark_hero_final.jpg" fetchpriority="high" />
 
       <div style={{
         minHeight: "100vh",
@@ -1642,14 +1642,19 @@ export default function Home() {
         </div>
 
         {/* PHOTO */}
-        <img
-          src="https://base44.app/api/apps/69d062aca815ce8e697894b1/files/mp/public/69d062aca815ce8e697894b1/c84d0f3bd_ronnie_clark_hero_final.jpg"
-          alt="Lake Sumter Landing"
-          fetchpriority="high"
-          loading="eager"
-          decoding="sync"
-          style={{ width: "100%", height: 240, objectFit: "cover", objectPosition: "center 55%", display: "block" }}
-        />
+        <div style={{ position: "relative", width: "100%", lineHeight: 0 }}>
+          <img
+            src="https://media.base44.com/images/public/69d062aca815ce8e697894b1/c84d0f3bd_ronnie_clark_hero_final.jpg"
+            alt="Lake Sumter Landing"
+            fetchpriority="high"
+            loading="eager"
+            decoding="sync"
+            style={{ width: "100%", height: 240, objectFit: "cover", objectPosition: "center 55%", display: "block" }}
+          />
+          <div style={{ position: "absolute", bottom: 6, right: 8, background: "rgba(240,230,200,0.82)", padding: "2px 7px", borderRadius: 3, fontSize: 9, fontFamily: "Georgia, serif", color: "#1C0F00", letterSpacing: 0.3, pointerEvents: "none" }}>
+            © Photo: Ronnie Clark
+          </div>
+        </div>
 
         {/* CLASSIFIEDS — full width, thick red border, links to Classifieds */}
         <a href="/Classifieds" style={{ textDecoration: "none", display: "block", width: "100%" }}>
