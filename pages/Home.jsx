@@ -1,4 +1,3 @@
-// V-HUB Home v2.5 - Ronnie Clark credit bar
 // FORCE_REBUILD_1776768600
 // V-Hub Home — v2026-04-14c
 import React, { useState, useEffect, useRef } from "react"; // v3 - expanded content
@@ -1480,7 +1479,7 @@ export default function Home() {
     keywords: "The Villages FL services, local service directory, home repair, landscaping, cleaning, pet care, golf cart services, The Villages Florida",
     ogTitle: "V-Hub — The Villages Local Services Directory",
     ogDescription: "Find local service providers across all 97 villages in The Villages, FL. No fees. No middlemen. Just neighbors serving neighbors.",
-    ogImage: "https://media.base44.com/images/public/69d062aca815ce8e697894b1/baa1f63dd_ronnie_hero_with_credit.jpg",
+    ogImage: "https://media.base44.com/images/public/69d062aca815ce8e697894b1/0a0a19a9f_ronnie_hero_fixed.jpg",
     canonical: "https://www.v-hub.us/",
   });
 
@@ -1560,7 +1559,7 @@ export default function Home() {
       {/* Preload logo so it's ready instantly on navigation */}
       <link rel="preload" as="image" href="https://base44.app/api/apps/69d062aca815ce8e697894b1/files/mp/public/69d062aca815ce8e697894b1/f14a7cbd0_logo_icon_small.png" />
       {/* Preload hero image — highest priority, loads with app */}
-      <link rel="preload" as="image" href="https://media.base44.com/images/public/69d062aca815ce8e697894b1/baa1f63dd_ronnie_hero_with_credit.jpg" fetchpriority="high" />
+      <link rel="preload" as="image" href="https://media.base44.com/images/public/69d062aca815ce8e697894b1/0a0a19a9f_ronnie_hero_fixed.jpg" fetchpriority="high" />
 
       <div style={{
         minHeight: "100vh",
@@ -1645,7 +1644,7 @@ export default function Home() {
         {/* PHOTO */}
         <div style={{ position: "relative", width: "100%", lineHeight: 0 }}>
           <img
-            src="https://media.base44.com/images/public/69d062aca815ce8e697894b1/baa1f63dd_ronnie_hero_with_credit.jpg"
+            src="https://media.base44.com/images/public/69d062aca815ce8e697894b1/0a0a19a9f_ronnie_hero_fixed.jpg"
             alt="The Villages, FL"
             fetchpriority="high"
             loading="eager"
@@ -1659,7 +1658,7 @@ export default function Home() {
 
         {/* PHOTO CREDIT BAR */}
         <div style={{ width: "100%", background: "#F5E6C8", borderTop: "1px solid #C8A96E", borderBottom: "1px solid #C8A96E", textAlign: "center", padding: "5px 0", fontSize: 12, fontFamily: "'Times New Roman', serif", color: "#5C3A1E", letterSpacing: 0.5, fontStyle: "italic" }}>
-           Photo courtesy of Ronnie Clark 
+          Photo courtesy of Ronnie Clark
         </div>
 
         {/* CLASSIFIEDS — full width, thick red border, links to Classifieds */}
