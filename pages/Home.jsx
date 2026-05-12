@@ -1,4 +1,4 @@
-// FORCE_REBUILD_1778436497
+// FORCE_REBUILD_1776768600
 // V-Hub Home — v2026-04-14c
 import React, { useState, useEffect, useRef } from "react"; // v3 - expanded content
 import { createPortal } from "react-dom";
@@ -1642,16 +1642,16 @@ export default function Home() {
         </div>
 
         {/* PHOTO */}
-        <div style={{ position: "relative", width: "100%", lineHeight: 0 }}>
+        <div style={{ position: "relative", width: "100%", lineHeight: 0, background: "#000", overflow: "hidden" }}>
           <img
             src="https://media.base44.com/images/public/69d062aca815ce8e697894b1/c84d0f3bd_ronnie_clark_hero_final.jpg"
-            alt="Lake Sumter Landing"
+            alt="The Villages, FL"
             fetchpriority="high"
             loading="eager"
             decoding="sync"
-            style={{ width: "100%", height: 240, objectFit: "cover", objectPosition: "center 55%", display: "block" }}
+            style={{ width: "100%", height: 300, objectFit: "cover", objectPosition: "center 35%", display: "block" }}
           />
-          <div style={{ position: "absolute", bottom: 6, right: 8, background: "rgba(240,230,200,0.82)", padding: "2px 7px", borderRadius: 3, fontSize: 9, fontFamily: "Georgia, serif", color: "#1C0F00", letterSpacing: 0.3, pointerEvents: "none" }}>
+          <div style={{ position: "absolute", bottom: 6, right: 8, background: "rgba(0,0,0,0.45)", color: "#fff", fontSize: 10, padding: "2px 7px", borderRadius: 4, fontFamily: "sans-serif", letterSpacing: 0.3, lineHeight: "normal" }}>
             © Photo: Ronnie Clark
           </div>
         </div>
