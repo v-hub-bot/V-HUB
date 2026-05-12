@@ -1658,7 +1658,7 @@ export default function Home() {
 
         {/* PHOTO CREDIT BAR */}
         <div style={{ width: "100%", background: "#F5E6C8", borderTop: "1px solid #C8A96E", borderBottom: "1px solid #C8A96E", textAlign: "center", padding: "5px 0", fontSize: 12, fontFamily: "'Times New Roman', serif", color: "#5C3A1E", letterSpacing: 0.5, fontStyle: "italic" }}>
-          Photo courtesy of Ronnie Clark
+           Photo courtesy of Ronnie Clark 
         </div>
 
         {/* CLASSIFIEDS — full width, thick red border, links to Classifieds */}
