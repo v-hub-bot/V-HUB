@@ -1642,14 +1642,14 @@ export default function Home() {
         </div>
 
         {/* PHOTO */}
-        <div style={{ position: "relative", width: "100%", lineHeight: 0, background: "#000", overflow: "hidden" }}>
+        <div style={{ position: "relative", width: "100%", lineHeight: 0 }}>
           <img
             src="https://media.base44.com/images/public/69d062aca815ce8e697894b1/c84d0f3bd_ronnie_clark_hero_final.jpg"
             alt="The Villages, FL"
             fetchpriority="high"
             loading="eager"
             decoding="sync"
-            style={{ width: "100%", height: 300, objectFit: "cover", objectPosition: "center 35%", display: "block" }}
+            style={{ width: "100%", display: "block" }}
           />
           <div style={{ position: "absolute", bottom: 6, right: 8, background: "rgba(0,0,0,0.45)", color: "#fff", fontSize: 10, padding: "2px 7px", borderRadius: 4, fontFamily: "sans-serif", letterSpacing: 0.3, lineHeight: "normal" }}>
             © Photo: Ronnie Clark
