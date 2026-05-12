@@ -1,4 +1,5 @@
 // GA4 traffic report for V-HUB — property 534059288
+// redeployed: 2026-05-12
 import { createClientFromRequest } from "npm:@base44/sdk@0.8.23/deno";
 const PROP = "properties/534059288";
 
@@ -25,51 +26,44 @@ export default async function handler(req: Request): Promise<Response> {
         body: JSON.stringify(payload)
       }).then(r => r.json());
 
-    // 1. Daily trend
-    const dailyData = await fetchGA4({
-      dateRanges: [{ startDate, endDate: "today" }],
-      dimensions: [{ name: "date" }],
-      metrics: [
-        { name: "totalUsers" }, { name: "screenPageViews" },
-        { name: "sessions" }, { name: "newUsers" }, { name: "bounceRate" }
-      ],
-      orderBys: [{ dimension: { dimensionName: "date" } }]
-    });
-
-    // 2. Traffic sources
-    const sourceData = await fetchGA4({
-      dateRanges: [{ startDate, endDate: "today" }],
-      dimensions: [{ name: "sessionDefaultChannelGroup" }],
-      metrics: [{ name: "sessions" }, { name: "totalUsers" }],
-      orderBys: [{ metric: { metricName: "sessions" }, desc: true }],
-      limit: 10
-    });
-
-    // 3. Device breakdown
-    const deviceData = await fetchGA4({
-      dateRanges: [{ startDate, endDate: "today" }],
-      dimensions: [{ name: "deviceCategory" }],
-      metrics: [{ name: "sessions" }, { name: "totalUsers" }],
-      orderBys: [{ metric: { metricName: "sessions" }, desc: true }]
-    });
-
-    // 4. Top pages
-    const pageData = await fetchGA4({
-      dateRanges: [{ startDate, endDate: "today" }],
-      dimensions: [{ name: "pagePath" }],
-      metrics: [{ name: "screenPageViews" }, { name: "totalUsers" }],
-      orderBys: [{ metric: { metricName: "screenPageViews" }, desc: true }],
-      limit: 10
-    });
-
-    // 5. Totals
-    const totalsData = await fetchGA4({
-      dateRanges: [{ startDate, endDate: "today" }],
-      metrics: [
-        { name: "totalUsers" }, { name: "newUsers" }, { name: "sessions" },
-        { name: "screenPageViews" }, { name: "bounceRate" }, { name: "averageSessionDuration" }
-      ]
-    });
+    const [dailyData, sourceData, deviceData, pageData, totalsData] = await Promise.all([
+      fetchGA4({
+        dateRanges: [{ startDate, endDate: "today" }],
+        dimensions: [{ name: "date" }],
+        metrics: [
+          { name: "totalUsers" }, { name: "screenPageViews" },
+          { name: "sessions" }, { name: "newUsers" }, { name: "bounceRate" }
+        ],
+        orderBys: [{ dimension: { dimensionName: "date" } }]
+      }),
+      fetchGA4({
+        dateRanges: [{ startDate, endDate: "today" }],
+        dimensions: [{ name: "sessionDefaultChannelGroup" }],
+        metrics: [{ name: "sessions" }, { name: "totalUsers" }],
+        orderBys: [{ metric: { metricName: "sessions" }, desc: true }],
+        limit: 10
+      }),
+      fetchGA4({
+        dateRanges: [{ startDate, endDate: "today" }],
+        dimensions: [{ name: "deviceCategory" }],
+        metrics: [{ name: "sessions" }, { name: "totalUsers" }],
+        orderBys: [{ metric: { metricName: "sessions" }, desc: true }]
+      }),
+      fetchGA4({
+        dateRanges: [{ startDate, endDate: "today" }],
+        dimensions: [{ name: "pagePath" }],
+        metrics: [{ name: "screenPageViews" }, { name: "totalUsers" }],
+        orderBys: [{ metric: { metricName: "screenPageViews" }, desc: true }],
+        limit: 10
+      }),
+      fetchGA4({
+        dateRanges: [{ startDate, endDate: "today" }],
+        metrics: [
+          { name: "totalUsers" }, { name: "newUsers" }, { name: "sessions" },
+          { name: "screenPageViews" }, { name: "bounceRate" }, { name: "averageSessionDuration" }
+        ]
+      })
+    ]);
 
     const daily = (dailyData.rows || []).map((row: any) => {
       const rd = row.dimensionValues[0].value;
@@ -109,7 +103,7 @@ export default async function handler(req: Request): Promise<Response> {
     };
 
     return new Response(
-      JSON.stringify({ daily, totals, sources, devices, pages, range }),
+      JSON.stringify({ ok: true, daily, totals, sources, devices, pages, range }),
       { status: 200, headers: { ...cors, "Content-Type": "application/json" } }
     );
   } catch (e) {
@@ -119,5 +113,3 @@ export default async function handler(req: Request): Promise<Response> {
     );
   }
 }
-
-// updated: 1777582709059
