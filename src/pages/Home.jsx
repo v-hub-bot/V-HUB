@@ -1479,7 +1479,7 @@ export default function Home() {
     keywords: "The Villages FL services, local service directory, home repair, landscaping, cleaning, pet care, golf cart services, The Villages Florida",
     ogTitle: "V-Hub — The Villages Local Services Directory",
     ogDescription: "Find local service providers across all 97 villages in The Villages, FL. No fees. No middlemen. Just neighbors serving neighbors.",
-    ogImage: "https://media.base44.com/images/public/69d062aca815ce8e697894b1/0a0a19a9f_ronnie_hero_fixed.jpg",
+    ogImage: "https://media.base44.com/images/public/69d062aca815ce8e697894b1/1256a9552_ronnie_clark_hero.jpg",
     canonical: "https://www.v-hub.us/",
   });
 
@@ -1559,7 +1559,7 @@ export default function Home() {
       {/* Preload logo so it's ready instantly on navigation */}
       <link rel="preload" as="image" href="https://media.base44.com/images/public/69d062aca815ce8e697894b1/f14a7cbd0_logo_icon_small.png" />
       {/* Preload hero image — highest priority, loads with app */}
-      <link rel="preload" as="image" href="https://media.base44.com/images/public/69d062aca815ce8e697894b1/0a0a19a9f_ronnie_hero_fixed.jpg" fetchpriority="high" />
+      <link rel="preload" as="image" href="https://media.base44.com/images/public/69d062aca815ce8e697894b1/1256a9552_ronnie_clark_hero.jpg" fetchpriority="high" />
 
       <div style={{
         minHeight: "100vh",
@@ -1644,7 +1644,7 @@ export default function Home() {
         {/* PHOTO */}
         <div style={{ position: "relative", width: "100%", lineHeight: 0 }}>
           <img
-            src="https://media.base44.com/images/public/69d062aca815ce8e697894b1/0a0a19a9f_ronnie_hero_fixed.jpg"
+            src="https://media.base44.com/images/public/69d062aca815ce8e697894b1/1256a9552_ronnie_clark_hero.jpg"
             alt="The Villages, FL"
             fetchpriority="high"
             loading="eager"
