@@ -1651,7 +1651,7 @@ export default function Home() {
             decoding="sync"
             style={{ width: "100%", display: "block" }}
           />
-          <div style={{ position: "absolute", bottom: 6, right: 8, background: "rgba(0,0,0,0.45)", color: "#fff", fontSize: 10, padding: "2px 7px", borderRadius: 4, fontFamily: "sans-serif", letterSpacing: 0.3, lineHeight: "normal" }}>
+          <div style={{ position: "absolute", bottom: 8, right: 10, background: "rgba(0,0,0,0.55)", color: "#fff", fontSize: 13, fontWeight: 500, padding: "3px 9px", borderRadius: 4, fontFamily: "sans-serif", letterSpacing: 0.4, lineHeight: "normal" }}>
             © Photo: Ronnie Clark
           </div>
         </div>
