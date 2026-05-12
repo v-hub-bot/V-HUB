@@ -5,8 +5,8 @@ import React, { useState, useEffect } from "react";
 import { Provider, ProviderReview, LeadInquiry, ServiceSearchStat, Category, Service, ServiceArea } from "@/api/entities";
 
 const BUILD_ID = "v2026-04-20-toast-save"; const LOGO = "https://media.base44.com/images/public/69d062aca815ce8e697894b1/a9af95bc3_V-Hublogo.png";
-const API_BASE = "https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions";
-const FN = "https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/adminMagicLink";
+const API_BASE = "https://api.base44.app/api/apps/69d06ada8019d7e9edf7f8e8/functions";
+const FN = "https://api.base44.app/api/apps/69d06ada8019d7e9edf7f8e8/functions/adminMagicLink";
 
 // SHA-256 for password hashing (used by admin Set Password feature)
 async function sha256(plain) {
@@ -323,7 +323,7 @@ function ProvidersTab({ providers, setProviders, catMap, svcMap, areaMap, fullSv
       const trialStartStr = now.toISOString().split('T')[0];
       const trialEndStr = trialEnd.toISOString().split('T')[0];
 
-      const res = await fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/approveProvider", {
+      const res = await fetch("https://api.base44.app/api/apps/69d06ada8019d7e9edf7f8e8/functions/approveProvider", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -344,7 +344,7 @@ function ProvidersTab({ providers, setProviders, catMap, svcMap, areaMap, fullSv
       if (data.error) throw new Error(data.error);
 
       // Also mark as Self-Managed
-      await fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/adminUpdateProvider", {
+      await fetch("https://api.base44.app/api/apps/69d06ada8019d7e9edf7f8e8/functions/adminUpdateProvider", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action: "admin_update", pin: "1357", id: p.id, fields: { managed_by: "Self-Managed" } }),
@@ -406,7 +406,7 @@ function ProvidersTab({ providers, setProviders, catMap, svcMap, areaMap, fullSv
       trialEnd.setDate(trialEnd.getDate() + 45);
       const trialStartStr = now.toISOString().split('T')[0];
       const trialEndStr = trialEnd.toISOString().split('T')[0];
-      const res = await fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/approveProvider", {
+      const res = await fetch("https://api.base44.app/api/apps/69d06ada8019d7e9edf7f8e8/functions/approveProvider", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -1035,24 +1035,24 @@ function ReviewsTab({ reviews, setReviews, providers, adminPin }) {
   const provMap = {}; providers.forEach(p => { provMap[p.id] = p.business_name; });
   const shown = reviews.filter(r => filter === "all" ? true : filter === "pending" ? !r.is_approved : r.is_approved);
   const approve = async (r) => {
-    await fetch(`https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/adminUpdateReview`, {
+    await fetch(`https://api.base44.app/api/apps/69d06ada8019d7e9edf7f8e8/functions/adminUpdateReview`, {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ pin: "1357", id: r.id, fields: { is_approved: true } }),
     });
     // Immediately recalc provider rating so it's reflected now, not at 4am
-    fetch(`https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/recalcProviderRatings`, {
+    fetch(`https://api.base44.app/api/apps/69d06ada8019d7e9edf7f8e8/functions/recalcProviderRatings`, {
       method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}',
     }).catch(() => {});
     setReviews(p => p.map(x => x.id === r.id ? { ...x, is_approved: true } : x));
   };
   const remove = async (r) => {
     if (!window.confirm("Delete this review?")) return;
-    await fetch(`https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/adminUpdateReview`, {
+    await fetch(`https://api.base44.app/api/apps/69d06ada8019d7e9edf7f8e8/functions/adminUpdateReview`, {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ pin: "1357", id: r.id, delete: true }),
     });
     // Recalc provider rating after deletion
-    fetch(`https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/recalcProviderRatings`, {
+    fetch(`https://api.base44.app/api/apps/69d06ada8019d7e9edf7f8e8/functions/recalcProviderRatings`, {
       method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}',
     }).catch(() => {});
     setReviews(p => p.filter(x => x.id !== r.id));
@@ -1489,7 +1489,7 @@ function AddProviderTab({ onAdded, categories, services: allServices, serviceAre
     if (!form.business_name.trim()) return alert("Business name is required — everything else can be added later.");
     setSaving(true);
     try {
-      const res = await fetch(`https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/addProviderByAdmin`, {
+      const res = await fetch(`https://api.base44.app/api/apps/69d06ada8019d7e9edf7f8e8/functions/addProviderByAdmin`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -1782,7 +1782,7 @@ function Dashboard({ adminPin }) {
   const load = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/getAdminData`, {
+      const res = await fetch(`https://api.base44.app/api/apps/69d06ada8019d7e9edf7f8e8/functions/getAdminData`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ pin: adminPin }),

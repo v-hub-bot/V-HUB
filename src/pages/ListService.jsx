@@ -541,7 +541,7 @@ export default function ListService() {
       const catObj = dbCategories.find(c => c.id === selCatId);
       const catName = catObj ? catObj.name : "";
 
-      const res = await fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/submitListing", {
+      const res = await fetch("https://api.base44.app/api/apps/69d06ada8019d7e9edf7f8e8/functions/submitListing", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
