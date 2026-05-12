@@ -1557,7 +1557,7 @@ export default function Home() {
         }
       `}</style>
       {/* Preload logo so it's ready instantly on navigation */}
-      <link rel="preload" as="image" href="https://base44.app/api/apps/69d062aca815ce8e697894b1/files/mp/public/69d062aca815ce8e697894b1/f14a7cbd0_logo_icon_small.png" />
+      <link rel="preload" as="image" href="https://media.base44.com/images/public/69d062aca815ce8e697894b1/f14a7cbd0_logo_icon_small.png" />
       {/* Preload hero image — highest priority, loads with app */}
       <link rel="preload" as="image" href="https://media.base44.com/images/public/69d062aca815ce8e697894b1/0a0a19a9f_ronnie_hero_fixed.jpg" fetchpriority="high" />
 
@@ -1595,7 +1595,7 @@ export default function Home() {
             {/* Left: logo — fixed width 64 */}
             <div style={{ flexShrink: 0, width: 64, height: 64, display: "flex", alignItems: "center", justifyContent: "flex-start" }}>
               <img
-                src="https://base44.app/api/apps/69d062aca815ce8e697894b1/files/mp/public/69d062aca815ce8e697894b1/f14a7cbd0_logo_icon_small.png"
+                src="https://media.base44.com/images/public/69d062aca815ce8e697894b1/f14a7cbd0_logo_icon_small.png"
                 alt="V-Hub logo icon"
                 loading="eager"
                 fetchPriority="high"
