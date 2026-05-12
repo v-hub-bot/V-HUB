@@ -1,3 +1,4 @@
+// V-HUB Home v2.5 - Ronnie Clark credit bar
 // FORCE_REBUILD_1776768600
 // V-Hub Home — v2026-04-14c
 import React, { useState, useEffect, useRef } from "react"; // v3 - expanded content
