@@ -1,4 +1,4 @@
-// Classifieds Ad Checkout — $10 one-time payment for 1 week
+// Classifieds Ad Checkout — $20 one-time payment for 10 days
 import Stripe from "npm:stripe@14";
 
 Deno.serve(async (req) => {
@@ -14,10 +14,10 @@ Deno.serve(async (req) => {
     const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY")!, { apiVersion: "2023-10-16" });
     const appUrl = "https://www.v-hub.us";
 
-    // 7 days from now for display purposes (actual expiry set by webhook at time of payment)
-    const weekEnd = new Date();
-    weekEnd.setDate(weekEnd.getDate() + 7);
-    const weekEndStr = weekEnd.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
+    // 10 days from now for display purposes (actual expiry set by webhook at time of payment)
+    const adEnd = new Date();
+    adEnd.setDate(adEnd.getDate() + 10);
+    const adEndStr = adEnd.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
 
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
@@ -28,8 +28,8 @@ Deno.serve(async (req) => {
           currency: "usd",
           unit_amount: 2000, // $20.00
           product_data: {
-            name: "V-Hub Deals of the Week — 7-Day Ad",
-            description: `Your ad runs on V-Hub's Deals of the Week page for 7 days (through ${weekEndStr}).`,
+            name: "V-Hub Deals of the Week — 10-Day Ad",
+            description: `Your ad runs on V-Hub's Deals of the Week page for 10 days (through ${adEndStr}).`,
           },
         },
         quantity: 1,
