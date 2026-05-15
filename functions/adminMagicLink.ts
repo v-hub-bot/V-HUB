@@ -1,4 +1,4 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.23';
 
 const ADMIN_EMAILS = [
   "kimberlycook1980@gmail.com",
@@ -8,6 +8,7 @@ const ADMIN_EMAILS = [
 const ALERT_EMAILS = ["kimberlycook1980@gmail.com", "5bebegurlz@gmail.com"];
 const APP_URL = "https://www.v-hub.us";
 const LOGO = "https://media.base44.com/images/public/69d062aca815ce8e697894b1/a9af95bc3_V-Hublogo.png";
+const SENDGRID_API_KEY = Deno.env.get("SENDGRID_API_KEY") || "";
 
 function randomToken(len = 48) {
   const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
@@ -16,32 +17,25 @@ function randomToken(len = 48) {
   return t;
 }
 
-async function sendEmail(accessToken: string, to: string, subject: string, html: string) {
-  const boundary = "vhub_ml_" + Date.now();
-  const raw = [
-    `To: ${to}`,
-    `From: V-Hub Admin <noreply@v-hub.us>`,
-    `Subject: ${subject}`,
-    `MIME-Version: 1.0`,
-    `Content-Type: multipart/alternative; boundary="${boundary}"`,
-    ``,
-    `--${boundary}`,
-    `Content-Type: text/html; charset=UTF-8`,
-    ``,
-    html,
-    `--${boundary}--`,
-  ].join("\r\n");
-
-  const encoded = btoa(unescape(encodeURIComponent(raw)))
-    .replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
-
-  const res = await fetch("https://gmail.googleapis.com/gmail/v1/users/me/messages/send", {
+async function sendEmail(to: string, subject: string, html: string) {
+  const payload = {
+    personalizations: [{ to: [{ email: to }] }],
+    from: { email: "admin@v-hub.us", name: "V-HUB" },
+    subject,
+    content: [{ type: "text/html", value: html }],
+  };
+  const res = await fetch("https://api.sendgrid.com/v3/mail/send", {
     method: "POST",
-    headers: { Authorization: `Bearer ${accessToken}`, "Content-Type": "application/json" },
-    body: JSON.stringify({ raw: encoded }),
+    headers: {
+      Authorization: `Bearer ${SENDGRID_API_KEY}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(payload),
   });
-  if (!res.ok) throw new Error("Gmail send failed: " + await res.text());
-  return res.json();
+  if (!res.ok && res.status !== 202) {
+    const err = await res.text();
+    throw new Error("SendGrid send failed: " + err);
+  }
 }
 
 Deno.serve(async (req) => {
@@ -56,7 +50,6 @@ Deno.serve(async (req) => {
       if (!email) return Response.json({ error: "Email required" }, { status: 400 });
 
       const isAdmin = ADMIN_EMAILS.includes(email);
-      const { accessToken } = await base44.asServiceRole.connectors.getConnection("gmail");
 
       if (!isAdmin) {
         // Alert admins
@@ -73,7 +66,7 @@ Deno.serve(async (req) => {
             <p style="color:#999;font-size:11px;margin:0;">Time: ${new Date().toLocaleString("en-US", { timeZone: "America/Detroit" })} ET</p>
           </div>`;
         for (const a of ALERT_EMAILS) {
-try { await sendEmail(accessToken, a, "V-Hub Admin - Unauthorized Access Attempt", alertHtml); } catch (_) {}
+          try { await sendEmail(a, "V-Hub Admin - Unauthorized Access Attempt", alertHtml); } catch (_) {}
         }
         return Response.json({ status: "not_admin" });
       }
@@ -84,7 +77,7 @@ try { await sendEmail(accessToken, a, "V-Hub Admin - Unauthorized Access Attempt
       await base44.asServiceRole.entities.AdminMagicLink.create({ email, token, expires_at: expiresAt, used: false });
 
       const magicUrl = `${APP_URL}/Wekcadmin?token=${token}`;
-      const firstName = email.includes("kim") ? "Kimberly" : "Admin";
+      const firstName = email.includes("kim") || email.includes("bebegurlz") ? "Kimberly" : "Admin";
 
       const linkHtml = `
         <div style="font-family:Arial,sans-serif;max-width:580px;margin:0 auto;">
@@ -103,7 +96,7 @@ try { await sendEmail(accessToken, a, "V-Hub Admin - Unauthorized Access Attempt
           </div>
         </div>`;
 
-      await sendEmail(accessToken, email, "Your V-Hub Admin Login Link", linkHtml);
+      await sendEmail(email, "Your V-Hub Admin Login Link", linkHtml);
       return Response.json({ status: "sent", email });
     }
 
