@@ -142,7 +142,7 @@ async function sendClassifiedsConfirmEmail(opts: {
       <table style="width:100%;border-collapse:collapse;font-size:14px;color:#3A1A00;">
         <tr><td style="padding:5px 0;color:#2E7D32;">Business</td><td style="text-align:right;font-weight:700;">${businessName}</td></tr>
         <tr><td style="padding:5px 0;color:#2E7D32;">Headline</td><td style="text-align:right;font-weight:700;">${headline}</td></tr>
-        <tr><td style="padding:5px 0;color:#2E7D32;">Amount Paid</td><td style="text-align:right;font-weight:900;color:#2E7D32;">$20.00</td></tr>
+        <tr><td style="padding:5px 0;color:#2E7D32;">Amount Paid</td><td style="text-align:right;font-weight:900;color:#2E7D32;">$10.00</td></tr>
         <tr><td style="padding:5px 0;color:#2E7D32;">Runs Through</td><td style="text-align:right;font-weight:700;">${expiresDate}</td></tr>
       </table>
     </div>
@@ -182,7 +182,7 @@ Deno.serve(async (req) => {
   if (event.type === "checkout.session.completed") {
     const session = event.data.object as Stripe.Checkout.Session;
 
-    // ── ONE-TIME PAYMENT: Classifieds weekly $20 ──────────────────────────
+    // ── ONE-TIME PAYMENT: Classifieds weekly $10 ──────────────────────────
     if (session.mode === "payment") {
       const providerRecordId = session.metadata?.provider_record_id;
       const addonType        = session.metadata?.addon_type;
@@ -277,16 +277,16 @@ Deno.serve(async (req) => {
           const adminEmails = ["kimberlycook1980@gmail.com"];
           for (const adminEmail of adminEmails) {
             await sendEmail(adminEmail,
-              `💳 New Classifieds Payment — ${provider?.business_name || providerRecordId} ($20)`,
+              `💳 New Classifieds Payment — ${provider?.business_name || providerRecordId} ($10)`,
               emailWrapper("NEW AD PAYMENT", `
                 <p style="color:#1A0A00;font-size:15px;line-height:1.7;">
-                  A provider just paid $20 for a Deals of the Week ad.
+                  A provider just paid $10 for a Deals of the Week ad.
                 </p>
                 <div style="background:#E8F5E9;border:2px solid #2E7D32;border-radius:10px;padding:16px 20px;margin-bottom:16px;">
                   <table style="width:100%;border-collapse:collapse;font-size:14px;color:#3A1A00;">
                     <tr><td style="padding:5px 0;color:#2E7D32;">Business</td><td style="text-align:right;font-weight:700;">${provider?.business_name || providerRecordId}</td></tr>
                     <tr><td style="padding:5px 0;color:#2E7D32;">Ad Headline</td><td style="text-align:right;font-weight:700;">${activatedHeadline || "(blank)"}</td></tr>
-                    <tr><td style="padding:5px 0;color:#2E7D32;">Amount</td><td style="text-align:right;font-weight:900;color:#2E7D32;">$20.00</td></tr>
+                    <tr><td style="padding:5px 0;color:#2E7D32;">Amount</td><td style="text-align:right;font-weight:900;color:#2E7D32;">$10.00</td></tr>
                     <tr><td style="padding:5px 0;color:#2E7D32;">Runs Through</td><td style="text-align:right;font-weight:700;">${expiresStr}</td></tr>
                     <tr><td style="padding:5px 0;color:#2E7D32;">Provider Email</td><td style="text-align:right;">${providerEmail}</td></tr>
                   </table>

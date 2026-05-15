@@ -975,7 +975,7 @@ function LoginScreen({ onLogin, onForgot }) {
 //   saved_images[]  → up to 3 stored image URLs per ad
 //
 // Flow: Build ad → save to queue → preview it → mark "next" →
-//       pay $20 via Stripe → goes live immediately for 10 days.
+//       pay $10 via Stripe → goes live immediately for 10 days.
 //       NOT charged again until they manually launch another ad.
 
 function ClassifiedAdSection({ provider, refreshKey = 0 }) {
@@ -1262,7 +1262,7 @@ function ClassifiedAdSection({ provider, refreshKey = 0 }) {
           <div style={{ fontSize: 12, color: INK_FADE, fontFamily: SANS, lineHeight: 1.8, marginBottom: 14 }}>
             <span style={{ color: NAVY, fontWeight: 700 }}>Step 1</span> — Build your ad (headline, image, description)<br/>
             <span style={{ color: NAVY, fontWeight: 700 }}>Step 2</span> — Preview it exactly as visitors will see it<br/>
-            <span style={{ color: NAVY, fontWeight: 700 }}>Step 3</span> — Pay <strong>$20</strong> via Stripe · runs 10 days · no auto-charge
+            <span style={{ color: NAVY, fontWeight: 700 }}>Step 3</span> — Pay <strong>$10</strong> via Stripe · runs 10 days · no auto-charge
           </div>
           <button data-testid="create-first-ad-btn" onClick={() => { setDealTypeStep(true); setTimeout(() => sectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 50); }} style={{ background: `linear-gradient(180deg,#9A6030,${BROWN_BTN})`, color: PAPER, border: `2px solid ${NAVY}`, borderRadius: 6, padding: "11px 28px", fontSize: 13, fontWeight: 900, cursor: "pointer", fontFamily: SERIF }}>
             ✚ Create My First Ad
@@ -1300,8 +1300,8 @@ function ClassifiedAdSection({ provider, refreshKey = 0 }) {
           <div style={{ fontSize: 12, color: INK, fontFamily: SANS, lineHeight: 1.7, marginBottom: 10 }}>
             <strong>"{liveAd.headline}"</strong> has expired.{" "}
             {nextUp
-              ? <>Pick <strong>"{nextUp.headline}"</strong> below and pay <strong>$20</strong> to go live for another 10 days.</>
-              : <>Build a new ad or mark a queued one "Next Up", then pay <strong>$20</strong> to go live.</>}
+              ? <>Pick <strong>"{nextUp.headline}"</strong> below and pay <strong>$10</strong> to go live for another 10 days.</>
+              : <>Build a new ad or mark a queued one "Next Up", then pay <strong>$10</strong> to go live.</>}
           </div>
           {checkoutErr && <div style={{ marginTop: 8, fontSize: 12, color: "#c00", fontFamily: SANS }}>{checkoutErr}</div>}
         </div>
@@ -1357,12 +1357,12 @@ function ClassifiedAdSection({ provider, refreshKey = 0 }) {
             ✅ Ready to Launch — <span style={{ color: INK }}>"{nextUp.headline}"</span>
           </div>
           <div style={{ fontSize: 12, color: INK_FADE, fontFamily: SANS, lineHeight: 1.7, marginBottom: 10 }}>
-            Pay <strong style={{ color: INK }}>$20</strong> to go live for <strong style={{ color: INK }}>10 days</strong>. You won't be charged again unless you launch another ad.
+            Pay <strong style={{ color: INK }}>$10</strong> to go live for <strong style={{ color: INK }}>10 days</strong>. You won't be charged again unless you launch another ad.
           </div>
           <div style={{ display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center" }}>
             <button disabled={checkoutLoading} onClick={() => handleCheckout(nextUp)}
               style={{ background: "linear-gradient(180deg,#1A6B3C,#145530)", color: "#fff", border: "2px solid #1A6B3C", borderRadius: 6, padding: "11px 28px", fontSize: 13, fontWeight: 900, cursor: checkoutLoading ? "not-allowed" : "pointer", fontFamily: SERIF, opacity: checkoutLoading ? 0.7 : 1 }}>
-              {checkoutLoading ? "Redirecting to Stripe…" : `💳 Pay $20 — Launch Ad for 10 Days →`}
+              {checkoutLoading ? "Redirecting to Stripe…" : `💳 Pay $10 — Launch Ad for 10 Days →`}
             </button>
             <button onClick={() => openPreviewQueued(nextUp)} style={{ background: "none", border: `1.5px solid ${TEAL}`, color: TEAL, borderRadius: 6, padding: "10px 16px", fontSize: 12, cursor: "pointer", fontFamily: SANS, fontWeight: 700 }}>👁 Preview First</button>
           </div>
@@ -1373,7 +1373,7 @@ function ClassifiedAdSection({ provider, refreshKey = 0 }) {
       {/* Hint: they have queued ads but haven't marked one Next */}
       {queued.length > 0 && !nextUp && editingSlot === null && (
         <div style={{ background: "#EFF8FF", border: "1.5px solid #1565C0", borderRadius: 8, padding: "10px 14px", marginBottom: 14, fontSize: 12, color: "#1565C0", fontFamily: SANS, lineHeight: 1.7 }}>
-          ⏭ <strong>Ready to go live?</strong> Click <strong>"Set Next"</strong> on the ad you want to run, then pay $20 to launch it for 10 days.
+          ⏭ <strong>Ready to go live?</strong> Click <strong>"Set Next"</strong> on the ad you want to run, then pay $10 to launch it for 10 days.
         </div>
       )}
 
@@ -1564,13 +1564,13 @@ function ClassifiedAdSection({ provider, refreshKey = 0 }) {
                     <div style={{ fontSize: 13, fontWeight: 900, color: "#1B5E20", fontFamily: SERIF, marginBottom: 6 }}>✅ Ad saved!</div>
                     <div style={{ fontSize: 12, color: INK_FADE, fontFamily: SANS, lineHeight: 1.8, marginBottom: 12 }}>
                       Your ad <strong style={{ color: INK }}>"{savedAdRecord.headline}"</strong> is ready.<br/>
-                      Preview it first, then pay <strong style={{ color: INK }}>$20</strong> to post it live for <strong style={{ color: INK }}>10 days</strong>.<br/>
+                      Preview it first, then pay <strong style={{ color: INK }}>$10</strong> to post it live for <strong style={{ color: INK }}>10 days</strong>.<br/>
                       <span style={{ fontSize: 11 }}>You won't be charged again unless you manually launch another ad.</span>
                     </div>
                     <div style={{ display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center" }}>
                       <button data-testid="pay-now-btn" disabled={checkoutLoading} onClick={() => { closeEdit(); handleCheckout(savedAdRecord); }}
                         style={{ background: "linear-gradient(180deg,#1A6B3C,#145530)", color: "#fff", border: "2px solid #1A6B3C", borderRadius: 6, padding: "11px 24px", fontSize: 13, fontWeight: 900, cursor: checkoutLoading ? "not-allowed" : "pointer", fontFamily: SERIF, opacity: checkoutLoading ? 0.7 : 1 }}>
-                        {checkoutLoading ? "Redirecting to Stripe…" : "💳 Pay $20 — Post Live for 10 Days →"}
+                        {checkoutLoading ? "Redirecting to Stripe…" : "💳 Pay $10 — Post Live for 10 Days →"}
                       </button>
                       <button onClick={() => { setPreviewAd({ ...savedAdRecord, image_url: filePreview || savedAdRecord.image_url }); setPreviewFromEditor(false); }}
                         style={{ background: "none", border: `1.5px solid ${TEAL}`, color: TEAL, borderRadius: 6, padding: "10px 16px", fontSize: 12, cursor: "pointer", fontFamily: SANS, fontWeight: 700 }}>
@@ -1610,7 +1610,7 @@ function ClassifiedAdSection({ provider, refreshKey = 0 }) {
       {editingSlot === null && (
         <div style={{ fontSize: 11, color: INK_FADE, fontFamily: SANS, lineHeight: 1.9, background: PAPER, border: `1px solid ${PAPER_DK}`, borderRadius: 6, padding: "8px 12px" }}>
           <strong style={{ fontFamily: SERIF, color: INK }}>How Deals of the Week works:</strong>{" "}
-          Build up to 3 ads · Upload your own image or use AI to generate one · Preview exactly how it will look · Mark one "Next Up" · Pay <strong>$20</strong> → runs live for <strong>10 days</strong> · You're never auto-charged again
+          Build up to 3 ads · Upload your own image or use AI to generate one · Preview exactly how it will look · Mark one "Next Up" · Pay <strong>$10</strong> → runs live for <strong>10 days</strong> · You're never auto-charged again
         </div>
       )}
 
@@ -1682,7 +1682,7 @@ function ClassifiedAdSection({ provider, refreshKey = 0 }) {
                   {nextUp?.id === previewAd.id && (
                     <button disabled={checkoutLoading} onClick={() => { setPreviewAd(null); handleCheckout(previewAd); }}
                       style={{ background: "linear-gradient(180deg,#1A6B3C,#145530)", color: "#fff", border: "2px solid #1A6B3C", borderRadius: 6, padding: "10px 22px", fontSize: 13, fontWeight: 900, cursor: "pointer", fontFamily: SERIF }}>
-                      {checkoutLoading ? "Redirecting…" : "💳 Looks good — Pay $20 & Go Live →"}
+                      {checkoutLoading ? "Redirecting…" : "💳 Looks good — Pay $10 & Go Live →"}
                     </button>
                   )}
                   <button onClick={() => setPreviewAd(null)} style={{ background: "none", border: `1.5px solid ${PAPER_DK}`, color: PAPER, borderRadius: 6, padding: "8px 18px", fontSize: 12, cursor: "pointer", fontFamily: SANS }}>✕ Close</button>
@@ -2996,7 +2996,7 @@ export default function ProviderDashboard() {
         {/* ── CLASSIFIED AD SECTION ─────────────────────────── */}
         <div style={{ ...shS, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <span>📰 Deals of the Week</span>
-          <span style={{ fontSize: 10, fontWeight: 400, color: INK_FADE, fontFamily: SANS, letterSpacing: 0.5 }}>$20/10 days · no auto-charge</span>
+          <span style={{ fontSize: 10, fontWeight: 400, color: INK_FADE, fontFamily: SANS, letterSpacing: 0.5 }}>$10/10 days · no auto-charge</span>
         </div>
         <ClassifiedAdSection provider={provider} refreshKey={adsRefreshKey} />
 

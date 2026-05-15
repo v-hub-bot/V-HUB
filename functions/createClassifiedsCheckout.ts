@@ -1,4 +1,4 @@
-// Classifieds Ad Checkout — $20 one-time payment for 10 days
+// Classifieds Ad Checkout — $10 one-time payment for 10 days
 import Stripe from "npm:stripe@14";
 
 Deno.serve(async (req) => {
@@ -26,7 +26,7 @@ Deno.serve(async (req) => {
       line_items: [{
         price_data: {
           currency: "usd",
-          unit_amount: 2000, // $20.00
+          unit_amount: 1000, // $10.00
           product_data: {
             name: "V-Hub Deals of the Week — 10-Day Ad",
             description: `Your ad runs on V-Hub's Deals of the Week page for 10 days (through ${adEndStr}).`,
