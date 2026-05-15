@@ -136,19 +136,19 @@ async function sendClassifiedsConfirmEmail(opts: {
   const { to, ownerName, businessName, headline, expiresDate } = opts;
   const body = `
     <p style="color:#1A0A00;font-size:17px;font-weight:700;margin:0 0 6px;">Hi ${ownerName},</p>
-    <p style="color:#5A3010;font-size:15px;line-height:1.7;margin:0 0 16px;">Your Deal of the Week ad for <strong>${businessName}</strong> is now <strong>live</strong> on V-Hub!</p>
+    <p style="color:#5A3010;font-size:15px;line-height:1.7;margin:0 0 16px;">Your Weekly Featured ad for <strong>${businessName}</strong> is now <strong>live</strong> on V-Hub!</p>
     <div style="background:#E8F5E9;border:2px solid #2E7D32;border-radius:10px;padding:20px 24px;margin-bottom:20px;">
       <div style="font-size:13px;font-weight:900;color:#1B5E20;letter-spacing:1px;margin-bottom:10px;text-transform:uppercase;">🟢 Ad Details</div>
       <table style="width:100%;border-collapse:collapse;font-size:14px;color:#3A1A00;">
         <tr><td style="padding:5px 0;color:#2E7D32;">Business</td><td style="text-align:right;font-weight:700;">${businessName}</td></tr>
         <tr><td style="padding:5px 0;color:#2E7D32;">Headline</td><td style="text-align:right;font-weight:700;">${headline}</td></tr>
-        <tr><td style="padding:5px 0;color:#2E7D32;">Amount Paid</td><td style="text-align:right;font-weight:900;color:#2E7D32;">$10.00</td></tr>
+        <tr><td style="padding:5px 0;color:#2E7D32;">Amount Paid</td><td style="text-align:right;font-weight:900;color:#2E7D32;">$20.00</td></tr>
         <tr><td style="padding:5px 0;color:#2E7D32;">Runs Through</td><td style="text-align:right;font-weight:700;">${expiresDate}</td></tr>
       </table>
     </div>
-    <p style="color:#5A3010;font-size:14px;line-height:1.7;">Your ad is now visible on the <a href="${APP_URL}/Classifieds" style="color:#C9973A;">Deals of the Week</a> page — searchable by village and keyword.</p>
+    <p style="color:#5A3010;font-size:14px;line-height:1.7;">Your ad is now visible on the <a href="${APP_URL}/Classifieds" style="color:#C9973A;">Weekly Featured</a> page — searchable by village and keyword.</p>
     <p style="color:#5A3010;font-size:13px;line-height:1.7;margin-top:12px;">When your ad ends, log back in to your <a href="${APP_URL}/ProviderDashboard" style="color:#C9973A;">Provider Hub</a> to select your next ad and pay to run another week. Questions? <a href="mailto:admin@v-hub.us" style="color:#E8431A;font-weight:700;">admin@v-hub.us</a></p>`;
-  await sendEmail(to, `🏷️ Your V-Hub Deal is Live! Runs through ${expiresDate}`, emailWrapper("YOUR AD IS LIVE!", body));
+  await sendEmail(to, `🌟 Your V-Hub Weekly Featured Ad is Live! Runs through ${expiresDate}`, emailWrapper("YOUR FEATURED AD IS LIVE!", body));
 }
 
 // ── Main handler ─────────────────────────────────────────────────────────────
@@ -182,7 +182,7 @@ Deno.serve(async (req) => {
   if (event.type === "checkout.session.completed") {
     const session = event.data.object as Stripe.Checkout.Session;
 
-    // ── ONE-TIME PAYMENT: Classifieds weekly $10 ──────────────────────────
+    // ── ONE-TIME PAYMENT: Weekly Featured $20 ──────────────────────────
     if (session.mode === "payment") {
       const providerRecordId = session.metadata?.provider_record_id;
       const addonType        = session.metadata?.addon_type;
@@ -248,7 +248,7 @@ Deno.serve(async (req) => {
                 is_active: true,
                 deal_expires_at: expiresIso,
                 classifieds_stripe_subscription_id: session.id,
-                headline: "New Deal — Coming Soon",
+                headline: "New Weekly Featured — Coming Soon",
                 body: "",
                 village: provider?.address || "",
               });
@@ -277,16 +277,16 @@ Deno.serve(async (req) => {
           const adminEmails = ["kimberlycook1980@gmail.com"];
           for (const adminEmail of adminEmails) {
             await sendEmail(adminEmail,
-              `💳 New Classifieds Payment — ${provider?.business_name || providerRecordId} ($10)`,
+              `💳 New Classifieds Payment — ${provider?.business_name || providerRecordId} ($20)`,
               emailWrapper("NEW AD PAYMENT", `
                 <p style="color:#1A0A00;font-size:15px;line-height:1.7;">
-                  A provider just paid $10 for a Deals of the Week ad.
+                  A provider just paid $20 for a Weekly Featured ad.
                 </p>
                 <div style="background:#E8F5E9;border:2px solid #2E7D32;border-radius:10px;padding:16px 20px;margin-bottom:16px;">
                   <table style="width:100%;border-collapse:collapse;font-size:14px;color:#3A1A00;">
                     <tr><td style="padding:5px 0;color:#2E7D32;">Business</td><td style="text-align:right;font-weight:700;">${provider?.business_name || providerRecordId}</td></tr>
                     <tr><td style="padding:5px 0;color:#2E7D32;">Ad Headline</td><td style="text-align:right;font-weight:700;">${activatedHeadline || "(blank)"}</td></tr>
-                    <tr><td style="padding:5px 0;color:#2E7D32;">Amount</td><td style="text-align:right;font-weight:900;color:#2E7D32;">$10.00</td></tr>
+                    <tr><td style="padding:5px 0;color:#2E7D32;">Amount</td><td style="text-align:right;font-weight:900;color:#2E7D32;">$20.00</td></tr>
                     <tr><td style="padding:5px 0;color:#2E7D32;">Runs Through</td><td style="text-align:right;font-weight:700;">${expiresStr}</td></tr>
                     <tr><td style="padding:5px 0;color:#2E7D32;">Provider Email</td><td style="text-align:right;">${providerEmail}</td></tr>
                   </table>

@@ -975,7 +975,7 @@ function LoginScreen({ onLogin, onForgot }) {
 //   saved_images[]  → up to 3 stored image URLs per ad
 //
 // Flow: Build ad → save to queue → preview it → mark "next" →
-//       pay $10 via Stripe → goes live immediately for 10 days.
+//       pay $20 via Stripe → goes live immediately for 10 days.
 //       NOT charged again until they manually launch another ad.
 
 function ClassifiedAdSection({ provider, refreshKey = 0 }) {
@@ -1226,7 +1226,7 @@ function ClassifiedAdSection({ provider, refreshKey = 0 }) {
   const openPreviewFromEditor = () => {
     setPreviewAd({
       headline:      form.headline || "Your Headline Here",
-      body:          form.body     || "Your deal description here.",
+      body:          form.body     || "Your featured ad description here.",
       village:       "",
       address:       provider.address || "",
       image_url:     filePreview   || form.image_url || "",
@@ -1258,11 +1258,11 @@ function ClassifiedAdSection({ provider, refreshKey = 0 }) {
       {!liveAd && queued.length === 0 && editingSlot === null && (
         <div style={{ background: PAPER_MID, border: `2px dashed ${PAPER_DK}`, borderRadius: 10, padding: "20px 16px", textAlign: "center", marginBottom: 14 }}>
           <div style={{ fontSize: 22, marginBottom: 8 }}>📣</div>
-          <div style={{ fontSize: 14, fontWeight: 900, color: INK, fontFamily: SERIF, marginBottom: 6 }}>Advertise on Deals of the Week</div>
+          <div style={{ fontSize: 14, fontWeight: 900, color: INK, fontFamily: SERIF, marginBottom: 6 }}>Advertise on Weekly Featured</div>
           <div style={{ fontSize: 12, color: INK_FADE, fontFamily: SANS, lineHeight: 1.8, marginBottom: 14 }}>
             <span style={{ color: NAVY, fontWeight: 700 }}>Step 1</span> — Build your ad (headline, image, description)<br/>
             <span style={{ color: NAVY, fontWeight: 700 }}>Step 2</span> — Preview it exactly as visitors will see it<br/>
-            <span style={{ color: NAVY, fontWeight: 700 }}>Step 3</span> — Pay <strong>$10</strong> via Stripe · runs 10 days · no auto-charge
+            <span style={{ color: NAVY, fontWeight: 700 }}>Step 3</span> — Pay <strong>$20</strong> via Stripe · runs 10 days · no auto-charge
           </div>
           <button data-testid="create-first-ad-btn" onClick={() => { setDealTypeStep(true); setTimeout(() => sectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 50); }} style={{ background: `linear-gradient(180deg,#9A6030,${BROWN_BTN})`, color: PAPER, border: `2px solid ${NAVY}`, borderRadius: 6, padding: "11px 28px", fontSize: 13, fontWeight: 900, cursor: "pointer", fontFamily: SERIF }}>
             ✚ Create My First Ad
@@ -1300,8 +1300,8 @@ function ClassifiedAdSection({ provider, refreshKey = 0 }) {
           <div style={{ fontSize: 12, color: INK, fontFamily: SANS, lineHeight: 1.7, marginBottom: 10 }}>
             <strong>"{liveAd.headline}"</strong> has expired.{" "}
             {nextUp
-              ? <>Pick <strong>"{nextUp.headline}"</strong> below and pay <strong>$10</strong> to go live for another 10 days.</>
-              : <>Build a new ad or mark a queued one "Next Up", then pay <strong>$10</strong> to go live.</>}
+              ? <>Pick <strong>"{nextUp.headline}"</strong> below and pay <strong>$20</strong> to go live for another 10 days.</>
+              : <>Build a new ad or mark a queued one "Next Up", then pay <strong>$20</strong> to go live.</>}
           </div>
           {checkoutErr && <div style={{ marginTop: 8, fontSize: 12, color: "#c00", fontFamily: SANS }}>{checkoutErr}</div>}
         </div>
@@ -1357,12 +1357,12 @@ function ClassifiedAdSection({ provider, refreshKey = 0 }) {
             ✅ Ready to Launch — <span style={{ color: INK }}>"{nextUp.headline}"</span>
           </div>
           <div style={{ fontSize: 12, color: INK_FADE, fontFamily: SANS, lineHeight: 1.7, marginBottom: 10 }}>
-            Pay <strong style={{ color: INK }}>$10</strong> to go live for <strong style={{ color: INK }}>10 days</strong>. You won't be charged again unless you launch another ad.
+            Pay <strong style={{ color: INK }}>$20</strong> to go live for <strong style={{ color: INK }}>10 days</strong>. You won't be charged again unless you launch another ad.
           </div>
           <div style={{ display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center" }}>
             <button disabled={checkoutLoading} onClick={() => handleCheckout(nextUp)}
               style={{ background: "linear-gradient(180deg,#1A6B3C,#145530)", color: "#fff", border: "2px solid #1A6B3C", borderRadius: 6, padding: "11px 28px", fontSize: 13, fontWeight: 900, cursor: checkoutLoading ? "not-allowed" : "pointer", fontFamily: SERIF, opacity: checkoutLoading ? 0.7 : 1 }}>
-              {checkoutLoading ? "Redirecting to Stripe…" : `💳 Pay $10 — Launch Ad for 10 Days →`}
+              {checkoutLoading ? "Redirecting to Stripe…" : `💳 Pay $20 — Launch Ad for 10 Days →`}
             </button>
             <button onClick={() => openPreviewQueued(nextUp)} style={{ background: "none", border: `1.5px solid ${TEAL}`, color: TEAL, borderRadius: 6, padding: "10px 16px", fontSize: 12, cursor: "pointer", fontFamily: SANS, fontWeight: 700 }}>👁 Preview First</button>
           </div>
@@ -1373,7 +1373,7 @@ function ClassifiedAdSection({ provider, refreshKey = 0 }) {
       {/* Hint: they have queued ads but haven't marked one Next */}
       {queued.length > 0 && !nextUp && editingSlot === null && (
         <div style={{ background: "#EFF8FF", border: "1.5px solid #1565C0", borderRadius: 8, padding: "10px 14px", marginBottom: 14, fontSize: 12, color: "#1565C0", fontFamily: SANS, lineHeight: 1.7 }}>
-          ⏭ <strong>Ready to go live?</strong> Click <strong>"Set Next"</strong> on the ad you want to run, then pay $10 to launch it for 10 days.
+          ⏭ <strong>Ready to go live?</strong> Click <strong>"Set Next"</strong> on the ad you want to run, then pay $20 to launch it for 10 days.
         </div>
       )}
 
@@ -1388,7 +1388,7 @@ function ClassifiedAdSection({ provider, refreshKey = 0 }) {
       {dealTypeStep && editingSlot === null && (
         <div style={{ background: PAPER_MID, border: `2px solid ${PAPER_DK}`, borderRadius: 10, padding: "18px 14px", marginBottom: 14 }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
-            <div style={{ fontSize: 14, fontWeight: 900, color: INK, fontFamily: SERIF }}>📣 What kind of deal do you want to run?</div>
+            <div style={{ fontSize: 14, fontWeight: 900, color: INK, fontFamily: SERIF }}>📣 What kind of featured ad do you want to run?</div>
             <button onClick={() => setDealTypeStep(false)} style={{ background: "none", border: "none", fontSize: 20, cursor: "pointer", color: INK_FADE }}>✕</button>
           </div>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
@@ -1430,9 +1430,9 @@ function ClassifiedAdSection({ provider, refreshKey = 0 }) {
               <div style={{ fontSize: 10, color: INK_FADE, fontFamily: SANS, textAlign: "right" }}>{form.headline.length}/80</div>
             </div>
             <div style={{ gridColumn: "1/-1" }}>
-              <label style={lbS}>Deal Description * <span style={{ fontSize: 10, fontWeight: 400, textTransform: "none" }}>(max 300 chars)</span></label>
+              <label style={lbS}>Ad Description * <span style={{ fontSize: 10, fontWeight: 400, textTransform: "none" }}>(max 300 chars)</span></label>
               <textarea data-testid="ad-body-input" style={{ ...inS, minHeight: 80, resize: "vertical", lineHeight: 1.6 }}
-                placeholder="Describe your deal — what it is, how to redeem it, any conditions…"
+                placeholder="Describe your featured offer — what it is, how to redeem it, any conditions…"
                 value={form.body} onChange={e => setForm(p => ({ ...p, body: e.target.value.slice(0,300) }))} />
               <div style={{ fontSize: 10, color: INK_FADE, fontFamily: SANS, textAlign: "right" }}>{form.body.length}/300</div>
             </div>
@@ -1564,13 +1564,13 @@ function ClassifiedAdSection({ provider, refreshKey = 0 }) {
                     <div style={{ fontSize: 13, fontWeight: 900, color: "#1B5E20", fontFamily: SERIF, marginBottom: 6 }}>✅ Ad saved!</div>
                     <div style={{ fontSize: 12, color: INK_FADE, fontFamily: SANS, lineHeight: 1.8, marginBottom: 12 }}>
                       Your ad <strong style={{ color: INK }}>"{savedAdRecord.headline}"</strong> is ready.<br/>
-                      Preview it first, then pay <strong style={{ color: INK }}>$10</strong> to post it live for <strong style={{ color: INK }}>10 days</strong>.<br/>
+                      Preview it first, then pay <strong style={{ color: INK }}>$20</strong> to post it live for <strong style={{ color: INK }}>10 days</strong>.<br/>
                       <span style={{ fontSize: 11 }}>You won't be charged again unless you manually launch another ad.</span>
                     </div>
                     <div style={{ display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center" }}>
                       <button data-testid="pay-now-btn" disabled={checkoutLoading} onClick={() => { closeEdit(); handleCheckout(savedAdRecord); }}
                         style={{ background: "linear-gradient(180deg,#1A6B3C,#145530)", color: "#fff", border: "2px solid #1A6B3C", borderRadius: 6, padding: "11px 24px", fontSize: 13, fontWeight: 900, cursor: checkoutLoading ? "not-allowed" : "pointer", fontFamily: SERIF, opacity: checkoutLoading ? 0.7 : 1 }}>
-                        {checkoutLoading ? "Redirecting to Stripe…" : "💳 Pay $10 — Post Live for 10 Days →"}
+                        {checkoutLoading ? "Redirecting to Stripe…" : "💳 Pay $20 — Post Live for 10 Days →"}
                       </button>
                       <button onClick={() => { setPreviewAd({ ...savedAdRecord, image_url: filePreview || savedAdRecord.image_url }); setPreviewFromEditor(false); }}
                         style={{ background: "none", border: `1.5px solid ${TEAL}`, color: TEAL, borderRadius: 6, padding: "10px 16px", fontSize: 12, cursor: "pointer", fontFamily: SANS, fontWeight: 700 }}>
@@ -1609,8 +1609,8 @@ function ClassifiedAdSection({ provider, refreshKey = 0 }) {
       {/* ── HOW IT WORKS ── */}
       {editingSlot === null && (
         <div style={{ fontSize: 11, color: INK_FADE, fontFamily: SANS, lineHeight: 1.9, background: PAPER, border: `1px solid ${PAPER_DK}`, borderRadius: 6, padding: "8px 12px" }}>
-          <strong style={{ fontFamily: SERIF, color: INK }}>How Deals of the Week works:</strong>{" "}
-          Build up to 3 ads · Upload your own image or use AI to generate one · Preview exactly how it will look · Mark one "Next Up" · Pay <strong>$10</strong> → runs live for <strong>10 days</strong> · You're never auto-charged again
+          <strong style={{ fontFamily: SERIF, color: INK }}>How Weekly Featured works:</strong>{" "}
+          Build up to 3 ads · Upload your own image or use AI to generate one · Preview exactly how it will look · Mark one "Next Up" · Pay <strong>$20</strong> → runs live for <strong>10 days</strong> · You're never auto-charged again
         </div>
       )}
 
@@ -1643,7 +1643,7 @@ function ClassifiedAdSection({ provider, refreshKey = 0 }) {
               return (
                 <div style={{ background:"#F0E6C8", border:"2px solid #1C0F00", display:"flex", flexDirection:"column", overflow:"hidden", boxShadow:"3px 3px 12px rgba(0,0,0,0.4)" }}>
                   <div style={{ background:"#1C0F00", padding:"10px 14px 9px", textAlign:"center" }}>
-                    <div style={{ fontSize:9, color:"#C8B07A", fontFamily:SANS, letterSpacing:2, textTransform:"uppercase", marginBottom:4 }}>✦ Deal of the Week ✦</div>
+                    <div style={{ fontSize:9, color:"#C8B07A", fontFamily:SANS, letterSpacing:2, textTransform:"uppercase", marginBottom:4 }}>✦ Weekly Featured ✦</div>
                     <div style={{ fontSize:17, fontWeight:900, color:YELLOW, textTransform:"uppercase", letterSpacing:0.5, lineHeight:1.25, fontFamily:SERIF }}>{ad.headline || "Your Headline Here"}</div>
                     {badge}
                   </div>
@@ -1653,7 +1653,7 @@ function ClassifiedAdSection({ provider, refreshKey = 0 }) {
                   {!ad.image_url && (
                     <div style={{ width:"100%", height:100, background:PAPER_MID, display:"flex", alignItems:"center", justifyContent:"center", fontSize:13, color:INK_FADE, fontFamily:SANS, fontStyle:"italic" }}>No image selected</div>
                   )}
-                  <div style={{ padding:"14px 16px 8px", fontSize:14, color:"#1C0F00", lineHeight:1.8, fontFamily:SERIF }}>{ad.body || "Your deal description will appear here."}</div>
+                  <div style={{ padding:"14px 16px 8px", fontSize:14, color:"#1C0F00", lineHeight:1.8, fontFamily:SERIF }}>{ad.body || "Your featured ad description will appear here."}</div>
                   {/* Location info — smart display based on mobile/B&M/hybrid */}
                   <div style={{ padding:"2px 16px 10px", display:"flex", flexDirection:"column", gap:3 }}>
                     {ad._provider_is_mobile && Array.isArray(ad._provider_areas) && ad._provider_areas.length > 0 && (
@@ -1682,7 +1682,7 @@ function ClassifiedAdSection({ provider, refreshKey = 0 }) {
                   {nextUp?.id === previewAd.id && (
                     <button disabled={checkoutLoading} onClick={() => { setPreviewAd(null); handleCheckout(previewAd); }}
                       style={{ background: "linear-gradient(180deg,#1A6B3C,#145530)", color: "#fff", border: "2px solid #1A6B3C", borderRadius: 6, padding: "10px 22px", fontSize: 13, fontWeight: 900, cursor: "pointer", fontFamily: SERIF }}>
-                      {checkoutLoading ? "Redirecting…" : "💳 Looks good — Pay $10 & Go Live →"}
+                      {checkoutLoading ? "Redirecting…" : "💳 Looks good — Pay $20 & Go Live →"}
                     </button>
                   )}
                   <button onClick={() => setPreviewAd(null)} style={{ background: "none", border: `1.5px solid ${PAPER_DK}`, color: PAPER, borderRadius: 6, padding: "8px 18px", fontSize: 12, cursor: "pointer", fontFamily: SANS }}>✕ Close</button>
@@ -1981,7 +1981,7 @@ function AnalyticsDashboard({ provider, reviews }) {
             {[
               { icon: "🔍", label: "Times You Appeared in Search", value: analytics.searches, sub: `${range}-day window`, color: TEAL },
               { icon: "👁", label: "People Clicked Your Profile", value: analytics.views, sub: `${range}-day window`, color: BROWN_BTN },
-              { icon: "📰", label: "Classified Ad Clicks", value: analytics.adClicks, sub: provider.classifieds_addon ? `${range}-day window` : "Add-on not active", color: "#7B3FA0" },
+              { icon: "📰", label: "Featured Ad Clicks", value: analytics.adClicks, sub: provider.classifieds_addon ? `${range}-day window` : "Add-on not active", color: "#7B3FA0" },
               { icon: "⭐", label: "Reviews", value: reviews.length, sub: "All time", color: "#B8860B" },
             ].map(({ icon, label, value, sub, color }) => (
               <div key={label} style={{ background: PAPER_MID, border: `1.5px solid ${PAPER_DK}`, borderRadius: 8, padding: "14px 12px", textAlign: "center" }}>
@@ -2878,7 +2878,7 @@ export default function ProviderDashboard() {
             <div style={{ fontSize: 28 }}>📣</div>
             <div>
               <div style={{ fontWeight: 900, color: "#1B5E20", fontSize: 15, fontFamily: SERIF }}>Ad Payment Successful — You're Live!</div>
-              <div style={{ fontSize: 13, color: "#2E7D32", fontFamily: SANS, marginTop: 3 }}>Your Deals of the Week ad is now visible to residents. It will run for 10 days from today.</div>
+              <div style={{ fontSize: 13, color: "#2E7D32", fontFamily: SANS, marginTop: 3 }}>Your Weekly Featured ad is now visible to residents. It will run for 10 days from today.</div>
             </div>
             <button onClick={() => setClassifiedsSuccess(false)} style={{ marginLeft: "auto", background: "transparent", border: "none", color: "#888", fontSize: 18, cursor: "pointer" }}>✕</button>
           </div>
@@ -2995,8 +2995,8 @@ export default function ProviderDashboard() {
 
         {/* ── CLASSIFIED AD SECTION ─────────────────────────── */}
         <div style={{ ...shS, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-          <span>📰 Deals of the Week</span>
-          <span style={{ fontSize: 10, fontWeight: 400, color: INK_FADE, fontFamily: SANS, letterSpacing: 0.5 }}>$10/10 days · no auto-charge</span>
+          <span>🌟 Weekly Featured</span>
+          <span style={{ fontSize: 10, fontWeight: 400, color: INK_FADE, fontFamily: SANS, letterSpacing: 0.5 }}>$20/10 days · no auto-charge</span>
         </div>
         <ClassifiedAdSection provider={provider} refreshKey={adsRefreshKey} />
 
