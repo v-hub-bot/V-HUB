@@ -13,6 +13,7 @@ GA_TOKEN     = os.environ.get("GOOGLE_ANALYTICS_ACCESS_TOKEN", "")
 GA_PROP      = "properties/534059288"
 BASE44_API   = "https://api.base44.app/api/apps/69d062aca815ce8e697894b1"
 RECIPIENTS   = ["kimberlycook1980@gmail.com", "evansrus@comcast.net"]
+BASE44_KEY   = os.environ.get("BASE44_API_KEY", "")
 
 # ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -20,7 +21,7 @@ def fetch_all(entity):
     all_records, skip = [], 0
     while True:
         url = f"{BASE44_API}/entities/{entity}?limit=500&skip={skip}"
-        req = urllib.request.Request(url, headers={"Content-Type": "application/json"})
+        req = urllib.request.Request(url, headers={"Content-Type": "application/json", "api_key": BASE44_KEY})
         try:
             with urllib.request.urlopen(req, timeout=30) as r:
                 batch = json.loads(r.read())
