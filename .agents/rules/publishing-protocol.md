@@ -27,12 +27,46 @@ The file `.agents/mini_apps.json` MUST have:
 - **Procedure when CDN bust is needed:**
   1. Kimberly publishes from builder (busts CDN)
   2. Immediately tells me "it's messed up"
-  3. I restore from latest checkpoint and republish — takes under 60 seconds
+  3. I restore from `checkpoint_may20_leads` (latest) and republish — takes under 60 seconds
   4. Done
 
-## ✅ GOLDEN CHECKPOINT — Apr 22 2026 ~5pm ET (analytics + clean data)
+---
 
-This is the official "bookmark" / restore point. All test data cleaned, analytics tab upgraded, live flows verified.
+## ✅ CURRENT GOLDEN CHECKPOINT — May 20 2026 ~12:30pm ET
+### Name: `checkpoint_may20_leads`
+
+### To restore ALL pages from this checkpoint:
+```bash
+cp pages/Home.jsx.checkpoint_may20_leads pages/Home.jsx
+cp pages/ProviderDashboard.jsx.checkpoint_may20_leads pages/ProviderDashboard.jsx
+cp pages/Wekcadmin.jsx.checkpoint_may20_leads pages/Wekcadmin.jsx
+cp pages/ListService.jsx.checkpoint_may20_leads pages/ListService.jsx
+cp pages/Classifieds.jsx.checkpoint_may20_leads pages/Classifieds.jsx
+```
+Then run `manage_app(publish)`.
+
+### What's in this checkpoint:
+- ✅ **Contact Provider Lead Form** — on every provider detail page. Collects name, email, phone, message. Saves to LeadInquiry entity + emails provider instantly via SendGrid
+- ✅ **submitLead backend function** — deployed and live, tested working
+- ✅ **service_name bug fixed** — search_appearance events now correctly record which service was searched
+- ✅ **village_search tracking** — fires on every village dropdown selection
+- ✅ **search_performed tracking** — fires one site-level event per search with village + service
+- ✅ **featured_banner_click tracking** — fires when Weekly Featured banner is clicked
+- ✅ 509 real providers, VH-TEST1 hidden from public
+- ✅ 5 active classified ads (expire June 10, 2026)
+- ✅ CK's Signature Detailing (VH-10089) added — Cody Fogle
+
+### Page line counts at this checkpoint:
+- Home.jsx: 1887 lines
+- ProviderDashboard.jsx: 3027 lines
+- Wekcadmin.jsx: 2154 lines
+- ListService.jsx: 1245 lines
+- Classifieds.jsx: 203 lines
+
+---
+
+## ✅ PREVIOUS GOLDEN CHECKPOINT — Apr 22 2026 ~5pm ET
+### Name: `checkpoint_apr22_analytics`
 
 ### To restore ALL pages from this checkpoint:
 ```bash
@@ -51,6 +85,8 @@ Then run `manage_app(publish)`.
 - All test reviews, analytics events, and stray data removed
 - All live backend flows verified ✅
 
+---
+
 ## Test account credentials (keep private):
 - **VH number:** VH-TEST1
 - **Email:** test@v-hub.us
@@ -61,9 +97,10 @@ Then run `manage_app(publish)`.
 - ✅ Login with VH number → SUCCESS
 - ✅ Login with email → SUCCESS
 - ✅ Wrong password → Correct error returned
-- ✅ Public search → 233 real providers, test account hidden
+- ✅ Public search → real providers, test account hidden
 - ✅ Password reset request → Returns ok:true
 - ✅ Submit review → SUCCESS
+- ✅ Submit lead → SUCCESS (tested May 20 2026)
 
 ## Older checkpoints (kept for reference):
 - `*.checkpoint_apr22_0400` — golden state Apr 22 morning (pre-analytics)
