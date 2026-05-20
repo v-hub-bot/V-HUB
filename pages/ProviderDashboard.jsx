@@ -1,9 +1,10 @@
+// FORCE_REBUILD_1776768600
+// BUILD_FORCE_2026_04_22_T0400
 // CACHE-BUST-1776743534-FIX
 // build-1776559362 
 // @build 2026-04-18-b
 // ProviderDashboard — REBUILD 1776411339
 import React, { useState, useEffect, useRef } from "react";
-const _BUILD = "1776721368"; // cache-bust
 import { Provider, ProviderReview, Service, ServiceArea, Category, ClassifiedAd, ProviderAnalytic } from "@/api/entities";
 
 // ── SEO ───────────────────────────────────────────────────────────────────
@@ -38,7 +39,7 @@ const SANS      = "'Helvetica Neue', Arial, sans-serif";
 const SERIF     = "'Times New Roman', Georgia, serif";
 
 // ── Legacy short-code lookup maps (providers created before entity migration)
-const LEGACY_SVC = {"s01":"Home Improvements","s02":"General Repairs","s03":"Cleaning Services","s04":"Painting (Interior/Exterior)","s05":"Garage Door Services","s06":"Window Installation/Repair","s07":"HVAC","s08":"Plumbing","s09":"Roofing","s10":"Handyman Services","s11":"Security & Home Watch","s12":"Pest Control","s13":"Appliance Repair","s14":"Electrical & Lighting","s15":"Flooring (Tile, Wood, Carpet)","s16":"Home Organization","s17":"Smart Home Installation","s18":"Pool & Spa Services","s19":"Lawn Mowing","s20":"Sod Installation","s21":"Tree Trimming & Pruning/Removal","s22":"Lawn Fertilization","s23":"Irrigation/Sprinkler Services","s24":"Landscaping","s25":"Hardscaping","s26":"Pressure Washing","s27":"Driveway Repair/Cleaning/Painting","s28":"Rentals","s29":"Repairs","s30":"Detailing","s31":"Lighting Upgrades","s32":"Improvements/Customizations","s33":"Battery Replacement","s34":"Tire Services","s35":"Auto Repairs","s36":"Auto Detailing","s37":"Oil Changes","s38":"Tire Services","s39":"Mobile Mechanic","s40":"Hair Stylists","s41":"Nail Technicians","s42":"Spa Services","s43":"Home Health Aides","s44":"Massage Therapists","s45":"Personal Trainers","s46":"Makeup Artists","s47":"Veterinary Services","s48":"Grooming","s49":"Pet Sitting/Walking","s50":"Pet Training","s51":"Mobile Grooming","s52":"Medical Transport","s53":"Airport Transport","s54":"Local Rides","s55":"Errand Services","s56":"Courier/Delivery Services","s57":"Accounting & Bookkeeping","s58":"Notary Services","s59":"IT Support","s60":"Legal Services","s61":"Business Consulting","s62":"Tax Preparation","s63":"Home Watch","s64":"Pool & Spa Services","s65":"Vehicle Transport"};
+const LEGACY_SVC = {"s01":"Home Improvements","s02":"General Repairs","s03":"Cleaning Services","s04":"Painting (Interior/Exterior)","s05":"Garage Door Services","s06":"Window Installation/Repair","s07":"HVAC","s08":"Plumbing","s09":"Roofing","s10":"Handyman Services","s11":"Security & Home Watch","s12":"Pest Control","s13":"Appliance Repair","s14":"Electrical & Lighting","s15":"Flooring (Tile, Wood, Carpet)","s16":"Home Organization","s17":"Smart Home Installation","s18":"Pool & Spa Services","s19":"Lawn Mowing","s20":"Sod Installation","s21":"Tree Trimming & Pruning/Removal","s22":"Lawn Fertilization","s23":"Irrigation/Sprinkler Services","s24":"Landscaping","s25":"Hardscaping","s26":"Pressure Washing","s27":"Driveway Repair/Cleaning/Painting","s28":"Rentals","s29":"Repairs","s30":"Detailing","s31":"Lighting Upgrades","s32":"Improvements/Customizations","s33":"Battery Replacement","s34":"Tire Services","s35":"Auto Repairs","s36":"Auto Detailing","s37":"Oil Changes","s38":"Tire Services","s39":"Mobile Mechanic","s40":"Barber / Stylist","s41":"Nail Technicians","s42":"Spa Services","s43":"Home Health Aides","s44":"Massage Therapists","s45":"Personal Trainers","s46":"Makeup Artists","s47":"Veterinary Services","s48":"Grooming","s49":"Pet Sitting/Walking","s50":"Pet Training","s51":"Mobile Grooming","s52":"Medical Transport","s53":"Airport Transport","s54":"Local Rides","s55":"Errand Services","s56":"Courier/Delivery Services","s57":"Accounting & Bookkeeping","s58":"Notary Services","s59":"IT Support","s60":"Legal Services","s61":"Business Consulting","s62":"Tax Preparation","s63":"Home Watch","s64":"Pool & Spa Services","s65":"Vehicle Transport"};
 const LEGACY_AREA = {"va001":"Alhambra","va002":"Amelia","va003":"Ashland","va004":"Belle Aire","va005":"Belvedere","va006":"Bonita","va007":"Bonnybrook","va008":"Bradford","va009":"Briar Meadow","va010":"Bridgeport at Creekside Landing","va011":"Bridgeport at Lake Miona","va012":"Bridgeport at Lake Sumter","va013":"Bridgeport at Laurel Valley","va014":"Bridgeport at Miona Shores","va015":"Bridgeport at Mission Hills","va016":"Buttonwood","va017":"Calumet Grove","va018":"Caroline","va019":"Cason Hammock","va020":"Charlotte","va021":"Chatham","va022":"Chitty Chatty","va023":"Citrus Grove","va024":"Collier","va025":"Collier at Alden Bungalows","va026":"Collier at Antrim Dells","va027":"Country Club Hills","va028":"Dabney","va029":"De Allende","va030":"De La Vista","va031":"Del Mar","va032":"DeLuna","va033":"DeSoto","va034":"Dunedin","va035":"Duval","va036":"El Cortez","va037":"Fenney","va038":"Fernandina","va039":"Gilchrist","va040":"Glenbrook","va041":"Hacienda","va042":"Haciendas of Mission Hills","va043":"Hadley","va044":"Hammock at Fenney","va045":"Hawkins","va046":"Hemingway","va047":"Hillsborough","va048":"La Reynalda","va049":"La Zamora","va050":"LaBelle","va051":"Lake Deaton","va052":"Lake Denham","va053":"Lakeshore Cottages","va054":"Largo","va055":"Liberty Park","va056":"Linden","va057":"Lynnhaven","va058":"Mallory Square","va059":"Marsh Bend","va060":"McClure","va061":"Mira Mesa","va062":"Monarch Grove","va063":"Newell","va064":"Orange Blossom Gardens","va065":"Osceola Hills","va066":"Osceola Hills at Soaring Eagle Preserve","va067":"Palo Alto","va068":"Pennecamp","va069":"Piedmont","va070":"Pine Hills","va071":"Pine Ridge","va072":"Pinellas","va073":"Poinciana","va074":"Polo Ridge","va075":"Richmond","va076":"Rio Grande","va077":"Rio Ponderosa","va078":"Rio Ranchero","va079":"Sabal Chase","va080":"Sanibel","va081":"Santiago","va082":"Santo Domingo","va083":"Silver Lake","va084":"Springdale","va085":"St. Catherine","va086":"St. Charles","va087":"St. James","va088":"St. Johns","va089":"Summerhill","va090":"Sunset Pointe","va091":"Tall Trees","va092":"Tamarind Grove","va093":"Tierra Del Sol","va094":"Valle Verde","va095":"Virginia Trace","va096":"Winifred","va097":"Woodbury"};
 
 // ── Helpers ───────────────────────────────────────────────────────────────
@@ -218,7 +219,7 @@ const LEGACY_SVC_NAMES = {
   s24:"Landscaping",s25:"Hardscaping",s26:"Pressure Washing",s27:"Driveway Repair/Cleaning/Painting",
   s28:"Rentals",s29:"Repairs",s30:"Detailing",s31:"Lighting Upgrades",s32:"Improvements/Customizations",
   s33:"Battery Replacement",s34:"Tire Services",s35:"Auto Repairs",s36:"Auto Detailing",
-  s37:"Oil Changes",s38:"Tire Services",s39:"Mobile Mechanic",s40:"Hair Stylists",
+  s37:"Oil Changes",s38:"Tire Services",s39:"Mobile Mechanic",s40:"Barber / Stylist",
   s41:"Nail Technicians",s42:"Spa Services",s43:"Home Health Aides",s44:"Massage Therapists",
   s45:"Personal Trainers",s46:"Makeup Artists",s47:"Veterinary Services",s48:"Grooming",
   s49:"Pet Sitting/Walking",s50:"Pet Training",s51:"Mobile Grooming",s52:"Medical Transport",
@@ -627,7 +628,7 @@ function ForcePasswordChangeScreen({ provider, onComplete }) {
               Welcome, {firstName}!
             </div>
             <div style={{ fontSize: 13, color: INK_FADE, fontStyle: "italic", marginTop: 8, lineHeight: 1.7, fontFamily: SERIF }}>
-              You're signed in with your temporary password.<br/>Please create a permanent one to continue.
+              Welcome to V-Hub! Please create your permanent password to continue.<br/>You can change it anytime from your account settings.
             </div>
           </div>
 
@@ -844,13 +845,14 @@ function LoginScreen({ onLogin, onForgot }) {
         setLoading(false);
         return;
       }
+      setLoading(false);
       sessionStorage.setItem("vhub_provider_id", prov.id);
       onLogin(prov);
     } catch (err) {
       console.error("Login error:", err);
       setError("Something went wrong. Please try again.");
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   return (
@@ -884,7 +886,7 @@ function LoginScreen({ onLogin, onForgot }) {
             <div style={{ fontSize: 36, marginBottom: 8 }}>🔐</div>
             <div style={{ fontSize: 16, fontWeight: 900, color: INK, textTransform: "uppercase", letterSpacing: 2, fontFamily: SERIF }}>Sign In to Your Hub</div>
             <div style={{ fontSize: 13, color: INK_FADE, fontStyle: "italic", marginTop: 6, lineHeight: 1.6, fontFamily: SERIF }}>
-              Use your email or VH account number, plus your password. First time? Use the temporary password from your welcome email.
+              Use your email or VH account number, plus your password. First time signing in? Use the password from your welcome email.
             </div>
           </div>
 
@@ -967,16 +969,17 @@ function LoginScreen({ onLogin, onForgot }) {
 
 // ── MAIN COMPONENT ────────────────────────────────────────────────────────
 
-//   is_active=true  → LIVE ad (paid, visible on site for 7 days)
+//   is_active=true  → LIVE ad (paid, visible on site for 10 days)
 //   is_active=false → QUEUED ad (pre-built, up to 3 in queue)
 //   is_queued_next=true → marked as the next one to launch
 //   saved_images[]  → up to 3 stored image URLs per ad
 //
 // Flow: Build ad → save to queue → preview it → mark "next" →
-//       pay $10 via Stripe → goes live immediately for 7 days.
+//       pay $20 via Stripe → goes live immediately for 10 days.
 //       NOT charged again until they manually launch another ad.
 
 function ClassifiedAdSection({ provider, refreshKey = 0 }) {
+  const sectionRef = React.useRef(null);
   const [adSlots, setAdSlots]         = React.useState([]);
   const [liveAd, setLiveAd]           = React.useState(null);
   const [loading, setLoading]         = React.useState(true);
@@ -1030,6 +1033,8 @@ function ClassifiedAdSection({ provider, refreshKey = 0 }) {
   const GREEN     = "#1A6B3C";
   const BROWN_BTN = "#7A4820";
   const YELLOW    = "#FFDB00";
+  const MUTED     = "#9B8068";
+  const ORANGE    = "#E8431A";
   const lbS = { display: "block", fontSize: 11, fontWeight: 700, color: INK_FADE, fontFamily: SANS, letterSpacing: 0.5, textTransform: "uppercase", marginBottom: 4 };
   const inS = { width: "100%", boxSizing: "border-box", background: "#FFFDF5", border: `1.5px solid ${PAPER_DK}`, borderRadius: 5, padding: "9px 10px", fontSize: 13, color: INK, fontFamily: SANS, outline: "none" };
 
@@ -1052,6 +1057,14 @@ function ClassifiedAdSection({ provider, refreshKey = 0 }) {
   const nextUp      = queued.find(a => a.is_queued_next) || null;
   const liveExpired = liveAd?.deal_expires_at && new Date(liveAd.deal_expires_at) < new Date();
 
+  // Local areaNames for location display in ad editor
+  const areaNames = React.useMemo(() => {
+    if (!provider) return [];
+    const ids = provider.service_areas || [];
+    const areaMap = { "69d06c4ad9b0c2b3a2f9e1a1": "Historic Side", "69d06c4ad9b0c2b3a2f9e1a2": "Established Villages", "69d06c4ad9b0c2b3a2f9e1a3": "Newer Villages", "69d06c4ad9b0c2b3a2f9e1a4": "Eastport", "69d06c4ad9b0c2b3a2f9e1a5": "Family/Non-Age-Restricted" };
+    return ids.map(id => areaMap[id] || id).filter(Boolean);
+  }, [provider]);
+
   // ── Open editor ──────────────────────────────────────────────────────────
   const openEdit = (slot, dealType) => {
     setEditingSlot(slot || "new");
@@ -1061,8 +1074,8 @@ function ClassifiedAdSection({ provider, refreshKey = 0 }) {
     setForm({
       headline:  slot?.headline || (dt && dt.id !== "custom" ? dt.headline.replace("{BIZ}", provider.business_name || "").replace("{X}", "10") : ""),
       body:      slot?.body     || "",
-      village:   slot?.village  || "",
-      address:   slot?.address  || "",
+      village:   slot?.village  || (provider?.is_mobile ? (areaNames.length > 0 ? areaNames[0] : "") : "") || "",
+      address:   slot?.address  || provider?.address || "",
       image_url: slot?.image_url || "",
     });
     setFilePreview(null); setFileObj(null);
@@ -1085,7 +1098,7 @@ function ClassifiedAdSection({ provider, refreshKey = 0 }) {
     try {
       const fd = new FormData();
       fd.append("file", file);
-      const upResp = await fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/storage/upload", { method: "POST", body: fd });
+      const upResp = await fetch("https://api.base44.app/api/apps/69d06ada8019d7e9edf7f8e8/storage/upload", { method: "POST", body: fd });
       const upData = await upResp.json();
       if (upData.url) {
         setForm(p => ({ ...p, image_url: upData.url }));
@@ -1135,7 +1148,7 @@ function ClassifiedAdSection({ provider, refreshKey = 0 }) {
       if (fileObj) {
         const fd = new FormData();
         fd.append("file", fileObj);
-        const upResp = await fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/storage/upload", { method: "POST", body: fd });
+        const upResp = await fetch("https://api.base44.app/api/apps/69d06ada8019d7e9edf7f8e8/storage/upload", { method: "POST", body: fd });
         const upData = await upResp.json();
         imageUrl = upData.url || imageUrl;
       }
@@ -1213,12 +1226,16 @@ function ClassifiedAdSection({ provider, refreshKey = 0 }) {
   const openPreviewFromEditor = () => {
     setPreviewAd({
       headline:      form.headline || "Your Headline Here",
-      body:          form.body     || "Your deal description here.",
-      village:       form.village  || "",
-      address:       form.address  || "",
+      body:          form.body     || "Your featured ad description here.",
+      village:       "",
+      address:       provider.address || "",
       image_url:     filePreview   || form.image_url || "",
       provider_name: provider.business_name || "",
       deal_expires_at: null, // not yet set — webhook sets this at payment time
+      // enriched location fields (mirroring what getDeals returns)
+      _provider_is_mobile: !!provider.is_mobile,
+      _provider_address:   provider.address || null,
+      _provider_areas:     areaNames,
     });
     setPreviewFromEditor(true);
   };
@@ -1235,19 +1252,19 @@ function ClassifiedAdSection({ provider, refreshKey = 0 }) {
   if (loading) return <div style={{ padding: 16, fontSize: 13, color: INK_FADE, fontFamily: SANS }}>Loading ads…</div>;
 
   return (
-    <div style={{ marginBottom: 24 }}>
+    <div ref={sectionRef} style={{ marginBottom: 24 }}>
 
       {/* ── STEP INDICATOR (when no live ad and nothing in queue) ── */}
       {!liveAd && queued.length === 0 && editingSlot === null && (
         <div style={{ background: PAPER_MID, border: `2px dashed ${PAPER_DK}`, borderRadius: 10, padding: "20px 16px", textAlign: "center", marginBottom: 14 }}>
           <div style={{ fontSize: 22, marginBottom: 8 }}>📣</div>
-          <div style={{ fontSize: 14, fontWeight: 900, color: INK, fontFamily: SERIF, marginBottom: 6 }}>Advertise on Deals of the Week</div>
+          <div style={{ fontSize: 14, fontWeight: 900, color: INK, fontFamily: SERIF, marginBottom: 6 }}>Advertise on Weekly Featured</div>
           <div style={{ fontSize: 12, color: INK_FADE, fontFamily: SANS, lineHeight: 1.8, marginBottom: 14 }}>
             <span style={{ color: NAVY, fontWeight: 700 }}>Step 1</span> — Build your ad (headline, image, description)<br/>
             <span style={{ color: NAVY, fontWeight: 700 }}>Step 2</span> — Preview it exactly as visitors will see it<br/>
-            <span style={{ color: NAVY, fontWeight: 700 }}>Step 3</span> — Pay <strong>$10</strong> via Stripe · runs 7 days · no auto-charge
+            <span style={{ color: NAVY, fontWeight: 700 }}>Step 3</span> — Pay <strong>$20</strong> via Stripe · runs 10 days · no auto-charge
           </div>
-          <button data-testid="create-first-ad-btn" onClick={() => setDealTypeStep(true)} style={{ background: `linear-gradient(180deg,#9A6030,${BROWN_BTN})`, color: PAPER, border: `2px solid ${NAVY}`, borderRadius: 6, padding: "11px 28px", fontSize: 13, fontWeight: 900, cursor: "pointer", fontFamily: SERIF }}>
+          <button data-testid="create-first-ad-btn" onClick={() => { setDealTypeStep(true); setTimeout(() => sectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 50); }} style={{ background: `linear-gradient(180deg,#9A6030,${BROWN_BTN})`, color: PAPER, border: `2px solid ${NAVY}`, borderRadius: 6, padding: "11px 28px", fontSize: 13, fontWeight: 900, cursor: "pointer", fontFamily: SERIF }}>
             ✚ Create My First Ad
           </button>
         </div>
@@ -1283,8 +1300,8 @@ function ClassifiedAdSection({ provider, refreshKey = 0 }) {
           <div style={{ fontSize: 12, color: INK, fontFamily: SANS, lineHeight: 1.7, marginBottom: 10 }}>
             <strong>"{liveAd.headline}"</strong> has expired.{" "}
             {nextUp
-              ? <>Pick <strong>"{nextUp.headline}"</strong> below and pay <strong>$10</strong> to go live for another 7 days.</>
-              : <>Build a new ad or mark a queued one "Next Up", then pay <strong>$10</strong> to go live.</>}
+              ? <>Pick <strong>"{nextUp.headline}"</strong> below and pay <strong>$20</strong> to go live for another 10 days.</>
+              : <>Build a new ad or mark a queued one "Next Up", then pay <strong>$20</strong> to go live.</>}
           </div>
           {checkoutErr && <div style={{ marginTop: 8, fontSize: 12, color: "#c00", fontFamily: SANS }}>{checkoutErr}</div>}
         </div>
@@ -1340,12 +1357,12 @@ function ClassifiedAdSection({ provider, refreshKey = 0 }) {
             ✅ Ready to Launch — <span style={{ color: INK }}>"{nextUp.headline}"</span>
           </div>
           <div style={{ fontSize: 12, color: INK_FADE, fontFamily: SANS, lineHeight: 1.7, marginBottom: 10 }}>
-            Pay <strong style={{ color: INK }}>$10</strong> to go live for <strong style={{ color: INK }}>7 days</strong>. You won't be charged again unless you launch another ad.
+            Pay <strong style={{ color: INK }}>$20</strong> to go live for <strong style={{ color: INK }}>10 days</strong>. You won't be charged again unless you launch another ad.
           </div>
           <div style={{ display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center" }}>
             <button disabled={checkoutLoading} onClick={() => handleCheckout(nextUp)}
               style={{ background: "linear-gradient(180deg,#1A6B3C,#145530)", color: "#fff", border: "2px solid #1A6B3C", borderRadius: 6, padding: "11px 28px", fontSize: 13, fontWeight: 900, cursor: checkoutLoading ? "not-allowed" : "pointer", fontFamily: SERIF, opacity: checkoutLoading ? 0.7 : 1 }}>
-              {checkoutLoading ? "Redirecting to Stripe…" : `💳 Pay $10 — Launch Ad for 7 Days →`}
+              {checkoutLoading ? "Redirecting to Stripe…" : `💳 Pay $20 — Launch Ad for 10 Days →`}
             </button>
             <button onClick={() => openPreviewQueued(nextUp)} style={{ background: "none", border: `1.5px solid ${TEAL}`, color: TEAL, borderRadius: 6, padding: "10px 16px", fontSize: 12, cursor: "pointer", fontFamily: SANS, fontWeight: 700 }}>👁 Preview First</button>
           </div>
@@ -1356,7 +1373,7 @@ function ClassifiedAdSection({ provider, refreshKey = 0 }) {
       {/* Hint: they have queued ads but haven't marked one Next */}
       {queued.length > 0 && !nextUp && editingSlot === null && (
         <div style={{ background: "#EFF8FF", border: "1.5px solid #1565C0", borderRadius: 8, padding: "10px 14px", marginBottom: 14, fontSize: 12, color: "#1565C0", fontFamily: SANS, lineHeight: 1.7 }}>
-          ⏭ <strong>Ready to go live?</strong> Click <strong>"Set Next"</strong> on the ad you want to run, then pay $10 to launch it for 7 days.
+          ⏭ <strong>Ready to go live?</strong> Click <strong>"Set Next"</strong> on the ad you want to run, then pay $20 to launch it for 10 days.
         </div>
       )}
 
@@ -1371,12 +1388,12 @@ function ClassifiedAdSection({ provider, refreshKey = 0 }) {
       {dealTypeStep && editingSlot === null && (
         <div style={{ background: PAPER_MID, border: `2px solid ${PAPER_DK}`, borderRadius: 10, padding: "18px 14px", marginBottom: 14 }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
-            <div style={{ fontSize: 14, fontWeight: 900, color: INK, fontFamily: SERIF }}>📣 What kind of deal do you want to run?</div>
+            <div style={{ fontSize: 14, fontWeight: 900, color: INK, fontFamily: SERIF }}>📣 What kind of featured ad do you want to run?</div>
             <button onClick={() => setDealTypeStep(false)} style={{ background: "none", border: "none", fontSize: 20, cursor: "pointer", color: INK_FADE }}>✕</button>
           </div>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
             {DEAL_TYPES.map(dt => (
-              <button key={dt.id} onClick={() => openEdit(null, dt)}
+              <button key={dt.id} data-testid={`deal-type-${dt.id}`} onClick={() => openEdit(null, dt)}
                 style={{ background: PAPER, border: `2px solid ${PAPER_DK}`, borderRadius: 8, padding: "12px 10px", textAlign: "left", cursor: "pointer", fontFamily: SANS, transition: "border-color 0.15s" }}
                 onMouseEnter={e => e.currentTarget.style.borderColor = NAVY}
                 onMouseLeave={e => e.currentTarget.style.borderColor = PAPER_DK}>
@@ -1413,19 +1430,43 @@ function ClassifiedAdSection({ provider, refreshKey = 0 }) {
               <div style={{ fontSize: 10, color: INK_FADE, fontFamily: SANS, textAlign: "right" }}>{form.headline.length}/80</div>
             </div>
             <div style={{ gridColumn: "1/-1" }}>
-              <label style={lbS}>Deal Description * <span style={{ fontSize: 10, fontWeight: 400, textTransform: "none" }}>(max 300 chars)</span></label>
-              <textarea style={{ ...inS, minHeight: 80, resize: "vertical", lineHeight: 1.6 }}
-                placeholder="Describe your deal — what it is, how to redeem it, any conditions…"
+              <label style={lbS}>Ad Description * <span style={{ fontSize: 10, fontWeight: 400, textTransform: "none" }}>(max 300 chars)</span></label>
+              <textarea data-testid="ad-body-input" style={{ ...inS, minHeight: 80, resize: "vertical", lineHeight: 1.6 }}
+                placeholder="Describe your featured offer — what it is, how to redeem it, any conditions…"
                 value={form.body} onChange={e => setForm(p => ({ ...p, body: e.target.value.slice(0,300) }))} />
               <div style={{ fontSize: 10, color: INK_FADE, fontFamily: SANS, textAlign: "right" }}>{form.body.length}/300</div>
             </div>
-            <div>
-              <label style={lbS}>Village / Area</label>
-              <input style={inS} placeholder="e.g. Brownwood" value={form.village} onChange={e => setForm(p => ({ ...p, village: e.target.value }))} />
+            {/* Location info — editable, pre-filled from profile */}
+            <div style={{ gridColumn: "1/-1" }}>
+              <label style={lbS}>Village / Area on Ad <span style={{ fontSize: 10, fontWeight: 400, textTransform: "none", color: TEAL }}>(pre-filled from your profile — you can change it)</span></label>
+              <select
+                style={{ ...inS, cursor: "pointer" }}
+                value={form.village}
+                onChange={e => setForm(p => ({ ...p, village: e.target.value }))}
+              >
+                <option value="">— Select the village/area for this ad —</option>
+                <option value="Historic Side">🌴 Historic Side</option>
+                <option value="Established Villages">🏡 Established Villages</option>
+                <option value="Newer Villages">🏘️ Newer Villages</option>
+                <option value="Eastport">🌊 Eastport</option>
+                <option value="Family/Non-Age-Restricted">👨‍👩‍👧 Family / Non-Age-Restricted</option>
+                <option value="All Villages">📍 All Villages (serves all areas)</option>
+              </select>
+              <div style={{ fontSize: 10, color: MUTED, fontFamily: SANS, marginTop: 3 }}>
+                This is how your location appears on the ad. Pre-filled from your profile but you can adjust it for this specific ad.
+              </div>
             </div>
-            <div>
-              <label style={lbS}>Business Address</label>
-              <input style={inS} placeholder="123 Main St" value={form.address} onChange={e => setForm(p => ({ ...p, address: e.target.value }))} />
+            <div style={{ gridColumn: "1/-1" }}>
+              <label style={lbS}>Address / Location Detail <span style={{ fontSize: 10, fontWeight: 400, textTransform: "none" }}>(optional)</span></label>
+              <input
+                style={inS}
+                placeholder={provider?.is_mobile ? "e.g. Serving all of The Villages, FL" : "e.g. 1234 Main St, Lady Lake, FL"}
+                value={form.address}
+                onChange={e => setForm(p => ({ ...p, address: e.target.value }))}
+              />
+              <div style={{ fontSize: 10, color: MUTED, fontFamily: SANS, marginTop: 3 }}>
+                Optional — add a street address or location note for this ad.
+              </div>
             </div>
           </div>
 
@@ -1470,75 +1511,106 @@ function ClassifiedAdSection({ provider, refreshKey = 0 }) {
             )}
 
             {/* AI generator */}
-            <div style={{ borderTop: `1px solid ${PAPER_DK}`, paddingTop: 10, marginTop: 4 }}>
-              <label style={{ ...lbS, marginBottom: 6 }}>✨ AI Image Generator</label>
-              {selectedDealType && selectedDealType.id !== "custom" && !aiGenerating && !form.image_url && (
-                <div style={{ fontSize: 11, color: TEAL, fontFamily: SANS, marginBottom: 6, fontStyle: "italic" }}>
-                  💡 We pre-filled a prompt based on your "{selectedDealType.label}" deal — just hit Generate or customize it first!
-                </div>
-              )}
-              <div style={{ display: "flex", gap: 8 }}>
-                <input style={{ ...inS, flex: 1 }} placeholder="e.g. Pool cleaning service, sunny Florida backyard"
-                  value={aiPrompt} onChange={e => setAiPrompt(e.target.value)}
-                  onKeyDown={e => e.key === "Enter" && handleGenerateAI()} />
-                <button onClick={handleGenerateAI} disabled={aiGenerating || !aiPrompt.trim()}
-                  style={{ background: `linear-gradient(180deg,#9A6030,${BROWN_BTN})`, color: PAPER, border: `1.5px solid ${NAVY}`, borderRadius: 5, padding: "8px 14px", fontSize: 12, fontWeight: 700, cursor: aiGenerating || !aiPrompt.trim() ? "not-allowed" : "pointer", fontFamily: SANS, whiteSpace: "nowrap", opacity: aiGenerating ? 0.7 : 1 }}>
-                  {aiGenerating ? "Generating…" : "✨ Generate"}
-                </button>
+            <div style={{ borderTop: `2px dashed ${TEAL}`, paddingTop: 14, marginTop: 10, background: "#F9F5EC", borderRadius: 6, padding: "14px 12px" }}>
+              <label style={{ ...lbS, marginBottom: 4, fontSize: 12, color: NAVY }}>✨ DESCRIBE YOUR IMAGE — AI WILL CREATE IT</label>
+              <div style={{ fontSize: 12, color: INK_FADE, fontFamily: SANS, marginBottom: 10, lineHeight: 1.5 }}>
+                Type exactly what you want in your ad image. Be specific! For example:<br/>
+                <em style={{ color: TEAL }}>"Golf cart with 3 tires in the back and 1 in the front, red and white color, parked in front of a Florida home"</em><br/>
+                <em style={{ color: TEAL }}>"Before and after lawn — left side overgrown, right side freshly mowed, sunny day"</em>
               </div>
-              {aiGenerating && <div style={{ marginTop: 6, fontSize: 11, color: INK_FADE, fontFamily: SANS }}>Creating your image — takes ~10 seconds…</div>}
+              <textarea
+                style={{ ...inS, minHeight: 70, resize: "vertical", lineHeight: 1.5, fontSize: 13 }}
+                placeholder="Describe your image in detail... e.g. 'Golf cart with custom wheels, red and white paint, parked outside a Florida home in sunshine'"
+                value={aiPrompt}
+                onChange={e => setAiPrompt(e.target.value)}
+              />
+              <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 8 }}>
+                <button data-testid="ai-generate-btn" onClick={handleGenerateAI} disabled={aiGenerating || !aiPrompt.trim()}
+                  style={{ background: aiGenerating || !aiPrompt.trim() ? "#aaa" : `linear-gradient(180deg,#9A6030,${BROWN_BTN})`, color: PAPER, border: `2px solid ${NAVY}`, borderRadius: 5, padding: "10px 20px", fontSize: 13, fontWeight: 700, cursor: aiGenerating || !aiPrompt.trim() ? "not-allowed" : "pointer", fontFamily: SANS }}>
+                  {aiGenerating ? "⏳ Creating Image…" : "✨ Generate My Image"}
+                </button>
+                {aiPrompt.trim() && !aiGenerating && (
+                  <span style={{ fontSize: 11, color: INK_FADE, fontFamily: SANS, fontStyle: "italic" }}>~10 seconds to generate</span>
+                )}
+              </div>
+              {aiGenerating && <div style={{ marginTop: 8, fontSize: 12, color: TEAL, fontFamily: SANS, fontWeight: 600 }}>🎨 Creating your custom image… almost there!</div>}
               {aiError && <div style={{ marginTop: 6, fontSize: 11, color: "#c00", fontFamily: SANS }}>{aiError}</div>}
             </div>
           </div>
 
-          {/* Save + Preview buttons */}
-          {saveErr && <div style={{ marginTop: 10, fontSize: 12, color: "#c00", fontFamily: SANS }}>{saveErr}</div>}
-          {saveMsg !== "saved" && (
-            <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center", marginTop: 14 }}>
-              <button data-testid="save-ad-btn" onClick={handleSave} disabled={saving}
-                style={{ background: `linear-gradient(180deg,#9A6030,${BROWN_BTN})`, color: PAPER, border: `2px solid ${NAVY}`, borderRadius: 5, padding: "11px 24px", fontSize: 13, fontWeight: 900, cursor: saving ? "not-allowed" : "pointer", fontFamily: SERIF, opacity: saving ? 0.7 : 1 }}>
-                {saving ? "Saving…" : "💾 Save Ad"}
-              </button>
-              <button onClick={openPreviewFromEditor}
-                style={{ background: PAPER, border: `2px solid ${TEAL}`, color: TEAL, borderRadius: 5, padding: "11px 18px", fontSize: 13, fontWeight: 900, cursor: "pointer", fontFamily: SERIF }}>
-                👁 Preview Ad
-              </button>
-              <button onClick={closeEdit} style={{ background: "none", border: `1.5px solid ${PAPER_DK}`, color: INK_FADE, borderRadius: 5, padding: "10px 16px", fontSize: 12, cursor: "pointer", fontFamily: SANS }}>Cancel</button>
-            </div>
-          )}
-          {saveMsg === "saved" && savedAdRecord && (
-            <div style={{ marginTop: 12, background: "#F0FBF4", border: "2px solid #2E7D32", borderRadius: 8, padding: "14px 16px" }}>
-              <div style={{ fontSize: 13, fontWeight: 900, color: "#1B5E20", fontFamily: SERIF, marginBottom: 6 }}>✅ Ad saved!</div>
-              <div style={{ fontSize: 12, color: INK_FADE, fontFamily: SANS, lineHeight: 1.8, marginBottom: 12 }}>
-                Your ad <strong style={{ color: INK }}>"{savedAdRecord.headline}"</strong> is ready.<br/>
-                Preview it first, then pay <strong style={{ color: INK }}>$10</strong> to post it live for <strong style={{ color: INK }}>7 days</strong>.<br/>
-                <span style={{ fontSize: 11 }}>You won't be charged again unless you manually launch another ad.</span>
-              </div>
-              <div style={{ display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center" }}>
-                <button data-testid="pay-now-btn" disabled={checkoutLoading} onClick={() => { closeEdit(); handleCheckout(savedAdRecord); }}
-                  style={{ background: "linear-gradient(180deg,#1A6B3C,#145530)", color: "#fff", border: "2px solid #1A6B3C", borderRadius: 6, padding: "11px 24px", fontSize: 13, fontWeight: 900, cursor: checkoutLoading ? "not-allowed" : "pointer", fontFamily: SERIF, opacity: checkoutLoading ? 0.7 : 1 }}>
-                  {checkoutLoading ? "Redirecting to Stripe…" : "💳 Pay $10 — Post Live for 7 Days →"}
-                </button>
-                <button onClick={() => { setPreviewAd({ ...savedAdRecord, image_url: filePreview || savedAdRecord.image_url }); setPreviewFromEditor(false); }}
-                  style={{ background: "none", border: `1.5px solid ${TEAL}`, color: TEAL, borderRadius: 6, padding: "10px 16px", fontSize: 12, cursor: "pointer", fontFamily: SANS, fontWeight: 700 }}>
-                  👁 Preview First
-                </button>
-                <button onClick={closeEdit}
-                  style={{ background: "none", border: `1.5px solid ${PAPER_DK}`, color: INK_FADE, borderRadius: 5, padding: "10px 14px", fontSize: 12, cursor: "pointer", fontFamily: SANS }}>
-                  Save for Later
-                </button>
-              </div>
-              {checkoutErr && <div style={{ marginTop: 8, fontSize: 12, color: "#c00", fontFamily: SANS }}>{checkoutErr}</div>}
-            </div>
-          )}
+          {/* Save + Preview buttons — context-aware: live ad vs draft */}
+          {(() => {
+            const isEditingLive = currentRecord?.is_active === true;
+            return (
+              <>
+                {saveErr && <div style={{ marginTop: 10, fontSize: 12, color: "#c00", fontFamily: SANS }}>{saveErr}</div>}
+
+                {saveMsg !== "saved" && (
+                  <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center", marginTop: 14 }}>
+                    <button data-testid="save-ad-btn" onClick={handleSave} disabled={saving}
+                      style={{ background: isEditingLive ? "linear-gradient(180deg,#1A6B3C,#145530)" : `linear-gradient(180deg,#9A6030,${BROWN_BTN})`, color: PAPER, border: `2px solid ${isEditingLive ? "#1A6B3C" : NAVY}`, borderRadius: 5, padding: "11px 24px", fontSize: 13, fontWeight: 900, cursor: saving ? "not-allowed" : "pointer", fontFamily: SERIF, opacity: saving ? 0.7 : 1 }}>
+                      {saving ? "Updating…" : isEditingLive ? "✅ Update Live Ad" : "💾 Save Ad"}
+                    </button>
+                    <button onClick={openPreviewFromEditor}
+                      data-testid="preview-ad-btn" style={{ background: PAPER, border: `2px solid ${TEAL}`, color: TEAL, borderRadius: 5, padding: "11px 18px", fontSize: 13, fontWeight: 900, cursor: "pointer", fontFamily: SERIF }}>
+                      👁 Preview Ad
+                    </button>
+                    <button onClick={closeEdit} style={{ background: "none", border: `1.5px solid ${PAPER_DK}`, color: INK_FADE, borderRadius: 5, padding: "10px 16px", fontSize: 12, cursor: "pointer", fontFamily: SANS }}>Cancel</button>
+                  </div>
+                )}
+
+                {saveMsg === "saved" && savedAdRecord && !isEditingLive && (
+                  <div style={{ marginTop: 12, background: "#F0FBF4", border: "2px solid #2E7D32", borderRadius: 8, padding: "14px 16px" }}>
+                    <div style={{ fontSize: 13, fontWeight: 900, color: "#1B5E20", fontFamily: SERIF, marginBottom: 6 }}>✅ Ad saved!</div>
+                    <div style={{ fontSize: 12, color: INK_FADE, fontFamily: SANS, lineHeight: 1.8, marginBottom: 12 }}>
+                      Your ad <strong style={{ color: INK }}>"{savedAdRecord.headline}"</strong> is ready.<br/>
+                      Preview it first, then pay <strong style={{ color: INK }}>$20</strong> to post it live for <strong style={{ color: INK }}>10 days</strong>.<br/>
+                      <span style={{ fontSize: 11 }}>You won't be charged again unless you manually launch another ad.</span>
+                    </div>
+                    <div style={{ display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center" }}>
+                      <button data-testid="pay-now-btn" disabled={checkoutLoading} onClick={() => { closeEdit(); handleCheckout(savedAdRecord); }}
+                        style={{ background: "linear-gradient(180deg,#1A6B3C,#145530)", color: "#fff", border: "2px solid #1A6B3C", borderRadius: 6, padding: "11px 24px", fontSize: 13, fontWeight: 900, cursor: checkoutLoading ? "not-allowed" : "pointer", fontFamily: SERIF, opacity: checkoutLoading ? 0.7 : 1 }}>
+                        {checkoutLoading ? "Redirecting to Stripe…" : "💳 Pay $20 — Post Live for 10 Days →"}
+                      </button>
+                      <button onClick={() => { setPreviewAd({ ...savedAdRecord, image_url: filePreview || savedAdRecord.image_url }); setPreviewFromEditor(false); }}
+                        style={{ background: "none", border: `1.5px solid ${TEAL}`, color: TEAL, borderRadius: 6, padding: "10px 16px", fontSize: 12, cursor: "pointer", fontFamily: SANS, fontWeight: 700 }}>
+                        👁 Preview First
+                      </button>
+                      <button onClick={closeEdit}
+                        style={{ background: "none", border: `1.5px solid ${PAPER_DK}`, color: INK_FADE, borderRadius: 5, padding: "10px 14px", fontSize: 12, cursor: "pointer", fontFamily: SANS }}>
+                        Save for Later
+                      </button>
+                    </div>
+                    {checkoutErr && <div style={{ marginTop: 8, fontSize: 12, color: "#c00", fontFamily: SANS }}>{checkoutErr}</div>}
+                  </div>
+                )}
+
+                {saveMsg === "saved" && savedAdRecord && isEditingLive && (
+                  <div style={{ marginTop: 12, background: "#E8F5E9", border: "2px solid #2E7D32", borderRadius: 8, padding: "14px 16px" }}>
+                    <div style={{ fontSize: 13, fontWeight: 900, color: "#1B5E20", fontFamily: SERIF, marginBottom: 4 }}>✅ Live ad updated!</div>
+                    <div style={{ fontSize: 12, color: INK_FADE, fontFamily: SANS, lineHeight: 1.8, marginBottom: 10 }}>
+                      Your changes to <strong style={{ color: INK }}>"{savedAdRecord.headline}"</strong> are now live.<br/>
+                      {savedAdRecord.deal_expires_at && (
+                        <span>This ad continues to run through <strong>{new Date(savedAdRecord.deal_expires_at).toLocaleDateString("en-US",{weekday:"long",month:"long",day:"numeric"})}</strong>.</span>
+                      )}
+                    </div>
+                    <button onClick={closeEdit}
+                      style={{ background: `linear-gradient(180deg,#9A6030,${BROWN_BTN})`, color: PAPER, border: `2px solid ${NAVY}`, borderRadius: 5, padding: "10px 24px", fontSize: 13, fontWeight: 900, cursor: "pointer", fontFamily: SERIF }}>
+                      ← Back to Dashboard
+                    </button>
+                  </div>
+                )}
+              </>
+            );
+          })()}
         </div>
       )}
 
       {/* ── HOW IT WORKS ── */}
       {editingSlot === null && (
         <div style={{ fontSize: 11, color: INK_FADE, fontFamily: SANS, lineHeight: 1.9, background: PAPER, border: `1px solid ${PAPER_DK}`, borderRadius: 6, padding: "8px 12px" }}>
-          <strong style={{ fontFamily: SERIF, color: INK }}>How Deals of the Week works:</strong>{" "}
-          Build up to 3 ads · Upload your own image or use AI to generate one · Preview exactly how it will look · Mark one "Next Up" · Pay <strong>$10</strong> → runs live for <strong>7 days</strong> · You're never auto-charged again
+          <strong style={{ fontFamily: SERIF, color: INK }}>How Weekly Featured works:</strong>{" "}
+          Build up to 3 ads · Upload your own image or use AI to generate one · Preview exactly how it will look · Mark one "Next Up" · Pay <strong>$20</strong> → runs live for <strong>10 days</strong> · You're never auto-charged again
         </div>
       )}
 
@@ -1571,7 +1643,7 @@ function ClassifiedAdSection({ provider, refreshKey = 0 }) {
               return (
                 <div style={{ background:"#F0E6C8", border:"2px solid #1C0F00", display:"flex", flexDirection:"column", overflow:"hidden", boxShadow:"3px 3px 12px rgba(0,0,0,0.4)" }}>
                   <div style={{ background:"#1C0F00", padding:"10px 14px 9px", textAlign:"center" }}>
-                    <div style={{ fontSize:9, color:"#C8B07A", fontFamily:SANS, letterSpacing:2, textTransform:"uppercase", marginBottom:4 }}>✦ Deal of the Week ✦</div>
+                    <div style={{ fontSize:9, color:"#C8B07A", fontFamily:SANS, letterSpacing:2, textTransform:"uppercase", marginBottom:4 }}>✦ Weekly Featured ✦</div>
                     <div style={{ fontSize:17, fontWeight:900, color:YELLOW, textTransform:"uppercase", letterSpacing:0.5, lineHeight:1.25, fontFamily:SERIF }}>{ad.headline || "Your Headline Here"}</div>
                     {badge}
                   </div>
@@ -1581,11 +1653,21 @@ function ClassifiedAdSection({ provider, refreshKey = 0 }) {
                   {!ad.image_url && (
                     <div style={{ width:"100%", height:100, background:PAPER_MID, display:"flex", alignItems:"center", justifyContent:"center", fontSize:13, color:INK_FADE, fontFamily:SANS, fontStyle:"italic" }}>No image selected</div>
                   )}
-                  <div style={{ padding:"14px 16px 8px", fontSize:14, color:"#1C0F00", lineHeight:1.8, fontFamily:SERIF }}>{ad.body || "Your deal description will appear here."}</div>
-                  {ad.address && <div style={{ padding:"4px 16px 10px", fontSize:12, color:"#00836B", fontWeight:700, fontFamily:SANS }}>📍 {ad.address}</div>}
+                  <div style={{ padding:"14px 16px 8px", fontSize:14, color:"#1C0F00", lineHeight:1.8, fontFamily:SERIF }}>{ad.body || "Your featured ad description will appear here."}</div>
+                  {/* Location info — smart display based on mobile/B&M/hybrid */}
+                  <div style={{ padding:"2px 16px 10px", display:"flex", flexDirection:"column", gap:3 }}>
+                    {ad._provider_is_mobile && Array.isArray(ad._provider_areas) && ad._provider_areas.length > 0 && (
+                      <div style={{ fontSize:12, color:"#00836B", fontWeight:700, fontFamily:SANS }}>🗺️ Serves: {ad._provider_areas.join(" · ")}</div>
+                    )}
+                    {!ad._provider_is_mobile && ad._provider_address && (
+                      <div style={{ fontSize:12, color:"#00836B", fontWeight:700, fontFamily:SANS }}>📍 Located at: {ad._provider_address}</div>
+                    )}
+                    {ad._provider_is_mobile && ad._provider_address && (
+                      <div style={{ fontSize:12, color:"#5C7A6B", fontFamily:SANS }}>📍 Also at: {ad._provider_address}</div>
+                    )}
+                  </div>
                   <div style={{ borderTop:"1px solid #C8B07A", background:"#E4D5A8", padding:"9px 14px", display:"flex", justifyContent:"space-between", alignItems:"center", gap:8, flexWrap:"wrap" }}>
                     <div style={{ fontSize:13, fontWeight:900, color:NAVY, fontFamily:SANS }}>{ad.provider_name || provider.business_name}</div>
-                    {ad.village && <div style={{ fontSize:11, color:"#5C3A10", fontFamily:SERIF, fontStyle:"italic", background:"#C8B07A", borderRadius:2, padding:"2px 8px" }}>📌 {ad.village}</div>}
                   </div>
                 </div>
               );
@@ -1600,7 +1682,7 @@ function ClassifiedAdSection({ provider, refreshKey = 0 }) {
                   {nextUp?.id === previewAd.id && (
                     <button disabled={checkoutLoading} onClick={() => { setPreviewAd(null); handleCheckout(previewAd); }}
                       style={{ background: "linear-gradient(180deg,#1A6B3C,#145530)", color: "#fff", border: "2px solid #1A6B3C", borderRadius: 6, padding: "10px 22px", fontSize: 13, fontWeight: 900, cursor: "pointer", fontFamily: SERIF }}>
-                      {checkoutLoading ? "Redirecting…" : "💳 Looks good — Pay $10 & Go Live →"}
+                      {checkoutLoading ? "Redirecting…" : "💳 Looks good — Pay $20 & Go Live →"}
                     </button>
                   )}
                   <button onClick={() => setPreviewAd(null)} style={{ background: "none", border: `1.5px solid ${PAPER_DK}`, color: PAPER, borderRadius: 6, padding: "8px 18px", fontSize: 12, cursor: "pointer", fontFamily: SANS }}>✕ Close</button>
@@ -1823,7 +1905,7 @@ function AnalyticsDashboard({ provider, reviews }) {
       // Tally by type
       const searches   = inRange.filter(e => e.event_type === "search_appearance");
       const views      = inRange.filter(e => e.event_type === "profile_view");
-      const adClicks   = inRange.filter(e => e.event_type === "classified_click");
+      const adClicks   = inRange.filter(e => e.event_type === "classified_ad_click" || e.event_type === "classified_click");
       const leads      = inRange.filter(e => e.event_type === "lead_inquiry");
 
       // Searches by service
@@ -1852,13 +1934,22 @@ function AnalyticsDashboard({ provider, reviews }) {
         if (e.date_key && trend[e.date_key] !== undefined) trend[e.date_key]++;
       });
 
+      // Also count leads from LeadInquiry entity
+      let leadsFromEntity = 0;
+      try {
+        const cutoffISO = new Date(Date.now() - range*24*60*60*1000).toISOString();
+        const allLeads = await LeadInquiry.filter({ provider_id: provider.id });
+        leadsFromEntity = (allLeads||[]).filter(l => l.created_date && l.created_date >= cutoffISO).length;
+      } catch(e2) { leadsFromEntity = leads.length; }
+
       setAnalytics({
         searches: searches.length,
         views: views.length,
         adClicks: adClicks.length,
-        leads: leads.length,
+        leads: Math.max(leads.length, leadsFromEntity),
         allTimeSearches: allTime.filter(e => e.event_type === "search_appearance").length,
         allTimeViews: allTime.filter(e => e.event_type === "profile_view").length,
+        allTimeAdClicks: allTime.filter(e => ["classified_ad_click","classified_click"].includes(e.event_type)).length,
         byService: Object.entries(byService).sort((a, b) => b[1] - a[1]).slice(0, 8),
         byArea: Object.entries(byArea).sort((a, b) => b[1] - a[1]).slice(0, 8),
         trend: Object.entries(trend),
@@ -1899,7 +1990,7 @@ function AnalyticsDashboard({ provider, reviews }) {
             {[
               { icon: "🔍", label: "Times You Appeared in Search", value: analytics.searches, sub: `${range}-day window`, color: TEAL },
               { icon: "👁", label: "People Clicked Your Profile", value: analytics.views, sub: `${range}-day window`, color: BROWN_BTN },
-              { icon: "📰", label: "Classified Ad Clicks", value: analytics.adClicks, sub: provider.classifieds_addon ? `${range}-day window` : "Add-on not active", color: "#7B3FA0" },
+              { icon: "📰", label: "Featured Ad Clicks", value: analytics.adClicks, sub: provider.classifieds_addon ? `${range}-day window` : "Add-on not active", color: "#7B3FA0" },
               { icon: "⭐", label: "Reviews", value: reviews.length, sub: "All time", color: "#B8860B" },
             ].map(({ icon, label, value, sub, color }) => (
               <div key={label} style={{ background: PAPER_MID, border: `1.5px solid ${PAPER_DK}`, borderRadius: 8, padding: "14px 12px", textAlign: "center" }}>
@@ -1924,6 +2015,10 @@ function AnalyticsDashboard({ provider, reviews }) {
             <div style={{ fontSize: 12, color: INK_FADE, fontFamily: SANS, textAlign: "center" }}>
               <span style={{ fontWeight: 900, color: INK, fontSize: 16 }}>{analytics.leads}</span>
               <br />Leads in {range} days
+            </div>
+            <div style={{ fontSize: 12, color: INK_FADE, fontFamily: SANS, textAlign: "center" }}>
+              <span style={{ fontWeight: 900, color: INK, fontSize: 16 }}>{(analytics.allTimeAdClicks||0).toLocaleString()}</span>
+              <br />All-time ad clicks
             </div>
           </div>
 
@@ -2292,8 +2387,8 @@ export default function ProviderDashboard() {
     setNewLoginEmail(prov.login_email || prov.email || "");
     loadReviews(prov.id);
     loadClassified(prov.id);
-    // If admin-added account, force password change on first login
-    if (prov.onboarding_type === "admin_added" && !prov.password_changed) {
+    // Force permanent password creation on first login for ALL providers
+    if (!prov.password_changed) {
       setAuthState("force_change_password");
     } else {
       setAuthState("dashboard");
@@ -2796,7 +2891,7 @@ export default function ProviderDashboard() {
             <div style={{ fontSize: 28 }}>📣</div>
             <div>
               <div style={{ fontWeight: 900, color: "#1B5E20", fontSize: 15, fontFamily: SERIF }}>Ad Payment Successful — You're Live!</div>
-              <div style={{ fontSize: 13, color: "#2E7D32", fontFamily: SANS, marginTop: 3 }}>Your Deals of the Week ad is now visible to residents. It will run for 7 days from today.</div>
+              <div style={{ fontSize: 13, color: "#2E7D32", fontFamily: SANS, marginTop: 3 }}>Your Weekly Featured ad is now visible to residents. It will run for 10 days from today.</div>
             </div>
             <button onClick={() => setClassifiedsSuccess(false)} style={{ marginLeft: "auto", background: "transparent", border: "none", color: "#888", fontSize: 18, cursor: "pointer" }}>✕</button>
           </div>
@@ -2913,8 +3008,8 @@ export default function ProviderDashboard() {
 
         {/* ── CLASSIFIED AD SECTION ─────────────────────────── */}
         <div style={{ ...shS, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-          <span>📰 Deals of the Week</span>
-          <span style={{ fontSize: 10, fontWeight: 400, color: INK_FADE, fontFamily: SANS, letterSpacing: 0.5 }}>$10/week · 7-day ad</span>
+          <span>🌟 Weekly Featured</span>
+          <span style={{ fontSize: 10, fontWeight: 400, color: INK_FADE, fontFamily: SANS, letterSpacing: 0.5 }}>$20/10 days · no auto-charge</span>
         </div>
         <ClassifiedAdSection provider={provider} refreshKey={adsRefreshKey} />
 
