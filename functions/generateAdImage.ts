@@ -1,6 +1,5 @@
-// v26 — gpt-image-1 with reference image support (edits endpoint)
-// If reference_image_url is provided, uses /images/edits to blend prompt + photo
-// Otherwise falls back to pure /images/generations
+// v27 — gpt-image-1 with reference image support + direct storage API upload
+// Fixed: CDN upload now uses direct multipart POST instead of broken SDK storage
 import { createClientFromRequest } from "npm:@base44/sdk@0.8.23";
 
 const CORS_HEADERS = {
@@ -9,16 +8,30 @@ const CORS_HEADERS = {
   "Access-Control-Allow-Headers": "Content-Type, Authorization",
 };
 
-async function uploadB64ToCDN(b64: string, provider_id: string, base44: any): Promise<string | null> {
+const APP_ID = "69d06ada8019d7e9edf7f8e8";
+const STORAGE_URL = `https://api.base44.app/api/apps/${APP_ID}/storage/upload`;
+
+async function uploadB64ToCDN(b64: string, provider_id: string): Promise<string | null> {
   try {
     const byteArray = Uint8Array.from(atob(b64), c => c.charCodeAt(0));
     const blob = new Blob([byteArray], { type: "image/png" });
     const filename = `ai_ad_${provider_id}_${Date.now()}.png`;
     const file = new File([blob], filename, { type: "image/png" });
-    const uploadResult = await base44.asServiceRole.storage.upload(file);
-    return uploadResult?.url || uploadResult?.file_url || null;
+
+    const fd = new FormData();
+    fd.append("file", file);
+
+    const resp = await fetch(STORAGE_URL, { method: "POST", body: fd });
+    if (!resp.ok) {
+      console.error("Storage upload HTTP error:", resp.status, await resp.text());
+      return null;
+    }
+    const data = await resp.json();
+    const url = data?.url || data?.file_url || null;
+    if (url) console.log("✅ CDN upload success:", url);
+    return url;
   } catch (err: any) {
-    console.error("SDK upload error:", err?.message);
+    console.error("uploadB64ToCDN error:", err?.message);
     return null;
   }
 }
@@ -29,7 +42,8 @@ async function fetchImageAsBlob(url: string): Promise<Blob | null> {
     if (!resp.ok) { console.error("Failed to fetch reference image:", resp.status); return null; }
     const contentType = resp.headers.get("content-type") || "image/png";
     const buffer = await resp.arrayBuffer();
-    return new Blob([buffer], { type: contentType });
+    console.log(`✅ Reference image fetched (${buffer.byteLength} bytes, ${contentType})`);
+    return new Blob([buffer], { type: "image/png" }); // always send as png to OpenAI
   } catch (err: any) {
     console.error("fetchImageAsBlob error:", err?.message);
     return null;
@@ -43,20 +57,15 @@ Deno.serve(async (req) => {
     const body = await req.json().catch(() => ({}));
     const { prompt, provider_id, upload_only, b64_png, reference_image_url } = body;
 
-    const base44 = createClientFromRequest(req);
-
     // ── Upload-only mode ──────────────────────────────────────────────────
     if (upload_only && b64_png && provider_id) {
       console.log("Upload-only mode...");
-      const cdnUrl = await uploadB64ToCDN(b64_png, provider_id, base44);
-      if (cdnUrl) {
-        console.log("✅ Upload-only success:", cdnUrl);
-        return Response.json({ url: cdnUrl }, { headers: CORS_HEADERS });
-      }
+      const cdnUrl = await uploadB64ToCDN(b64_png, provider_id);
+      if (cdnUrl) return Response.json({ url: cdnUrl }, { headers: CORS_HEADERS });
       return Response.json({ error: "Upload failed" }, { status: 500, headers: CORS_HEADERS });
     }
 
-    // ── Validate inputs ───────────────────────────────────────────────────
+    // ── Validate ──────────────────────────────────────────────────────────
     if (!prompt) return Response.json({ error: "Prompt is required" }, { status: 400, headers: CORS_HEADERS });
     if (!provider_id) return Response.json({ error: "Provider ID required" }, { status: 400, headers: CORS_HEADERS });
 
@@ -69,7 +78,7 @@ Deno.serve(async (req) => {
 
     // ── Mode A: Image + Prompt (edits endpoint) ───────────────────────────
     if (reference_image_url) {
-      console.log("Using gpt-image-1 edits endpoint with reference image...");
+      console.log("Attempting gpt-image-1 edits with reference image:", reference_image_url);
       const refBlob = await fetchImageAsBlob(reference_image_url);
 
       if (refBlob) {
@@ -79,7 +88,6 @@ Deno.serve(async (req) => {
         fd.append("n", "1");
         fd.append("size", "1024x1024");
         fd.append("quality", "low");
-        // Append the reference image — gpt-image-1 edits uses 'image[]' or 'image'
         fd.append("image", refBlob, "reference.png");
 
         const resp = await fetch("https://api.openai.com/v1/images/edits", {
@@ -92,22 +100,22 @@ Deno.serve(async (req) => {
           const data = await resp.json();
           b64 = data?.data?.[0]?.b64_json || null;
           if (b64) {
-            console.log("✅ Image edit generated successfully");
+            console.log("✅ Image edit generated with reference photo");
           } else {
-            console.warn("⚠️ Edits endpoint returned no b64, falling back to generations...");
+            console.warn("⚠️ Edits returned no b64 — falling back to generations");
           }
         } else {
           const errBody = await resp.json().catch(() => ({}));
           console.warn("⚠️ Edits endpoint failed:", errBody?.error?.message, "— falling back to generations");
         }
       } else {
-        console.warn("⚠️ Could not fetch reference image — falling back to generations");
+        console.warn("⚠️ Could not fetch reference image — falling back to prompt-only");
       }
     }
 
-    // ── Mode B: Prompt only (generations endpoint) — also used as fallback ─
+    // ── Mode B: Prompt only (or fallback) ────────────────────────────────
     if (!b64) {
-      console.log("Using gpt-image-1 generations endpoint (prompt only)...");
+      console.log("Using gpt-image-1 generations (prompt only)...");
       const resp = await fetch("https://api.openai.com/v1/images/generations", {
         method: "POST",
         headers: { "Authorization": `Bearer ${OPENAI_API_KEY}`, "Content-Type": "application/json" },
@@ -117,31 +125,31 @@ Deno.serve(async (req) => {
       if (!resp.ok) {
         const errBody = await resp.json().catch(() => ({}));
         const msg = errBody?.error?.message || `gpt-image-1 failed (${resp.status})`;
-        console.error("generations error:", msg);
+        console.error("Generations error:", msg);
         return Response.json({ error: msg }, { status: 500, headers: CORS_HEADERS });
       }
 
       const data = await resp.json();
       b64 = data?.data?.[0]?.b64_json || null;
+      if (b64) console.log("✅ Image generated from prompt only");
     }
 
     if (!b64) {
-      return Response.json({ error: "No image returned from OpenAI" }, { status: 500, headers: CORS_HEADERS });
+      return Response.json({ error: "No image returned from OpenAI. Please try again." }, { status: 500, headers: CORS_HEADERS });
     }
 
-    console.log("✅ Image ready, uploading to CDN...");
-    const cdnUrl = await uploadB64ToCDN(b64, provider_id, base44);
+    // ── Upload to CDN ─────────────────────────────────────────────────────
+    const cdnUrl = await uploadB64ToCDN(b64, provider_id);
     if (cdnUrl) {
-      console.log("✅ CDN upload success:", cdnUrl);
       return Response.json({ url: cdnUrl }, { headers: CORS_HEADERS });
     }
 
-    // Fallback: return base64 directly
-    console.log("⚠️ CDN upload failed — returning base64 fallback");
+    // Last resort: return base64 (should not normally reach here)
+    console.warn("⚠️ All CDN uploads failed — returning base64");
     return Response.json({ url: `data:image/png;base64,${b64}` }, { headers: CORS_HEADERS });
 
   } catch (err: any) {
-    console.error("generateAdImage error:", err);
+    console.error("generateAdImage fatal error:", err);
     return Response.json({ error: err.message || "Unknown error. Please try again." }, { status: 500, headers: CORS_HEADERS });
   }
 });
