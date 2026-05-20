@@ -119,8 +119,14 @@ reviews = fetch_all("ProviderReview")
 provider_map = {p["id"]: p.get("business_name") or p.get("owner_name") or "Unknown" for p in providers}
 
 # ── Filter Analytics ─────────────────────────────────────────────────────────
-today_ev = [e for e in analytics if e.get("date_key") == today_key and e.get("provider_id") not in ("test123", "VH-TEST1")]
-yest_ev  = [e for e in analytics if e.get("date_key") == yest_key  and e.get("provider_id") not in ("test123", "VH-TEST1")]
+prior_14 = (now_et - timedelta(days=14)).strftime("%Y-%m-%d")
+
+EXCLUDED_PIDS = ("test123", "VH-TEST1")
+
+# Last 7 days (current week)
+week_ev  = [e for e in analytics if e.get("date_key", "") >= week_ago  and e.get("provider_id") not in EXCLUDED_PIDS]
+# Prior 7 days (comparison week)
+prior_ev = [e for e in analytics if prior_14 <= e.get("date_key", "") < week_ago and e.get("provider_id") not in EXCLUDED_PIDS]
 
 def cnt(events, etype, pid=None):
     r = [e for e in events if e.get("event_type") == etype]
@@ -128,19 +134,19 @@ def cnt(events, etype, pid=None):
     if pid == "OTHER": r = [e for e in r if e.get("provider_id") != "SITE"]
     return len(r)
 
-# Today internal stats
-t_hp   = cnt(today_ev, "homepage_view", "SITE")
-t_pv   = cnt(today_ev, "profile_view", "OTHER")
-t_sa   = cnt(today_ev, "search_appearance")
-t_cc   = cnt(today_ev, "classified_click")
-t_li   = cnt(today_ev, "lead_inquiry")
+# This week internal stats
+t_hp   = cnt(week_ev, "homepage_view", "SITE")
+t_pv   = cnt(week_ev, "profile_view", "OTHER")
+t_sa   = cnt(week_ev, "search_appearance")
+t_cc   = cnt(week_ev, "classified_click") + cnt(week_ev, "classified_ad_click")
+t_li   = cnt(week_ev, "lead_inquiry")
 
-# Yesterday
-y_hp   = cnt(yest_ev, "homepage_view", "SITE")
-y_pv   = cnt(yest_ev, "profile_view", "OTHER")
-y_sa   = cnt(yest_ev, "search_appearance")
-y_cc   = cnt(yest_ev, "classified_click")
-y_li   = cnt(yest_ev, "lead_inquiry")
+# Prior week (for comparison delta)
+y_hp   = cnt(prior_ev, "homepage_view", "SITE")
+y_pv   = cnt(prior_ev, "profile_view", "OTHER")
+y_sa   = cnt(prior_ev, "search_appearance")
+y_cc   = cnt(prior_ev, "classified_click") + cnt(prior_ev, "classified_ad_click")
+y_li   = cnt(prior_ev, "lead_inquiry")
 
 # ── GA4 Data ─────────────────────────────────────────────────────────────────
 print("Fetching GA4 data...")
@@ -358,6 +364,7 @@ pending_review_note = f'{len(pending_reviews)} review(s) awaiting approval' if p
 
 # ── Pending Leads ─────────────────────────────────────────────────────────────
 total_leads_week = sum(1 for l in leads if str(l.get("created_date",""))[:10] >= week_ago)
+total_leads_alltime = len(leads)
 
 # ── Build HTML ────────────────────────────────────────────────────────────────
 LOGO = "https://media.base44.com/images/public/69d062aca815ce8e697894b1/a9af95bc3_V-Hublogo.png"
@@ -451,7 +458,7 @@ html = f"""<!DOCTYPE html>
 <!-- ═══════════════ 4. INTERNAL ENGAGEMENT ═══════════════ -->
 <tr><td style="padding-bottom:18px;">
 <table width="100%" cellpadding="0" cellspacing="0" style="background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,0.09);">
-  {section_header("🎯 INTERNAL ENGAGEMENT — TODAY vs YESTERDAY", "#E8431A")}
+  {section_header("🎯 INTERNAL ENGAGEMENT — LAST 7 DAYS vs PRIOR 7 DAYS", "#E8431A")}
   <tr><td style="padding:20px 10px;">
     <table width="100%" cellpadding="0" cellspacing="0"><tr>
       {stat_cell(t_hp, "Homepage<br>Hits", delta_html(t_hp, y_hp), "#1B3D6F", False)}
