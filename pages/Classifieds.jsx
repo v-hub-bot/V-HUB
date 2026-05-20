@@ -1,3 +1,4 @@
+// BUILD_FORCE_2026_04_22_T0400
 // CACHE-BUST-1776573078
 // build-1776559362
 // build-1776539899-PROBE 
@@ -5,7 +6,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { ClassifiedAd, Provider } from "@/api/entities";
 
 // ────────────────────────────────────────────────────────────────
-//  V-HUB  ·  Deals of the Week
+//  V-HUB  ·  Weekly Featured
 //  Shows rotating "featured deal" ads from active providers.
 //  Slot rotation is handled nightly by the rolloverClassifiedAds function.
 // ────────────────────────────────────────────────────────────────
@@ -87,15 +88,36 @@ function AdCard({ ad }) {
           {ad.body}
         </div>
 
-        {/* village + expiry */}
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 8 }}>
-          {ad.village && (
-            <span style={{ fontSize: 11, color: MUTED }}>📍 {ad.village}</span>
+        {/* location info + expiry */}
+        <div style={{ marginTop: 8, display: "flex", flexDirection: "column", gap: 4 }}>
+          {/* Mobile provider: show service areas */}
+          {ad._provider_is_mobile && ad._provider_areas && ad._provider_areas.length > 0 && (
+            <div style={{ fontSize: 11, color: TEAL, fontWeight: 600 }}>
+              🗺️ Serves: {ad._provider_areas.join(" · ")}
+            </div>
+          )}
+          {/* Brick & mortar: show address */}
+          {!ad._provider_is_mobile && ad._provider_address && (
+            <div style={{ fontSize: 11, color: MUTED }}>
+              📍 {ad._provider_address}
+            </div>
+          )}
+          {/* Both mobile AND has a location (hybrid) */}
+          {ad._provider_is_mobile && ad._provider_address && (
+            <div style={{ fontSize: 11, color: MUTED }}>
+              📍 Also at: {ad._provider_address}
+            </div>
+          )}
+          {/* Fallback: manual village field if no provider data enrichment */}
+          {!ad._provider_is_mobile && !ad._provider_address && ad.village && (
+            <div style={{ fontSize: 11, color: MUTED }}>
+              📍 {ad.village}
+            </div>
           )}
           {ad.deal_expires_at && !expired && (
-            <span style={{ fontSize: 11, color: RED, fontWeight: 700 }}>
+            <div style={{ fontSize: 11, color: RED, fontWeight: 700 }}>
               Expires {fmt(ad.deal_expires_at)}
-            </span>
+            </div>
           )}
         </div>
       </div>
@@ -113,11 +135,11 @@ export default function Classifieds() {
     (async () => {
       try {
         const res = await fetch(`${API_BASE}/getDeals`);
-        if (!res.ok) throw new Error("Failed to load deals");
+        if (!res.ok) throw new Error("Failed to load featured ads");
         const data = await res.json();
         setAds(data.ads || []);
       } catch (e) {
-        setError("Could not load Deals of the Week. Please try again later.");
+        setError("Could not load Weekly Featured. Please try again later.");
       } finally {
         setLoading(false);
       }
@@ -136,7 +158,7 @@ export default function Classifieds() {
             <button style={{ background: "linear-gradient(180deg,#9A6030,#7A4820 60%,#5A3010)", border: "2px solid #1B3D6F", borderRadius: 6, color: "#F5E8CC", fontFamily: "Georgia, serif", fontWeight: 700, fontSize: 13, padding: "8px 16px", cursor: "pointer", whiteSpace: "nowrap" }}>« Home</button>
           </a>
         </div>
-        <div style={{ fontSize: 28, fontWeight: 900, letterSpacing: 1 }}>🔥 Deals of the Week!</div>
+        <div style={{ fontSize: 28, fontWeight: 900, letterSpacing: 1 }}>🌟 Weekly Featured!</div>
         <div style={{ fontSize: 13, opacity: 0.8, marginTop: 4 }}>
           Exclusive offers from local providers in The Villages, FL
         </div>
@@ -146,7 +168,7 @@ export default function Classifieds() {
       <div style={{ maxWidth: 680, margin: "0 auto", padding: "20px 16px 40px" }}>
         {loading && (
           <div style={{ textAlign: "center", padding: 60, color: MUTED, fontSize: 16 }}>
-            Loading deals…
+            Loading featured ads…
           </div>
         )}
 
@@ -159,8 +181,8 @@ export default function Classifieds() {
         {!loading && !error && ads.length === 0 && (
           <div style={{ textAlign: "center", padding: 60, color: MUTED }}>
             <div style={{ fontSize: 40, marginBottom: 12 }}>🏖️</div>
-            <div style={{ fontSize: 18, fontWeight: 700, color: NAVY, marginBottom: 8 }}>No Active Deals Right Now</div>
-            <div style={{ fontSize: 14 }}>Check back soon — new deals are added weekly!</div>
+            <div style={{ fontSize: 18, fontWeight: 700, color: NAVY, marginBottom: 8 }}>No Active Featured Ads Right Now</div>
+            <div style={{ fontSize: 14 }}>Check back soon — new featured ads are added weekly!</div>
           </div>
         )}
 
