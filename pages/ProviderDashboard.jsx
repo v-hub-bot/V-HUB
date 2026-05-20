@@ -1905,7 +1905,7 @@ function AnalyticsDashboard({ provider, reviews }) {
       // Tally by type
       const searches   = inRange.filter(e => e.event_type === "search_appearance");
       const views      = inRange.filter(e => e.event_type === "profile_view");
-      const adClicks   = inRange.filter(e => e.event_type === "classified_click");
+      const adClicks   = inRange.filter(e => e.event_type === "classified_ad_click" || e.event_type === "classified_click");
       const leads      = inRange.filter(e => e.event_type === "lead_inquiry");
 
       // Searches by service
@@ -1934,13 +1934,22 @@ function AnalyticsDashboard({ provider, reviews }) {
         if (e.date_key && trend[e.date_key] !== undefined) trend[e.date_key]++;
       });
 
+      // Also count leads from LeadInquiry entity
+      let leadsFromEntity = 0;
+      try {
+        const cutoffISO = new Date(Date.now() - range*24*60*60*1000).toISOString();
+        const allLeads = await LeadInquiry.filter({ provider_id: provider.id });
+        leadsFromEntity = (allLeads||[]).filter(l => l.created_date && l.created_date >= cutoffISO).length;
+      } catch(e2) { leadsFromEntity = leads.length; }
+
       setAnalytics({
         searches: searches.length,
         views: views.length,
         adClicks: adClicks.length,
-        leads: leads.length,
+        leads: Math.max(leads.length, leadsFromEntity),
         allTimeSearches: allTime.filter(e => e.event_type === "search_appearance").length,
         allTimeViews: allTime.filter(e => e.event_type === "profile_view").length,
+        allTimeAdClicks: allTime.filter(e => ["classified_ad_click","classified_click"].includes(e.event_type)).length,
         byService: Object.entries(byService).sort((a, b) => b[1] - a[1]).slice(0, 8),
         byArea: Object.entries(byArea).sort((a, b) => b[1] - a[1]).slice(0, 8),
         trend: Object.entries(trend),
@@ -2006,6 +2015,10 @@ function AnalyticsDashboard({ provider, reviews }) {
             <div style={{ fontSize: 12, color: INK_FADE, fontFamily: SANS, textAlign: "center" }}>
               <span style={{ fontWeight: 900, color: INK, fontSize: 16 }}>{analytics.leads}</span>
               <br />Leads in {range} days
+            </div>
+            <div style={{ fontSize: 12, color: INK_FADE, fontFamily: SANS, textAlign: "center" }}>
+              <span style={{ fontWeight: 900, color: INK, fontSize: 16 }}>{(analytics.allTimeAdClicks||0).toLocaleString()}</span>
+              <br />All-time ad clicks
             </div>
           </div>
 
