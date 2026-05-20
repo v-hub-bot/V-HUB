@@ -245,6 +245,9 @@ function ProvDetail({ prov, areas, cats, svcs, onBack }) {
   const [showReviewForm, setShowReviewForm] = useState(false);
   const [reviewSaved, setReviewSaved] = useState(false);
   const [reviewForm, setReviewForm] = useState({ customer_name: "", customer_village: "", rating: 5, review_text: "", service_used: "" });
+  const [showLeadForm, setShowLeadForm] = useState(false);
+  const [leadForm, setLeadForm] = useState({ customer_name: "", customer_email: "", customer_phone: "", message: "" });
+  const [leadSent, setLeadSent] = useState(false);
   const cat = cats.find(c => c.id === prov.category_id);
   const GREEN = "#1A6B3C";
   const RED_RULE = "#8B1A1A";
@@ -297,6 +300,29 @@ function ProvDetail({ prov, areas, cats, svcs, onBack }) {
       setReviewForm({ customer_name: "", customer_village: "", rating: 5, review_text: "", service_used: "" });
     } catch(err) {
       alert("There was a problem submitting your review. Please try again.");
+    }
+  };
+
+  const handleLeadSubmit = async () => {
+    if (!leadForm.customer_name || (!leadForm.customer_email && !leadForm.customer_phone)) {
+      alert("Please enter your name and at least one contact method (email or phone).");
+      return;
+    }
+    try {
+      await fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/trackEvent", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ provider_id: prov.id, event_type: "lead_inquiry", source: "homepage" }),
+      }).catch(() => {});
+      // Save to LeadInquiry entity via backend
+      await fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/submitLead", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ provider_id: prov.id, ...leadForm }),
+      }).catch(() => {});
+      setLeadSent(true);
+      setShowLeadForm(false);
+      setLeadForm({ customer_name: "", customer_email: "", customer_phone: "", message: "" });
+    } catch(err) {
+      alert("There was a problem sending your message. Please try again or call directly.");
     }
   };
 
@@ -444,6 +470,32 @@ function ProvDetail({ prov, areas, cats, svcs, onBack }) {
             </div>
           </div>
         )}
+
+        {/* ── Contact Provider Form ── */}
+        <div style={{ background: "#EEF4FF", border: "1.5px solid #1B3D6F", borderRadius: 8, padding: "14px 16px", marginBottom: 14 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <div style={{ fontSize: 13, fontWeight: 900, color: "#1B3D6F", textTransform: "uppercase", letterSpacing: 1.5 }}>📬 Contact {prov.business_name}</div>
+            {!showLeadForm && !leadSent && (
+              <button onClick={() => setShowLeadForm(true)} style={{ background: "#E8431A", color: "#fff", border: "none", borderRadius: 4, padding: "5px 14px", fontSize: 11, fontWeight: 700, cursor: "pointer", fontFamily: "'Times New Roman', serif", letterSpacing: 1 }}>Send a Message</button>
+            )}
+          </div>
+          {leadSent && <div style={{ fontSize: 12, color: "#1A6B3C", fontStyle: "italic", marginTop: 8 }}>✓ Your message was sent! {prov.business_name} will be in touch soon.</div>}
+          {showLeadForm && (
+            <div style={{ marginTop: 12 }}>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px 14px", marginBottom: 8 }}>
+                <div style={{ gridColumn: "1/-1" }}><label style={lblS}>Your Name *</label><input style={inputS} value={leadForm.customer_name} onChange={e => setLeadForm(p => ({ ...p, customer_name: e.target.value }))} placeholder="First & Last Name" /></div>
+                <div><label style={lblS}>Your Email</label><input style={inputS} type="email" value={leadForm.customer_email} onChange={e => setLeadForm(p => ({ ...p, customer_email: e.target.value }))} placeholder="your@email.com" /></div>
+                <div><label style={lblS}>Your Phone</label><input style={inputS} type="tel" value={leadForm.customer_phone} onChange={e => setLeadForm(p => ({ ...p, customer_phone: e.target.value }))} placeholder="352-555-0000" /></div>
+                <div style={{ gridColumn: "1/-1" }}><label style={lblS}>Message</label><textarea style={{ ...inputS, minHeight: 65, resize: "vertical", lineHeight: 1.6 }} value={leadForm.message} onChange={e => setLeadForm(p => ({ ...p, message: e.target.value }))} placeholder={"Hi, I'm interested in your services. Please contact me..."} /></div>
+              </div>
+              <div style={{ fontSize: 10, color: "#666", fontStyle: "italic", marginBottom: 8 }}>* Name and at least one contact method required.</div>
+              <div style={{ display: "flex", gap: 8 }}>
+                <button onClick={handleLeadSubmit} style={{ background: "#1B3D6F", color: "#fff", border: "none", borderRadius: 4, padding: "8px 20px", fontSize: 12, fontWeight: 700, cursor: "pointer", fontFamily: "'Times New Roman', serif" }}>Send Message</button>
+                <button onClick={() => setShowLeadForm(false)} style={{ background: PAPER, border: `1.5px solid ${PAPER_DK}`, color: INK_FADE, borderRadius: 4, padding: "8px 14px", fontSize: 12, cursor: "pointer", fontFamily: "'Times New Roman', serif" }}>Cancel</button>
+              </div>
+            </div>
+          )}
+        </div>
 
         <Rule style={{ marginBottom: 14 }} />
 
@@ -1457,14 +1509,15 @@ export default function Home() {
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ provider_id: "SITE", event_type: "search_performed", area_name: areaLabelSite, service_name: svcLabelSite, category_name: catLabelSite, source: "homepage" }),
       }).catch(() => {});
-      const areaLabel = selArea ? (areas.find(a => a.id === selArea || a.name === selArea)?.name || selArea) : "";
-      const svcObj = selSvc ? svcs.find(s => s.id === selSvc) : null;
-      const catObj = svcObj ? cats.find(c => c.id === svcObj.category_id) : null;
+      // selSvc and selArea are already full objects (not IDs)
+      const areaLabel = selArea ? selArea.name : "";
+      const svcName = selSvc ? (selSvc._isCat ? "" : selSvc.name) : "";
+      const catName = selSvc ? (selSvc._isCat ? selSvc.name : (cats.find(c => c.id === selSvc.category_id)?.name || "")) : "";
       const events = out.map(p => ({
         provider_id: p.id,
         event_type: "search_appearance",
-        service_name: svcObj?.name || "",
-        category_name: catObj?.name || "",
+        service_name: svcName,
+        category_name: catName,
         area_name: areaLabel,
         source: "homepage",
       }));
