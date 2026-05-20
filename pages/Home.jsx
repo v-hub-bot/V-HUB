@@ -866,7 +866,7 @@ function VilDropdown({ open, areas, selArea, setSelArea, setVOpen }) {
     }}>
       {sorted.map(v => (
         <div key={v.id}
-          onClick={e => { e.stopPropagation(); setSelArea(v); setVOpen(false); }}
+          onClick={e => { e.stopPropagation(); setSelArea(v); setVOpen(false); fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/trackEvent",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({provider_id:"SITE",event_type:"village_search",area_name:v.name,source:"homepage"})}).catch(()=>{}); }}
           style={{
             padding: "12px 16px", fontSize: 16, lineHeight: 1.4,
             color: selArea?.id === v.id ? "#fff" : INK,
@@ -1449,6 +1449,14 @@ export default function Home() {
     setSearched(true);
     // Track search appearances — fire & forget to backend analytics
     if (out.length > 0) {
+      // Track site-level search event (village + service combo)
+      const areaLabelSite = selArea ? selArea.name : "All Villages";
+      const svcLabelSite = selSvc ? selSvc.name : "All Services";
+      const catLabelSite = selSvc?._isCat ? selSvc.name : (cats.find(c=>c.id===selSvc?.category_id)?.name || "");
+      fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/trackEvent", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ provider_id: "SITE", event_type: "search_performed", area_name: areaLabelSite, service_name: svcLabelSite, category_name: catLabelSite, source: "homepage" }),
+      }).catch(() => {});
       const areaLabel = selArea ? (areas.find(a => a.id === selArea || a.name === selArea)?.name || selArea) : "";
       const svcObj = selSvc ? svcs.find(s => s.id === selSvc) : null;
       const catObj = svcObj ? cats.find(c => c.id === svcObj.category_id) : null;
@@ -1662,7 +1670,7 @@ export default function Home() {
         </div>
 
         {/* CLASSIFIEDS — full width, thick red border, links to Classifieds */}
-        <a href="/Classifieds" style={{ textDecoration: "none", display: "block", width: "100%" }}>
+        <a href="/Classifieds" style={{ textDecoration: "none", display: "block", width: "100%" }} onClick={()=>fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/trackEvent",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({provider_id:"SITE",event_type:"featured_banner_click",source:"homepage"})}).catch(()=>{})}>
           <div style={{
             border: "4px solid #CC0000",
             outline: "1.5px solid #CC0000",
