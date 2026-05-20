@@ -9,11 +9,50 @@ from datetime import datetime, timedelta, timezone
 from collections import defaultdict
 
 SENDGRID_KEY = os.environ.get("SENDGRID_API_KEY", "")
-GA_TOKEN     = os.environ.get("GOOGLE_ANALYTICS_ACCESS_TOKEN", "")
 GA_PROP      = "properties/534059288"
 BASE44_API   = "https://api.base44.app/api/apps/69d062aca815ce8e697894b1"
 RECIPIENTS   = ["kimberlycook1980@gmail.com", "evansrus@comcast.net"]
 BASE44_KEY   = os.environ.get("BASE44_API_KEY", "")
+BASE44_AGENT_API = "https://api.base44.app/api/apps/69d062aca815ce8e697894b1"
+
+# ── Auto-refresh GA4 token at runtime ────────────────────────────────────────
+def get_ga4_token():
+    """Fetch a fresh GA4 access token from the Base44 connector at runtime."""
+    # First try the env var (may already be fresh from agent context)
+    token = os.environ.get("GOOGLE_ANALYTICS_ACCESS_TOKEN", "")
+    if token:
+        # Quick validity check
+        test_url = f"https://analyticsdata.googleapis.com/v1beta/{GA_PROP}:runReport"
+        test_payload = json.dumps({"dateRanges":[{"startDate":"today","endDate":"today"}],"metrics":[{"name":"totalUsers"}]}).encode()
+        test_req = urllib.request.Request(test_url, data=test_payload, headers={
+            "Authorization": f"Bearer {token}", "Content-Type": "application/json"
+        })
+        try:
+            with urllib.request.urlopen(test_req, timeout=10) as r:
+                r.read()
+                print("  ✅ GA4 token valid")
+                return token
+        except Exception:
+            print("  ⚠️  GA4 env token expired, fetching fresh token...")
+
+    # Fetch fresh token from Base44 connector API
+    try:
+        token_url = "https://api.base44.app/api/connectors/google_analytics/token"
+        token_req = urllib.request.Request(token_url, headers={
+            "api_key": BASE44_KEY,
+            "Content-Type": "application/json"
+        })
+        with urllib.request.urlopen(token_req, timeout=15) as r:
+            result = json.loads(r.read())
+            fresh = result.get("access_token", "")
+            if fresh:
+                print("  ✅ GA4 token refreshed via Base44 connector")
+                return fresh
+    except Exception as e:
+        print(f"  ⚠️  Could not refresh GA4 token: {e}")
+    return ""
+
+GA_TOKEN = get_ga4_token()
 
 # ── Helpers ──────────────────────────────────────────────────────────────────
 
