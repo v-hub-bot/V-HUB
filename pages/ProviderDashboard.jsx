@@ -1114,9 +1114,11 @@ function ClassifiedAdSection({ provider, refreshKey = 0 }) {
     if (!aiPrompt.trim()) return;
     setAiError(""); setAiGenerating(true);
     try {
+      // Pass the current uploaded image as a reference if one exists
+      const referenceImageUrl = filePreview && filePreview.startsWith("http") ? filePreview : (form.image_url || null);
       const resp = await fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/generateAdImage", {
         method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt: aiPrompt, provider_id: provider.id }),
+        body: JSON.stringify({ prompt: aiPrompt, provider_id: provider.id, reference_image_url: referenceImageUrl || undefined }),
       });
       const data = await resp.json();
       if (data.url) {
@@ -1512,11 +1514,11 @@ function ClassifiedAdSection({ provider, refreshKey = 0 }) {
 
             {/* AI generator */}
             <div style={{ borderTop: `2px dashed ${TEAL}`, paddingTop: 14, marginTop: 10, background: "#F9F5EC", borderRadius: 6, padding: "14px 12px" }}>
-              <label style={{ ...lbS, marginBottom: 4, fontSize: 12, color: NAVY }}>✨ DESCRIBE YOUR IMAGE — AI WILL CREATE IT</label>
+              <label style={{ ...lbS, marginBottom: 4, fontSize: 12, color: NAVY }}>✨ AI IMAGE GENERATOR — DESCRIBE WHAT YOU WANT</label>
               <div style={{ fontSize: 12, color: INK_FADE, fontFamily: SANS, marginBottom: 10, lineHeight: 1.5 }}>
-                Type exactly what you want in your ad image. Be specific! For example:<br/>
-                <em style={{ color: TEAL }}>"Golf cart with 3 tires in the back and 1 in the front, red and white color, parked in front of a Florida home"</em><br/>
-                <em style={{ color: TEAL }}>"Before and after lawn — left side overgrown, right side freshly mowed, sunny day"</em>
+                <strong style={{ color: TEAL }}>💡 Pro tip:</strong> Upload your own photo first, then describe how to transform it — AI will blend your image with your description!<br/>
+                <em style={{ color: TEAL }}>Example: Upload a photo of your blanket, then type "Hammock made from this blanket hanging between two palm trees on a sunny Florida beach"</em><br/>
+                <em style={{ color: TEAL }}>Or skip the photo and just describe: "Golf cart with custom wheels parked outside a Florida home in sunshine"</em>
               </div>
               <textarea
                 style={{ ...inS, minHeight: 70, resize: "vertical", lineHeight: 1.5, fontSize: 13 }}
