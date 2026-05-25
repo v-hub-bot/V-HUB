@@ -2,7 +2,7 @@
 // CACHE-BUST-1776648334
 // build-1776648334 
 import React, { useState, useEffect } from "react";
-import { Provider, ProviderReview, LeadInquiry, ServiceSearchStat, Category, Service, ServiceArea, ProviderAnalytic } from "@/api/entities";
+import { Provider, ProviderReview, LeadInquiry, ServiceSearchStat, Category, Service, ServiceArea, ProviderAnalytic, MarketVendor } from "@/api/entities";
 
 const BUILD_ID = "v2026-04-20-toast-save"; const LOGO = "https://media.base44.com/images/public/69d062aca815ce8e697894b1/a9af95bc3_V-Hublogo.png";
 const API_BASE = "https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions";
@@ -2048,7 +2048,7 @@ function Dashboard({ adminPin }) {
 
   const pendingReviews = reviews.filter(r => !r.is_approved);
   const pendingProviders = providers.filter(p => p.subscription_status === "pending");
-  const TABS = ["Overview", "Providers", "Deals", "Reviews", "Leads", "Analytics", "Add Provider"];
+  const TABS = ["Overview", "Providers", "Deals", "Reviews", "Leads", "Analytics", "Vendors", "Add Provider"];
 
   if (loading) return (
     <div style={{ minHeight: "100vh", background: T.parchment, display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", gap: 12 }}>
@@ -2141,8 +2141,201 @@ function Dashboard({ adminPin }) {
         {tab === "Leads" && <LeadsTab leads={leads} providers={providers} />}
         {tab === "Deals" && <DealsTab providers={providers} classifiedAds={classifiedAds} />}
         {tab === "Analytics" && <AnalyticsTab providers={providers} reviews={reviews} leads={leads} stats={stats} catMap={catMap} svcMap={svcMap} fullSvcMap={fullSvcMap} classifiedAds={classifiedAds} />}
+        {tab === "Vendors" && <VendorsTab />}
         {tab === "Add Provider" && <AddProviderTab onAdded={p => { setProviders(prev => [p, ...prev]); setTab("Providers"); }} categories={categories} services={services} serviceAreas={serviceAreas} adminPin={adminPin} />}
       </div>
+    </div>
+  );
+}
+
+
+// ── VENDORS TAB ───────────────────────────────────────────────────────────────
+const VENDOR_CAT_EMOJI_ADMIN = {
+  "Farm & Fresh Produce": "🌽",
+  "Food, Baked Goods & Sweets": "🥐",
+  "Wellness & Body": "🌿",
+  "Art, Jewelry & Gifts": "🎨",
+  "Home, Yard & Golf Cart": "🏡",
+};
+
+function VendorsTab() {
+  const [vendors, setVendors] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [filterCat, setFilterCat] = useState("All");
+  const [filterStatus, setFilterStatus] = useState("All");
+  const [searchQ, setSearchQ] = useState("");
+  const [editVendor, setEditVendor] = useState(null);
+  const [editForm, setEditForm] = useState({});
+  const [saving, setSaving] = useState(false);
+  const [toast, setToast] = useState("");
+
+  const showToast = (msg) => { setToast(msg); setTimeout(() => setToast(""), 3000); };
+
+  useEffect(() => {
+    MarketVendor.list().then(v => { setVendors(v || []); setLoading(false); }).catch(() => setLoading(false));
+  }, []);
+
+  const categories = ["All", "Farm & Fresh Produce", "Food, Baked Goods & Sweets", "Wellness & Body", "Art, Jewelry & Gifts", "Home, Yard & Golf Cart"];
+
+  const filtered = vendors.filter(v => {
+    const catMatch = filterCat === "All" || v.category === filterCat;
+    const statusMatch = filterStatus === "All" || (filterStatus === "Active" && v.is_active) || (filterStatus === "Pending" && !v.is_active);
+    const q = searchQ.trim().toLowerCase();
+    const nameMatch = !q || (v.name || "").toLowerCase().includes(q);
+    return catMatch && statusMatch && nameMatch;
+  });
+
+  const openEdit = (v) => { setEditVendor(v); setEditForm({ ...v }); };
+
+  const saveEdit = async () => {
+    setSaving(true);
+    try {
+      await MarketVendor.update(editVendor.id, editForm);
+      setVendors(prev => prev.map(x => x.id === editVendor.id ? { ...x, ...editForm } : x));
+      setEditVendor(null);
+      showToast("✅ Vendor updated!");
+    } catch { showToast("❌ Save failed"); }
+    setSaving(false);
+  };
+
+  const toggleActive = async (v) => {
+    await MarketVendor.update(v.id, { is_active: !v.is_active });
+    setVendors(prev => prev.map(x => x.id === v.id ? { ...x, is_active: !v.is_active } : x));
+    showToast(v.is_active ? "⚠️ Vendor hidden from public" : "✅ Vendor is now live");
+  };
+
+  const deleteVendor = async (v) => {
+    if (!window.confirm(`Delete ${v.name}? This cannot be undone.`)) return;
+    await MarketVendor.delete(v.id);
+    setVendors(prev => prev.filter(x => x.id !== v.id));
+    showToast("🗑️ Vendor deleted");
+  };
+
+  const pendingCount = vendors.filter(v => !v.is_active).length;
+  const activeCount = vendors.filter(v => v.is_active).length;
+
+  const inputS = { width: "100%", padding: "7px 10px", fontSize: 13, border: `1px solid ${T.border}`, borderRadius: 6, background: T.cream, fontFamily: T.sans, boxSizing: "border-box", marginBottom: 8 };
+  const labelS = { display: "block", fontSize: 11, fontWeight: 700, color: T.brownLight, fontFamily: T.sans, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 3 };
+
+  return (
+    <div>
+      {toast && <div style={{ position: "fixed", top: 20, right: 20, background: "#1A6B3C", color: "#fff", padding: "10px 18px", borderRadius: 8, fontWeight: 700, fontFamily: T.sans, zIndex: 9999, boxShadow: "0 4px 12px rgba(0,0,0,0.2)" }}>{toast}</div>}
+
+      {/* Stats strip */}
+      <div style={{ display: "flex", gap: 10, marginBottom: 14, flexWrap: "wrap" }}>
+        {[
+          { label: "Total Vendors", val: vendors.length, color: T.brown },
+          { label: "Active / Public", val: activeCount, color: "#1A6B3C" },
+          { label: "Pending Review", val: pendingCount, color: "#E8431A" },
+        ].map(s => (
+          <div key={s.label} style={{ flex: 1, minWidth: 100, background: T.cream, border: `1px solid ${T.border}`, borderRadius: 8, padding: "10px 14px", textAlign: "center" }}>
+            <div style={{ fontSize: 22, fontWeight: 900, color: s.color, fontFamily: T.sans }}>{s.val}</div>
+            <div style={{ fontSize: 11, color: T.brownLight, fontFamily: T.sans, marginTop: 2 }}>{s.label}</div>
+          </div>
+        ))}
+      </div>
+
+      {/* Filters */}
+      <div style={{ display: "flex", gap: 8, marginBottom: 10, flexWrap: "wrap", alignItems: "center" }}>
+        <input type="text" placeholder="Search vendors..." value={searchQ} onChange={e => setSearchQ(e.target.value)}
+          style={{ flex: 1, minWidth: 160, padding: "7px 12px", fontSize: 13, border: `1px solid ${T.border}`, borderRadius: 20, background: T.cream, fontFamily: T.sans }} />
+        <select value={filterCat} onChange={e => setFilterCat(e.target.value)}
+          style={{ padding: "7px 10px", fontSize: 12, border: `1px solid ${T.border}`, borderRadius: 20, background: T.cream, fontFamily: T.sans }}>
+          {categories.map(c => <option key={c} value={c}>{c === "All" ? "All Categories" : c}</option>)}
+        </select>
+        <select value={filterStatus} onChange={e => setFilterStatus(e.target.value)}
+          style={{ padding: "7px 10px", fontSize: 12, border: `1px solid ${T.border}`, borderRadius: 20, background: T.cream, fontFamily: T.sans }}>
+          <option value="All">All Status</option>
+          <option value="Active">Active</option>
+          <option value="Pending">Pending</option>
+        </select>
+      </div>
+
+      <div style={{ fontSize: 12, color: T.brownLight, fontFamily: T.sans, marginBottom: 10 }}>
+        Showing {filtered.length} of {vendors.length} vendors
+      </div>
+
+      {loading ? (
+        <div style={{ textAlign: "center", color: T.brownLight, padding: 30, fontFamily: T.sans }}>Loading vendors...</div>
+      ) : (
+        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+          {filtered.map(v => (
+            <div key={v.id} style={{ background: T.cream, border: `1px solid ${v.is_active ? T.border : "#E8431A55"}`, borderRadius: 8, padding: "10px 14px", display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+              <div style={{ fontSize: 20 }}>{VENDOR_CAT_EMOJI_ADMIN[v.category] || "🏪"}</div>
+              <div style={{ flex: 1, minWidth: 140 }}>
+                <div style={{ fontWeight: 700, fontSize: 14, color: T.brownDark, fontFamily: T.sans }}>{v.name}</div>
+                <div style={{ fontSize: 11, color: T.brownLight, fontFamily: T.sans }}>{v.category}</div>
+                {v.email && <div style={{ fontSize: 11, color: T.teal, fontFamily: T.sans }}>{v.email}</div>}
+                {v.phone && <div style={{ fontSize: 11, color: T.brownLight, fontFamily: T.sans }}>{v.phone}</div>}
+                <div style={{ marginTop: 3 }}>
+                  <span style={{ fontSize: 10, fontWeight: 700, padding: "1px 7px", borderRadius: 10, background: v.is_active ? "#E8F5E9" : "#FFEBEE", color: v.is_active ? "#1A6B3C" : "#E8431A", border: `1px solid ${v.is_active ? "#1A6B3C44" : "#E8431A44"}`, fontFamily: T.sans }}>
+                    {v.is_active ? "● Live" : "● Pending"}
+                  </span>
+                  {v.vendor_id && <span style={{ marginLeft: 6, fontSize: 10, color: T.brownLight, fontFamily: T.sans }}>{v.vendor_id}</span>}
+                </div>
+              </div>
+              <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                <button onClick={() => toggleActive(v)} style={{ padding: "5px 10px", fontSize: 11, fontWeight: 700, background: v.is_active ? "#FFF3E0" : "#E8F5E9", color: v.is_active ? "#E65100" : "#1A6B3C", border: `1px solid ${v.is_active ? "#E65100" : "#1A6B3C"}`, borderRadius: 6, cursor: "pointer", fontFamily: T.sans }}>
+                  {v.is_active ? "⏸ Hide" : "✅ Approve"}
+                </button>
+                <button onClick={() => openEdit(v)} style={{ padding: "5px 10px", fontSize: 11, fontWeight: 700, background: T.parchmentDark, color: T.brownDark, border: `1px solid ${T.border}`, borderRadius: 6, cursor: "pointer", fontFamily: T.sans }}>
+                  ✏️ Edit
+                </button>
+                <button onClick={() => deleteVendor(v)} style={{ padding: "5px 10px", fontSize: 11, fontWeight: 700, background: "#FFEBEE", color: "#c0392b", border: "1px solid #c0392b44", borderRadius: 6, cursor: "pointer", fontFamily: T.sans }}>
+                  🗑️
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Edit Modal */}
+      {editVendor && (
+        <div onClick={() => setEditVendor(null)} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", zIndex: 9000, display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }}>
+          <div onClick={e => e.stopPropagation()} style={{ background: T.parchment, borderRadius: 10, padding: "22px 18px", maxWidth: 420, width: "100%", maxHeight: "85vh", overflowY: "auto", boxShadow: "0 8px 32px rgba(0,0,0,0.25)", border: `2px solid ${T.border}` }}>
+            <h3 style={{ margin: "0 0 14px", color: T.brownDark, fontFamily: T.font, fontSize: 16 }}>✏️ Edit Vendor: {editVendor.name}</h3>
+
+            <label style={labelS}>Business Name</label>
+            <input value={editForm.name || ""} onChange={e => setEditForm(f => ({...f, name: e.target.value}))} style={inputS} />
+
+            <label style={labelS}>Category</label>
+            <select value={editForm.category || ""} onChange={e => setEditForm(f => ({...f, category: e.target.value}))} style={inputS}>
+              {["Farm & Fresh Produce","Food, Baked Goods & Sweets","Wellness & Body","Art, Jewelry & Gifts","Home, Yard & Golf Cart"].map(c => <option key={c} value={c}>{c}</option>)}
+            </select>
+
+            <label style={labelS}>Description</label>
+            <textarea value={editForm.description || ""} onChange={e => setEditForm(f => ({...f, description: e.target.value}))} rows={3} style={{ ...inputS, resize: "vertical" }} />
+
+            <label style={labelS}>Email</label>
+            <input type="email" value={editForm.email || ""} onChange={e => setEditForm(f => ({...f, email: e.target.value}))} style={inputS} />
+
+            <label style={labelS}>Phone</label>
+            <input value={editForm.phone || ""} onChange={e => setEditForm(f => ({...f, phone: e.target.value}))} style={inputS} />
+
+            <label style={labelS}>Website</label>
+            <input value={editForm.website || ""} onChange={e => setEditForm(f => ({...f, website: e.target.value}))} style={inputS} />
+
+            <label style={labelS}>Facebook URL</label>
+            <input value={editForm.facebook_url || ""} onChange={e => setEditForm(f => ({...f, facebook_url: e.target.value}))} style={inputS} />
+
+            <label style={labelS}>Logo URL</label>
+            <input value={editForm.logo_url || ""} onChange={e => setEditForm(f => ({...f, logo_url: e.target.value}))} style={inputS} />
+
+            <label style={labelS}>Notes (internal only)</label>
+            <textarea value={editForm.notes || ""} onChange={e => setEditForm(f => ({...f, notes: e.target.value}))} rows={2} style={{ ...inputS, resize: "vertical" }} />
+
+            <div style={{ display: "flex", gap: 8, marginTop: 6 }}>
+              <button onClick={saveEdit} disabled={saving} style={{ flex: 1, padding: "10px", background: "#1A6B3C", color: "#fff", border: "none", borderRadius: 8, fontWeight: 700, fontSize: 14, cursor: saving ? "not-allowed" : "pointer", fontFamily: T.sans }}>
+                {saving ? "Saving…" : "💾 Save Changes"}
+              </button>
+              <button onClick={() => setEditVendor(null)} style={{ padding: "10px 16px", background: T.parchmentDark, color: T.brownDark, border: `1px solid ${T.border}`, borderRadius: 8, fontWeight: 700, fontSize: 14, cursor: "pointer", fontFamily: T.sans }}>
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
