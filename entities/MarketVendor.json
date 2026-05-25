@@ -1,0 +1,62 @@
+{
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "Farm & Fresh Produce",
+        "Food, Baked Goods & Sweets",
+        "Wellness & Body",
+        "Art, Jewelry & Gifts",
+        "Home, Yard & Golf Cart"
+      ]
+    },
+    "description": {
+      "type": "string"
+    },
+    "email": {
+      "type": "string"
+    },
+    "phone": {
+      "type": "string"
+    },
+    "website": {
+      "type": "string"
+    },
+    "facebook_url": {
+      "type": "string"
+    },
+    "logo_url": {
+      "type": "string"
+    },
+    "location": {
+      "type": "string"
+    },
+    "schedule": {
+      "type": "string"
+    },
+    "is_active": {
+      "type": "boolean"
+    },
+    "is_verified": {
+      "type": "boolean"
+    },
+    "vendor_id": {
+      "type": "string"
+    },
+    "login_email": {
+      "type": "string"
+    },
+    "login_password": {
+      "type": "string"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [],
+  "name": "MarketVendor"
+}

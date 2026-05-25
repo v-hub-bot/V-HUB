@@ -1,0 +1,546 @@
+[
+  {
+    "name": "April's Produce",
+    "category": "Farm & Fresh Produce"
+  },
+  {
+    "name": "Eby Produce",
+    "category": "Farm & Fresh Produce"
+  },
+  {
+    "name": "Honest Produce",
+    "category": "Farm & Fresh Produce"
+  },
+  {
+    "name": "Plant Prana Wellness Microgreens",
+    "category": "Farm & Fresh Produce"
+  },
+  {
+    "name": "Reeds Groves",
+    "category": "Farm & Fresh Produce"
+  },
+  {
+    "name": "Sea Moss Me",
+    "category": "Farm & Fresh Produce"
+  },
+  {
+    "name": "Soulsprout Farm",
+    "category": "Farm & Fresh Produce"
+  },
+  {
+    "name": "Yummi Harvest",
+    "category": "Farm & Fresh Produce"
+  },
+  {
+    "name": "A&C Trusted Solutions LLC",
+    "category": "Food, Baked Goods & Sweets"
+  },
+  {
+    "name": "A Wish Or Two Ago",
+    "category": "Food, Baked Goods & Sweets"
+  },
+  {
+    "name": "Ain't Yo' Mama's Baked Beans LLC",
+    "category": "Food, Baked Goods & Sweets"
+  },
+  {
+    "name": "Alzaytoon",
+    "category": "Food, Baked Goods & Sweets"
+  },
+  {
+    "name": "Amish Country Bulk Foods",
+    "category": "Food, Baked Goods & Sweets"
+  },
+  {
+    "name": "Aneta Bistro",
+    "category": "Food, Baked Goods & Sweets"
+  },
+  {
+    "name": "Awesome Fudge",
+    "category": "Food, Baked Goods & Sweets"
+  },
+  {
+    "name": "Bailey Bleus LLC",
+    "category": "Food, Baked Goods & Sweets"
+  },
+  {
+    "name": "Bahama Mama's Catering",
+    "category": "Food, Baked Goods & Sweets"
+  },
+  {
+    "name": "Baked By Small Batch",
+    "category": "Food, Baked Goods & Sweets"
+  },
+  {
+    "name": "Bespoke Blends",
+    "category": "Food, Baked Goods & Sweets"
+  },
+  {
+    "name": "BnL All American Snack Co. and BnL Fine Cigars",
+    "category": "Food, Baked Goods & Sweets"
+  },
+  {
+    "name": "BuonGourmet",
+    "category": "Food, Baked Goods & Sweets"
+  },
+  {
+    "name": "Captain Jo's Fish Dips",
+    "category": "Food, Baked Goods & Sweets"
+  },
+  {
+    "name": "Casa Daza",
+    "category": "Food, Baked Goods & Sweets"
+  },
+  {
+    "name": "Casa Luciana (Oh My Guac)",
+    "category": "Food, Baked Goods & Sweets"
+  },
+  {
+    "name": "Cheesy Dreams",
+    "category": "Food, Baked Goods & Sweets"
+  },
+  {
+    "name": "Chattering Chimps LLC",
+    "category": "Food, Baked Goods & Sweets"
+  },
+  {
+    "name": "Colombian Cravings",
+    "category": "Food, Baked Goods & Sweets"
+  },
+  {
+    "name": "Endoughment LLC",
+    "category": "Food, Baked Goods & Sweets"
+  },
+  {
+    "name": "European Breads LLC",
+    "category": "Food, Baked Goods & Sweets"
+  },
+  {
+    "name": "Florida Fresh Fungi",
+    "category": "Food, Baked Goods & Sweets"
+  },
+  {
+    "name": "Friends Products LLC",
+    "category": "Food, Baked Goods & Sweets"
+  },
+  {
+    "name": "Fruit2nuts",
+    "category": "Food, Baked Goods & Sweets"
+  },
+  {
+    "name": "GiGi's Pot Pies",
+    "category": "Food, Baked Goods & Sweets"
+  },
+  {
+    "name": "Graham's Original Kettlecorn by Randy & Glenda",
+    "category": "Food, Baked Goods & Sweets"
+  },
+  {
+    "name": "Grandma's German Kitchen",
+    "category": "Food, Baked Goods & Sweets"
+  },
+  {
+    "name": "Heavenly Soft Pretzels",
+    "category": "Food, Baked Goods & Sweets"
+  },
+  {
+    "name": "House of Jerks",
+    "category": "Food, Baked Goods & Sweets"
+  },
+  {
+    "name": "Island Fin Poke",
+    "category": "Food, Baked Goods & Sweets"
+  },
+  {
+    "name": "Italian Hills",
+    "category": "Food, Baked Goods & Sweets"
+  },
+  {
+    "name": "Kibbeh House LLC / Mama Ganoush",
+    "category": "Food, Baked Goods & Sweets"
+  },
+  {
+    "name": "La Montagne Des Saveurs",
+    "category": "Food, Baked Goods & Sweets"
+  },
+  {
+    "name": "Manuka Gold",
+    "category": "Food, Baked Goods & Sweets"
+  },
+  {
+    "name": "Matts Fresh Cheese LLC",
+    "category": "Food, Baked Goods & Sweets"
+  },
+  {
+    "name": "Mexican Specialty",
+    "category": "Food, Baked Goods & Sweets"
+  },
+  {
+    "name": "Mitchem Bee Company",
+    "category": "Food, Baked Goods & Sweets"
+  },
+  {
+    "name": "Nutty Blends LLC",
+    "category": "Food, Baked Goods & Sweets"
+  },
+  {
+    "name": "Oaken Bakery LLC",
+    "category": "Food, Baked Goods & Sweets"
+  },
+  {
+    "name": "Orlando Fresh Bread",
+    "category": "Food, Baked Goods & Sweets"
+  },
+  {
+    "name": "Pasta Bella Of Florida",
+    "category": "Food, Baked Goods & Sweets"
+  },
+  {
+    "name": "Reno's Jewels of the Antilles",
+    "category": "Food, Baked Goods & Sweets"
+  },
+  {
+    "name": "Riverbend Cattle Company",
+    "category": "Food, Baked Goods & Sweets"
+  },
+  {
+    "name": "Sally's Delectables",
+    "category": "Food, Baked Goods & Sweets"
+  },
+  {
+    "name": "Simply Savory Dips",
+    "category": "Food, Baked Goods & Sweets"
+  },
+  {
+    "name": "Simply Soup Creations and Mixes",
+    "category": "Food, Baked Goods & Sweets"
+  },
+  {
+    "name": "Simply Sourdough Bakery",
+    "category": "Food, Baked Goods & Sweets"
+  },
+  {
+    "name": "Simply Sweets",
+    "category": "Food, Baked Goods & Sweets"
+  },
+  {
+    "name": "Sukhothia M&T Foods LLC",
+    "category": "Food, Baked Goods & Sweets"
+  },
+  {
+    "name": "Sunshine Slush",
+    "category": "Food, Baked Goods & Sweets"
+  },
+  {
+    "name": "Sunstate Projects (Wi Fried Cheese Curds)",
+    "category": "Food, Baked Goods & Sweets"
+  },
+  {
+    "name": "The Cheesecake Lab",
+    "category": "Food, Baked Goods & Sweets"
+  },
+  {
+    "name": "The Picanha Experience",
+    "category": "Food, Baked Goods & Sweets"
+  },
+  {
+    "name": "The Pickled Princess FL LLC",
+    "category": "Food, Baked Goods & Sweets"
+  },
+  {
+    "name": "The Proper Pickle Company",
+    "category": "Food, Baked Goods & Sweets"
+  },
+  {
+    "name": "The Ricotta Cheese Factory",
+    "category": "Food, Baked Goods & Sweets"
+  },
+  {
+    "name": "TJE Seafood",
+    "category": "Food, Baked Goods & Sweets"
+  },
+  {
+    "name": "TJE Seafood (Live Crab & Lobster)",
+    "category": "Food, Baked Goods & Sweets"
+  },
+  {
+    "name": "Tomozz",
+    "category": "Food, Baked Goods & Sweets"
+  },
+  {
+    "name": "Uncle Ronnie's Cheesecake",
+    "category": "Food, Baked Goods & Sweets"
+  },
+  {
+    "name": "Wakarusa Dime Store",
+    "category": "Food, Baked Goods & Sweets"
+  },
+  {
+    "name": "11/22 Ancient Terra",
+    "category": "Wellness & Body"
+  },
+  {
+    "name": "Clear View Imaging",
+    "category": "Wellness & Body"
+  },
+  {
+    "name": "Drift Away Australian Oil of Eucalyptus",
+    "category": "Wellness & Body"
+  },
+  {
+    "name": "MIYO Midwest Brokers LLC DBA Soggy Bottom Hemp",
+    "category": "Wellness & Body"
+  },
+  {
+    "name": "Nature's Line Bath and Body",
+    "category": "Wellness & Body"
+  },
+  {
+    "name": "Northwood Naturals",
+    "category": "Wellness & Body"
+  },
+  {
+    "name": "That Pickleball Swag",
+    "category": "Wellness & Body"
+  },
+  {
+    "name": "The Pharm Stand",
+    "category": "Wellness & Body"
+  },
+  {
+    "name": "United HealthCare",
+    "category": "Wellness & Body"
+  },
+  {
+    "name": "Village Dental",
+    "category": "Wellness & Body"
+  },
+  {
+    "name": "4Seasons",
+    "category": "Art, Jewelry & Gifts"
+  },
+  {
+    "name": "Amazing Elemental",
+    "category": "Art, Jewelry & Gifts"
+  },
+  {
+    "name": "Beach Girl and Giggling Goats",
+    "category": "Art, Jewelry & Gifts"
+  },
+  {
+    "name": "Brigitte Gallery",
+    "category": "Art, Jewelry & Gifts"
+  },
+  {
+    "name": "Art Handcrafted and More",
+    "category": "Art, Jewelry & Gifts"
+  },
+  {
+    "name": "Catching Rays",
+    "category": "Art, Jewelry & Gifts"
+  },
+  {
+    "name": "Celtic Elegance",
+    "category": "Art, Jewelry & Gifts"
+  },
+  {
+    "name": "Celticness",
+    "category": "Art, Jewelry & Gifts"
+  },
+  {
+    "name": "Chen Oriental Gift",
+    "category": "Art, Jewelry & Gifts"
+  },
+  {
+    "name": "CraftsHands",
+    "category": "Art, Jewelry & Gifts"
+  },
+  {
+    "name": "DANISMAN PHOTOGRAPHY LLC",
+    "category": "Art, Jewelry & Gifts"
+  },
+  {
+    "name": "Doodle Draw Portrait",
+    "category": "Art, Jewelry & Gifts"
+  },
+  {
+    "name": "Doug's Air Plants",
+    "category": "Art, Jewelry & Gifts"
+  },
+  {
+    "name": "Ellie Rose Crafty Corner",
+    "category": "Art, Jewelry & Gifts"
+  },
+  {
+    "name": "Fantasy Flair By ER",
+    "category": "Art, Jewelry & Gifts"
+  },
+  {
+    "name": "Galaxy Art",
+    "category": "Art, Jewelry & Gifts"
+  },
+  {
+    "name": "Griffin Farm Crafts & Stone Creations",
+    "category": "Art, Jewelry & Gifts"
+  },
+  {
+    "name": "Heavenly Gems Jewelry",
+    "category": "Art, Jewelry & Gifts"
+  },
+  {
+    "name": "Indulgences Unique Pieces",
+    "category": "Art, Jewelry & Gifts"
+  },
+  {
+    "name": "Karl Candela",
+    "category": "Art, Jewelry & Gifts"
+  },
+  {
+    "name": "Kingdom Crafters",
+    "category": "Art, Jewelry & Gifts"
+  },
+  {
+    "name": "Kitchen Fun With Sherrie & Pampered Chef",
+    "category": "Art, Jewelry & Gifts"
+  },
+  {
+    "name": "L & L Design By Two Chicks",
+    "category": "Art, Jewelry & Gifts"
+  },
+  {
+    "name": "Loganjade Designs",
+    "category": "Art, Jewelry & Gifts"
+  },
+  {
+    "name": "Luciid Designs",
+    "category": "Art, Jewelry & Gifts"
+  },
+  {
+    "name": "PaperPie",
+    "category": "Art, Jewelry & Gifts"
+  },
+  {
+    "name": "Peachy Links",
+    "category": "Art, Jewelry & Gifts"
+  },
+  {
+    "name": "Sentimental Art",
+    "category": "Art, Jewelry & Gifts"
+  },
+  {
+    "name": "SOL Specialties",
+    "category": "Art, Jewelry & Gifts"
+  },
+  {
+    "name": "Steelheart Creations",
+    "category": "Art, Jewelry & Gifts"
+  },
+  {
+    "name": "Steve Gordon Pottery",
+    "category": "Art, Jewelry & Gifts"
+  },
+  {
+    "name": "Thank God I'm Fabulous! Jewelry",
+    "category": "Art, Jewelry & Gifts"
+  },
+  {
+    "name": "ThePerfectPocketBook",
+    "category": "Art, Jewelry & Gifts"
+  },
+  {
+    "name": "USA Creations",
+    "category": "Art, Jewelry & Gifts"
+  },
+  {
+    "name": "Bob Martin Signs",
+    "category": "Home, Yard & Golf Cart"
+  },
+  {
+    "name": "Cheryls Kitchen Towels",
+    "category": "Home, Yard & Golf Cart"
+  },
+  {
+    "name": "Cool Cart Stuff LLC",
+    "category": "Home, Yard & Golf Cart"
+  },
+  {
+    "name": "Fine Designs",
+    "category": "Home, Yard & Golf Cart"
+  },
+  {
+    "name": "Flags and More Store",
+    "category": "Home, Yard & Golf Cart"
+  },
+  {
+    "name": "Golf Cart Hoodies",
+    "category": "Home, Yard & Golf Cart"
+  },
+  {
+    "name": "Hardscapes by Pooters LLC",
+    "category": "Home, Yard & Golf Cart"
+  },
+  {
+    "name": "Humana",
+    "category": "Home, Yard & Golf Cart"
+  },
+  {
+    "name": "Karen's Creative Designs LLC",
+    "category": "Home, Yard & Golf Cart"
+  },
+  {
+    "name": "Kazumi Garden",
+    "category": "Home, Yard & Golf Cart"
+  },
+  {
+    "name": "Make Me That",
+    "category": "Home, Yard & Golf Cart"
+  },
+  {
+    "name": "Margie's Meadow Flower Farm",
+    "category": "Home, Yard & Golf Cart"
+  },
+  {
+    "name": "Merr's Farms",
+    "category": "Home, Yard & Golf Cart"
+  },
+  {
+    "name": "Mid Florida Agencies",
+    "category": "Home, Yard & Golf Cart"
+  },
+  {
+    "name": "M&M Cleaning",
+    "category": "Home, Yard & Golf Cart"
+  },
+  {
+    "name": "Posh Pool Loungers by Tenjam",
+    "category": "Home, Yard & Golf Cart"
+  },
+  {
+    "name": "Renewal by Andersen",
+    "category": "Home, Yard & Golf Cart"
+  },
+  {
+    "name": "Rhino Cart Art",
+    "category": "Home, Yard & Golf Cart"
+  },
+  {
+    "name": "Sew Craft Crazy",
+    "category": "Home, Yard & Golf Cart"
+  },
+  {
+    "name": "Signs By Farris",
+    "category": "Home, Yard & Golf Cart"
+  },
+  {
+    "name": "Sip Sip Orchids",
+    "category": "Home, Yard & Golf Cart"
+  },
+  {
+    "name": "The Purple Dragonfly2",
+    "category": "Home, Yard & Golf Cart"
+  },
+  {
+    "name": "The Villages Daily Sun",
+    "category": "Home, Yard & Golf Cart"
+  }
+]

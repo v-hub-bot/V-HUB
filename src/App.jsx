@@ -6,6 +6,7 @@ import Privacy from './pages/Privacy';
 import ProviderDashboard from './pages/ProviderDashboard';
 import Terms from './pages/Terms';
 import Wekcadmin from './pages/Wekcadmin';
+import VendorSignup from './pages/VendorSignup';
 
 function App() {
   return (
@@ -19,6 +20,7 @@ function App() {
         <Route path="/ProviderDashboard" element={<ProviderDashboard />} />
         <Route path="/Terms" element={<Terms />} />
         <Route path="/Wekcadmin" element={<Wekcadmin />} />
+        <Route path="/VendorSignup" element={<VendorSignup />} />
       </Routes>
     </BrowserRouter>
   )

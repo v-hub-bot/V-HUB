@@ -1,0 +1,1226 @@
+[
+  {
+    "vendor_id": "VM-1001",
+    "name": "April's Produce",
+    "category": "Farm & Fresh Produce",
+    "is_active": true,
+    "is_verified": false,
+    "location": "The Villages, FL",
+    "schedule": "Every Saturday 9:00 AM \u2013 1:00 PM at Brownwood Paddock Square"
+  },
+  {
+    "vendor_id": "VM-1002",
+    "name": "Eby Produce",
+    "category": "Farm & Fresh Produce",
+    "is_active": true,
+    "is_verified": false,
+    "location": "The Villages, FL",
+    "schedule": "Every Saturday 9:00 AM \u2013 1:00 PM at Brownwood Paddock Square"
+  },
+  {
+    "vendor_id": "VM-1003",
+    "name": "Honest Produce",
+    "category": "Farm & Fresh Produce",
+    "is_active": true,
+    "is_verified": false,
+    "location": "The Villages, FL",
+    "schedule": "Every Saturday 9:00 AM \u2013 1:00 PM at Brownwood Paddock Square"
+  },
+  {
+    "vendor_id": "VM-1004",
+    "name": "Plant Prana Wellness Microgreens",
+    "category": "Farm & Fresh Produce",
+    "is_active": true,
+    "is_verified": false,
+    "location": "The Villages, FL",
+    "schedule": "Every Saturday 9:00 AM \u2013 1:00 PM at Brownwood Paddock Square"
+  },
+  {
+    "vendor_id": "VM-1005",
+    "name": "Reeds Groves",
+    "category": "Farm & Fresh Produce",
+    "is_active": true,
+    "is_verified": false,
+    "location": "The Villages, FL",
+    "schedule": "Every Saturday 9:00 AM \u2013 1:00 PM at Brownwood Paddock Square"
+  },
+  {
+    "vendor_id": "VM-1006",
+    "name": "Sea Moss Me",
+    "category": "Farm & Fresh Produce",
+    "is_active": true,
+    "is_verified": false,
+    "location": "The Villages, FL",
+    "schedule": "Every Saturday 9:00 AM \u2013 1:00 PM at Brownwood Paddock Square"
+  },
+  {
+    "vendor_id": "VM-1007",
+    "name": "Soulsprout Farm",
+    "category": "Farm & Fresh Produce",
+    "is_active": true,
+    "is_verified": false,
+    "location": "The Villages, FL",
+    "schedule": "Every Saturday 9:00 AM \u2013 1:00 PM at Brownwood Paddock Square"
+  },
+  {
+    "vendor_id": "VM-1008",
+    "name": "Yummi Harvest",
+    "category": "Farm & Fresh Produce",
+    "is_active": true,
+    "is_verified": false,
+    "location": "The Villages, FL",
+    "schedule": "Every Saturday 9:00 AM \u2013 1:00 PM at Brownwood Paddock Square"
+  },
+  {
+    "vendor_id": "VM-1009",
+    "name": "A&C Trusted Solutions LLC",
+    "category": "Food, Baked Goods & Sweets",
+    "is_active": true,
+    "is_verified": false,
+    "location": "The Villages, FL",
+    "schedule": "Every Saturday 9:00 AM \u2013 1:00 PM at Brownwood Paddock Square"
+  },
+  {
+    "vendor_id": "VM-1010",
+    "name": "A Wish Or Two Ago",
+    "category": "Food, Baked Goods & Sweets",
+    "is_active": true,
+    "is_verified": false,
+    "location": "The Villages, FL",
+    "schedule": "Every Saturday 9:00 AM \u2013 1:00 PM at Brownwood Paddock Square"
+  },
+  {
+    "vendor_id": "VM-1011",
+    "name": "Ain't Yo' Mama's Baked Beans LLC",
+    "category": "Food, Baked Goods & Sweets",
+    "is_active": true,
+    "is_verified": false,
+    "location": "The Villages, FL",
+    "schedule": "Every Saturday 9:00 AM \u2013 1:00 PM at Brownwood Paddock Square"
+  },
+  {
+    "vendor_id": "VM-1012",
+    "name": "Alzaytoon",
+    "category": "Food, Baked Goods & Sweets",
+    "is_active": true,
+    "is_verified": false,
+    "location": "The Villages, FL",
+    "schedule": "Every Saturday 9:00 AM \u2013 1:00 PM at Brownwood Paddock Square"
+  },
+  {
+    "vendor_id": "VM-1013",
+    "name": "Amish Country Bulk Foods",
+    "category": "Food, Baked Goods & Sweets",
+    "is_active": true,
+    "is_verified": false,
+    "location": "The Villages, FL",
+    "schedule": "Every Saturday 9:00 AM \u2013 1:00 PM at Brownwood Paddock Square"
+  },
+  {
+    "vendor_id": "VM-1014",
+    "name": "Aneta Bistro",
+    "category": "Food, Baked Goods & Sweets",
+    "is_active": true,
+    "is_verified": false,
+    "location": "The Villages, FL",
+    "schedule": "Every Saturday 9:00 AM \u2013 1:00 PM at Brownwood Paddock Square"
+  },
+  {
+    "vendor_id": "VM-1015",
+    "name": "Awesome Fudge",
+    "category": "Food, Baked Goods & Sweets",
+    "is_active": true,
+    "is_verified": false,
+    "location": "The Villages, FL",
+    "schedule": "Every Saturday 9:00 AM \u2013 1:00 PM at Brownwood Paddock Square"
+  },
+  {
+    "vendor_id": "VM-1016",
+    "name": "Bailey Bleus LLC",
+    "category": "Food, Baked Goods & Sweets",
+    "is_active": true,
+    "is_verified": false,
+    "location": "The Villages, FL",
+    "schedule": "Every Saturday 9:00 AM \u2013 1:00 PM at Brownwood Paddock Square"
+  },
+  {
+    "vendor_id": "VM-1017",
+    "name": "Bahama Mama's Catering",
+    "category": "Food, Baked Goods & Sweets",
+    "is_active": true,
+    "is_verified": false,
+    "location": "The Villages, FL",
+    "schedule": "Every Saturday 9:00 AM \u2013 1:00 PM at Brownwood Paddock Square"
+  },
+  {
+    "vendor_id": "VM-1018",
+    "name": "Baked By Small Batch",
+    "category": "Food, Baked Goods & Sweets",
+    "is_active": true,
+    "is_verified": false,
+    "location": "The Villages, FL",
+    "schedule": "Every Saturday 9:00 AM \u2013 1:00 PM at Brownwood Paddock Square"
+  },
+  {
+    "vendor_id": "VM-1019",
+    "name": "Bespoke Blends",
+    "category": "Food, Baked Goods & Sweets",
+    "is_active": true,
+    "is_verified": false,
+    "location": "The Villages, FL",
+    "schedule": "Every Saturday 9:00 AM \u2013 1:00 PM at Brownwood Paddock Square"
+  },
+  {
+    "vendor_id": "VM-1020",
+    "name": "BnL All American Snack Co. and BnL Fine Cigars",
+    "category": "Food, Baked Goods & Sweets",
+    "is_active": true,
+    "is_verified": false,
+    "location": "The Villages, FL",
+    "schedule": "Every Saturday 9:00 AM \u2013 1:00 PM at Brownwood Paddock Square"
+  },
+  {
+    "vendor_id": "VM-1021",
+    "name": "BuonGourmet",
+    "category": "Food, Baked Goods & Sweets",
+    "is_active": true,
+    "is_verified": false,
+    "location": "The Villages, FL",
+    "schedule": "Every Saturday 9:00 AM \u2013 1:00 PM at Brownwood Paddock Square"
+  },
+  {
+    "vendor_id": "VM-1022",
+    "name": "Captain Jo's Fish Dips",
+    "category": "Food, Baked Goods & Sweets",
+    "is_active": true,
+    "is_verified": false,
+    "location": "The Villages, FL",
+    "schedule": "Every Saturday 9:00 AM \u2013 1:00 PM at Brownwood Paddock Square"
+  },
+  {
+    "vendor_id": "VM-1023",
+    "name": "Casa Daza",
+    "category": "Food, Baked Goods & Sweets",
+    "is_active": true,
+    "is_verified": false,
+    "location": "The Villages, FL",
+    "schedule": "Every Saturday 9:00 AM \u2013 1:00 PM at Brownwood Paddock Square"
+  },
+  {
+    "vendor_id": "VM-1024",
+    "name": "Casa Luciana (Oh My Guac)",
+    "category": "Food, Baked Goods & Sweets",
+    "is_active": true,
+    "is_verified": false,
+    "location": "The Villages, FL",
+    "schedule": "Every Saturday 9:00 AM \u2013 1:00 PM at Brownwood Paddock Square"
+  },
+  {
+    "vendor_id": "VM-1025",
+    "name": "Cheesy Dreams",
+    "category": "Food, Baked Goods & Sweets",
+    "is_active": true,
+    "is_verified": false,
+    "location": "The Villages, FL",
+    "schedule": "Every Saturday 9:00 AM \u2013 1:00 PM at Brownwood Paddock Square"
+  },
+  {
+    "vendor_id": "VM-1026",
+    "name": "Chattering Chimps LLC",
+    "category": "Food, Baked Goods & Sweets",
+    "is_active": true,
+    "is_verified": false,
+    "location": "The Villages, FL",
+    "schedule": "Every Saturday 9:00 AM \u2013 1:00 PM at Brownwood Paddock Square"
+  },
+  {
+    "vendor_id": "VM-1027",
+    "name": "Colombian Cravings",
+    "category": "Food, Baked Goods & Sweets",
+    "is_active": true,
+    "is_verified": false,
+    "location": "The Villages, FL",
+    "schedule": "Every Saturday 9:00 AM \u2013 1:00 PM at Brownwood Paddock Square"
+  },
+  {
+    "vendor_id": "VM-1028",
+    "name": "Endoughment LLC",
+    "category": "Food, Baked Goods & Sweets",
+    "is_active": true,
+    "is_verified": false,
+    "location": "The Villages, FL",
+    "schedule": "Every Saturday 9:00 AM \u2013 1:00 PM at Brownwood Paddock Square"
+  },
+  {
+    "vendor_id": "VM-1029",
+    "name": "European Breads LLC",
+    "category": "Food, Baked Goods & Sweets",
+    "is_active": true,
+    "is_verified": false,
+    "location": "The Villages, FL",
+    "schedule": "Every Saturday 9:00 AM \u2013 1:00 PM at Brownwood Paddock Square"
+  },
+  {
+    "vendor_id": "VM-1030",
+    "name": "Florida Fresh Fungi",
+    "category": "Food, Baked Goods & Sweets",
+    "is_active": true,
+    "is_verified": false,
+    "location": "The Villages, FL",
+    "schedule": "Every Saturday 9:00 AM \u2013 1:00 PM at Brownwood Paddock Square"
+  },
+  {
+    "vendor_id": "VM-1031",
+    "name": "Friends Products LLC",
+    "category": "Food, Baked Goods & Sweets",
+    "is_active": true,
+    "is_verified": false,
+    "location": "The Villages, FL",
+    "schedule": "Every Saturday 9:00 AM \u2013 1:00 PM at Brownwood Paddock Square"
+  },
+  {
+    "vendor_id": "VM-1032",
+    "name": "Fruit2nuts",
+    "category": "Food, Baked Goods & Sweets",
+    "is_active": true,
+    "is_verified": false,
+    "location": "The Villages, FL",
+    "schedule": "Every Saturday 9:00 AM \u2013 1:00 PM at Brownwood Paddock Square"
+  },
+  {
+    "vendor_id": "VM-1033",
+    "name": "GiGi's Pot Pies",
+    "category": "Food, Baked Goods & Sweets",
+    "is_active": true,
+    "is_verified": false,
+    "location": "The Villages, FL",
+    "schedule": "Every Saturday 9:00 AM \u2013 1:00 PM at Brownwood Paddock Square"
+  },
+  {
+    "vendor_id": "VM-1034",
+    "name": "Graham's Original Kettlecorn by Randy & Glenda",
+    "category": "Food, Baked Goods & Sweets",
+    "is_active": true,
+    "is_verified": false,
+    "location": "The Villages, FL",
+    "schedule": "Every Saturday 9:00 AM \u2013 1:00 PM at Brownwood Paddock Square"
+  },
+  {
+    "vendor_id": "VM-1035",
+    "name": "Grandma's German Kitchen",
+    "category": "Food, Baked Goods & Sweets",
+    "is_active": true,
+    "is_verified": false,
+    "location": "The Villages, FL",
+    "schedule": "Every Saturday 9:00 AM \u2013 1:00 PM at Brownwood Paddock Square"
+  },
+  {
+    "vendor_id": "VM-1036",
+    "name": "Heavenly Soft Pretzels",
+    "category": "Food, Baked Goods & Sweets",
+    "is_active": true,
+    "is_verified": false,
+    "location": "The Villages, FL",
+    "schedule": "Every Saturday 9:00 AM \u2013 1:00 PM at Brownwood Paddock Square"
+  },
+  {
+    "vendor_id": "VM-1037",
+    "name": "House of Jerks",
+    "category": "Food, Baked Goods & Sweets",
+    "is_active": true,
+    "is_verified": false,
+    "location": "The Villages, FL",
+    "schedule": "Every Saturday 9:00 AM \u2013 1:00 PM at Brownwood Paddock Square"
+  },
+  {
+    "vendor_id": "VM-1038",
+    "name": "Island Fin Poke",
+    "category": "Food, Baked Goods & Sweets",
+    "is_active": true,
+    "is_verified": false,
+    "location": "The Villages, FL",
+    "schedule": "Every Saturday 9:00 AM \u2013 1:00 PM at Brownwood Paddock Square"
+  },
+  {
+    "vendor_id": "VM-1039",
+    "name": "Italian Hills",
+    "category": "Food, Baked Goods & Sweets",
+    "is_active": true,
+    "is_verified": false,
+    "location": "The Villages, FL",
+    "schedule": "Every Saturday 9:00 AM \u2013 1:00 PM at Brownwood Paddock Square"
+  },
+  {
+    "vendor_id": "VM-1040",
+    "name": "Kibbeh House LLC / Mama Ganoush",
+    "category": "Food, Baked Goods & Sweets",
+    "is_active": true,
+    "is_verified": false,
+    "location": "The Villages, FL",
+    "schedule": "Every Saturday 9:00 AM \u2013 1:00 PM at Brownwood Paddock Square"
+  },
+  {
+    "vendor_id": "VM-1041",
+    "name": "La Montagne Des Saveurs",
+    "category": "Food, Baked Goods & Sweets",
+    "is_active": true,
+    "is_verified": false,
+    "location": "The Villages, FL",
+    "schedule": "Every Saturday 9:00 AM \u2013 1:00 PM at Brownwood Paddock Square"
+  },
+  {
+    "vendor_id": "VM-1042",
+    "name": "Manuka Gold",
+    "category": "Food, Baked Goods & Sweets",
+    "is_active": true,
+    "is_verified": false,
+    "location": "The Villages, FL",
+    "schedule": "Every Saturday 9:00 AM \u2013 1:00 PM at Brownwood Paddock Square"
+  },
+  {
+    "vendor_id": "VM-1043",
+    "name": "Matts Fresh Cheese LLC",
+    "category": "Food, Baked Goods & Sweets",
+    "is_active": true,
+    "is_verified": false,
+    "location": "The Villages, FL",
+    "schedule": "Every Saturday 9:00 AM \u2013 1:00 PM at Brownwood Paddock Square"
+  },
+  {
+    "vendor_id": "VM-1044",
+    "name": "Mexican Specialty",
+    "category": "Food, Baked Goods & Sweets",
+    "is_active": true,
+    "is_verified": false,
+    "location": "The Villages, FL",
+    "schedule": "Every Saturday 9:00 AM \u2013 1:00 PM at Brownwood Paddock Square"
+  },
+  {
+    "vendor_id": "VM-1045",
+    "name": "Mitchem Bee Company",
+    "category": "Food, Baked Goods & Sweets",
+    "is_active": true,
+    "is_verified": false,
+    "location": "The Villages, FL",
+    "schedule": "Every Saturday 9:00 AM \u2013 1:00 PM at Brownwood Paddock Square"
+  },
+  {
+    "vendor_id": "VM-1046",
+    "name": "Nutty Blends LLC",
+    "category": "Food, Baked Goods & Sweets",
+    "is_active": true,
+    "is_verified": false,
+    "location": "The Villages, FL",
+    "schedule": "Every Saturday 9:00 AM \u2013 1:00 PM at Brownwood Paddock Square"
+  },
+  {
+    "vendor_id": "VM-1047",
+    "name": "Oaken Bakery LLC",
+    "category": "Food, Baked Goods & Sweets",
+    "is_active": true,
+    "is_verified": false,
+    "location": "The Villages, FL",
+    "schedule": "Every Saturday 9:00 AM \u2013 1:00 PM at Brownwood Paddock Square"
+  },
+  {
+    "vendor_id": "VM-1048",
+    "name": "Orlando Fresh Bread",
+    "category": "Food, Baked Goods & Sweets",
+    "is_active": true,
+    "is_verified": false,
+    "location": "The Villages, FL",
+    "schedule": "Every Saturday 9:00 AM \u2013 1:00 PM at Brownwood Paddock Square"
+  },
+  {
+    "vendor_id": "VM-1049",
+    "name": "Pasta Bella Of Florida",
+    "category": "Food, Baked Goods & Sweets",
+    "is_active": true,
+    "is_verified": false,
+    "location": "The Villages, FL",
+    "schedule": "Every Saturday 9:00 AM \u2013 1:00 PM at Brownwood Paddock Square"
+  },
+  {
+    "vendor_id": "VM-1050",
+    "name": "Reno's Jewels of the Antilles",
+    "category": "Food, Baked Goods & Sweets",
+    "is_active": true,
+    "is_verified": false,
+    "location": "The Villages, FL",
+    "schedule": "Every Saturday 9:00 AM \u2013 1:00 PM at Brownwood Paddock Square"
+  },
+  {
+    "vendor_id": "VM-1051",
+    "name": "Riverbend Cattle Company",
+    "category": "Food, Baked Goods & Sweets",
+    "is_active": true,
+    "is_verified": false,
+    "location": "The Villages, FL",
+    "schedule": "Every Saturday 9:00 AM \u2013 1:00 PM at Brownwood Paddock Square"
+  },
+  {
+    "vendor_id": "VM-1052",
+    "name": "Sally's Delectables",
+    "category": "Food, Baked Goods & Sweets",
+    "is_active": true,
+    "is_verified": false,
+    "location": "The Villages, FL",
+    "schedule": "Every Saturday 9:00 AM \u2013 1:00 PM at Brownwood Paddock Square"
+  },
+  {
+    "vendor_id": "VM-1053",
+    "name": "Simply Savory Dips",
+    "category": "Food, Baked Goods & Sweets",
+    "is_active": true,
+    "is_verified": false,
+    "location": "The Villages, FL",
+    "schedule": "Every Saturday 9:00 AM \u2013 1:00 PM at Brownwood Paddock Square"
+  },
+  {
+    "vendor_id": "VM-1054",
+    "name": "Simply Soup Creations and Mixes",
+    "category": "Food, Baked Goods & Sweets",
+    "is_active": true,
+    "is_verified": false,
+    "location": "The Villages, FL",
+    "schedule": "Every Saturday 9:00 AM \u2013 1:00 PM at Brownwood Paddock Square"
+  },
+  {
+    "vendor_id": "VM-1055",
+    "name": "Simply Sourdough Bakery",
+    "category": "Food, Baked Goods & Sweets",
+    "is_active": true,
+    "is_verified": false,
+    "location": "The Villages, FL",
+    "schedule": "Every Saturday 9:00 AM \u2013 1:00 PM at Brownwood Paddock Square"
+  },
+  {
+    "vendor_id": "VM-1056",
+    "name": "Simply Sweets",
+    "category": "Food, Baked Goods & Sweets",
+    "is_active": true,
+    "is_verified": false,
+    "location": "The Villages, FL",
+    "schedule": "Every Saturday 9:00 AM \u2013 1:00 PM at Brownwood Paddock Square"
+  },
+  {
+    "vendor_id": "VM-1057",
+    "name": "Sukhothia M&T Foods LLC",
+    "category": "Food, Baked Goods & Sweets",
+    "is_active": true,
+    "is_verified": false,
+    "location": "The Villages, FL",
+    "schedule": "Every Saturday 9:00 AM \u2013 1:00 PM at Brownwood Paddock Square"
+  },
+  {
+    "vendor_id": "VM-1058",
+    "name": "Sunshine Slush",
+    "category": "Food, Baked Goods & Sweets",
+    "is_active": true,
+    "is_verified": false,
+    "location": "The Villages, FL",
+    "schedule": "Every Saturday 9:00 AM \u2013 1:00 PM at Brownwood Paddock Square"
+  },
+  {
+    "vendor_id": "VM-1059",
+    "name": "Sunstate Projects (Wi Fried Cheese Curds)",
+    "category": "Food, Baked Goods & Sweets",
+    "is_active": true,
+    "is_verified": false,
+    "location": "The Villages, FL",
+    "schedule": "Every Saturday 9:00 AM \u2013 1:00 PM at Brownwood Paddock Square"
+  },
+  {
+    "vendor_id": "VM-1060",
+    "name": "The Cheesecake Lab",
+    "category": "Food, Baked Goods & Sweets",
+    "is_active": true,
+    "is_verified": false,
+    "location": "The Villages, FL",
+    "schedule": "Every Saturday 9:00 AM \u2013 1:00 PM at Brownwood Paddock Square"
+  },
+  {
+    "vendor_id": "VM-1061",
+    "name": "The Picanha Experience",
+    "category": "Food, Baked Goods & Sweets",
+    "is_active": true,
+    "is_verified": false,
+    "location": "The Villages, FL",
+    "schedule": "Every Saturday 9:00 AM \u2013 1:00 PM at Brownwood Paddock Square"
+  },
+  {
+    "vendor_id": "VM-1062",
+    "name": "The Pickled Princess FL LLC",
+    "category": "Food, Baked Goods & Sweets",
+    "is_active": true,
+    "is_verified": false,
+    "location": "The Villages, FL",
+    "schedule": "Every Saturday 9:00 AM \u2013 1:00 PM at Brownwood Paddock Square"
+  },
+  {
+    "vendor_id": "VM-1063",
+    "name": "The Proper Pickle Company",
+    "category": "Food, Baked Goods & Sweets",
+    "is_active": true,
+    "is_verified": false,
+    "location": "The Villages, FL",
+    "schedule": "Every Saturday 9:00 AM \u2013 1:00 PM at Brownwood Paddock Square"
+  },
+  {
+    "vendor_id": "VM-1064",
+    "name": "The Ricotta Cheese Factory",
+    "category": "Food, Baked Goods & Sweets",
+    "is_active": true,
+    "is_verified": false,
+    "location": "The Villages, FL",
+    "schedule": "Every Saturday 9:00 AM \u2013 1:00 PM at Brownwood Paddock Square"
+  },
+  {
+    "vendor_id": "VM-1065",
+    "name": "TJE Seafood",
+    "category": "Food, Baked Goods & Sweets",
+    "is_active": true,
+    "is_verified": false,
+    "location": "The Villages, FL",
+    "schedule": "Every Saturday 9:00 AM \u2013 1:00 PM at Brownwood Paddock Square"
+  },
+  {
+    "vendor_id": "VM-1066",
+    "name": "TJE Seafood (Live Crab & Lobster)",
+    "category": "Food, Baked Goods & Sweets",
+    "is_active": true,
+    "is_verified": false,
+    "location": "The Villages, FL",
+    "schedule": "Every Saturday 9:00 AM \u2013 1:00 PM at Brownwood Paddock Square"
+  },
+  {
+    "vendor_id": "VM-1067",
+    "name": "Tomozz",
+    "category": "Food, Baked Goods & Sweets",
+    "is_active": true,
+    "is_verified": false,
+    "location": "The Villages, FL",
+    "schedule": "Every Saturday 9:00 AM \u2013 1:00 PM at Brownwood Paddock Square"
+  },
+  {
+    "vendor_id": "VM-1068",
+    "name": "Uncle Ronnie's Cheesecake",
+    "category": "Food, Baked Goods & Sweets",
+    "is_active": true,
+    "is_verified": false,
+    "location": "The Villages, FL",
+    "schedule": "Every Saturday 9:00 AM \u2013 1:00 PM at Brownwood Paddock Square"
+  },
+  {
+    "vendor_id": "VM-1069",
+    "name": "Wakarusa Dime Store",
+    "category": "Food, Baked Goods & Sweets",
+    "is_active": true,
+    "is_verified": false,
+    "location": "The Villages, FL",
+    "schedule": "Every Saturday 9:00 AM \u2013 1:00 PM at Brownwood Paddock Square"
+  },
+  {
+    "vendor_id": "VM-1070",
+    "name": "11/22 Ancient Terra",
+    "category": "Wellness & Body",
+    "is_active": true,
+    "is_verified": false,
+    "location": "The Villages, FL",
+    "schedule": "Every Saturday 9:00 AM \u2013 1:00 PM at Brownwood Paddock Square"
+  },
+  {
+    "vendor_id": "VM-1071",
+    "name": "Clear View Imaging",
+    "category": "Wellness & Body",
+    "is_active": true,
+    "is_verified": false,
+    "location": "The Villages, FL",
+    "schedule": "Every Saturday 9:00 AM \u2013 1:00 PM at Brownwood Paddock Square"
+  },
+  {
+    "vendor_id": "VM-1072",
+    "name": "Drift Away Australian Oil of Eucalyptus",
+    "category": "Wellness & Body",
+    "is_active": true,
+    "is_verified": false,
+    "location": "The Villages, FL",
+    "schedule": "Every Saturday 9:00 AM \u2013 1:00 PM at Brownwood Paddock Square"
+  },
+  {
+    "vendor_id": "VM-1073",
+    "name": "MIYO Midwest Brokers LLC DBA Soggy Bottom Hemp",
+    "category": "Wellness & Body",
+    "is_active": true,
+    "is_verified": false,
+    "location": "The Villages, FL",
+    "schedule": "Every Saturday 9:00 AM \u2013 1:00 PM at Brownwood Paddock Square"
+  },
+  {
+    "vendor_id": "VM-1074",
+    "name": "Nature's Line Bath and Body",
+    "category": "Wellness & Body",
+    "is_active": true,
+    "is_verified": false,
+    "location": "The Villages, FL",
+    "schedule": "Every Saturday 9:00 AM \u2013 1:00 PM at Brownwood Paddock Square"
+  },
+  {
+    "vendor_id": "VM-1075",
+    "name": "Northwood Naturals",
+    "category": "Wellness & Body",
+    "is_active": true,
+    "is_verified": false,
+    "location": "The Villages, FL",
+    "schedule": "Every Saturday 9:00 AM \u2013 1:00 PM at Brownwood Paddock Square"
+  },
+  {
+    "vendor_id": "VM-1076",
+    "name": "That Pickleball Swag",
+    "category": "Wellness & Body",
+    "is_active": true,
+    "is_verified": false,
+    "location": "The Villages, FL",
+    "schedule": "Every Saturday 9:00 AM \u2013 1:00 PM at Brownwood Paddock Square"
+  },
+  {
+    "vendor_id": "VM-1077",
+    "name": "The Pharm Stand",
+    "category": "Wellness & Body",
+    "is_active": true,
+    "is_verified": false,
+    "location": "The Villages, FL",
+    "schedule": "Every Saturday 9:00 AM \u2013 1:00 PM at Brownwood Paddock Square"
+  },
+  {
+    "vendor_id": "VM-1078",
+    "name": "United HealthCare",
+    "category": "Wellness & Body",
+    "is_active": true,
+    "is_verified": false,
+    "location": "The Villages, FL",
+    "schedule": "Every Saturday 9:00 AM \u2013 1:00 PM at Brownwood Paddock Square"
+  },
+  {
+    "vendor_id": "VM-1079",
+    "name": "Village Dental",
+    "category": "Wellness & Body",
+    "is_active": true,
+    "is_verified": false,
+    "location": "The Villages, FL",
+    "schedule": "Every Saturday 9:00 AM \u2013 1:00 PM at Brownwood Paddock Square"
+  },
+  {
+    "vendor_id": "VM-1080",
+    "name": "4Seasons",
+    "category": "Art, Jewelry & Gifts",
+    "is_active": true,
+    "is_verified": false,
+    "location": "The Villages, FL",
+    "schedule": "Every Saturday 9:00 AM \u2013 1:00 PM at Brownwood Paddock Square"
+  },
+  {
+    "vendor_id": "VM-1081",
+    "name": "Amazing Elemental",
+    "category": "Art, Jewelry & Gifts",
+    "is_active": true,
+    "is_verified": false,
+    "location": "The Villages, FL",
+    "schedule": "Every Saturday 9:00 AM \u2013 1:00 PM at Brownwood Paddock Square"
+  },
+  {
+    "vendor_id": "VM-1082",
+    "name": "Beach Girl and Giggling Goats",
+    "category": "Art, Jewelry & Gifts",
+    "is_active": true,
+    "is_verified": false,
+    "location": "The Villages, FL",
+    "schedule": "Every Saturday 9:00 AM \u2013 1:00 PM at Brownwood Paddock Square"
+  },
+  {
+    "vendor_id": "VM-1083",
+    "name": "Brigitte Gallery",
+    "category": "Art, Jewelry & Gifts",
+    "is_active": true,
+    "is_verified": false,
+    "location": "The Villages, FL",
+    "schedule": "Every Saturday 9:00 AM \u2013 1:00 PM at Brownwood Paddock Square"
+  },
+  {
+    "vendor_id": "VM-1084",
+    "name": "Art Handcrafted and More",
+    "category": "Art, Jewelry & Gifts",
+    "is_active": true,
+    "is_verified": false,
+    "location": "The Villages, FL",
+    "schedule": "Every Saturday 9:00 AM \u2013 1:00 PM at Brownwood Paddock Square"
+  },
+  {
+    "vendor_id": "VM-1085",
+    "name": "Catching Rays",
+    "category": "Art, Jewelry & Gifts",
+    "is_active": true,
+    "is_verified": false,
+    "location": "The Villages, FL",
+    "schedule": "Every Saturday 9:00 AM \u2013 1:00 PM at Brownwood Paddock Square"
+  },
+  {
+    "vendor_id": "VM-1086",
+    "name": "Celtic Elegance",
+    "category": "Art, Jewelry & Gifts",
+    "is_active": true,
+    "is_verified": false,
+    "location": "The Villages, FL",
+    "schedule": "Every Saturday 9:00 AM \u2013 1:00 PM at Brownwood Paddock Square"
+  },
+  {
+    "vendor_id": "VM-1087",
+    "name": "Celticness",
+    "category": "Art, Jewelry & Gifts",
+    "is_active": true,
+    "is_verified": false,
+    "location": "The Villages, FL",
+    "schedule": "Every Saturday 9:00 AM \u2013 1:00 PM at Brownwood Paddock Square"
+  },
+  {
+    "vendor_id": "VM-1088",
+    "name": "Chen Oriental Gift",
+    "category": "Art, Jewelry & Gifts",
+    "is_active": true,
+    "is_verified": false,
+    "location": "The Villages, FL",
+    "schedule": "Every Saturday 9:00 AM \u2013 1:00 PM at Brownwood Paddock Square"
+  },
+  {
+    "vendor_id": "VM-1089",
+    "name": "CraftsHands",
+    "category": "Art, Jewelry & Gifts",
+    "is_active": true,
+    "is_verified": false,
+    "location": "The Villages, FL",
+    "schedule": "Every Saturday 9:00 AM \u2013 1:00 PM at Brownwood Paddock Square"
+  },
+  {
+    "vendor_id": "VM-1090",
+    "name": "DANISMAN PHOTOGRAPHY LLC",
+    "category": "Art, Jewelry & Gifts",
+    "is_active": true,
+    "is_verified": false,
+    "location": "The Villages, FL",
+    "schedule": "Every Saturday 9:00 AM \u2013 1:00 PM at Brownwood Paddock Square"
+  },
+  {
+    "vendor_id": "VM-1091",
+    "name": "Doodle Draw Portrait",
+    "category": "Art, Jewelry & Gifts",
+    "is_active": true,
+    "is_verified": false,
+    "location": "The Villages, FL",
+    "schedule": "Every Saturday 9:00 AM \u2013 1:00 PM at Brownwood Paddock Square"
+  },
+  {
+    "vendor_id": "VM-1092",
+    "name": "Doug's Air Plants",
+    "category": "Art, Jewelry & Gifts",
+    "is_active": true,
+    "is_verified": false,
+    "location": "The Villages, FL",
+    "schedule": "Every Saturday 9:00 AM \u2013 1:00 PM at Brownwood Paddock Square"
+  },
+  {
+    "vendor_id": "VM-1093",
+    "name": "Ellie Rose Crafty Corner",
+    "category": "Art, Jewelry & Gifts",
+    "is_active": true,
+    "is_verified": false,
+    "location": "The Villages, FL",
+    "schedule": "Every Saturday 9:00 AM \u2013 1:00 PM at Brownwood Paddock Square"
+  },
+  {
+    "vendor_id": "VM-1094",
+    "name": "Fantasy Flair By ER",
+    "category": "Art, Jewelry & Gifts",
+    "is_active": true,
+    "is_verified": false,
+    "location": "The Villages, FL",
+    "schedule": "Every Saturday 9:00 AM \u2013 1:00 PM at Brownwood Paddock Square"
+  },
+  {
+    "vendor_id": "VM-1095",
+    "name": "Galaxy Art",
+    "category": "Art, Jewelry & Gifts",
+    "is_active": true,
+    "is_verified": false,
+    "location": "The Villages, FL",
+    "schedule": "Every Saturday 9:00 AM \u2013 1:00 PM at Brownwood Paddock Square"
+  },
+  {
+    "vendor_id": "VM-1096",
+    "name": "Griffin Farm Crafts & Stone Creations",
+    "category": "Art, Jewelry & Gifts",
+    "is_active": true,
+    "is_verified": false,
+    "location": "The Villages, FL",
+    "schedule": "Every Saturday 9:00 AM \u2013 1:00 PM at Brownwood Paddock Square"
+  },
+  {
+    "vendor_id": "VM-1097",
+    "name": "Heavenly Gems Jewelry",
+    "category": "Art, Jewelry & Gifts",
+    "is_active": true,
+    "is_verified": false,
+    "location": "The Villages, FL",
+    "schedule": "Every Saturday 9:00 AM \u2013 1:00 PM at Brownwood Paddock Square"
+  },
+  {
+    "vendor_id": "VM-1098",
+    "name": "Indulgences Unique Pieces",
+    "category": "Art, Jewelry & Gifts",
+    "is_active": true,
+    "is_verified": false,
+    "location": "The Villages, FL",
+    "schedule": "Every Saturday 9:00 AM \u2013 1:00 PM at Brownwood Paddock Square"
+  },
+  {
+    "vendor_id": "VM-1099",
+    "name": "Karl Candela",
+    "category": "Art, Jewelry & Gifts",
+    "is_active": true,
+    "is_verified": false,
+    "location": "The Villages, FL",
+    "schedule": "Every Saturday 9:00 AM \u2013 1:00 PM at Brownwood Paddock Square"
+  },
+  {
+    "vendor_id": "VM-1100",
+    "name": "Kingdom Crafters",
+    "category": "Art, Jewelry & Gifts",
+    "is_active": true,
+    "is_verified": false,
+    "location": "The Villages, FL",
+    "schedule": "Every Saturday 9:00 AM \u2013 1:00 PM at Brownwood Paddock Square"
+  },
+  {
+    "vendor_id": "VM-1101",
+    "name": "Kitchen Fun With Sherrie & Pampered Chef",
+    "category": "Art, Jewelry & Gifts",
+    "is_active": true,
+    "is_verified": false,
+    "location": "The Villages, FL",
+    "schedule": "Every Saturday 9:00 AM \u2013 1:00 PM at Brownwood Paddock Square"
+  },
+  {
+    "vendor_id": "VM-1102",
+    "name": "L & L Design By Two Chicks",
+    "category": "Art, Jewelry & Gifts",
+    "is_active": true,
+    "is_verified": false,
+    "location": "The Villages, FL",
+    "schedule": "Every Saturday 9:00 AM \u2013 1:00 PM at Brownwood Paddock Square"
+  },
+  {
+    "vendor_id": "VM-1103",
+    "name": "Loganjade Designs",
+    "category": "Art, Jewelry & Gifts",
+    "is_active": true,
+    "is_verified": false,
+    "location": "The Villages, FL",
+    "schedule": "Every Saturday 9:00 AM \u2013 1:00 PM at Brownwood Paddock Square"
+  },
+  {
+    "vendor_id": "VM-1104",
+    "name": "Luciid Designs",
+    "category": "Art, Jewelry & Gifts",
+    "is_active": true,
+    "is_verified": false,
+    "location": "The Villages, FL",
+    "schedule": "Every Saturday 9:00 AM \u2013 1:00 PM at Brownwood Paddock Square"
+  },
+  {
+    "vendor_id": "VM-1105",
+    "name": "PaperPie",
+    "category": "Art, Jewelry & Gifts",
+    "is_active": true,
+    "is_verified": false,
+    "location": "The Villages, FL",
+    "schedule": "Every Saturday 9:00 AM \u2013 1:00 PM at Brownwood Paddock Square"
+  },
+  {
+    "vendor_id": "VM-1106",
+    "name": "Peachy Links",
+    "category": "Art, Jewelry & Gifts",
+    "is_active": true,
+    "is_verified": false,
+    "location": "The Villages, FL",
+    "schedule": "Every Saturday 9:00 AM \u2013 1:00 PM at Brownwood Paddock Square"
+  },
+  {
+    "vendor_id": "VM-1107",
+    "name": "Sentimental Art",
+    "category": "Art, Jewelry & Gifts",
+    "is_active": true,
+    "is_verified": false,
+    "location": "The Villages, FL",
+    "schedule": "Every Saturday 9:00 AM \u2013 1:00 PM at Brownwood Paddock Square"
+  },
+  {
+    "vendor_id": "VM-1108",
+    "name": "SOL Specialties",
+    "category": "Art, Jewelry & Gifts",
+    "is_active": true,
+    "is_verified": false,
+    "location": "The Villages, FL",
+    "schedule": "Every Saturday 9:00 AM \u2013 1:00 PM at Brownwood Paddock Square"
+  },
+  {
+    "vendor_id": "VM-1109",
+    "name": "Steelheart Creations",
+    "category": "Art, Jewelry & Gifts",
+    "is_active": true,
+    "is_verified": false,
+    "location": "The Villages, FL",
+    "schedule": "Every Saturday 9:00 AM \u2013 1:00 PM at Brownwood Paddock Square"
+  },
+  {
+    "vendor_id": "VM-1110",
+    "name": "Steve Gordon Pottery",
+    "category": "Art, Jewelry & Gifts",
+    "is_active": true,
+    "is_verified": false,
+    "location": "The Villages, FL",
+    "schedule": "Every Saturday 9:00 AM \u2013 1:00 PM at Brownwood Paddock Square"
+  },
+  {
+    "vendor_id": "VM-1111",
+    "name": "Thank God I'm Fabulous! Jewelry",
+    "category": "Art, Jewelry & Gifts",
+    "is_active": true,
+    "is_verified": false,
+    "location": "The Villages, FL",
+    "schedule": "Every Saturday 9:00 AM \u2013 1:00 PM at Brownwood Paddock Square"
+  },
+  {
+    "vendor_id": "VM-1112",
+    "name": "ThePerfectPocketBook",
+    "category": "Art, Jewelry & Gifts",
+    "is_active": true,
+    "is_verified": false,
+    "location": "The Villages, FL",
+    "schedule": "Every Saturday 9:00 AM \u2013 1:00 PM at Brownwood Paddock Square"
+  },
+  {
+    "vendor_id": "VM-1113",
+    "name": "USA Creations",
+    "category": "Art, Jewelry & Gifts",
+    "is_active": true,
+    "is_verified": false,
+    "location": "The Villages, FL",
+    "schedule": "Every Saturday 9:00 AM \u2013 1:00 PM at Brownwood Paddock Square"
+  },
+  {
+    "vendor_id": "VM-1114",
+    "name": "Bob Martin Signs",
+    "category": "Home, Yard & Golf Cart",
+    "is_active": true,
+    "is_verified": false,
+    "location": "The Villages, FL",
+    "schedule": "Every Saturday 9:00 AM \u2013 1:00 PM at Brownwood Paddock Square"
+  },
+  {
+    "vendor_id": "VM-1115",
+    "name": "Cheryls Kitchen Towels",
+    "category": "Home, Yard & Golf Cart",
+    "is_active": true,
+    "is_verified": false,
+    "location": "The Villages, FL",
+    "schedule": "Every Saturday 9:00 AM \u2013 1:00 PM at Brownwood Paddock Square"
+  },
+  {
+    "vendor_id": "VM-1116",
+    "name": "Cool Cart Stuff LLC",
+    "category": "Home, Yard & Golf Cart",
+    "is_active": true,
+    "is_verified": false,
+    "location": "The Villages, FL",
+    "schedule": "Every Saturday 9:00 AM \u2013 1:00 PM at Brownwood Paddock Square"
+  },
+  {
+    "vendor_id": "VM-1117",
+    "name": "Fine Designs",
+    "category": "Home, Yard & Golf Cart",
+    "is_active": true,
+    "is_verified": false,
+    "location": "The Villages, FL",
+    "schedule": "Every Saturday 9:00 AM \u2013 1:00 PM at Brownwood Paddock Square"
+  },
+  {
+    "vendor_id": "VM-1118",
+    "name": "Flags and More Store",
+    "category": "Home, Yard & Golf Cart",
+    "is_active": true,
+    "is_verified": false,
+    "location": "The Villages, FL",
+    "schedule": "Every Saturday 9:00 AM \u2013 1:00 PM at Brownwood Paddock Square"
+  },
+  {
+    "vendor_id": "VM-1119",
+    "name": "Golf Cart Hoodies",
+    "category": "Home, Yard & Golf Cart",
+    "is_active": true,
+    "is_verified": false,
+    "location": "The Villages, FL",
+    "schedule": "Every Saturday 9:00 AM \u2013 1:00 PM at Brownwood Paddock Square"
+  },
+  {
+    "vendor_id": "VM-1120",
+    "name": "Hardscapes by Pooters LLC",
+    "category": "Home, Yard & Golf Cart",
+    "is_active": true,
+    "is_verified": false,
+    "location": "The Villages, FL",
+    "schedule": "Every Saturday 9:00 AM \u2013 1:00 PM at Brownwood Paddock Square"
+  },
+  {
+    "vendor_id": "VM-1121",
+    "name": "Humana",
+    "category": "Home, Yard & Golf Cart",
+    "is_active": true,
+    "is_verified": false,
+    "location": "The Villages, FL",
+    "schedule": "Every Saturday 9:00 AM \u2013 1:00 PM at Brownwood Paddock Square"
+  },
+  {
+    "vendor_id": "VM-1122",
+    "name": "Karen's Creative Designs LLC",
+    "category": "Home, Yard & Golf Cart",
+    "is_active": true,
+    "is_verified": false,
+    "location": "The Villages, FL",
+    "schedule": "Every Saturday 9:00 AM \u2013 1:00 PM at Brownwood Paddock Square"
+  },
+  {
+    "vendor_id": "VM-1123",
+    "name": "Kazumi Garden",
+    "category": "Home, Yard & Golf Cart",
+    "is_active": true,
+    "is_verified": false,
+    "location": "The Villages, FL",
+    "schedule": "Every Saturday 9:00 AM \u2013 1:00 PM at Brownwood Paddock Square"
+  },
+  {
+    "vendor_id": "VM-1124",
+    "name": "Make Me That",
+    "category": "Home, Yard & Golf Cart",
+    "is_active": true,
+    "is_verified": false,
+    "location": "The Villages, FL",
+    "schedule": "Every Saturday 9:00 AM \u2013 1:00 PM at Brownwood Paddock Square"
+  },
+  {
+    "vendor_id": "VM-1125",
+    "name": "Margie's Meadow Flower Farm",
+    "category": "Home, Yard & Golf Cart",
+    "is_active": true,
+    "is_verified": false,
+    "location": "The Villages, FL",
+    "schedule": "Every Saturday 9:00 AM \u2013 1:00 PM at Brownwood Paddock Square"
+  },
+  {
+    "vendor_id": "VM-1126",
+    "name": "Merr's Farms",
+    "category": "Home, Yard & Golf Cart",
+    "is_active": true,
+    "is_verified": false,
+    "location": "The Villages, FL",
+    "schedule": "Every Saturday 9:00 AM \u2013 1:00 PM at Brownwood Paddock Square"
+  },
+  {
+    "vendor_id": "VM-1127",
+    "name": "Mid Florida Agencies",
+    "category": "Home, Yard & Golf Cart",
+    "is_active": true,
+    "is_verified": false,
+    "location": "The Villages, FL",
+    "schedule": "Every Saturday 9:00 AM \u2013 1:00 PM at Brownwood Paddock Square"
+  },
+  {
+    "vendor_id": "VM-1128",
+    "name": "M&M Cleaning",
+    "category": "Home, Yard & Golf Cart",
+    "is_active": true,
+    "is_verified": false,
+    "location": "The Villages, FL",
+    "schedule": "Every Saturday 9:00 AM \u2013 1:00 PM at Brownwood Paddock Square"
+  },
+  {
+    "vendor_id": "VM-1129",
+    "name": "Posh Pool Loungers by Tenjam",
+    "category": "Home, Yard & Golf Cart",
+    "is_active": true,
+    "is_verified": false,
+    "location": "The Villages, FL",
+    "schedule": "Every Saturday 9:00 AM \u2013 1:00 PM at Brownwood Paddock Square"
+  },
+  {
+    "vendor_id": "VM-1130",
+    "name": "Renewal by Andersen",
+    "category": "Home, Yard & Golf Cart",
+    "is_active": true,
+    "is_verified": false,
+    "location": "The Villages, FL",
+    "schedule": "Every Saturday 9:00 AM \u2013 1:00 PM at Brownwood Paddock Square"
+  },
+  {
+    "vendor_id": "VM-1131",
+    "name": "Rhino Cart Art",
+    "category": "Home, Yard & Golf Cart",
+    "is_active": true,
+    "is_verified": false,
+    "location": "The Villages, FL",
+    "schedule": "Every Saturday 9:00 AM \u2013 1:00 PM at Brownwood Paddock Square"
+  },
+  {
+    "vendor_id": "VM-1132",
+    "name": "Sew Craft Crazy",
+    "category": "Home, Yard & Golf Cart",
+    "is_active": true,
+    "is_verified": false,
+    "location": "The Villages, FL",
+    "schedule": "Every Saturday 9:00 AM \u2013 1:00 PM at Brownwood Paddock Square"
+  },
+  {
+    "vendor_id": "VM-1133",
+    "name": "Signs By Farris",
+    "category": "Home, Yard & Golf Cart",
+    "is_active": true,
+    "is_verified": false,
+    "location": "The Villages, FL",
+    "schedule": "Every Saturday 9:00 AM \u2013 1:00 PM at Brownwood Paddock Square"
+  },
+  {
+    "vendor_id": "VM-1134",
+    "name": "Sip Sip Orchids",
+    "category": "Home, Yard & Golf Cart",
+    "is_active": true,
+    "is_verified": false,
+    "location": "The Villages, FL",
+    "schedule": "Every Saturday 9:00 AM \u2013 1:00 PM at Brownwood Paddock Square"
+  },
+  {
+    "vendor_id": "VM-1135",
+    "name": "The Purple Dragonfly2",
+    "category": "Home, Yard & Golf Cart",
+    "is_active": true,
+    "is_verified": false,
+    "location": "The Villages, FL",
+    "schedule": "Every Saturday 9:00 AM \u2013 1:00 PM at Brownwood Paddock Square"
+  },
+  {
+    "vendor_id": "VM-1136",
+    "name": "The Villages Daily Sun",
+    "category": "Home, Yard & Golf Cart",
+    "is_active": true,
+    "is_verified": false,
+    "location": "The Villages, FL",
+    "schedule": "Every Saturday 9:00 AM \u2013 1:00 PM at Brownwood Paddock Square"
+  }
+]
