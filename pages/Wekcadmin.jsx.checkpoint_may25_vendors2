@@ -2213,6 +2213,33 @@ function VendorsTab() {
 
   const pendingCount = vendors.filter(v => !v.is_active).length;
   const activeCount = vendors.filter(v => v.is_active).length;
+  const verifiedCount = vendors.filter(v => v.is_verified).length;
+
+  // Category breakdown
+  const CAT_COLORS = {
+    "Farm & Fresh Produce": "#4CAF50",
+    "Food, Baked Goods & Sweets": "#FF9800",
+    "Wellness & Body": "#9C27B0",
+    "Art, Jewelry & Gifts": "#E8431A",
+    "Home, Yard & Golf Cart": "#2196F3",
+  };
+  const catCounts = ["Farm & Fresh Produce","Food, Baked Goods & Sweets","Wellness & Body","Art, Jewelry & Gifts","Home, Yard & Golf Cart"].map(cat => ({
+    cat,
+    count: vendors.filter(v => v.category === cat).length,
+    active: vendors.filter(v => v.category === cat && v.is_active).length,
+    color: CAT_COLORS[cat],
+    short: cat === "Food, Baked Goods & Sweets" ? "Food & Baked" : cat === "Home, Yard & Golf Cart" ? "Home & Golf Cart" : cat === "Farm & Fresh Produce" ? "Farm & Produce" : cat,
+  }));
+  const maxCatCount = Math.max(...catCounts.map(c => c.count), 1);
+
+  // Contact coverage
+  const withEmail = vendors.filter(v => v.email).length;
+  const withPhone = vendors.filter(v => v.phone).length;
+  const withWebsite = vendors.filter(v => v.website).length;
+  const withFacebook = vendors.filter(v => v.facebook_url).length;
+  const selfSignup = vendors.filter(v => (v.notes || "").includes("self-signup")).length;
+
+  const [showAnalytics, setShowAnalytics] = useState(false);
 
   const inputS = { width: "100%", padding: "7px 10px", fontSize: 13, border: `1px solid ${T.border}`, borderRadius: 6, background: T.cream, fontFamily: T.sans, boxSizing: "border-box", marginBottom: 8 };
   const labelS = { display: "block", fontSize: 11, fontWeight: 700, color: T.brownLight, fontFamily: T.sans, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 3 };
@@ -2234,6 +2261,78 @@ function VendorsTab() {
           </div>
         ))}
       </div>
+
+      {/* Analytics Toggle */}
+      <div style={{ marginBottom: 12 }}>
+        <button onClick={() => setShowAnalytics(s => !s)}
+          style={{ padding: "7px 16px", fontSize: 12, fontWeight: 700, background: showAnalytics ? T.brownDark : T.cream, color: showAnalytics ? "#fff" : T.brownDark, border: `1px solid ${T.border}`, borderRadius: 20, cursor: "pointer", fontFamily: T.sans, display: "flex", alignItems: "center", gap: 6 }}>
+          📊 {showAnalytics ? "Hide Analytics" : "Show Analytics"}
+        </button>
+      </div>
+
+      {/* Analytics Panel */}
+      {showAnalytics && (
+        <div style={{ background: T.cream, border: `1px solid ${T.border}`, borderRadius: 10, padding: "16px 16px 12px", marginBottom: 16 }}>
+          <div style={{ fontWeight: 900, fontSize: 13, color: T.brownDark, fontFamily: T.sans, textTransform: "uppercase", letterSpacing: 1, marginBottom: 14 }}>📊 Vendor Analytics</div>
+
+          {/* Row 1: Quick Stats */}
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 16 }}>
+            {[
+              { label: "Total Vendors", val: vendors.length, color: T.brown, icon: "🏪" },
+              { label: "Live / Active", val: activeCount, color: "#1A6B3C", icon: "✅" },
+              { label: "Pending Review", val: pendingCount, color: "#E8431A", icon: "⏳" },
+              { label: "Self-Signups", val: selfSignup, color: "#00BFA5", icon: "📝" },
+              { label: "Verified", val: verifiedCount, color: "#9C27B0", icon: "⭐" },
+            ].map(s => (
+              <div key={s.label} style={{ flex: 1, minWidth: 90, background: T.parchment, border: `1px solid ${T.border}`, borderRadius: 8, padding: "10px 10px", textAlign: "center" }}>
+                <div style={{ fontSize: 18 }}>{s.icon}</div>
+                <div style={{ fontSize: 20, fontWeight: 900, color: s.color, fontFamily: T.sans, lineHeight: 1.2 }}>{s.val}</div>
+                <div style={{ fontSize: 10, color: T.brownLight, fontFamily: T.sans, marginTop: 2, lineHeight: 1.3 }}>{s.label}</div>
+              </div>
+            ))}
+          </div>
+
+          {/* Row 2: Category Breakdown Bar Chart */}
+          <div style={{ marginBottom: 16 }}>
+            <div style={{ fontSize: 11, fontWeight: 700, color: T.brownLight, fontFamily: T.sans, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 8 }}>Vendors by Category</div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 7 }}>
+              {catCounts.sort((a,b) => b.count - a.count).map(({ cat, count, active, color, short }) => (
+                <div key={cat} style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <div style={{ width: 110, fontSize: 11, color: T.brownDark, fontFamily: T.sans, flexShrink: 0, textAlign: "right" }}>{short}</div>
+                  <div style={{ flex: 1, background: T.parchmentDark, borderRadius: 4, height: 18, overflow: "hidden", position: "relative" }}>
+                    <div style={{ width: `${(count / maxCatCount) * 100}%`, background: color, height: "100%", borderRadius: 4, transition: "width 0.4s ease", opacity: 0.85 }} />
+                    <div style={{ position: "absolute", right: 6, top: 0, height: "100%", display: "flex", alignItems: "center", fontSize: 10, fontWeight: 700, color: T.brownDark, fontFamily: T.sans }}>
+                      {active} live / {count} total
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Row 3: Contact Coverage */}
+          <div>
+            <div style={{ fontSize: 11, fontWeight: 700, color: T.brownLight, fontFamily: T.sans, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 8 }}>Contact Info Coverage</div>
+            <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+              {[
+                { label: "Have Email", val: withEmail, pct: Math.round(withEmail/Math.max(vendors.length,1)*100) },
+                { label: "Have Phone", val: withPhone, pct: Math.round(withPhone/Math.max(vendors.length,1)*100) },
+                { label: "Have Website", val: withWebsite, pct: Math.round(withWebsite/Math.max(vendors.length,1)*100) },
+                { label: "Have Facebook", val: withFacebook, pct: Math.round(withFacebook/Math.max(vendors.length,1)*100) },
+              ].map(({ label, val, pct }) => (
+                <div key={label} style={{ flex: 1, minWidth: 90, background: T.parchment, border: `1px solid ${T.border}`, borderRadius: 8, padding: "8px 10px", textAlign: "center" }}>
+                  <div style={{ fontSize: 18, fontWeight: 900, color: pct >= 80 ? "#1A6B3C" : pct >= 50 ? "#FF9800" : "#E8431A", fontFamily: T.sans }}>{pct}%</div>
+                  <div style={{ fontSize: 10, color: T.brownLight, fontFamily: T.sans, marginTop: 1 }}>{label}</div>
+                  <div style={{ fontSize: 10, color: T.brownLight, fontFamily: T.sans }}>{val} / {vendors.length}</div>
+                  <div style={{ marginTop: 5, height: 4, background: T.parchmentDark, borderRadius: 2, overflow: "hidden" }}>
+                    <div style={{ width: `${pct}%`, height: "100%", background: pct >= 80 ? "#1A6B3C" : pct >= 50 ? "#FF9800" : "#E8431A", borderRadius: 2 }} />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Filters */}
       <div style={{ display: "flex", gap: 8, marginBottom: 10, flexWrap: "wrap", alignItems: "center" }}>
