@@ -27,28 +27,29 @@ The file `.agents/mini_apps.json` MUST have:
 - **Procedure when CDN bust is needed:**
   1. Kimberly publishes from builder (busts CDN)
   2. Immediately tells me "it's messed up"
-  3. I restore from `checkpoint_may25_vendors` (latest) and republish — takes under 60 seconds
+  3. I restore from `checkpoint_may25_vendors2` (latest) and republish — takes under 60 seconds
   4. Done
 
 ---
 
-## ✅ CURRENT GOLDEN CHECKPOINT — May 25 2026 ~2:30pm ET
-### Name: `checkpoint_may25_vendors`
+## ✅ CURRENT GOLDEN CHECKPOINT — May 25 2026 ~5:10pm ET
+### Name: `checkpoint_may25_vendors2`
 
 ### To restore ALL pages from this checkpoint:
 ```bash
-cp pages/Home.jsx.checkpoint_may25_vendors pages/Home.jsx
-cp pages/ProviderDashboard.jsx.checkpoint_may25_vendors pages/ProviderDashboard.jsx
-cp pages/Wekcadmin.jsx.checkpoint_may25_vendors pages/Wekcadmin.jsx
-cp pages/ListService.jsx.checkpoint_may25_vendors pages/ListService.jsx
-cp pages/Classifieds.jsx.checkpoint_may25_vendors pages/Classifieds.jsx
-cp pages/VendorSignup.jsx.checkpoint_may25_vendors pages/VendorSignup.jsx
+cp pages/Home.jsx.checkpoint_may25_vendors2 pages/Home.jsx
+cp pages/ProviderDashboard.jsx.checkpoint_may25_vendors2 pages/ProviderDashboard.jsx
+cp pages/Wekcadmin.jsx.checkpoint_may25_vendors2 pages/Wekcadmin.jsx
+cp pages/ListService.jsx.checkpoint_may25_vendors2 pages/ListService.jsx
+cp pages/Classifieds.jsx.checkpoint_may25_vendors2 pages/Classifieds.jsx
+cp pages/VendorSignup.jsx.checkpoint_may25_vendors2 pages/VendorSignup.jsx
 ```
 Then run `manage_app(publish)`.
 
 ### What's in this checkpoint:
 - ✅ **Vendors button** — collapsible on homepage (between Find Services and Ronnie Clark photo), matches Find Services style, no "Hometown" branding
-- ✅ **VendorSignup page** — `/VendorSignup` public application form, saves as pending (is_active: false), emails Kimberly on submit
+- ✅ **VendorSignup page** — `/VendorSignup` public application form, calls `submitVendor` backend function (NOT SDK), saves as pending (is_active: false), emails Kimberly on submit
+- ✅ **submitVendor backend function** — deployed and live, handles auth-free public submissions
 - ✅ **Vendors tab in admin** — full CRUD: approve, hide, edit, delete vendors
 - ✅ **136 vendors** pre-loaded in MarketVendor entity from The Villages Entertainment
 - ✅ **Contact Provider Lead Form** — on every provider detail page
@@ -65,11 +66,40 @@ Then run `manage_app(publish)`.
 - Wekcadmin.jsx: 2347 lines
 - ListService.jsx: 1245 lines
 - Classifieds.jsx: 203 lines
-- VendorSignup.jsx: 145 lines
+- VendorSignup.jsx: 140 lines
+
+### Live flow test results (May 25 2026 ~5pm ET):
+- ✅ submitVendor function → HTTP 200, record saved to DB
+- ✅ Missing field validation → Returns proper error
+- ✅ Homepage HTTP 200
+- ✅ VendorSignup page HTTP 200
+- ✅ Admin page HTTP 200
+- ✅ submitVendor CORS preflight → 204
 
 ---
 
-## ✅ PREVIOUS GOLDEN CHECKPOINT — May 20 2026 ~12:30pm ET
+## ✅ PREVIOUS GOLDEN CHECKPOINT — May 25 2026 ~2:30pm ET
+### Name: `checkpoint_may25_vendors`
+
+### To restore ALL pages from this checkpoint:
+```bash
+cp pages/Home.jsx.checkpoint_may25_vendors pages/Home.jsx
+cp pages/ProviderDashboard.jsx.checkpoint_may25_vendors pages/ProviderDashboard.jsx
+cp pages/Wekcadmin.jsx.checkpoint_may25_vendors pages/Wekcadmin.jsx
+cp pages/ListService.jsx.checkpoint_may25_vendors pages/ListService.jsx
+cp pages/Classifieds.jsx.checkpoint_may25_vendors pages/Classifieds.jsx
+cp pages/VendorSignup.jsx.checkpoint_may25_vendors pages/VendorSignup.jsx
+```
+Then run `manage_app(publish)`.
+
+### What's in this checkpoint:
+- ✅ Vendors button, VendorSignup page, Vendors admin tab, 136 vendors
+- ✅ submitLead, all analytics, 509 providers, 6 classified ads
+- ⚠️ VendorSignup used SDK directly (broken for public users — fixed in vendors2)
+
+---
+
+## ✅ OLDER CHECKPOINT — May 20 2026 ~12:30pm ET
 ### Name: `checkpoint_may20_leads`
 
 ### To restore ALL pages from this checkpoint:
@@ -81,22 +111,6 @@ cp pages/ListService.jsx.checkpoint_may20_leads pages/ListService.jsx
 cp pages/Classifieds.jsx.checkpoint_may20_leads pages/Classifieds.jsx
 ```
 Then run `manage_app(publish)`.
-
-### What's in this checkpoint:
-- ✅ Contact Provider Lead Form on every provider detail page
-- ✅ submitLead backend function deployed and live
-- ✅ service_name bug fixed in analytics
-- ✅ village_search, search_performed, featured_banner_click tracking
-- ✅ 509 real providers, VH-TEST1 hidden
-- ✅ 5 active classified ads (expire June 10, 2026)
-- ✅ CK's Signature Detailing (VH-10089) added
-
-### Page line counts at this checkpoint:
-- Home.jsx: 1887 lines
-- ProviderDashboard.jsx: 3027 lines
-- Wekcadmin.jsx: 2154 lines
-- ListService.jsx: 1245 lines
-- Classifieds.jsx: 203 lines
 
 ---
 
@@ -113,12 +127,6 @@ cp pages/Classifieds.jsx.checkpoint_apr22_analytics pages/Classifieds.jsx
 ```
 Then run `manage_app(publish)`.
 
-### What's in this checkpoint:
-- Enhanced Analytics tab (engagement totals, 7-day leads chart, top providers, rating distribution)
-- VH-TEST1 cleaned up as single internal test account (hidden from public, is_visible: false)
-- Bill's Barber (VH-3486 / evansrus@comcast.net) DELETED
-- All test reviews, analytics events, and stray data removed
-
 ---
 
 ## Test account credentials (keep private):
@@ -127,18 +135,8 @@ Then run `manage_app(publish)`.
 - **Password:** VHub2026!
 - **Note:** is_visible = false — does NOT appear in public directory
 
-## Live flow test results (May 25 2026):
-- ✅ Login with VH number → SUCCESS
-- ✅ Login with email → SUCCESS
-- ✅ Wrong password → Correct error returned
-- ✅ Public search → real providers, test account hidden
-- ✅ Password reset request → Returns ok:true
-- ✅ Submit review → SUCCESS
-- ✅ Submit lead → SUCCESS
-- ✅ VendorSignup form → creates pending MarketVendor record
-- ✅ All pages load → HTTP 200
-
 ## Older checkpoints (kept for reference):
+- `*.checkpoint_may25_vendors` — May 25 ~2:30pm (pre-submitVendor fix)
 - `*.checkpoint_may20_leads` — golden state May 20 (pre-vendors)
 - `*.checkpoint_apr22_analytics` — golden state Apr 22 (pre-leads)
 - `*.checkpoint_apr22_0400` — golden state Apr 22 morning
