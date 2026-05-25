@@ -1,6 +1,6 @@
 // V-HUB — Vendor Market Signup Page
 import React, { useState } from "react";
-import { MarketVendor } from "@/api/entities";
+
 
 const PAPER = "#FBF6EC";
 const VENDOR_CATEGORIES = [
@@ -31,18 +31,13 @@ export default function VendorSignup() {
     setLoading(true);
     setError("");
     try {
-      // Generate a VM number
-      const existing = await MarketVendor.list();
-      const nextNum = 1000 + (existing?.length || 0) + 1;
-      await MarketVendor.create({
-        ...form,
-        vendor_id: `VM-${nextNum}`,
-        is_active: false,
-        is_verified: false,
-        location: "The Villages, FL",
-        schedule: "Every Saturday 9:00 AM – 1:00 PM at Brownwood Paddock Square",
-        notes: "Pending admin review — self-signup",
+      const res = await fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/submitVendor", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
       });
+      const data = await res.json();
+      if (!res.ok || !data.ok) throw new Error(data.error || "Submit failed");
       setSubmitted(true);
     } catch (err) {
       setError("Something went wrong. Please try again.");
