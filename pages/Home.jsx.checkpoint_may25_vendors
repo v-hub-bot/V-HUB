@@ -1157,6 +1157,7 @@ export default function Home() {
   const [selCatR,  setSelCatR]  = useState(null);
   const [selSvc,   setSelSvc]   = useState(null);
   const [selArea,  setSelArea]  = useState(null);
+  const [showVendors, setShowVendors] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
 
   // Hardcoded categories & services (no auth needed on homepage)
@@ -1866,12 +1867,12 @@ export default function Home() {
         </div>
 
 
-        {/* VENDOR MARKET SECTION */}
-        <div style={{ borderTop: "3px solid #C8A96E", borderBottom: "3px solid #C8A96E", background: PAPER, width: "100%", boxSizing: "border-box" }}>
-          <div style={{ padding: "6px 16px", textAlign: "center", fontSize: 13, fontWeight: 900, letterSpacing: 2, color: "#E8431A", textTransform: "uppercase", fontFamily: "'Times New Roman', serif", borderBottom: "1px solid #C8A96E" }}>
-            🛒 Hometown Market Vendors
+        {/* VENDORS BUTTON — collapsible, matches Find Services style */}
+        <div style={{ border: "4px solid #C8A96E", outline: "1.5px solid #C8A96E", outlineOffset: "0px", boxShadow: "0 0 10px 2px rgba(200,169,110,0.3)", background: PAPER, width: "100%", boxSizing: "border-box" }}>
+          <div onClick={() => setShowVendors(v => !v)} style={{ padding: "5px 16px", textAlign: "center", fontSize: 13, fontWeight: 900, letterSpacing: 2, color: "#000", textTransform: "uppercase", borderBottom: showVendors ? "1px solid #C8A96E88" : "none", cursor: "pointer", userSelect: "none", display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
+            🛒 Vendors <span style={{ fontSize: 11, color: "#C8A96E", fontWeight: 700 }}>{showVendors ? "▲" : "▼"}</span>
           </div>
-          <VendorMarketSection />
+          {showVendors && <VendorMarketSection />}
         </div>
 
         {/* PHOTO */}
