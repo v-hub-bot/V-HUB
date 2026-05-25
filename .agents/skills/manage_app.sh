@@ -21,7 +21,7 @@ const https = require('https');
 const fs = require('fs');
 const path = require('path');
 
-const pages = ['Home', 'Classifieds', 'ListService', 'Privacy', 'Provider', 'ProviderDashboard', 'Terms', 'Wekcadmin'];
+const pages = ['Home', 'Classifieds', 'ListService', 'Privacy', 'Provider', 'ProviderDashboard', 'Terms', 'Wekcadmin', 'VendorSignup'];
 const pagesObj = {};
 
 for (const page of pages) {
