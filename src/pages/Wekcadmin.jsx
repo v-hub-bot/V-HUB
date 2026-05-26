@@ -2,11 +2,11 @@
 // CACHE-BUST-1776648334
 // build-1776648334 
 import React, { useState, useEffect } from "react";
-import { Provider, ProviderReview, LeadInquiry, ServiceSearchStat, Category, Service, ServiceArea } from "@/api/entities";
+import { Provider, ProviderReview, LeadInquiry, ServiceSearchStat, Category, Service, ServiceArea, ProviderAnalytic, MarketVendor } from "@/api/entities";
 
 const BUILD_ID = "v2026-04-20-toast-save"; const LOGO = "https://media.base44.com/images/public/69d062aca815ce8e697894b1/a9af95bc3_V-Hublogo.png";
-const API_BASE = "https://api.base44.app/api/apps/69d06ada8019d7e9edf7f8e8/functions";
-const FN = "https://api.base44.app/api/apps/69d06ada8019d7e9edf7f8e8/functions/adminMagicLink";
+const API_BASE = "https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions";
+const FN = "https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/adminMagicLink";
 
 // SHA-256 for password hashing (used by admin Set Password feature)
 async function sha256(plain) {
@@ -323,7 +323,7 @@ function ProvidersTab({ providers, setProviders, catMap, svcMap, areaMap, fullSv
       const trialStartStr = now.toISOString().split('T')[0];
       const trialEndStr = trialEnd.toISOString().split('T')[0];
 
-      const res = await fetch("https://api.base44.app/api/apps/69d06ada8019d7e9edf7f8e8/functions/approveProvider", {
+      const res = await fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/approveProvider", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -344,7 +344,7 @@ function ProvidersTab({ providers, setProviders, catMap, svcMap, areaMap, fullSv
       if (data.error) throw new Error(data.error);
 
       // Also mark as Self-Managed
-      await fetch("https://api.base44.app/api/apps/69d06ada8019d7e9edf7f8e8/functions/adminUpdateProvider", {
+      await fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/adminUpdateProvider", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action: "admin_update", pin: "1357", id: p.id, fields: { managed_by: "Self-Managed" } }),
@@ -406,7 +406,7 @@ function ProvidersTab({ providers, setProviders, catMap, svcMap, areaMap, fullSv
       trialEnd.setDate(trialEnd.getDate() + 45);
       const trialStartStr = now.toISOString().split('T')[0];
       const trialEndStr = trialEnd.toISOString().split('T')[0];
-      const res = await fetch("https://api.base44.app/api/apps/69d06ada8019d7e9edf7f8e8/functions/approveProvider", {
+      const res = await fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/approveProvider", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -1035,24 +1035,24 @@ function ReviewsTab({ reviews, setReviews, providers, adminPin }) {
   const provMap = {}; providers.forEach(p => { provMap[p.id] = p.business_name; });
   const shown = reviews.filter(r => filter === "all" ? true : filter === "pending" ? !r.is_approved : r.is_approved);
   const approve = async (r) => {
-    await fetch(`https://api.base44.app/api/apps/69d06ada8019d7e9edf7f8e8/functions/adminUpdateReview`, {
+    await fetch(`https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/adminUpdateReview`, {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ pin: "1357", id: r.id, fields: { is_approved: true } }),
     });
     // Immediately recalc provider rating so it's reflected now, not at 4am
-    fetch(`https://api.base44.app/api/apps/69d06ada8019d7e9edf7f8e8/functions/recalcProviderRatings`, {
+    fetch(`https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/recalcProviderRatings`, {
       method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}',
     }).catch(() => {});
     setReviews(p => p.map(x => x.id === r.id ? { ...x, is_approved: true } : x));
   };
   const remove = async (r) => {
     if (!window.confirm("Delete this review?")) return;
-    await fetch(`https://api.base44.app/api/apps/69d06ada8019d7e9edf7f8e8/functions/adminUpdateReview`, {
+    await fetch(`https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/adminUpdateReview`, {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ pin: "1357", id: r.id, delete: true }),
     });
     // Recalc provider rating after deletion
-    fetch(`https://api.base44.app/api/apps/69d06ada8019d7e9edf7f8e8/functions/recalcProviderRatings`, {
+    fetch(`https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/recalcProviderRatings`, {
       method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}',
     }).catch(() => {});
     setReviews(p => p.filter(x => x.id !== r.id));
@@ -1291,15 +1291,104 @@ function DealsTab({ providers, classifiedAds }) {
 // ── ANALYTICS TAB ─────────────────────────────────────────────────────────────
 function AnalyticsTab({ providers, reviews, leads, stats, catMap, svcMap, fullSvcMap, classifiedAds }) {
   const [timeRange, setTimeRange] = React.useState("30d");
+  const [analyticEvents, setAnalyticEvents] = React.useState([]);
+  const [loadingEvents, setLoadingEvents] = React.useState(true);
+
+  React.useEffect(() => {
+    loadAllEvents();
+  }, []);
+
+  const loadAllEvents = async () => {
+    setLoadingEvents(true);
+    try {
+      // Pull last 90 days of ProviderAnalytic events
+      const cutoff90 = new Date(Date.now() - 90*24*60*60*1000).toISOString().slice(0,10);
+      let all = [];
+      let skip = 0;
+      let hasMore = true;
+      while (hasMore) {
+        const page = await ProviderAnalytic.filter({ limit: 500, skip });
+        if (!page || page.length === 0) { hasMore = false; break; }
+        all = all.concat(page);
+        skip += 500;
+        hasMore = page.length === 500;
+        if (all.length > 20000) break; // safety cap
+      }
+      setAnalyticEvents(all);
+    } catch(e) {
+      setAnalyticEvents([]);
+    }
+    setLoadingEvents(false);
+  };
 
   const now = new Date();
-  const rangeMs = { "24h": 86400000, "7d": 7*86400000, "30d": 30*86400000, "365d": 365*86400000 };
+  const rangeMs = { "24h": 86400000, "7d": 7*86400000, "30d": 30*86400000, "90d": 90*86400000 };
   const cutoff = new Date(now - (rangeMs[timeRange] || rangeMs["30d"]));
 
   const filteredLeads = leads.filter(l => l.created_date && new Date(l.created_date) >= cutoff);
   const filteredReviews = reviews.filter(r => r.created_date && new Date(r.created_date) >= cutoff);
   const filteredProviders = providers.filter(p => p.created_date && new Date(p.created_date) >= cutoff);
+  const filteredEvents = analyticEvents.filter(e => e.created_date && new Date(e.created_date) >= cutoff);
 
+  // Event breakdowns
+  const siteEvents = filteredEvents.filter(e => e.provider_id === "SITE");
+  const providerEvents = filteredEvents.filter(e => e.provider_id !== "SITE");
+  const villageSearches = siteEvents.filter(e => e.event_type === "village_search");
+  const searchPerformed = siteEvents.filter(e => e.event_type === "search_performed");
+  const homepageViews = siteEvents.filter(e => e.event_type === "homepage_view");
+  const featuredClicks = siteEvents.filter(e => e.event_type === "featured_banner_click");
+  const profileViews = providerEvents.filter(e => e.event_type === "profile_view");
+  const searchAppearances = providerEvents.filter(e => e.event_type === "search_appearance");
+  const adClicks = providerEvents.filter(e => e.event_type === "classified_ad_click");
+  const leadEvents = providerEvents.filter(e => e.event_type === "lead_inquiry");
+
+  // Top villages searched
+  const villageCounts = {};
+  villageSearches.forEach(e => {
+    if (e.area_name) villageCounts[e.area_name] = (villageCounts[e.area_name]||0)+1;
+  });
+  // Also count from search_performed
+  searchPerformed.forEach(e => {
+    if (e.area_name && e.area_name !== "All Villages") villageCounts[e.area_name] = (villageCounts[e.area_name]||0)+1;
+  });
+  const topVillages = Object.entries(villageCounts).sort((a,b)=>b[1]-a[1]).slice(0,10);
+
+  // Top services searched
+  const serviceCounts = {};
+  searchPerformed.forEach(e => {
+    if (e.service_name && e.service_name !== "All Services") serviceCounts[e.service_name] = (serviceCounts[e.service_name]||0)+1;
+  });
+  searchAppearances.forEach(e => {
+    if (e.service_name) serviceCounts[e.service_name] = (serviceCounts[e.service_name]||0)+1;
+  });
+  const topServices = Object.entries(serviceCounts).sort((a,b)=>b[1]-a[1]).slice(0,10);
+
+  // Top categories searched
+  const catCounts = {};
+  searchAppearances.forEach(e => {
+    if (e.category_name) catCounts[e.category_name] = (catCounts[e.category_name]||0)+1;
+  });
+  const topCats = Object.entries(catCounts).sort((a,b)=>b[1]-a[1]).slice(0,8);
+
+  // Top providers by profile views (from events, more accurate than counter)
+  const provViewCounts = {};
+  profileViews.forEach(e => { provViewCounts[e.provider_id] = (provViewCounts[e.provider_id]||0)+1; });
+  const topViewedProviderIds = Object.entries(provViewCounts).sort((a,b)=>b[1]-a[1]).slice(0,8);
+  const topViewedProviders = topViewedProviderIds.map(([id, cnt]) => ({
+    provider: providers.find(p=>p.id===id),
+    count: cnt
+  })).filter(x=>x.provider);
+
+  // Top providers by search appearances
+  const provSearchCounts = {};
+  searchAppearances.forEach(e => { provSearchCounts[e.provider_id] = (provSearchCounts[e.provider_id]||0)+1; });
+  const topSearchedProviderIds = Object.entries(provSearchCounts).sort((a,b)=>b[1]-a[1]).slice(0,8);
+  const topSearchedProviders = topSearchedProviderIds.map(([id, cnt]) => ({
+    provider: providers.find(p=>p.id===id),
+    count: cnt
+  })).filter(x=>x.provider);
+
+  // Provider subscription stats
   const paid = providers.filter(p => ["active","paid"].includes(p.subscription_status)).length;
   const trial = providers.filter(p => p.subscription_status === "trial").length;
   const inactive = providers.filter(p => ["inactive","expired","cancelled"].includes(p.subscription_status)).length;
@@ -1308,9 +1397,22 @@ function AnalyticsTab({ providers, reviews, leads, stats, catMap, svcMap, fullSv
     if (a.deal_expires_at && new Date(a.deal_expires_at) < now) return false;
     return true;
   });
-  const dealsRevenue = activeAds.length * 10;
-  const totalRevenue = (paid * 12) + dealsRevenue;
 
+  // Last 7 days trend
+  const last7 = Array.from({length:7},(_,i)=>{ const d=new Date(now); d.setDate(d.getDate()-6+i); return d.toISOString().split("T")[0]; });
+  const profilesByDay = {};
+  const searchesByDay = {};
+  profileViews.forEach(e => { if(e.date_key) profilesByDay[e.date_key]=(profilesByDay[e.date_key]||0)+1; });
+  searchAppearances.forEach(e => { if(e.date_key) searchesByDay[e.date_key]=(searchesByDay[e.date_key]||0)+1; });
+  const last7Data = last7.map(d=>({ date:d, views:profilesByDay[d]||0, searches:searchesByDay[d]||0 }));
+  const maxDay = Math.max(...last7Data.map(d=>Math.max(d.views,d.searches)),1);
+
+  // Rating distribution
+  const ratingDist = {1:0,2:0,3:0,4:0,5:0};
+  reviews.forEach(r=>{ if(r.rating>=1&&r.rating<=5) ratingDist[r.rating]++; });
+  const avgRating = reviews.length>0?(reviews.reduce((s,r)=>s+(r.rating||0),0)/reviews.length).toFixed(1):"—";
+
+  // Provider signup trend
   const byMonth = {};
   providers.forEach(p => {
     if (!p.created_date) return;
@@ -1321,118 +1423,174 @@ function AnalyticsTab({ providers, reviews, leads, stats, catMap, svcMap, fullSv
   const months = Object.entries(byMonth).sort((a,b)=>a[0].localeCompare(b[0])).slice(-12);
   const maxM = Math.max(...months.map(m=>m[1]),1);
 
-  const subMap2 = {};
-  providers.forEach(p => { const s = p.subscription_status||"unknown"; subMap2[s]=(subMap2[s]||0)+1; });
-  const subColors = { active:"#00BFA5", paid:"#00BFA5", trial:"#FFDB00", inactive:"#aaa", expired:"#E8431A", cancelled:"#E8431A", unknown:"#ccc" };
+  const rangeLabels = {"24h":"Last 24 Hours","7d":"Last 7 Days","30d":"Last 30 Days","90d":"Last 90 Days"};
 
-  const svcCount = {};
-  providers.forEach(p => (Array.isArray(p.services)?p.services:[]).forEach(s => {
-    const n = fullSvcMap[s]||svcMap[s]||s;
-    svcCount[n] = (svcCount[n]||0)+1;
-  }));
-  const topSvcs = Object.entries(svcCount).sort((a,b)=>b[1]-a[1]).slice(0,8);
-  const maxS = Math.max(...topSvcs.map(s=>s[1]),1);
-
-  const topViewedProviders = [...providers].filter(p=>p.profile_views>0).sort((a,b)=>(b.profile_views||0)-(a.profile_views||0)).slice(0,8);
-  const maxViews = Math.max(...topViewedProviders.map(p=>p.profile_views||0),1);
-
-  const topSearchedProviders = [...providers].filter(p=>p.search_appearances>0).sort((a,b)=>(b.search_appearances||0)-(a.search_appearances||0)).slice(0,8);
-  const maxSearch = Math.max(...topSearchedProviders.map(p=>p.search_appearances||0),1);
-
-  const topSearches = [...stats].sort((a,b)=>(b.search_count||0)-(a.search_count||0)).slice(0,10);
-  const maxSrch = Math.max(...topSearches.map(s=>s.search_count||0),1);
-
-  const last7 = Array.from({length:7},(_,i)=>{ const d=new Date(now); d.setDate(d.getDate()-6+i); return d.toISOString().split("T")[0]; });
-  const leadsByDay = {};
-  leads.forEach(l => { if(!l.created_date)return; const k=l.created_date.split("T")[0]; leadsByDay[k]=(leadsByDay[k]||0)+1; });
-  const last7Leads = last7.map(d=>({date:d,count:leadsByDay[d]||0}));
-  const maxDayLeads = Math.max(...last7Leads.map(d=>d.count),1);
-
-  const ratingDist = {1:0,2:0,3:0,4:0,5:0};
-  reviews.forEach(r=>{ if(r.rating>=1&&r.rating<=5) ratingDist[r.rating]++; });
-  const maxRatCount = Math.max(...Object.values(ratingDist),1);
-  const avgRating = reviews.length>0?(reviews.reduce((s,r)=>s+(r.rating||0),0)/reviews.length).toFixed(1):"—";
-
-  const totalViews = providers.reduce((s,p)=>s+(p.profile_views||0),0);
-  const totalSearchAppearances = providers.reduce((s,p)=>s+(p.search_appearances||0),0);
-
-  const rangeLabels = {"24h":"Last 24 Hours","7d":"Last 7 Days","30d":"Last 30 Days","365d":"Last 12 Months"};
+  // Bar helper
+  const Bar = ({val, max, color="#1B3D6F", height=18}) => (
+    <div style={{background:"#f0ece4",borderRadius:3,overflow:"hidden",height,flex:1,minWidth:60}}>
+      <div style={{height:"100%",width:`${Math.max((val/Math.max(max,1))*100,2)}%`,background:color,borderRadius:3,transition:"width 0.3s"}}></div>
+    </div>
+  );
 
   return (
     <div style={{display:"flex",flexDirection:"column",gap:14}}>
 
+      {/* Time Range Selector */}
       <div style={{...S.card,padding:"10px 16px"}}>
         <div style={{display:"flex",alignItems:"center",gap:8,flexWrap:"wrap"}}>
           <span style={{fontSize:12,fontWeight:700,color:T.brownLight,fontFamily:T.sans,marginRight:4}}>TIME RANGE:</span>
-          {["24h","7d","30d","365d"].map(r=>(
+          {["24h","7d","30d","90d"].map(r=>(
             <button key={r} onClick={()=>setTimeRange(r)} style={{...S.filterBtn(timeRange===r),fontSize:12,padding:"5px 14px"}}>
-              {r==="24h"?"24 Hours":r==="7d"?"7 Days":r==="30d"?"30 Days":"12 Months"}
+              {r==="24h"?"24 Hours":r==="7d"?"7 Days":r==="30d"?"30 Days":"90 Days"}
             </button>
           ))}
+          <button onClick={loadAllEvents} style={{marginLeft:"auto",fontSize:11,padding:"5px 12px",background:"#f0ece4",border:"1px solid #ccc",borderRadius:4,cursor:"pointer",color:T.brownLight}}>
+            {loadingEvents ? "Loading..." : "↻ Refresh"}
+          </button>
         </div>
       </div>
 
+      {/* Platform Activity KPIs */}
       <div style={S.card}>
-        <div style={S.secTitle}>📬 Activity — {rangeLabels[timeRange]}</div>
-        <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:8}}>
-          {[["New Providers",filteredProviders.length,T.teal],["New Leads",filteredLeads.length,"#1A6B3C"],["New Reviews",filteredReviews.length,T.gold]].map(([l,v,c])=>(
+        <div style={S.secTitle}>📊 Platform Activity — {rangeLabels[timeRange]}</div>
+        <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:8}}>
+          {[
+            ["🏠 Homepage Views", homepageViews.length, T.brown],
+            ["🔍 Searches Run", searchPerformed.length, T.teal],
+            ["👁️ Profile Views", profileViews.length, "#1A6B3C"],
+            ["📰 Ad Clicks", adClicks.length, "#7B3FA0"],
+          ].map(([l,v,c])=>(
             <div key={l} style={{textAlign:"center",background:T.parchment,borderRadius:6,padding:"12px 6px"}}>
-              <div style={{fontSize:26,fontWeight:800,color:c,fontFamily:T.sans}}>{v}</div>
-              <div style={{fontSize:10,color:T.brownLight,fontFamily:T.sans,textTransform:"uppercase",letterSpacing:0.5}}>{l}</div>
+              <div style={{fontSize:22,fontWeight:800,color:c,fontFamily:T.sans}}>{v.toLocaleString()}</div>
+              <div style={{fontSize:10,color:T.brownLight,fontFamily:T.sans,textTransform:"uppercase",letterSpacing:0.5,lineHeight:1.3}}>{l}</div>
+            </div>
+          ))}
+        </div>
+        <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:8,marginTop:8}}>
+          {[
+            ["📍 Village Searches", Object.values(villageCounts).reduce((a,b)=>a+b,0), "#E8431A"],
+            ["📬 Leads Sent", filteredLeads.length, "#1A6B3C"],
+            ["⭐ New Reviews", filteredReviews.length, T.gold],
+            ["🌟 Featured Clicks", featuredClicks.length, "#CC0000"],
+          ].map(([l,v,c])=>(
+            <div key={l} style={{textAlign:"center",background:T.parchment,borderRadius:6,padding:"12px 6px"}}>
+              <div style={{fontSize:22,fontWeight:800,color:c,fontFamily:T.sans}}>{v.toLocaleString()}</div>
+              <div style={{fontSize:10,color:T.brownLight,fontFamily:T.sans,textTransform:"uppercase",letterSpacing:0.5,lineHeight:1.3}}>{l}</div>
             </div>
           ))}
         </div>
       </div>
 
+      {/* 7-Day Engagement Trend */}
       <div style={S.card}>
-        <div style={S.secTitle}>👁️ Platform Engagement (All-Time)</div>
-        <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:8}}>
-          {[["Total Profile Views",totalViews,T.brown],["Search Appearances",totalSearchAppearances,T.teal],["Total Leads Sent",leads.length,"#1A6B3C"]].map(([l,v,c])=>(
-            <div key={l} style={{textAlign:"center",background:T.parchment,borderRadius:6,padding:"12px 6px"}}>
-              <div style={{fontSize:26,fontWeight:800,color:c,fontFamily:T.sans}}>{v.toLocaleString()}</div>
-              <div style={{fontSize:10,color:T.brownLight,fontFamily:T.sans,textTransform:"uppercase",letterSpacing:0.5}}>{l}</div>
-            </div>
-          ))}
+        <div style={S.secTitle}>📈 7-Day Engagement Trend</div>
+        <div style={{display:"flex",gap:16,marginBottom:8}}>
+          <span style={{fontSize:11,color:T.brown,fontFamily:T.sans}}>● Profile Views</span>
+          <span style={{fontSize:11,color:T.teal,fontFamily:T.sans}}>● Search Appearances</span>
+        </div>
+        <div style={{display:"flex",alignItems:"flex-end",gap:6,height:80}}>
+          {last7Data.map(({date,views,searches})=>{
+            const d=new Date(date+"T12:00:00");
+            const label=d.toLocaleDateString("en-US",{weekday:"short"});
+            return (
+              <div key={date} style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",gap:2}}>
+                <div style={{width:"100%",display:"flex",gap:1,alignItems:"flex-end",height:60}}>
+                  <div style={{flex:1,background:T.brown,borderRadius:"2px 2px 0 0",height:`${Math.max((views/maxDay)*56,views>0?4:0)}px`,transition:"height 0.3s"}} title={`${views} views`}></div>
+                  <div style={{flex:1,background:T.teal,borderRadius:"2px 2px 0 0",height:`${Math.max((searches/maxDay)*56,searches>0?4:0)}px`,transition:"height 0.3s"}} title={`${searches} searches`}></div>
+                </div>
+                <div style={{fontSize:9,color:T.brownLight,fontFamily:T.sans}}>{label}</div>
+              </div>
+            );
+          })}
         </div>
       </div>
 
+      {/* Top Villages Searched */}
       <div style={S.card}>
-        <div style={S.secTitle}>💰 Revenue Snapshot</div>
-        <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:8,marginBottom:10}}>
-          {[["Est. MRR",`$${paid*12}`,T.green],["Paid Providers",paid,T.teal],["On Trial",trial,T.gold]].map(([l,v,c])=>(
-            <div key={l} style={{textAlign:"center",background:T.parchment,borderRadius:6,padding:"12px 6px"}}>
-              <div style={{fontSize:24,fontWeight:800,color:c,fontFamily:T.sans}}>{v}</div>
-              <div style={{fontSize:10,color:T.brownLight,fontFamily:T.sans,textTransform:"uppercase",letterSpacing:0.5}}>{l}</div>
-            </div>
-          ))}
-        </div>
-        <div style={{borderTop:`1px solid ${T.border}`,paddingTop:10}}>
-          <div style={{fontSize:11,fontWeight:700,color:T.brownLight,textTransform:"uppercase",letterSpacing:1,marginBottom:8,fontFamily:T.sans}}>Deals of the Week</div>
-          <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:8}}>
-            {[["Active Ads",activeAds.length,T.teal],["Ad Revenue (week)",`$${dealsRevenue}`,"#1A6B3C"],["Est. Total Revenue",`$${totalRevenue}`,T.green]].map(([l,v,c])=>(
-              <div key={l} style={{textAlign:"center",background:T.parchment,borderRadius:6,padding:"12px 6px"}}>
-                <div style={{fontSize:20,fontWeight:800,color:c,fontFamily:T.sans}}>{v}</div>
-                <div style={{fontSize:10,color:T.brownLight,fontFamily:T.sans,textTransform:"uppercase",letterSpacing:0.5}}>{l}</div>
+        <div style={S.secTitle}>📍 Top Villages Searched</div>
+        {loadingEvents ? <div style={{color:"#aaa",fontSize:13}}>Loading event data...</div> :
+          topVillages.length === 0 ? <div style={{color:"#aaa",fontSize:13}}>No village search data yet — tracking is now active</div> :
+          <div style={{display:"flex",flexDirection:"column",gap:6}}>
+            {topVillages.map(([village, cnt], i)=>(
+              <div key={village} style={{display:"flex",alignItems:"center",gap:8}}>
+                <span style={{fontSize:11,fontWeight:700,color:T.brownLight,fontFamily:T.sans,width:18,textAlign:"right"}}>{i+1}.</span>
+                <span style={{fontSize:13,color:T.brownDark,fontFamily:T.sans,width:160,flexShrink:0}}>{village}</span>
+                <Bar val={cnt} max={topVillages[0]?.[1]||1} color="#E8431A" height={16}/>
+                <span style={{fontSize:12,fontWeight:700,color:"#E8431A",fontFamily:T.sans,width:30,textAlign:"right"}}>{cnt}</span>
               </div>
             ))}
           </div>
-        </div>
+        }
       </div>
 
+      {/* Top Services Searched */}
       <div style={S.card}>
-        <div style={S.secTitle}>📊 Subscription Breakdown</div>
-        <div style={{display:"flex",flexWrap:"wrap",gap:8,marginBottom:10}}>
-          {Object.entries(subMap2).sort((a,b)=>b[1]-a[1]).map(([s,c])=>(
-            <div key={s} style={{display:"flex",alignItems:"center",gap:6,background:T.parchment,borderRadius:20,padding:"5px 12px"}}>
-              <div style={{width:10,height:10,borderRadius:"50%",background:subColors[s]||"#ccc"}}></div>
-              <span style={{fontSize:12,color:T.brownDark,textTransform:"capitalize",fontFamily:T.sans}}>{s}</span>
-              <span style={{fontSize:13,fontWeight:800,color:T.brown,fontFamily:T.sans}}>{c}</span>
+        <div style={S.secTitle}>🔧 Top Services Searched</div>
+        {loadingEvents ? <div style={{color:"#aaa",fontSize:13}}>Loading...</div> :
+          topServices.length === 0 ? <div style={{color:"#aaa",fontSize:13}}>No service search data yet</div> :
+          <div style={{display:"flex",flexDirection:"column",gap:6}}>
+            {topServices.map(([svc, cnt], i)=>(
+              <div key={svc} style={{display:"flex",alignItems:"center",gap:8}}>
+                <span style={{fontSize:11,fontWeight:700,color:T.brownLight,fontFamily:T.sans,width:18,textAlign:"right"}}>{i+1}.</span>
+                <span style={{fontSize:13,color:T.brownDark,fontFamily:T.sans,width:160,flexShrink:0}}>{svc}</span>
+                <Bar val={cnt} max={topServices[0]?.[1]||1} color={T.teal} height={16}/>
+                <span style={{fontSize:12,fontWeight:700,color:T.teal,fontFamily:T.sans,width:30,textAlign:"right"}}>{cnt}</span>
+              </div>
+            ))}
+          </div>
+        }
+      </div>
+
+      {/* Top Providers — Profile Views */}
+      <div style={S.card}>
+        <div style={S.secTitle}>👁️ Most Viewed Providers ({rangeLabels[timeRange]})</div>
+        {loadingEvents ? <div style={{color:"#aaa",fontSize:13}}>Loading...</div> :
+          topViewedProviders.length === 0 ? <div style={{color:"#aaa",fontSize:13}}>No profile view data yet</div> :
+          <div style={{display:"flex",flexDirection:"column",gap:6}}>
+            {topViewedProviders.map(({provider:p, count}, i)=>(
+              <div key={p.id} style={{display:"flex",alignItems:"center",gap:8}}>
+                <span style={{fontSize:11,fontWeight:700,color:T.brownLight,fontFamily:T.sans,width:18,textAlign:"right"}}>{i+1}.</span>
+                <span style={{fontSize:12,color:T.brownDark,fontFamily:T.sans,width:170,flexShrink:0,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{p.business_name}</span>
+                <Bar val={count} max={topViewedProviders[0]?.count||1} color="#1A6B3C" height={16}/>
+                <span style={{fontSize:12,fontWeight:700,color:"#1A6B3C",fontFamily:T.sans,width:30,textAlign:"right"}}>{count}</span>
+              </div>
+            ))}
+          </div>
+        }
+      </div>
+
+      {/* Top Providers — Search Appearances */}
+      <div style={S.card}>
+        <div style={S.secTitle}>🔍 Most Appeared in Search ({rangeLabels[timeRange]})</div>
+        {loadingEvents ? <div style={{color:"#aaa",fontSize:13}}>Loading...</div> :
+          topSearchedProviders.length === 0 ? <div style={{color:"#aaa",fontSize:13}}>No search data yet</div> :
+          <div style={{display:"flex",flexDirection:"column",gap:6}}>
+            {topSearchedProviders.map(({provider:p, count}, i)=>(
+              <div key={p.id} style={{display:"flex",alignItems:"center",gap:8}}>
+                <span style={{fontSize:11,fontWeight:700,color:T.brownLight,fontFamily:T.sans,width:18,textAlign:"right"}}>{i+1}.</span>
+                <span style={{fontSize:12,color:T.brownDark,fontFamily:T.sans,width:170,flexShrink:0,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{p.business_name}</span>
+                <Bar val={count} max={topSearchedProviders[0]?.count||1} color={T.teal} height={16}/>
+                <span style={{fontSize:12,fontWeight:700,color:T.teal,fontFamily:T.sans,width:30,textAlign:"right"}}>{count}</span>
+              </div>
+            ))}
+          </div>
+        }
+      </div>
+
+      {/* Revenue Snapshot */}
+      <div style={S.card}>
+        <div style={S.secTitle}>💰 Revenue Snapshot</div>
+        <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:8}}>
+          {[["Est. MRR",`$${paid*12}`,T.teal],["Paid Providers",paid,"#1A6B3C"],["On Trial",trial,T.gold],["Active Featured Ads",activeAds.length,T.teal],["Featured Revenue",`$${activeAds.length*20}`,"#1A6B3C"],["Total Providers",providers.length,T.brown]].map(([l,v,c])=>(
+            <div key={l} style={{textAlign:"center",background:T.parchment,borderRadius:6,padding:"10px 6px"}}>
+              <div style={{fontSize:20,fontWeight:800,color:c,fontFamily:T.sans}}>{v}</div>
+              <div style={{fontSize:10,color:T.brownLight,fontFamily:T.sans,textTransform:"uppercase",letterSpacing:0.5,lineHeight:1.3}}>{l}</div>
             </div>
           ))}
         </div>
-        <div style={{fontSize:11,color:T.brownLight,fontFamily:T.sans}}>Total: {providers.length} providers · {inactive} inactive/expired</div>
       </div>
 
+      {/* Provider Signups by Month */}
       <div style={S.card}>
         <div style={S.secTitle}>📈 Provider Signups by Month</div>
         {months.length===0 ? <div style={{color:"#aaa",fontSize:13}}>No data yet</div> :
@@ -1450,135 +1608,40 @@ function AnalyticsTab({ providers, reviews, leads, stats, catMap, svcMap, fullSv
         }
       </div>
 
+      {/* Rating Distribution */}
       <div style={S.card}>
-        <div style={S.secTitle}>📨 Leads Sent — Last 7 Days</div>
-        <div style={{display:"flex",alignItems:"flex-end",gap:6,height:70}}>
-          {last7Leads.map(({date,count})=>{
-            const d=new Date(date+"T12:00:00");
-            const label=d.toLocaleDateString("en-US",{weekday:"short"});
-            return (
-              <div key={date} style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",gap:2}}>
-                <div style={{fontSize:9,color:T.brownLight,fontWeight:700,fontFamily:T.sans}}>{count||""}</div>
-                <div style={{width:"100%",background:count>0?"#1A6B3C":"#e0d8c8",borderRadius:"3px 3px 0 0",height:`${Math.max((count/maxDayLeads)*50,3)}px`}}></div>
-                <div style={{fontSize:9,color:T.brownLight,fontFamily:T.sans}}>{label}</div>
-              </div>
-            );
-          })}
-        </div>
-        <div style={{marginTop:8,fontSize:11,color:T.brownLight,fontFamily:T.sans}}>
-          {last7Leads.reduce((s,d)=>s+d.count,0)} leads in last 7 days · {leads.length} all-time
+        <div style={S.secTitle}>⭐ Review Rating Distribution (All-Time · Avg: {avgRating})</div>
+        <div style={{display:"flex",flexDirection:"column",gap:5}}>
+          {[5,4,3,2,1].map(star=>(
+            <div key={star} style={{display:"flex",alignItems:"center",gap:8}}>
+              <span style={{fontSize:12,color:T.gold,width:30,fontFamily:T.sans}}>{"⭐".repeat(star)}</span>
+              <Bar val={ratingDist[star]} max={Math.max(...Object.values(ratingDist),1)} color={T.gold} height={14}/>
+              <span style={{fontSize:12,fontWeight:700,color:T.brownLight,fontFamily:T.sans,width:24}}>{ratingDist[star]}</span>
+            </div>
+          ))}
         </div>
       </div>
 
-      {topViewedProviders.length>0 && (
-        <div style={S.card}>
-          <div style={S.secTitle}>🏆 Most Viewed Providers</div>
-          {topViewedProviders.map((p,i)=>(
-            <div key={p.id} style={{display:"flex",alignItems:"center",gap:8,marginBottom:6}}>
-              <div style={{fontSize:11,color:T.brownLight,fontFamily:T.sans,width:16,textAlign:"right",flexShrink:0}}>{i+1}</div>
-              <div style={{fontSize:12,color:T.brownDark,fontFamily:T.sans,width:140,flexShrink:0,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{p.business_name}</div>
-              <div style={{flex:1,background:T.parchmentDark,borderRadius:4,height:16}}>
-                <div style={{width:`${((p.profile_views||0)/maxViews)*100}%`,background:T.brown,borderRadius:4,height:"100%",minWidth:20,display:"flex",alignItems:"center",paddingLeft:5}}>
-                  <span style={{fontSize:9,color:"#fff",fontFamily:T.sans}}>{p.profile_views}</span>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {topSearchedProviders.length>0 && (
-        <div style={S.card}>
-          <div style={S.secTitle}>🔎 Most Appeared in Searches</div>
-          {topSearchedProviders.map((p,i)=>(
-            <div key={p.id} style={{display:"flex",alignItems:"center",gap:8,marginBottom:6}}>
-              <div style={{fontSize:11,color:T.brownLight,fontFamily:T.sans,width:16,textAlign:"right",flexShrink:0}}>{i+1}</div>
-              <div style={{fontSize:12,color:T.brownDark,fontFamily:T.sans,width:140,flexShrink:0,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{p.business_name}</div>
-              <div style={{flex:1,background:T.parchmentDark,borderRadius:4,height:16}}>
-                <div style={{width:`${((p.search_appearances||0)/maxSearch)*100}%`,background:T.teal,borderRadius:4,height:"100%",minWidth:20,display:"flex",alignItems:"center",paddingLeft:5}}>
-                  <span style={{fontSize:9,color:"#fff",fontFamily:T.sans}}>{p.search_appearances}</span>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {topSearches.length>0 && (
-        <div style={S.card}>
-          <div style={S.secTitle}>🔍 Top Search Terms</div>
-          {topSearches.map((s,i)=>(
-            <div key={i} style={{display:"flex",alignItems:"center",gap:8,marginBottom:5}}>
-              <div style={{fontSize:11,color:T.brownLight,fontFamily:T.sans,width:16,textAlign:"right",flexShrink:0}}>{i+1}</div>
-              <div style={{fontSize:11,color:T.brownDark,fontFamily:T.sans,width:150,flexShrink:0,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>
-                {s.service_name}{s.area_key?` · ${s.area_key}`:""}
-              </div>
-              <div style={{flex:1,background:T.parchmentDark,borderRadius:4,height:16}}>
-                <div style={{width:`${((s.search_count||0)/maxSrch)*100}%`,background:"#1A6B3C",borderRadius:4,height:"100%",minWidth:20,display:"flex",alignItems:"center",paddingLeft:5}}>
-                  <span style={{fontSize:9,color:"#fff",fontFamily:T.sans}}>{s.search_count}x</span>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-
+      {/* GA4 Link */}
       <div style={S.card}>
-        <div style={S.secTitle}>🛠️ Top Services Offered</div>
-        {topSvcs.length===0 ? <div style={{color:"#aaa",fontSize:13}}>No data yet</div> :
-          topSvcs.map(([svc,cnt])=>(
-            <div key={svc} style={{display:"flex",alignItems:"center",gap:8,marginBottom:5}}>
-              <div style={{fontSize:11,color:T.brownLight,fontFamily:T.sans,width:150,flexShrink:0,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{svc}</div>
-              <div style={{flex:1,background:T.parchmentDark,borderRadius:4,height:16}}>
-                <div style={{width:`${(cnt/maxS)*100}%`,background:T.teal,borderRadius:4,height:"100%",minWidth:16,display:"flex",alignItems:"center",paddingLeft:5}}>
-                  <span style={{fontSize:9,color:"#fff"}}>{cnt}</span>
-                </div>
-              </div>
-            </div>
-          ))
-        }
-      </div>
-
-      <div style={S.card}>
-        <div style={S.secTitle}>⭐ Review Stats</div>
-        <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:8,marginBottom:12}}>
-          {[["Total Reviews",reviews.length,T.brown],["Avg Rating",avgRating,T.gold],["Pending Approval",reviews.filter(r=>!r.is_approved).length,T.red]].map(([l,v,c])=>(
-            <div key={l} style={{textAlign:"center",background:T.parchment,borderRadius:6,padding:"12px 6px"}}>
-              <div style={{fontSize:24,fontWeight:800,color:c,fontFamily:T.sans}}>{v}</div>
-              <div style={{fontSize:10,color:T.brownLight,fontFamily:T.sans,textTransform:"uppercase",letterSpacing:0.5}}>{l}</div>
-            </div>
-          ))}
-        </div>
-        <div style={{fontSize:11,fontWeight:700,color:T.brownLight,textTransform:"uppercase",letterSpacing:1,marginBottom:8,fontFamily:T.sans}}>Rating Distribution</div>
-        {[5,4,3,2,1].map(star=>(
-          <div key={star} style={{display:"flex",alignItems:"center",gap:8,marginBottom:4}}>
-            <div style={{fontSize:11,color:T.gold,width:30,textAlign:"right",flexShrink:0,letterSpacing:-1}}>{"★".repeat(star)}</div>
-            <div style={{flex:1,background:T.parchmentDark,borderRadius:4,height:14}}>
-              <div style={{width:`${(ratingDist[star]/maxRatCount)*100}%`,background:T.gold,borderRadius:4,height:"100%",minWidth:ratingDist[star]>0?20:0,display:"flex",alignItems:"center",paddingLeft:4}}>
-                {ratingDist[star]>0&&<span style={{fontSize:9,color:"#fff"}}>{ratingDist[star]}</span>}
-              </div>
-            </div>
-            <div style={{fontSize:11,color:T.brownLight,fontFamily:T.sans,width:20}}>{ratingDist[star]}</div>
-          </div>
-        ))}
-      </div>
-
-      <div style={{...S.card,borderLeft:`4px solid ${T.teal}`}}>
         <div style={S.secTitle}>🌐 External Traffic (Google Analytics)</div>
-        <div style={{fontSize:12,color:T.brownDark,fontFamily:T.sans,marginBottom:10}}>
-          For site visitors, page views, and traffic sources, open GA4 directly:
-        </div>
+        <p style={{fontSize:13,color:T.brownLight,fontFamily:T.sans,margin:"0 0 10px 0"}}>
+          For detailed traffic sources, demographics, and real-time visitors, open GA4 directly:
+        </p>
         <a href="https://analytics.google.com/analytics/web/#/p490233278/reports/reportinghub"
-           target="_blank" rel="noopener noreferrer"
-           style={{display:"inline-block",padding:"10px 20px",background:T.teal,color:"#fff",borderRadius:6,fontWeight:700,fontSize:13,textDecoration:"none"}}>
+          target="_blank" rel="noopener noreferrer"
+          style={{display:"inline-block",padding:"10px 20px",background:T.brown,color:"#fff",borderRadius:5,fontSize:13,fontWeight:700,fontFamily:T.sans,textDecoration:"none"}}>
           📊 Open Google Analytics →
         </a>
-        <div style={{marginTop:6,fontSize:10,color:"#aaa",fontFamily:T.sans}}>Property: G-1EJ40FW9E1 · www.v-hub.us</div>
+        <div style={{marginTop:10,fontSize:12,color:T.brownLight,fontFamily:T.sans}}>
+          Measurement ID: G-1EJ40FW9E1 · Property: V-Hub Homepage
+        </div>
       </div>
 
     </div>
   );
 }
+
 
 // ── ADD PROVIDER TAB ──────────────────────────────────────────────────────────
 function AddProviderTab({ onAdded, categories, services: allServices, serviceAreas: allAreas, adminPin }) {
@@ -1656,7 +1719,7 @@ function AddProviderTab({ onAdded, categories, services: allServices, serviceAre
     if (!form.business_name.trim()) return alert("Business name is required — everything else can be added later.");
     setSaving(true);
     try {
-      const res = await fetch(`https://api.base44.app/api/apps/69d06ada8019d7e9edf7f8e8/functions/addProviderByAdmin`, {
+      const res = await fetch(`https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/addProviderByAdmin`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -1949,7 +2012,7 @@ function Dashboard({ adminPin }) {
   const load = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`https://api.base44.app/api/apps/69d06ada8019d7e9edf7f8e8/functions/getAdminData`, {
+      const res = await fetch(`https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/getAdminData`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ pin: adminPin }),
@@ -1985,7 +2048,7 @@ function Dashboard({ adminPin }) {
 
   const pendingReviews = reviews.filter(r => !r.is_approved);
   const pendingProviders = providers.filter(p => p.subscription_status === "pending");
-  const TABS = ["Overview", "Providers", "Deals", "Reviews", "Leads", "Analytics", "Add Provider"];
+  const TABS = ["Overview", "Providers", "Deals", "Reviews", "Leads", "Analytics", "Vendors", "Add Provider"];
 
   if (loading) return (
     <div style={{ minHeight: "100vh", background: T.parchment, display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", gap: 12 }}>
@@ -2078,8 +2141,431 @@ function Dashboard({ adminPin }) {
         {tab === "Leads" && <LeadsTab leads={leads} providers={providers} />}
         {tab === "Deals" && <DealsTab providers={providers} classifiedAds={classifiedAds} />}
         {tab === "Analytics" && <AnalyticsTab providers={providers} reviews={reviews} leads={leads} stats={stats} catMap={catMap} svcMap={svcMap} fullSvcMap={fullSvcMap} classifiedAds={classifiedAds} />}
+        {tab === "Vendors" && <VendorsTab />}
         {tab === "Add Provider" && <AddProviderTab onAdded={p => { setProviders(prev => [p, ...prev]); setTab("Providers"); }} categories={categories} services={services} serviceAreas={serviceAreas} adminPin={adminPin} />}
       </div>
+    </div>
+  );
+}
+
+
+// ── VENDORS TAB ───────────────────────────────────────────────────────────────
+const VENDOR_CAT_EMOJI_ADMIN = {
+  "Farm & Fresh Produce": "🌽",
+  "Food, Baked Goods & Sweets": "🥐",
+  "Wellness & Body": "🌿",
+  "Art, Jewelry & Gifts": "🎨",
+  "Home, Yard & Golf Cart": "🏡",
+};
+
+function VendorsTab() {
+  const [vendors, setVendors] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [filterCat, setFilterCat] = useState("All");
+  const [filterStatus, setFilterStatus] = useState("All");
+  const [filterAcct, setFilterAcct] = useState("All");
+  const [searchQ, setSearchQ] = useState("");
+  const [editVendor, setEditVendor] = useState(null);
+  const [editForm, setEditForm] = useState({});
+  const [saving, setSaving] = useState(false);
+  const [toast, setToast] = useState("");
+  const [showAnalytics, setShowAnalytics] = useState(false);
+  const [sendingWelcome, setSendingWelcome] = useState(null);
+  const [setPassId, setSetPassId] = useState(null);
+  const [newPass, setNewPass] = useState("");
+
+  const showToast = (msg) => { setToast(msg); setTimeout(() => setToast(""), 3500); };
+
+  useEffect(() => {
+    MarketVendor.list().then(v => { setVendors(v || []); setLoading(false); }).catch(() => setLoading(false));
+  }, []);
+
+  const categories = ["All", "Farm & Fresh Produce", "Food, Baked Goods & Sweets", "Wellness & Body", "Art, Jewelry & Gifts", "Home, Yard & Golf Cart"];
+
+  const filtered = vendors.filter(v => {
+    const catMatch = filterCat === "All" || v.category === filterCat;
+    const statusMatch = filterStatus === "All" || (filterStatus === "Active" && v.is_active) || (filterStatus === "Pending" && !v.is_active);
+    const acctMatch = filterAcct === "All"
+      || (filterAcct === "HasEmail" && v.email)
+      || (filterAcct === "NoEmail" && !v.email)
+      || (filterAcct === "HasLogin" && v.login_email)
+      || (filterAcct === "WelcomeSent" && v.welcome_sent)
+      || (filterAcct === "SelfManaged" && v.managed_by === "vendor");
+    const q = searchQ.trim().toLowerCase();
+    const nameMatch = !q || (v.name || "").toLowerCase().includes(q) || (v.vendor_id || "").toLowerCase().includes(q) || (v.email || "").toLowerCase().includes(q);
+    return catMatch && statusMatch && acctMatch && nameMatch;
+  });
+
+  const openEdit = (v) => { setEditVendor(v); setEditForm({ ...v }); };
+
+  const saveEdit = async () => {
+    setSaving(true);
+    try {
+      await MarketVendor.update(editVendor.id, editForm);
+      setVendors(prev => prev.map(x => x.id === editVendor.id ? { ...x, ...editForm } : x));
+      setEditVendor(null);
+      showToast("✅ Vendor updated!");
+    } catch { showToast("❌ Save failed"); }
+    setSaving(false);
+  };
+
+  const toggleActive = async (v) => {
+    await MarketVendor.update(v.id, { is_active: !v.is_active });
+    setVendors(prev => prev.map(x => x.id === v.id ? { ...x, is_active: !v.is_active } : x));
+    showToast(v.is_active ? "⚠️ Vendor hidden from public" : "✅ Vendor is now live");
+  };
+
+  const toggleManagedBy = async (v) => {
+    const newVal = v.managed_by === "vendor" ? "vhub" : "vendor";
+    await MarketVendor.update(v.id, { managed_by: newVal });
+    setVendors(prev => prev.map(x => x.id === v.id ? { ...x, managed_by: newVal } : x));
+    showToast(newVal === "vendor" ? "✅ Marked as self-managed" : "↩️ Returned to V-HUB management");
+  };
+
+  const deleteVendor = async (v) => {
+    if (!window.confirm(`Delete ${v.name}? This cannot be undone.`)) return;
+    await MarketVendor.delete(v.id);
+    setVendors(prev => prev.filter(x => x.id !== v.id));
+    showToast("🗑️ Vendor deleted");
+  };
+
+  const savePassword = async (v) => {
+    if (!newPass || newPass.length < 6) { showToast("❌ Password must be at least 6 characters"); return; }
+    await MarketVendor.update(v.id, { login_password: newPass, login_email: v.login_email || v.email || "" });
+    setVendors(prev => prev.map(x => x.id === v.id ? { ...x, login_password: newPass, login_email: v.login_email || v.email || "" } : x));
+    setSetPassId(null);
+    setNewPass("");
+    showToast("🔐 Password saved");
+  };
+
+  const sendWelcomeEmail = async (v) => {
+    if (!v.email) { showToast("❌ No email on file for this vendor"); return; }
+    if (!window.confirm(`Send welcome email to ${v.name} at ${v.email}?`)) return;
+    setSendingWelcome(v.id);
+    try {
+      const res = await fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/sendVendorWelcome", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ vendor_id: v.id })
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        await MarketVendor.update(v.id, { welcome_sent: true });
+        setVendors(prev => prev.map(x => x.id === v.id ? { ...x, welcome_sent: true } : x));
+        showToast(`✅ Welcome email sent to ${v.email}`);
+      } else {
+        showToast("❌ Email failed: " + (data.error || "Unknown error"));
+      }
+    } catch (e) {
+      showToast("❌ Network error sending email");
+    }
+    setSendingWelcome(null);
+  };
+
+  // Stats
+  const pendingCount = vendors.filter(v => !v.is_active).length;
+  const activeCount = vendors.filter(v => v.is_active).length;
+  const verifiedCount = vendors.filter(v => v.is_verified).length;
+  const withEmail = vendors.filter(v => v.email).length;
+  const withPhone = vendors.filter(v => v.phone).length;
+  const withWebsite = vendors.filter(v => v.website).length;
+  const withFacebook = vendors.filter(v => v.facebook_url).length;
+  const withLogin = vendors.filter(v => v.login_email).length;
+  const welcomeSentCount = vendors.filter(v => v.welcome_sent).length;
+  const selfManagedCount = vendors.filter(v => v.managed_by === "vendor").length;
+  const selfSignup = vendors.filter(v => (v.notes || "").includes("self-signup")).length;
+
+  const CAT_COLORS = {
+    "Farm & Fresh Produce": "#4CAF50",
+    "Food, Baked Goods & Sweets": "#FF9800",
+    "Wellness & Body": "#9C27B0",
+    "Art, Jewelry & Gifts": "#E8431A",
+    "Home, Yard & Golf Cart": "#2196F3",
+  };
+  const catCounts = ["Farm & Fresh Produce","Food, Baked Goods & Sweets","Wellness & Body","Art, Jewelry & Gifts","Home, Yard & Golf Cart"].map(cat => ({
+    cat, count: vendors.filter(v => v.category === cat).length,
+    active: vendors.filter(v => v.category === cat && v.is_active).length,
+    color: CAT_COLORS[cat],
+    short: cat === "Food, Baked Goods & Sweets" ? "Food & Baked" : cat === "Home, Yard & Golf Cart" ? "Home & Golf Cart" : cat === "Farm & Fresh Produce" ? "Farm & Produce" : cat,
+  }));
+  const maxCatCount = Math.max(...catCounts.map(c => c.count), 1);
+
+  const inputS = { width: "100%", padding: "7px 10px", fontSize: 13, border: `1px solid ${T.border}`, borderRadius: 6, background: T.cream, fontFamily: T.sans, boxSizing: "border-box", marginBottom: 8 };
+  const labelS = { display: "block", fontSize: 11, fontWeight: 700, color: T.brownLight, fontFamily: T.sans, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 3 };
+
+  return (
+    <div>
+      {toast && <div style={{ position: "fixed", top: 20, right: 20, background: "#1A6B3C", color: "#fff", padding: "10px 18px", borderRadius: 8, fontWeight: 700, fontFamily: T.sans, zIndex: 9999, boxShadow: "0 4px 12px rgba(0,0,0,0.2)" }}>{toast}</div>}
+
+      {/* Stats strip */}
+      <div style={{ display: "flex", gap: 10, marginBottom: 14, flexWrap: "wrap" }}>
+        {[
+          { label: "Total Vendors", val: vendors.length, color: T.brown },
+          { label: "Active / Public", val: activeCount, color: "#1A6B3C" },
+          { label: "Pending Review", val: pendingCount, color: "#E8431A" },
+          { label: "Have Email", val: withEmail, color: "#00BFA5" },
+          { label: "Welcome Sent", val: welcomeSentCount, color: "#9C27B0" },
+          { label: "Self-Managed", val: selfManagedCount, color: "#2196F3" },
+        ].map(s => (
+          <div key={s.label} style={{ flex: 1, minWidth: 90, background: T.cream, border: `1px solid ${T.border}`, borderRadius: 8, padding: "10px 14px", textAlign: "center" }}>
+            <div style={{ fontSize: 20, fontWeight: 900, color: s.color, fontFamily: T.sans }}>{s.val}</div>
+            <div style={{ fontSize: 10, color: T.brownLight, fontFamily: T.sans, marginTop: 2 }}>{s.label}</div>
+          </div>
+        ))}
+      </div>
+
+      {/* Analytics Toggle */}
+      <div style={{ marginBottom: 12 }}>
+        <button onClick={() => setShowAnalytics(s => !s)}
+          style={{ padding: "7px 16px", fontSize: 12, fontWeight: 700, background: showAnalytics ? T.brownDark : T.cream, color: showAnalytics ? "#fff" : T.brownDark, border: `1px solid ${T.border}`, borderRadius: 20, cursor: "pointer", fontFamily: T.sans }}>
+          📊 {showAnalytics ? "Hide Analytics" : "Show Analytics"}
+        </button>
+      </div>
+
+      {/* Analytics Panel */}
+      {showAnalytics && (
+        <div style={{ background: T.cream, border: `1px solid ${T.border}`, borderRadius: 10, padding: "16px 16px 12px", marginBottom: 16 }}>
+          <div style={{ fontWeight: 900, fontSize: 13, color: T.brownDark, fontFamily: T.sans, textTransform: "uppercase", letterSpacing: 1, marginBottom: 14 }}>📊 Vendor Analytics</div>
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 16 }}>
+            {[
+              { label: "Total Vendors", val: vendors.length, color: T.brown, icon: "🏪" },
+              { label: "Live / Active", val: activeCount, color: "#1A6B3C", icon: "✅" },
+              { label: "Pending", val: pendingCount, color: "#E8431A", icon: "⏳" },
+              { label: "Self-Signups", val: selfSignup, color: "#00BFA5", icon: "📝" },
+              { label: "Verified", val: verifiedCount, color: "#9C27B0", icon: "⭐" },
+              { label: "Have Login", val: withLogin, color: "#2196F3", icon: "🔐" },
+              { label: "Welcome Sent", val: welcomeSentCount, color: "#FF9800", icon: "📧" },
+              { label: "Self-Managed", val: selfManagedCount, color: "#5D4037", icon: "🙋" },
+            ].map(s => (
+              <div key={s.label} style={{ flex: 1, minWidth: 90, background: T.parchment, border: `1px solid ${T.border}`, borderRadius: 8, padding: "10px 10px", textAlign: "center" }}>
+                <div style={{ fontSize: 18 }}>{s.icon}</div>
+                <div style={{ fontSize: 18, fontWeight: 900, color: s.color, fontFamily: T.sans, lineHeight: 1.2 }}>{s.val}</div>
+                <div style={{ fontSize: 10, color: T.brownLight, fontFamily: T.sans, marginTop: 2 }}>{s.label}</div>
+              </div>
+            ))}
+          </div>
+          <div style={{ marginBottom: 16 }}>
+            <div style={{ fontSize: 11, fontWeight: 700, color: T.brownLight, fontFamily: T.sans, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 8 }}>Vendors by Category</div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 7 }}>
+              {catCounts.sort((a,b) => b.count - a.count).map(({ cat, count, active, color, short }) => (
+                <div key={cat} style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <div style={{ width: 110, fontSize: 11, color: T.brownDark, fontFamily: T.sans, flexShrink: 0, textAlign: "right" }}>{short}</div>
+                  <div style={{ flex: 1, background: T.parchmentDark, borderRadius: 4, height: 18, overflow: "hidden", position: "relative" }}>
+                    <div style={{ width: `${(count / maxCatCount) * 100}%`, background: color, height: "100%", borderRadius: 4, opacity: 0.85 }} />
+                    <div style={{ position: "absolute", right: 6, top: 0, height: "100%", display: "flex", alignItems: "center", fontSize: 10, fontWeight: 700, color: T.brownDark, fontFamily: T.sans }}>
+                      {active} live / {count} total
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div>
+            <div style={{ fontSize: 11, fontWeight: 700, color: T.brownLight, fontFamily: T.sans, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 8 }}>Contact Info Coverage</div>
+            <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+              {[
+                { label: "Have Email", val: withEmail, pct: Math.round(withEmail/Math.max(vendors.length,1)*100) },
+                { label: "Have Phone", val: withPhone, pct: Math.round(withPhone/Math.max(vendors.length,1)*100) },
+                { label: "Have Website", val: withWebsite, pct: Math.round(withWebsite/Math.max(vendors.length,1)*100) },
+                { label: "Have Facebook", val: withFacebook, pct: Math.round(withFacebook/Math.max(vendors.length,1)*100) },
+              ].map(({ label, val, pct }) => (
+                <div key={label} style={{ flex: 1, minWidth: 90, background: T.parchment, border: `1px solid ${T.border}`, borderRadius: 8, padding: "8px 10px", textAlign: "center" }}>
+                  <div style={{ fontSize: 18, fontWeight: 900, color: pct >= 80 ? "#1A6B3C" : pct >= 50 ? "#FF9800" : "#E8431A", fontFamily: T.sans }}>{pct}%</div>
+                  <div style={{ fontSize: 10, color: T.brownLight, fontFamily: T.sans, marginTop: 1 }}>{label}</div>
+                  <div style={{ fontSize: 10, color: T.brownLight, fontFamily: T.sans }}>{val} / {vendors.length}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Filters */}
+      <div style={{ display: "flex", gap: 8, marginBottom: 10, flexWrap: "wrap", alignItems: "center" }}>
+        <input type="text" placeholder="Search name, VM#, email..." value={searchQ} onChange={e => setSearchQ(e.target.value)}
+          style={{ flex: 2, minWidth: 160, padding: "7px 12px", fontSize: 13, border: `1px solid ${T.border}`, borderRadius: 20, background: T.cream, fontFamily: T.sans }} />
+        <select value={filterCat} onChange={e => setFilterCat(e.target.value)}
+          style={{ flex: 1, minWidth: 130, padding: "7px 10px", fontSize: 12, border: `1px solid ${T.border}`, borderRadius: 20, background: T.cream, fontFamily: T.sans }}>
+          {categories.map(c => <option key={c}>{c}</option>)}
+        </select>
+        <select value={filterStatus} onChange={e => setFilterStatus(e.target.value)}
+          style={{ flex: 1, minWidth: 110, padding: "7px 10px", fontSize: 12, border: `1px solid ${T.border}`, borderRadius: 20, background: T.cream, fontFamily: T.sans }}>
+          {["All","Active","Pending"].map(s => <option key={s}>{s}</option>)}
+        </select>
+        <select value={filterAcct} onChange={e => setFilterAcct(e.target.value)}
+          style={{ flex: 1, minWidth: 130, padding: "7px 10px", fontSize: 12, border: `1px solid ${T.border}`, borderRadius: 20, background: T.cream, fontFamily: T.sans }}>
+          <option value="All">All Accounts</option>
+          <option value="HasEmail">Has Email</option>
+          <option value="NoEmail">No Email</option>
+          <option value="HasLogin">Has Login</option>
+          <option value="WelcomeSent">Welcome Sent</option>
+          <option value="SelfManaged">Self-Managed</option>
+        </select>
+      </div>
+
+      <div style={{ fontSize: 11, color: T.brownLight, fontFamily: T.sans, marginBottom: 10 }}>
+        Showing {filtered.length} of {vendors.length} vendors
+      </div>
+
+      {/* Vendor List */}
+      {loading ? (
+        <div style={{ textAlign: "center", color: T.brownLight, padding: 30, fontFamily: T.sans }}>Loading vendors...</div>
+      ) : (
+        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+          {filtered.map(v => (
+            <div key={v.id} style={{ background: T.cream, border: `1.5px solid ${v.is_active ? T.border : "#f5a623"}`, borderRadius: 10, padding: "12px 14px" }}>
+              <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 8, flexWrap: "wrap" }}>
+                {/* Left: Info */}
+                <div style={{ flex: 1, minWidth: 200 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap", marginBottom: 3 }}>
+                    <span style={{ fontWeight: 800, fontSize: 14, color: T.brownDark, fontFamily: T.font }}>{v.name}</span>
+                    {v.vendor_id && <span style={{ fontSize: 10, color: T.brownLight, fontFamily: T.sans, background: T.parchmentDark, padding: "1px 6px", borderRadius: 10 }}>{v.vendor_id}</span>}
+                    {v.is_active ? <span style={{ fontSize: 10, background: "#E8F5E9", color: "#1A6B3C", borderRadius: 10, padding: "1px 7px", fontWeight: 700, fontFamily: T.sans }}>● Live</span>
+                      : <span style={{ fontSize: 10, background: "#FFF3E0", color: "#E65100", borderRadius: 10, padding: "1px 7px", fontWeight: 700, fontFamily: T.sans }}>⏳ Pending</span>}
+                    {v.is_verified && <span style={{ fontSize: 10, background: "#EDE7F6", color: "#6A1B9A", borderRadius: 10, padding: "1px 7px", fontWeight: 700, fontFamily: T.sans }}>⭐ Verified</span>}
+                    {v.managed_by === "vendor" && <span style={{ fontSize: 10, background: "#E3F2FD", color: "#1565C0", borderRadius: 10, padding: "1px 7px", fontWeight: 700, fontFamily: T.sans }}>🙋 Self-Managed</span>}
+                    {v.welcome_sent && <span style={{ fontSize: 10, background: "#F3E5F5", color: "#6A1B9A", borderRadius: 10, padding: "1px 7px", fontWeight: 700, fontFamily: T.sans }}>📧 Welcomed</span>}
+                  </div>
+                  <div style={{ fontSize: 11, color: T.brownLight, fontFamily: T.sans, marginBottom: 2 }}>{v.category}</div>
+                  {v.location && <div style={{ fontSize: 11, color: T.brownLight, fontFamily: T.sans }}>📍 {v.location}</div>}
+                  <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginTop: 5 }}>
+                    {v.phone && <span style={{ fontSize: 11, color: T.brown, fontFamily: T.sans }}>📞 {v.phone}</span>}
+                    {v.website && <a href={v.website} target="_blank" rel="noreferrer" style={{ fontSize: 11, color: "#1565C0", fontFamily: T.sans }}>🌐 Website</a>}
+                    {v.facebook_url && <a href={v.facebook_url} target="_blank" rel="noreferrer" style={{ fontSize: 11, color: "#1565C0", fontFamily: T.sans }}>📘 Facebook</a>}
+                    {v.instagram_url && <a href={v.instagram_url} target="_blank" rel="noreferrer" style={{ fontSize: 11, color: "#C2185B", fontFamily: T.sans }}>📷 Instagram</a>}
+                  </div>
+                  {/* Admin-only block */}
+                  <div style={{ marginTop: 6, background: T.parchment, borderRadius: 6, padding: "6px 10px", border: `1px solid ${T.border}` }}>
+                    <div style={{ fontSize: 11, fontWeight: 700, color: T.brownLight, fontFamily: T.sans, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 3 }}>🔒 Admin Only</div>
+                    {v.email ? <div style={{ fontSize: 12, color: T.brownDark, fontFamily: T.sans }}><strong>Email:</strong> {v.email}</div>
+                      : <div style={{ fontSize: 11, color: "#999", fontFamily: T.sans, fontStyle: "italic" }}>No email — vendor can claim via admin@v-hub.us</div>}
+                    {v.login_email && <div style={{ fontSize: 12, color: T.brownDark, fontFamily: T.sans, marginTop: 2 }}><strong>Login:</strong> {v.login_email}</div>}
+                    {v.login_password && <div style={{ fontSize: 12, color: "#1A6B3C", fontFamily: T.sans }}><strong>Temp PW:</strong> {v.login_password}</div>}
+                    {!v.login_password && <div style={{ fontSize: 11, color: "#E8431A", fontFamily: T.sans, fontStyle: "italic" }}>⚠️ No login password set</div>}
+                  </div>
+                </div>
+
+                {/* Right: Action Buttons */}
+                <div style={{ display: "flex", flexDirection: "column", gap: 5, minWidth: 130 }}>
+                  <button onClick={() => openEdit(v)}
+                    style={{ padding: "6px 12px", fontSize: 11, fontWeight: 700, background: T.parchmentDark, color: T.brownDark, border: `1px solid ${T.border}`, borderRadius: 6, cursor: "pointer", fontFamily: T.sans }}>
+                    ✏️ Edit
+                  </button>
+                  <button onClick={() => toggleActive(v)}
+                    style={{ padding: "6px 12px", fontSize: 11, fontWeight: 700, background: v.is_active ? "#FFF3E0" : "#E8F5E9", color: v.is_active ? "#E65100" : "#1A6B3C", border: `1px solid ${v.is_active ? "#FFB74D" : "#A5D6A7"}`, borderRadius: 6, cursor: "pointer", fontFamily: T.sans }}>
+                    {v.is_active ? "⚠️ Hide" : "✅ Activate"}
+                  </button>
+                  <button onClick={() => toggleManagedBy(v)}
+                    style={{ padding: "6px 12px", fontSize: 11, fontWeight: 700, background: v.managed_by === "vendor" ? "#EFEBE9" : "#E3F2FD", color: v.managed_by === "vendor" ? "#5D4037" : "#1565C0", border: `1px solid ${v.managed_by === "vendor" ? "#BCAAA4" : "#90CAF9"}`, borderRadius: 6, cursor: "pointer", fontFamily: T.sans }}>
+                    {v.managed_by === "vendor" ? "↩ V-HUB Manages" : "🙋 Self-Managed"}
+                  </button>
+                  <button onClick={() => { setSetPassId(setPassId === v.id ? null : v.id); setNewPass(""); }}
+                    style={{ padding: "6px 12px", fontSize: 11, fontWeight: 700, background: v.login_password ? "#E8F5E9" : "#FFEBEE", color: v.login_password ? "#1A6B3C" : "#c0392b", border: `1px solid ${v.login_password ? "#A5D6A7" : "#EF9A9A"}`, borderRadius: 6, cursor: "pointer", fontFamily: T.sans }}>
+                    {v.login_password ? "🔐 Change PW" : "🔑 Set Password"}
+                  </button>
+                  {v.email && (
+                    <button onClick={() => sendWelcomeEmail(v)} disabled={sendingWelcome === v.id}
+                      style={{ padding: "6px 12px", fontSize: 11, fontWeight: 700, background: v.welcome_sent ? "#EDE7F6" : "#E8431A", color: v.welcome_sent ? "#6A1B9A" : "#fff", border: "none", borderRadius: 6, cursor: sendingWelcome === v.id ? "wait" : "pointer", fontFamily: T.sans, opacity: sendingWelcome === v.id ? 0.7 : 1 }}>
+                      {sendingWelcome === v.id ? "Sending..." : v.welcome_sent ? "📧 Re-send" : "📧 Send Welcome"}
+                    </button>
+                  )}
+                  <button onClick={() => deleteVendor(v)}
+                    style={{ padding: "6px 12px", fontSize: 11, fontWeight: 700, background: "#FFEBEE", color: "#c0392b", border: "1px solid #EF9A9A", borderRadius: 6, cursor: "pointer", fontFamily: T.sans }}>
+                    🗑️ Delete
+                  </button>
+                </div>
+              </div>
+
+              {/* Password Set Inline */}
+              {setPassId === v.id && (
+                <div style={{ marginTop: 10, background: T.parchment, borderRadius: 8, padding: "10px 12px", border: `1px solid ${T.border}` }}>
+                  <div style={{ fontSize: 12, fontWeight: 700, color: T.brownDark, fontFamily: T.sans, marginBottom: 6 }}>Set vendor login password:</div>
+                  <div style={{ display: "flex", gap: 8 }}>
+                    <input type="text" value={newPass} onChange={e => setNewPass(e.target.value)} placeholder="Enter password..."
+                      style={{ flex: 1, padding: "6px 10px", fontSize: 13, border: `1px solid ${T.border}`, borderRadius: 6, background: T.cream, fontFamily: T.sans }} />
+                    <button onClick={() => savePassword(v)}
+                      style={{ padding: "6px 14px", fontSize: 12, fontWeight: 700, background: "#1A6B3C", color: "#fff", border: "none", borderRadius: 6, cursor: "pointer", fontFamily: T.sans }}>
+                      Save
+                    </button>
+                  </div>
+                  <div style={{ fontSize: 10, color: T.brownLight, fontFamily: T.sans, marginTop: 4 }}>Login email: {v.login_email || v.email || "(none)"}</div>
+                </div>
+              )}
+
+              {/* Notes */}
+              {v.notes && (
+                <div style={{ marginTop: 8, fontSize: 11, color: T.brownLight, fontFamily: T.sans, fontStyle: "italic", borderTop: `1px solid ${T.border}`, paddingTop: 6 }}>
+                  📝 {v.notes.substring(0, 180)}{v.notes.length > 180 ? "…" : ""}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Edit Modal */}
+      {editVendor && (
+        <div onClick={() => setEditVendor(null)} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", zIndex: 9000, display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }}>
+          <div onClick={e => e.stopPropagation()} style={{ background: T.parchment, borderRadius: 12, padding: 20, maxWidth: 540, width: "100%", maxHeight: "90vh", overflowY: "auto", boxShadow: "0 8px 32px rgba(0,0,0,0.25)" }}>
+            <h3 style={{ margin: "0 0 14px", color: T.brownDark, fontFamily: T.font, fontSize: 16 }}>✏️ Edit Vendor: {editVendor.name}</h3>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0 12px" }}>
+              {[
+                { field: "name", label: "Business Name" },
+                { field: "vendor_id", label: "Vendor ID (VM-XXXX)" },
+                { field: "category", label: "Category", type: "select", options: ["Farm & Fresh Produce","Food, Baked Goods & Sweets","Wellness & Body","Art, Jewelry & Gifts","Home, Yard & Golf Cart"] },
+                { field: "location", label: "Location (City, FL)" },
+                { field: "phone", label: "Phone (not shown publicly)" },
+                { field: "email", label: "Email (admin-only, not public)" },
+                { field: "website", label: "Website URL" },
+                { field: "facebook_url", label: "Facebook URL" },
+                { field: "instagram_url", label: "Instagram URL" },
+                { field: "schedule", label: "Market Schedule" },
+                { field: "login_email", label: "Login Email" },
+                { field: "login_password", label: "Temp Password" },
+              ].map(({ field, label, type, options }) => (
+                <div key={field} style={{ marginBottom: 8 }}>
+                  <label style={labelS}>{label}</label>
+                  {type === "select" ? (
+                    <select value={editForm[field] || ""} onChange={e => setEditForm(f => ({ ...f, [field]: e.target.value }))} style={inputS}>
+                      {options.map(o => <option key={o}>{o}</option>)}
+                    </select>
+                  ) : (
+                    <input type="text" value={editForm[field] || ""} onChange={e => setEditForm(f => ({ ...f, [field]: e.target.value }))} style={inputS} />
+                  )}
+                </div>
+              ))}
+            </div>
+            <div style={{ marginBottom: 8 }}>
+              <label style={labelS}>Description</label>
+              <textarea value={editForm.description || ""} onChange={e => setEditForm(f => ({ ...f, description: e.target.value }))}
+                style={{ ...inputS, height: 80, resize: "vertical" }} />
+            </div>
+            <div style={{ marginBottom: 8 }}>
+              <label style={labelS}>Internal Notes (admin only)</label>
+              <textarea value={editForm.notes || ""} onChange={e => setEditForm(f => ({ ...f, notes: e.target.value }))}
+                style={{ ...inputS, height: 60, resize: "vertical" }} />
+            </div>
+            <div style={{ display: "flex", gap: 12, marginTop: 4, flexWrap: "wrap" }}>
+              {[
+                { field: "is_active", label: "Active / Public" },
+                { field: "is_verified", label: "Verified" },
+                { field: "welcome_sent", label: "Welcome Sent" },
+                { field: "password_changed", label: "PW Changed" },
+              ].map(({ field, label }) => (
+                <label key={field} style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, fontFamily: T.sans, color: T.brownDark, cursor: "pointer" }}>
+                  <input type="checkbox" checked={!!editForm[field]} onChange={e => setEditForm(f => ({ ...f, [field]: e.target.checked }))} /> {label}
+                </label>
+              ))}
+            </div>
+            <div style={{ display: "flex", gap: 8, marginTop: 14, justifyContent: "flex-end" }}>
+              <button onClick={() => setEditVendor(null)} style={{ padding: "10px 16px", background: T.parchmentDark, color: T.brownDark, border: `1px solid ${T.border}`, borderRadius: 8, fontWeight: 700, fontSize: 14, cursor: "pointer", fontFamily: T.sans }}>Cancel</button>
+              <button onClick={saveEdit} disabled={saving} style={{ padding: "10px 20px", background: "#1A6B3C", color: "#fff", border: "none", borderRadius: 8, fontWeight: 700, fontSize: 14, cursor: "pointer", fontFamily: T.sans }}>
+                {saving ? "Saving..." : "💾 Save Changes"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
