@@ -2,7 +2,7 @@
 // V-Hub Home — v2026-04-14c
 import React, { useState, useEffect, useRef } from "react"; // v3 - expanded content
 import { createPortal } from "react-dom";
-import { ServiceArea, Category, Service, Provider, ProviderReview, User } from "@/api/entities";
+import { ServiceArea, Category, Service, Provider, ProviderReview, User, MarketVendor } from "@/api/entities";
 
 
 // ── GA4 Loader ────────────────────────────────────────────────────────────
@@ -188,14 +188,16 @@ function Burger({ currentUser }) {
                 { label: "Home", href: "/" },
                 { label: "List Your Service", href: "/ListService" },
                 { label: "Provider Hub", href: "/ProviderDashboard", highlight: true },
+                { label: "Vendor Hub", href: "/VendorDashboard", highlight: false, teal: true },
               ].map((l, i) => (
                 <a key={i} href={l.href} style={{ textDecoration: "none" }}>
-                  <div style={{ padding: "10px 12px", borderRadius: 3, fontSize: 13, fontWeight: 700, color: l.highlight ? PAPER : INK, marginBottom: 4, background: l.highlight ? BROWN_BTN : PAPER_MID, borderLeft: `4px solid ${BROWN_BTN}` }}>{l.label}</div>
+                  <div style={{ padding: "10px 12px", borderRadius: 3, fontSize: 13, fontWeight: 700, color: l.highlight ? PAPER : l.teal ? "#fff" : INK, marginBottom: 4, background: l.highlight ? BROWN_BTN : l.teal ? "#00897B" : PAPER_MID, borderLeft: `4px solid ${l.teal ? "#00BFA5" : BROWN_BTN}` }}>{l.label}</div>
                 </a>
               ))}
               <div style={{ margin: "12px 7px 4px", height: 1, background: PAPER_DK }} />
               <div style={{ padding: "6px 12px", fontSize: 10, color: INK_FADE, fontStyle: "italic", fontFamily: "Georgia, serif", lineHeight: 1.5 }}>
-                Already listed? Visit the <strong>Provider Hub</strong> to manage your profile, view your stats, and read your reviews.
+                <strong>Provider Hub</strong> — manage your service listing, stats, and reviews.<br/>
+                <strong>Vendor Hub</strong> — Hometown Market vendors: manage your booth listing.
               </div>
 
 
@@ -245,6 +247,9 @@ function ProvDetail({ prov, areas, cats, svcs, onBack }) {
   const [showReviewForm, setShowReviewForm] = useState(false);
   const [reviewSaved, setReviewSaved] = useState(false);
   const [reviewForm, setReviewForm] = useState({ customer_name: "", customer_village: "", rating: 5, review_text: "", service_used: "" });
+  const [showLeadForm, setShowLeadForm] = useState(false);
+  const [leadForm, setLeadForm] = useState({ customer_name: "", customer_email: "", customer_phone: "", message: "" });
+  const [leadSent, setLeadSent] = useState(false);
   const cat = cats.find(c => c.id === prov.category_id);
   const GREEN = "#1A6B3C";
   const RED_RULE = "#8B1A1A";
@@ -277,7 +282,7 @@ function ProvDetail({ prov, areas, cats, svcs, onBack }) {
       Provider.update(prov.id, { profile_views: (prov.profile_views || 0) + 1 }).catch(() => {});
     });
     // Log to detailed analytics
-    fetch("https://api.base44.app/api/apps/69d06ada8019d7e9edf7f8e8/functions/trackEvent", {
+    fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/trackEvent", {
       method: "POST", headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ provider_id: prov.id, event_type: "profile_view", source: "homepage" }),
     }).catch(() => {});
@@ -297,6 +302,29 @@ function ProvDetail({ prov, areas, cats, svcs, onBack }) {
       setReviewForm({ customer_name: "", customer_village: "", rating: 5, review_text: "", service_used: "" });
     } catch(err) {
       alert("There was a problem submitting your review. Please try again.");
+    }
+  };
+
+  const handleLeadSubmit = async () => {
+    if (!leadForm.customer_name || (!leadForm.customer_email && !leadForm.customer_phone)) {
+      alert("Please enter your name and at least one contact method (email or phone).");
+      return;
+    }
+    try {
+      await fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/trackEvent", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ provider_id: prov.id, event_type: "lead_inquiry", source: "homepage" }),
+      }).catch(() => {});
+      // Save to LeadInquiry entity via backend
+      await fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/submitLead", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ provider_id: prov.id, ...leadForm }),
+      }).catch(() => {});
+      setLeadSent(true);
+      setShowLeadForm(false);
+      setLeadForm({ customer_name: "", customer_email: "", customer_phone: "", message: "" });
+    } catch(err) {
+      alert("There was a problem sending your message. Please try again or call directly.");
     }
   };
 
@@ -444,6 +472,32 @@ function ProvDetail({ prov, areas, cats, svcs, onBack }) {
             </div>
           </div>
         )}
+
+        {/* ── Contact Provider Form ── */}
+        <div style={{ background: "#EEF4FF", border: "1.5px solid #1B3D6F", borderRadius: 8, padding: "14px 16px", marginBottom: 14 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <div style={{ fontSize: 13, fontWeight: 900, color: "#1B3D6F", textTransform: "uppercase", letterSpacing: 1.5 }}>📬 Contact {prov.business_name}</div>
+            {!showLeadForm && !leadSent && (
+              <button onClick={() => setShowLeadForm(true)} style={{ background: "#E8431A", color: "#fff", border: "none", borderRadius: 4, padding: "5px 14px", fontSize: 11, fontWeight: 700, cursor: "pointer", fontFamily: "'Times New Roman', serif", letterSpacing: 1 }}>Send a Message</button>
+            )}
+          </div>
+          {leadSent && <div style={{ fontSize: 12, color: "#1A6B3C", fontStyle: "italic", marginTop: 8 }}>✓ Your message was sent! {prov.business_name} will be in touch soon.</div>}
+          {showLeadForm && (
+            <div style={{ marginTop: 12 }}>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px 14px", marginBottom: 8 }}>
+                <div style={{ gridColumn: "1/-1" }}><label style={lblS}>Your Name *</label><input style={inputS} value={leadForm.customer_name} onChange={e => setLeadForm(p => ({ ...p, customer_name: e.target.value }))} placeholder="First & Last Name" /></div>
+                <div><label style={lblS}>Your Email</label><input style={inputS} type="email" value={leadForm.customer_email} onChange={e => setLeadForm(p => ({ ...p, customer_email: e.target.value }))} placeholder="your@email.com" /></div>
+                <div><label style={lblS}>Your Phone</label><input style={inputS} type="tel" value={leadForm.customer_phone} onChange={e => setLeadForm(p => ({ ...p, customer_phone: e.target.value }))} placeholder="352-555-0000" /></div>
+                <div style={{ gridColumn: "1/-1" }}><label style={lblS}>Message</label><textarea style={{ ...inputS, minHeight: 65, resize: "vertical", lineHeight: 1.6 }} value={leadForm.message} onChange={e => setLeadForm(p => ({ ...p, message: e.target.value }))} placeholder={"Hi, I'm interested in your services. Please contact me..."} /></div>
+              </div>
+              <div style={{ fontSize: 10, color: "#666", fontStyle: "italic", marginBottom: 8 }}>* Name and at least one contact method required.</div>
+              <div style={{ display: "flex", gap: 8 }}>
+                <button onClick={handleLeadSubmit} style={{ background: "#1B3D6F", color: "#fff", border: "none", borderRadius: 4, padding: "8px 20px", fontSize: 12, fontWeight: 700, cursor: "pointer", fontFamily: "'Times New Roman', serif" }}>Send Message</button>
+                <button onClick={() => setShowLeadForm(false)} style={{ background: PAPER, border: `1.5px solid ${PAPER_DK}`, color: INK_FADE, borderRadius: 4, padding: "8px 14px", fontSize: 12, cursor: "pointer", fontFamily: "'Times New Roman', serif" }}>Cancel</button>
+              </div>
+            </div>
+          )}
+        </div>
 
         <Rule style={{ marginBottom: 14 }} />
 
@@ -866,7 +920,7 @@ function VilDropdown({ open, areas, selArea, setSelArea, setVOpen }) {
     }}>
       {sorted.map(v => (
         <div key={v.id}
-          onClick={e => { e.stopPropagation(); setSelArea(v); setVOpen(false); }}
+          onClick={e => { e.stopPropagation(); setSelArea(v); setVOpen(false); fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/trackEvent",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({provider_id:"SITE",event_type:"village_search",area_name:v.name,source:"homepage"})}).catch(()=>{}); }}
           style={{
             padding: "12px 16px", fontSize: 16, lineHeight: 1.4,
             color: selArea?.id === v.id ? "#fff" : INK,
@@ -914,14 +968,18 @@ function SearchBox({ cats, svcs, areas, onSearch, selSvc, setSelSvc, selArea, se
         return (
           <button onClick={e => { e.stopPropagation(); onSearch(selSvc, selArea); }} style={{
             width: "100%",
-            background: bothSelected ? "linear-gradient(180deg,#1A6B3C,#145530)" : `linear-gradient(180deg,#9A6030,${BROWN_BTN} 60%,#5A3010)`,
-            border: bothSelected ? "3px solid #1A6B3C" : `3px solid ${YELLOW}`,
-            boxShadow: bothSelected ? "0 0 0 1.5px #1A6B3C, 0 0 12px 3px rgba(26,107,60,0.4)" : `0 0 0 1.5px ${YELLOW}, 0 0 10px 2px rgba(255,220,0,0.35)`,
-            borderRadius: 5, color: "#F5E8CC", fontFamily: "'Times New Roman', serif",
-            fontWeight: 700, fontSize: 14, letterSpacing: 3, padding: "13px", cursor: "pointer", boxSizing: "border-box",
-            marginTop: 10, transition: "all 0.2s ease",
+            background: bothSelected ? "linear-gradient(180deg,#1A6B3C 0%,#145530 60%,#0d3d22 100%)" : `linear-gradient(180deg,#9A6030,${BROWN_BTN} 60%,#5A3010)`,
+            border: bothSelected ? "3px solid #52d68a" : `3px solid ${YELLOW}`,
+            boxShadow: bothSelected
+              ? "0 0 0 3px #0d3d22, 0 0 18px 4px rgba(26,107,60,0.7), 0 6px 24px rgba(26,107,60,0.5), inset 0 1px 0 rgba(255,255,255,0.18)"
+              : `0 0 0 2px ${YELLOW}, 0 4px 14px rgba(200,169,110,0.45), inset 0 1px 0 rgba(255,255,255,0.10)`,
+            borderRadius: 6, color: "#F5E8CC", fontFamily: "'Times New Roman', serif",
+            fontWeight: 700, fontSize: bothSelected ? 15 : 14, letterSpacing: 3, padding: "14px", cursor: "pointer", boxSizing: "border-box",
+            marginTop: 10, transition: "all 0.25s ease",
+            textShadow: bothSelected ? "0 0 8px rgba(82,214,138,0.6), 0 1px 2px rgba(0,0,0,0.5)" : "0 1px 2px rgba(0,0,0,0.4)",
+            transform: bothSelected ? "translateY(-1px)" : "translateY(0px)",
           }}>
-            {bothSelected ? "✓ FIND SERVICES" : "FIND SERVICES"}
+            {bothSelected ? "✅ FIND SERVICES" : "FIND SERVICES"}
           </button>
         );
       })()}
@@ -930,6 +988,181 @@ function SearchBox({ cats, svcs, areas, onSearch, selSvc, setSelSvc, selArea, se
 }
 
 // ── Main ──────────────────────────────────────────────────────────────────────
+
+// ── Category emoji map ────────────────────────────────────────────────────
+const VENDOR_CAT_EMOJI = {
+  "Farm & Fresh Produce": "🌽",
+  "Food, Baked Goods & Sweets": "🥐",
+  "Wellness & Body": "🌿",
+  "Art, Jewelry & Gifts": "🎨",
+  "Home, Yard & Golf Cart": "🏡",
+};
+const VENDOR_CATEGORIES = Object.keys(VENDOR_CAT_EMOJI);
+
+function VendorMarketSection() {
+  const [vendors, setVendors] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [selCat, setSelCat] = useState("All");
+  const [searchQ, setSearchQ] = useState("");
+  const [selectedVendor, setSelectedVendor] = useState(null);
+
+  useEffect(() => {
+    MarketVendor.filter({ is_active: true }).then(v => {
+      setVendors(v || []);
+      setLoading(false);
+    }).catch(() => setLoading(false));
+  }, []);
+
+  const categories = ["All", ...VENDOR_CATEGORIES];
+
+  const filtered = vendors.filter(v => {
+    const catMatch = selCat === "All" || v.category === selCat;
+    const q = searchQ.trim().toLowerCase();
+    const nameMatch = !q || (v.name || "").toLowerCase().includes(q);
+    return catMatch && nameMatch;
+  });
+
+  return (
+    <div style={{ padding: "8px 12px 12px" }}>
+      {/* Category filter tabs */}
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 5, marginBottom: 8, justifyContent: "center" }}>
+        {categories.map(cat => (
+          <button key={cat} onClick={() => setSelCat(cat)} style={{
+            padding: "3px 10px", fontSize: 11, fontWeight: selCat === cat ? 900 : 600,
+            background: selCat === cat ? "#E8431A" : "#F5E6C8",
+            color: selCat === cat ? "#fff" : "#5C3A1E",
+            border: `1px solid ${selCat === cat ? "#E8431A" : "#C8A96E"}`,
+            borderRadius: 20, cursor: "pointer", fontFamily: "'Times New Roman', serif",
+            letterSpacing: 0.5, transition: "all 0.15s",
+          }}>
+            {cat === "All" ? "🗂 All" : `${VENDOR_CAT_EMOJI[cat] || ""} ${cat}`}
+          </button>
+        ))}
+      </div>
+      {/* Search */}
+      <div style={{ marginBottom: 8, textAlign: "center" }}>
+        <input type="text" placeholder="Search vendors..." value={searchQ}
+          onChange={e => setSearchQ(e.target.value)}
+          style={{ padding: "5px 12px", fontSize: 13, border: "1px solid #C8A96E", borderRadius: 20, background: "#FFFDF5", width: "90%", maxWidth: 320, fontFamily: "'Times New Roman', serif", outline: "none" }} />
+      </div>
+      <div style={{ textAlign: "center", fontSize: 11, color: "#888", marginBottom: 8, fontStyle: "italic" }}>
+        {loading ? "Loading vendors..." : `${filtered.length} vendor${filtered.length !== 1 ? "s" : ""} found`}
+      </div>
+
+      {/* Vendor grid */}
+      {!loading && (
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 8 }}>
+          {filtered.map(v => (
+            <div key={v.id} onClick={() => setSelectedVendor(v)} style={{
+              background: "#FFFDF5", border: "1px solid #C8A96E", borderRadius: 8,
+              padding: "10px 10px 8px", cursor: "pointer", transition: "box-shadow 0.15s",
+              boxShadow: "0 1px 4px rgba(0,0,0,0.07)", display: "flex", flexDirection: "column", gap: 3,
+            }}
+              onMouseEnter={e => e.currentTarget.style.boxShadow = "0 3px 12px rgba(232,67,26,0.18)"}
+              onMouseLeave={e => e.currentTarget.style.boxShadow = "0 1px 4px rgba(0,0,0,0.07)"}
+            >
+              <div style={{ fontSize: 20 }}>{VENDOR_CAT_EMOJI[v.category] || "🏪"}</div>
+              <div style={{ fontSize: 12, fontWeight: 800, color: "#3A1A0A", fontFamily: "'Times New Roman', serif", lineHeight: 1.3 }}>{v.name}</div>
+              <div style={{ fontSize: 9, color: "#888", fontStyle: "italic" }}>{v.category}</div>
+              {/* Contact icon row */}
+              <div style={{ display: "flex", gap: 6, marginTop: 4, flexWrap: "wrap" }}>
+                {v.phone && <span style={{ fontSize: 16 }} title="Call">📞</span>}
+                {v.website && <span style={{ fontSize: 16 }} title="Website">🌐</span>}
+                {v.facebook_url && <span style={{ fontSize: 16 }} title="Facebook">📘</span>}
+                {v.instagram_url && <span style={{ fontSize: 16 }} title="Instagram">📷</span>}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {filtered.length === 0 && !loading && (
+        <div style={{ textAlign: "center", color: "#999", fontSize: 13, padding: "16px 0", fontStyle: "italic" }}>
+          No vendors found. Try a different filter or search.
+        </div>
+      )}
+
+      <div style={{ marginTop: 12, textAlign: "center" }}>
+        <a href="/VendorSignup" style={{ display: "inline-block", padding: "7px 18px", background: "#E8431A", color: "#fff", borderRadius: 20, fontSize: 12, fontWeight: 700, textDecoration: "none", fontFamily: "'Times New Roman', serif", letterSpacing: 0.5, boxShadow: "0 2px 6px rgba(232,67,26,0.3)" }}>
+          🛒 Are you a vendor? List your booth →
+        </a>
+      </div>
+
+      {/* Vendor Detail Modal */}
+      {selectedVendor && (
+        <div onClick={() => setSelectedVendor(null)} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.55)", zIndex: 9999, display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }}>
+          <div onClick={e => e.stopPropagation()} style={{ background: "#FFFDF5", borderRadius: 12, padding: "22px 20px", maxWidth: 400, width: "100%", boxShadow: "0 8px 32px rgba(0,0,0,0.28)", border: "2px solid #C8A96E", fontFamily: "'Times New Roman', serif", position: "relative", maxHeight: "88vh", overflowY: "auto" }}>
+            <button onClick={() => setSelectedVendor(null)} style={{ position: "absolute", top: 10, right: 12, background: "none", border: "none", fontSize: 22, cursor: "pointer", color: "#888", lineHeight: 1 }}>×</button>
+
+            {/* Header */}
+            <div style={{ textAlign: "center", marginBottom: 8 }}>
+              <div style={{ fontSize: 32, marginBottom: 4 }}>{VENDOR_CAT_EMOJI[selectedVendor.category] || "🏪"}</div>
+              {selectedVendor.logo_url && <img src={selectedVendor.logo_url} alt="logo" style={{ width: 60, height: 60, borderRadius: 8, objectFit: "cover", marginBottom: 6, border: "1px solid #C8A96E" }} />}
+              <h2 style={{ margin: "0 0 6px", fontSize: 18, fontWeight: 900, color: "#3A1A0A", lineHeight: 1.3 }}>{selectedVendor.name}</h2>
+              <span style={{ background: "#E8431A22", color: "#E8431A", fontSize: 11, fontWeight: 700, padding: "2px 10px", borderRadius: 12, border: "1px solid #E8431A55" }}>{selectedVendor.category}</span>
+            </div>
+
+            <div style={{ borderTop: "1px solid #C8A96E", paddingTop: 12, marginTop: 10 }}>
+              {selectedVendor.description && <p style={{ fontSize: 13, color: "#5C3A1E", marginBottom: 12, lineHeight: 1.6 }}>{selectedVendor.description}</p>}
+
+              {/* Schedule — not address */}
+              {selectedVendor.schedule && (
+                <div style={{ fontSize: 12, color: "#5C3A1E", marginBottom: 10, display: "flex", gap: 6, alignItems: "flex-start" }}>
+                  <span>🕘</span><span><strong>Schedule:</strong> {selectedVendor.schedule}</span>
+                </div>
+              )}
+              {!selectedVendor.schedule && (
+                <div style={{ fontSize: 12, color: "#5C3A1E", marginBottom: 10 }}>🕘 <strong>Schedule:</strong> Every Saturday 9:00 AM – 1:00 PM · Brownwood Paddock Square</div>
+              )}
+
+              {/* Contact Buttons — NO address shown */}
+              <div style={{ display: "flex", flexDirection: "column", gap: 8, marginTop: 12 }}>
+                {selectedVendor.phone && (
+                  <a href={`tel:${selectedVendor.phone}`} style={{ display: "flex", alignItems: "center", gap: 10, background: "#1A6B3C", color: "#fff", padding: "10px 16px", borderRadius: 8, textDecoration: "none", fontWeight: 700, fontSize: 14 }}>
+                    <span>📞</span><span>Call {selectedVendor.phone}</span>
+                  </a>
+                )}
+                {selectedVendor.website && (
+                  <a href={selectedVendor.website} target="_blank" rel="noopener noreferrer" style={{ display: "flex", alignItems: "center", gap: 10, background: "#1565C0", color: "#fff", padding: "10px 16px", borderRadius: 8, textDecoration: "none", fontWeight: 700, fontSize: 14 }}>
+                    <span>🌐</span><span>Visit Website</span>
+                  </a>
+                )}
+                {selectedVendor.facebook_url && (
+                  <a href={selectedVendor.facebook_url} target="_blank" rel="noopener noreferrer" style={{ display: "flex", alignItems: "center", gap: 10, background: "#1877F2", color: "#fff", padding: "10px 16px", borderRadius: 8, textDecoration: "none", fontWeight: 700, fontSize: 14 }}>
+                    <span>📘</span><span>Facebook Page</span>
+                  </a>
+                )}
+                {selectedVendor.instagram_url && (
+                  <a href={selectedVendor.instagram_url} target="_blank" rel="noopener noreferrer" style={{ display: "flex", alignItems: "center", gap: 10, background: "#C2185B", color: "#fff", padding: "10px 16px", borderRadius: 8, textDecoration: "none", fontWeight: 700, fontSize: 14 }}>
+                    <span>📷</span><span>Instagram</span>
+                  </a>
+                )}
+                {!selectedVendor.phone && !selectedVendor.website && !selectedVendor.facebook_url && !selectedVendor.instagram_url && (
+                  <div style={{ textAlign: "center", color: "#999", fontSize: 12, fontStyle: "italic", padding: "8px 0" }}>
+                    Contact info coming soon — find us at the market!
+                  </div>
+                )}
+              </div>
+
+              {/* Ratings placeholder — shows star average if available, else CTA */}
+              <div style={{ marginTop: 16, background: "#FFF8EC", border: "1px solid #C8A96E", borderRadius: 8, padding: "10px 14px", textAlign: "center" }}>
+                <div style={{ fontSize: 12, fontWeight: 700, color: "#5C3A1E", marginBottom: 4 }}>⭐ Ratings & Reviews</div>
+                <div style={{ fontSize: 12, color: "#888", fontStyle: "italic" }}>
+                  Reviews for Hometown Market vendors are coming soon.<br/>Find us every Saturday at Brownwood Paddock Square!
+                </div>
+              </div>
+            </div>
+
+            <div style={{ marginTop: 12, textAlign: "center" }}>
+              <a href="/VendorDashboard" style={{ fontSize: 11, color: "#00897B", textDecoration: "underline", fontStyle: "italic" }}>Are you this vendor? Log in to manage your listing →</a>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function Home() {
   const [areas,    setAreas]    = useState([]);
   const [cats,     setCats]     = useState([]);
@@ -942,6 +1175,7 @@ export default function Home() {
   const [selCatR,  setSelCatR]  = useState(null);
   const [selSvc,   setSelSvc]   = useState(null);
   const [selArea,  setSelArea]  = useState(null);
+  const [showVendors, setShowVendors] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
 
   // Hardcoded categories & services (no auth needed on homepage)
@@ -957,79 +1191,70 @@ export default function Home() {
     { id: "69d181fe57b60e0aecf4067e", name: "Professional Services", icon: "💼" },
   ];
   const SVCS_STATIC = [
-    // Home Services
-    { id: "69d1822df3b2afb229b5bad7", category_id: "69d09c14d5ee9e7be9aa301b", name: "Cleaning Services (Home & Pool)" },
-    { id: "69d1822df3b2afb229b5baef", category_id: "69d09c14d5ee9e7be9aa301b", name: "Driveway Repair/Cleaning/Painting" },
-    { id: "69d1822df3b2afb229b5bae3", category_id: "69d09c14d5ee9e7be9aa301b", name: "Flooring (Tile, Wood, Carpet)" },
-    { id: "69d1822df3b2afb229b5bad9", category_id: "69d09c14d5ee9e7be9aa301b", name: "Garage Door Services" },
-    { id: "69d1822df3b2afb229b5bad6", category_id: "69d09c14d5ee9e7be9aa301b", name: "General Repairs" },
-    { id: "69d1822df3b2afb229b5badb", category_id: "69d09c14d5ee9e7be9aa301b", name: "HVAC" },
-    { id: "69d1822df3b2afb229b5bade", category_id: "69d09c14d5ee9e7be9aa301b", name: "Handyman Services" },
     { id: "69d1822df3b2afb229b5bad5", category_id: "69d09c14d5ee9e7be9aa301b", name: "Home Improvements" },
-    { id: "69ea749b0daf529bb432bdef", category_id: "69d09c14d5ee9e7be9aa301b", name: "Home Inspection" },
+    { id: "69d1822df3b2afb229b5bad6", category_id: "69d09c14d5ee9e7be9aa301b", name: "General Repairs" },
+    { id: "69d1822df3b2afb229b5bad7", category_id: "69d09c14d5ee9e7be9aa301b", name: "Cleaning Services" },
     { id: "69d1822df3b2afb229b5bad8", category_id: "69d09c14d5ee9e7be9aa301b", name: "Painting (Interior/Exterior)" },
-    { id: "69d1822df3b2afb229b5badc", category_id: "69d09c14d5ee9e7be9aa301b", name: "Plumbing" },
-    { id: "69d1822df3b2afb229b5baee", category_id: "69d09c14d5ee9e7be9aa301b", name: "Pressure Washing" },
-    { id: "69d1822df3b2afb229b5badd", category_id: "69d09c14d5ee9e7be9aa301b", name: "Roofing & Gutters" },
-    { id: "69d1822df3b2afb229b5badf", category_id: "69d09c14d5ee9e7be9aa301b", name: "Security & Home Watch" },
+    { id: "69d1822df3b2afb229b5bad9", category_id: "69d09c14d5ee9e7be9aa301b", name: "Garage Door Services" },
     { id: "69d1822df3b2afb229b5bada", category_id: "69d09c14d5ee9e7be9aa301b", name: "Window Installation/Repair" },
-    // Home Systems & Utilities
+    { id: "69d1822df3b2afb229b5badb", category_id: "69d09c14d5ee9e7be9aa301b", name: "HVAC" },
+    { id: "69d1822df3b2afb229b5badc", category_id: "69d09c14d5ee9e7be9aa301b", name: "Plumbing" },
+    { id: "69d1822df3b2afb229b5badd", category_id: "69d09c14d5ee9e7be9aa301b", name: "Roofing" },
+    { id: "69d1822df3b2afb229b5badf", category_id: "69d09c14d5ee9e7be9aa301b", name: "Home Watch" },
+    { id: "69d1822df3b2afb229b5bade", category_id: "69d181fe57b60e0aecf4067d", name: "Handyman Services" },
+    { id: "69d1822df3b2afb229b5badf", category_id: "69d181fe57b60e0aecf4067d", name: "Security & Home Watch" },
+    { id: "69d1822df3b2afb229b5bae0", category_id: "69d181fe57b60e0aecf4067d", name: "Pest Control" },
     { id: "69d1822df3b2afb229b5bae1", category_id: "69d181fe57b60e0aecf4067d", name: "Appliance Repair" },
     { id: "69d1822df3b2afb229b5bae2", category_id: "69d181fe57b60e0aecf4067d", name: "Electrical & Lighting" },
-    { id: "69d1822df3b2afb229b5bae0", category_id: "69d181fe57b60e0aecf4067d", name: "Pest Control" },
-    { id: "69d1822df3b2afb229b5bae6", category_id: "69d181fe57b60e0aecf4067d", name: "Pool & Spa Services" },
+    { id: "69d1822df3b2afb229b5bae3", category_id: "69d181fe57b60e0aecf4067d", name: "Flooring (Tile, Wood, Carpet)" },
+    { id: "69d1822df3b2afb229b5bae4", category_id: "69d181fe57b60e0aecf4067d", name: "Home Organization" },
     { id: "69d1822df3b2afb229b5bae5", category_id: "69d181fe57b60e0aecf4067d", name: "Smart Home Installation" },
-    // Yard & Outdoor
-    { id: "69d1822df3b2afb229b5baed", category_id: "69d09c14d5ee9e7be9aa301c", name: "Hardscaping" },
-    { id: "69d1822df3b2afb229b5baeb", category_id: "69d09c14d5ee9e7be9aa301c", name: "Irrigation/Sprinkler Services" },
-    { id: "69d1822df3b2afb229b5baec", category_id: "69d09c14d5ee9e7be9aa301c", name: "Landscaping" },
-    { id: "69d1822df3b2afb229b5baea", category_id: "69d09c14d5ee9e7be9aa301c", name: "Lawn Fertilization" },
+    { id: "69d1822df3b2afb229b5bae6", category_id: "69d181fe57b60e0aecf4067d", name: "Pool & Spa Services" },
     { id: "69d1822df3b2afb229b5bae7", category_id: "69d09c14d5ee9e7be9aa301c", name: "Lawn Mowing" },
     { id: "69d1822df3b2afb229b5bae8", category_id: "69d09c14d5ee9e7be9aa301c", name: "Sod Installation" },
     { id: "69d1822df3b2afb229b5bae9", category_id: "69d09c14d5ee9e7be9aa301c", name: "Tree Trimming & Pruning/Removal" },
-    // Golf Cart Services
-    { id: "69d1822df3b2afb229b5baf5", category_id: "69d09c14d5ee9e7be9aa301d", name: "Battery Replacement" },
-    { id: "69d1822df3b2afb229b5baf2", category_id: "69d09c14d5ee9e7be9aa301d", name: "Detailing" },
-    { id: "69d1822df3b2afb229b5baf4", category_id: "69d09c14d5ee9e7be9aa301d", name: "Improvements/Customizations" },
-    { id: "69d1822df3b2afb229b5baf3", category_id: "69d09c14d5ee9e7be9aa301d", name: "Lighting Upgrades" },
+    { id: "69d1822df3b2afb229b5baea", category_id: "69d09c14d5ee9e7be9aa301c", name: "Lawn Fertilization" },
+    { id: "69d1822df3b2afb229b5baeb", category_id: "69d09c14d5ee9e7be9aa301c", name: "Irrigation/Sprinkler Services" },
+    { id: "69d1822df3b2afb229b5baec", category_id: "69d09c14d5ee9e7be9aa301c", name: "Landscaping" },
+    { id: "69d1822df3b2afb229b5baed", category_id: "69d09c14d5ee9e7be9aa301c", name: "Hardscaping" },
+    { id: "69d1822df3b2afb229b5baee", category_id: "69d09c14d5ee9e7be9aa301c", name: "Pressure Washing" },
+    { id: "69d1822df3b2afb229b5baef", category_id: "69d09c14d5ee9e7be9aa301c", name: "Driveway Repair/Cleaning/Painting" },
+    { id: "69d1822df3b2afb229b5bae6", category_id: "69d09c14d5ee9e7be9aa301c", name: "Pool & Spa Services" },
     { id: "69d1822df3b2afb229b5baf0", category_id: "69d09c14d5ee9e7be9aa301d", name: "Rentals" },
     { id: "69d1822df3b2afb229b5baf1", category_id: "69d09c14d5ee9e7be9aa301d", name: "Repairs" },
+    { id: "69d1822df3b2afb229b5baf2", category_id: "69d09c14d5ee9e7be9aa301d", name: "Detailing" },
+    { id: "69d1822df3b2afb229b5baf3", category_id: "69d09c14d5ee9e7be9aa301d", name: "Lighting Upgrades" },
+    { id: "69d1822df3b2afb229b5baf4", category_id: "69d09c14d5ee9e7be9aa301d", name: "Improvements/Customizations" },
+    { id: "69d1822df3b2afb229b5baf5", category_id: "69d09c14d5ee9e7be9aa301d", name: "Battery Replacement" },
     { id: "69d1822df3b2afb229b5baf6", category_id: "69d09c14d5ee9e7be9aa301d", name: "Tire Services" },
-    // Automobile Services
-    { id: "69d1822df3b2afb229b5baf8", category_id: "69d09c14d5ee9e7be9aa301e", name: "Auto Detailing" },
     { id: "69d1822df3b2afb229b5baf7", category_id: "69d09c14d5ee9e7be9aa301e", name: "Auto Repairs" },
-    { id: "69d1822df3b2afb229b5bafb", category_id: "69d09c14d5ee9e7be9aa301e", name: "Mobile Mechanic" },
+    { id: "69d1822df3b2afb229b5baf8", category_id: "69d09c14d5ee9e7be9aa301e", name: "Auto Detailing" },
     { id: "69d1822df3b2afb229b5baf9", category_id: "69d09c14d5ee9e7be9aa301e", name: "Oil Changes" },
     { id: "69d1822df3b2afb229b5bafa", category_id: "69d09c14d5ee9e7be9aa301e", name: "Tire Services" },
-    // Personal Care
+    { id: "69d1822df3b2afb229b5bafb", category_id: "69d09c14d5ee9e7be9aa301e", name: "Mobile Mechanic" },
     { id: "69d1822df3b2afb229b5bafc", category_id: "69d09c14d5ee9e7be9aa301f", name: "Barber / Stylist" },
-    { id: "69d1822df3b2afb229b5baff", category_id: "69d09c14d5ee9e7be9aa301f", name: "Home Health Aides" },
-    { id: "69d1822df3b2afb229b5bb02", category_id: "69d09c14d5ee9e7be9aa301f", name: "Makeup Artists" },
-    { id: "69d1822df3b2afb229b5bb00", category_id: "69d09c14d5ee9e7be9aa301f", name: "Massage Therapists" },
     { id: "69d1822df3b2afb229b5bafd", category_id: "69d09c14d5ee9e7be9aa301f", name: "Nail Technicians" },
-    { id: "69d1822df3b2afb229b5bb01", category_id: "69d09c14d5ee9e7be9aa301f", name: "Personal Trainers" },
     { id: "69d1822df3b2afb229b5bafe", category_id: "69d09c14d5ee9e7be9aa301f", name: "Spa Services" },
-    // Pet Services
+    { id: "69d1822df3b2afb229b5baff", category_id: "69d09c14d5ee9e7be9aa301f", name: "Home Health Aides" },
+    { id: "69d1822df3b2afb229b5bb00", category_id: "69d09c14d5ee9e7be9aa301f", name: "Massage Therapists" },
+    { id: "69d1822df3b2afb229b5bb01", category_id: "69d09c14d5ee9e7be9aa301f", name: "Personal Trainers" },
+    { id: "69d1822df3b2afb229b5bb02", category_id: "69d09c14d5ee9e7be9aa301f", name: "Makeup Artists" },
+    { id: "69d1822df3b2afb229b5bb03", category_id: "69d09c14d5ee9e7be9aa3020", name: "Veterinary Services" },
     { id: "69d1822df3b2afb229b5bb04", category_id: "69d09c14d5ee9e7be9aa3020", name: "Grooming" },
-    { id: "69d1822df3b2afb229b5bb07", category_id: "69d09c14d5ee9e7be9aa3020", name: "Mobile Grooming" },
-    { id: "69deb9de1564dc5386aff454", category_id: "69d09c14d5ee9e7be9aa3020", name: "Pet Nail Trimming" },
     { id: "69d1822df3b2afb229b5bb05", category_id: "69d09c14d5ee9e7be9aa3020", name: "Pet Sitting/Walking" },
     { id: "69d1822df3b2afb229b5bb06", category_id: "69d09c14d5ee9e7be9aa3020", name: "Pet Training" },
-    { id: "69d1822df3b2afb229b5bb03", category_id: "69d09c14d5ee9e7be9aa3020", name: "Veterinary Services" },
-    // Transportation
-    { id: "69d1822df3b2afb229b5bb09", category_id: "69d09c14d5ee9e7be9aa3021", name: "Airport Transport" },
-    { id: "69d1822df3b2afb229b5bb0c", category_id: "69d09c14d5ee9e7be9aa3021", name: "Courier/Delivery Services" },
-    { id: "69d1822df3b2afb229b5bb0b", category_id: "69d09c14d5ee9e7be9aa3021", name: "Errand Services" },
-    { id: "69d1822df3b2afb229b5bb0a", category_id: "69d09c14d5ee9e7be9aa3021", name: "Local Rides" },
+    { id: "69d1822df3b2afb229b5bb07", category_id: "69d09c14d5ee9e7be9aa3020", name: "Mobile Grooming" },
     { id: "69d1822df3b2afb229b5bb08", category_id: "69d09c14d5ee9e7be9aa3021", name: "Medical Transport" },
-    { id: "69e533a4d86b8063aacf415e", category_id: "69d09c14d5ee9e7be9aa3021", name: "Vehicle Transport" },
-    // Professional Services
+    { id: "69d1822df3b2afb229b5bb09", category_id: "69d09c14d5ee9e7be9aa3021", name: "Airport Transport" },
+    { id: "69d1822df3b2afb229b5bb0a", category_id: "69d09c14d5ee9e7be9aa3021", name: "Local Rides" },
+    { id: "69d1822df3b2afb229b5bb0b", category_id: "69d09c14d5ee9e7be9aa3021", name: "Errand Services" },
+    { id: "69d1822df3b2afb229b5bb0c", category_id: "69d09c14d5ee9e7be9aa3021", name: "Courier/Delivery Services" },
+    { id: "69d1822df3b2afb229b5bb0a", category_id: "69d09c14d5ee9e7be9aa3021", name: "Vehicle Transport" },
     { id: "69d1822df3b2afb229b5bb0d", category_id: "69d181fe57b60e0aecf4067e", name: "Accounting & Bookkeeping" },
-    { id: "69d1822df3b2afb229b5bb11", category_id: "69d181fe57b60e0aecf4067e", name: "Business Consulting" },
-    { id: "69d1822df3b2afb229b5bae4", category_id: "69d181fe57b60e0aecf4067e", name: "Home Organization" },
+    { id: "69d1822df3b2afb229b5bb0e", category_id: "69d181fe57b60e0aecf4067e", name: "Notary Services" },
     { id: "69d1822df3b2afb229b5bb0f", category_id: "69d181fe57b60e0aecf4067e", name: "IT Support" },
     { id: "69d1822df3b2afb229b5bb10", category_id: "69d181fe57b60e0aecf4067e", name: "Legal Services" },
-    { id: "69d1822df3b2afb229b5bb0e", category_id: "69d181fe57b60e0aecf4067e", name: "Notary Services" },
+    { id: "69d1822df3b2afb229b5bb11", category_id: "69d181fe57b60e0aecf4067e", name: "Business Consulting" },
     { id: "69d1822df3b2afb229b5bb12", category_id: "69d181fe57b60e0aecf4067e", name: "Tax Preparation" },
   ];
 
@@ -1130,7 +1355,7 @@ export default function Home() {
 
     // ── Step 1: Fetch providers via backend (service role — works on public page) ──
     try {
-      const resp = await fetch("https://api.base44.app/api/apps/69d06ada8019d7e9edf7f8e8/functions/getProviders", {
+      const resp = await fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/getProviders", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action: "list_all" }),
@@ -1458,18 +1683,27 @@ export default function Home() {
     setSearched(true);
     // Track search appearances — fire & forget to backend analytics
     if (out.length > 0) {
-      const areaLabel = selArea ? (areas.find(a => a.id === selArea || a.name === selArea)?.name || selArea) : "";
-      const svcObj = selSvc ? svcs.find(s => s.id === selSvc) : null;
-      const catObj = svcObj ? cats.find(c => c.id === svcObj.category_id) : null;
+      // Track site-level search event (village + service combo)
+      const areaLabelSite = selArea ? selArea.name : "All Villages";
+      const svcLabelSite = selSvc ? selSvc.name : "All Services";
+      const catLabelSite = selSvc?._isCat ? selSvc.name : (cats.find(c=>c.id===selSvc?.category_id)?.name || "");
+      fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/trackEvent", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ provider_id: "SITE", event_type: "search_performed", area_name: areaLabelSite, service_name: svcLabelSite, category_name: catLabelSite, source: "homepage" }),
+      }).catch(() => {});
+      // selSvc and selArea are already full objects (not IDs)
+      const areaLabel = selArea ? selArea.name : "";
+      const svcName = selSvc ? (selSvc._isCat ? "" : selSvc.name) : "";
+      const catName = selSvc ? (selSvc._isCat ? selSvc.name : (cats.find(c => c.id === selSvc.category_id)?.name || "")) : "";
       const events = out.map(p => ({
         provider_id: p.id,
         event_type: "search_appearance",
-        service_name: svcObj?.name || "",
-        category_name: catObj?.name || "",
+        service_name: svcName,
+        category_name: catName,
         area_name: areaLabel,
         source: "homepage",
       }));
-      fetch("https://api.base44.app/api/apps/69d06ada8019d7e9edf7f8e8/functions/trackEvent", {
+      fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/trackEvent", {
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify(events),
       }).catch(() => {});
@@ -1488,7 +1722,7 @@ export default function Home() {
     keywords: "The Villages FL services, local service directory, home repair, landscaping, cleaning, pet care, golf cart services, The Villages Florida",
     ogTitle: "V-Hub — The Villages Local Services Directory",
     ogDescription: "Find local service providers across all 97 villages in The Villages, FL. No fees. No middlemen. Just neighbors serving neighbors.",
-    ogImage: "https://media.base44.com/images/public/69d062aca815ce8e697894b1/1256a9552_ronnie_clark_hero.jpg",
+    ogImage: "https://media.base44.com/images/public/69d062aca815ce8e697894b1/0a0a19a9f_ronnie_hero_fixed.jpg",
     canonical: "https://www.v-hub.us/",
   });
 
@@ -1566,9 +1800,9 @@ export default function Home() {
         }
       `}</style>
       {/* Preload logo so it's ready instantly on navigation */}
-      <link rel="preload" as="image" href="https://media.base44.com/images/public/69d062aca815ce8e697894b1/f14a7cbd0_logo_icon_small.png" />
+      <link rel="preload" as="image" href="https://base44.app/api/apps/69d062aca815ce8e697894b1/files/mp/public/69d062aca815ce8e697894b1/f14a7cbd0_logo_icon_small.png" />
       {/* Preload hero image — highest priority, loads with app */}
-      <link rel="preload" as="image" href="https://media.base44.com/images/public/69d062aca815ce8e697894b1/1256a9552_ronnie_clark_hero.jpg" fetchpriority="high" />
+      <link rel="preload" as="image" href="https://media.base44.com/images/public/69d062aca815ce8e697894b1/0a0a19a9f_ronnie_hero_fixed.jpg" fetchpriority="high" />
 
       <div style={{
         minHeight: "100vh",
@@ -1604,7 +1838,7 @@ export default function Home() {
             {/* Left: logo — fixed width 64 */}
             <div style={{ flexShrink: 0, width: 64, height: 64, display: "flex", alignItems: "center", justifyContent: "flex-start" }}>
               <img
-                src="https://media.base44.com/images/public/69d062aca815ce8e697894b1/f14a7cbd0_logo_icon_small.png"
+                src="https://base44.app/api/apps/69d062aca815ce8e697894b1/files/mp/public/69d062aca815ce8e697894b1/f14a7cbd0_logo_icon_small.png"
                 alt="V-Hub logo icon"
                 loading="eager"
                 fetchPriority="high"
@@ -1629,31 +1863,61 @@ export default function Home() {
 
         <Rule thick />
 
-        {/* FIND SERVICES SEARCH BLOCK — full width, green bordered */}
+        {/* FIND SERVICES SEARCH BLOCK — high contrast, visually grouped unit */}
         <div style={{
           border: "4px solid #1A6B3C",
-          outline: "1.5px solid #1A6B3C",
-          outlineOffset: "0px",
-          boxShadow: "0 0 10px 2px rgba(26,107,60,0.3)",
-          background: PAPER,
+          outline: "3px solid #0d3d22",
+          outlineOffset: "2px",
+          boxShadow: "0 0 0 5px rgba(26,107,60,0.18), 0 6px 24px rgba(26,107,60,0.28)",
+          background: "#EDFAF2",
           width: "100%", boxSizing: "border-box",
+          borderRadius: 4,
         }}>
           {/* Header label */}
           <div style={{
-            padding: "5px 16px", textAlign: "center", fontSize: 13, fontWeight: 900,
-            letterSpacing: 2, color: "#000", textTransform: "uppercase",
-            borderBottom: "1px solid #1A6B3C88",
-          }}>Classifieds</div>
+            padding: "7px 16px", textAlign: "center", fontSize: 13, fontWeight: 900,
+            letterSpacing: 3, color: "#fff", textTransform: "uppercase",
+            background: "linear-gradient(180deg,#1A6B3C 0%,#0d3d22 100%)",
+            fontFamily: "'Times New Roman', serif",
+            borderBottom: "2px solid #0d3d22",
+          }}>🔍 Find a Provider</div>
           {/* Search box */}
-          <div style={{ padding: "4px 12px 2px" }}>
+          <div style={{ padding: "10px 12px 8px" }}>
             <SearchBox cats={cats} svcs={svcs} areas={areas} onSearch={doSearch} selSvc={selSvc} setSelSvc={setSelSvc} selArea={selArea} setSelArea={setSelArea} />
           </div>
+        </div>
+
+
+        {/* DIVIDER — separates Find Services group from the action buttons below */}
+        <div style={{ width: "100%", display: "flex", alignItems: "center", gap: 8, margin: "2px 0" }}>
+          <div style={{ flex: 1, height: 1, background: "linear-gradient(90deg, transparent, #C8A96E 30%, #C8A96E 70%, transparent)" }} />
+          <span style={{ fontSize: 10, color: "#999", fontFamily: "'Times New Roman', serif", letterSpacing: 1, fontStyle: "italic", whiteSpace: "nowrap" }}>— or —</span>
+          <div style={{ flex: 1, height: 1, background: "linear-gradient(90deg, transparent, #C8A96E 30%, #C8A96E 70%, transparent)" }} />
+        </div>
+
+        {/* VENDORS BUTTON — matches Find Services button style exactly */}
+        <div style={{ width: "100%", boxSizing: "border-box" }}>
+          <button onClick={() => setShowVendors(v => !v)} style={{
+            width: "100%",
+            background: showVendors ? "linear-gradient(180deg,#1A6B3C 0%,#145530 60%,#0d3d22 100%)" : `linear-gradient(180deg,#9A6030,#7A4820 60%,#5A3010)`,
+            border: showVendors ? "3px solid #1A6B3C" : "3px solid #FFDB00",
+            boxShadow: showVendors
+              ? "0 0 0 2px #1A6B3C, 0 4px 18px rgba(26,107,60,0.55), inset 0 1px 0 rgba(255,255,255,0.12)"
+              : "0 0 0 2px #FFDB00, 0 4px 14px rgba(200,169,110,0.45), inset 0 1px 0 rgba(255,255,255,0.10)",
+            borderRadius: 6, color: "#F5E8CC", fontFamily: "'Times New Roman', serif",
+            fontWeight: 700, fontSize: 14, letterSpacing: 3, padding: "14px", cursor: "pointer", boxSizing: "border-box",
+            transition: "all 0.2s ease", textTransform: "uppercase", textAlign: "center",
+            textShadow: "0 1px 2px rgba(0,0,0,0.4)",
+          }}>
+            {showVendors ? "✓ HOMETOWN MARKET VENDORS" : "HOMETOWN MARKET VENDORS"}
+          </button>
+          {showVendors && <VendorMarketSection />}
         </div>
 
         {/* PHOTO */}
         <div style={{ position: "relative", width: "100%", lineHeight: 0 }}>
           <img
-            src="https://media.base44.com/images/public/69d062aca815ce8e697894b1/1256a9552_ronnie_clark_hero.jpg"
+            src="https://media.base44.com/images/public/69d062aca815ce8e697894b1/0a0a19a9f_ronnie_hero_fixed.jpg"
             alt="The Villages, FL"
             fetchpriority="high"
             loading="eager"
@@ -1671,31 +1935,33 @@ export default function Home() {
         </div>
 
         {/* CLASSIFIEDS — full width, thick red border, links to Classifieds */}
-        <a href="/Classifieds" style={{ textDecoration: "none", display: "block", width: "100%" }}>
-          <div style={{
-            border: "4px solid #CC0000",
-            outline: "1.5px solid #CC0000",
-            outlineOffset: "0px",
-            boxShadow: "0 0 10px 2px rgba(204,0,0,0.3)",
-            background: PAPER,
-            width: "100%", boxSizing: "border-box",
-            cursor: "pointer",
-          }}>
-            <div style={{ padding: "5px 16px 2px", textAlign: "center", fontSize: 13, fontWeight: 900, letterSpacing: 2, color: "#CC0000", textTransform: "uppercase", fontFamily: "'Times New Roman', serif" }}>🔥 Deals of the Week!</div>
-            <div style={{ padding: "0 16px 5px", textAlign: "center", fontSize: 11, fontStyle: "italic", color: "#CC0000", fontFamily: "'Times New Roman', serif", opacity: 0.8 }}>Click here to see this week's deals →</div>
-          </div>
+        <a href="/Classifieds" style={{ textDecoration: "none", display: "block", width: "100%" }} onClick={()=>fetch("https://api.base44.app/api/apps/69d062aca815ce8e697894b1/functions/trackEvent",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({provider_id:"SITE",event_type:"featured_banner_click",source:"homepage"})}).catch(()=>{})}>
+          <button style={{
+            width: "100%",
+            background: "linear-gradient(180deg,#CC0000 0%,#991000 60%,#660000 100%)",
+            border: "3px solid #CC0000",
+            boxShadow: "0 0 0 2px #CC0000, 0 4px 18px rgba(204,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.12)",
+            borderRadius: 6, color: "#FFF5E6", fontFamily: "'Times New Roman', serif",
+            fontWeight: 700, fontSize: 14, letterSpacing: 3, padding: "14px", cursor: "pointer",
+            boxSizing: "border-box", textTransform: "uppercase", textAlign: "center",
+            transition: "all 0.2s ease", textShadow: "0 1px 2px rgba(0,0,0,0.4)",
+            pointerEvents: "none",
+          }}>🌟 WEEKLY FEATURED</button>
         </a>
 
         {/* LIST MY SERVICE — full width, deep navy blue */}
         <a href="/ListService" style={{ textDecoration: "none", display: "block", width: "100%" }}>
-          <div style={{
-            padding: "14px 8px", textAlign: "center", fontSize: 13, fontWeight: 900,
-            letterSpacing: 2, color: "#FFFFFF", textTransform: "uppercase",
-            background: `linear-gradient(180deg,#1B3D6F,#0d2447)`,
-            border: `3px solid #1B3D6F`,
-            boxShadow: `0 0 0 1.5px #1B3D6F, 0 2px 12px rgba(27,61,111,0.4)`,
-            boxSizing: "border-box", cursor: "pointer", lineHeight: 1.4, width: "100%",
-          }}>📋 List My Service</div>
+          <button style={{
+            width: "100%",
+            background: "linear-gradient(180deg,#1B3D6F 0%,#0d2447 60%,#071830 100%)",
+            border: "3px solid #1B3D6F",
+            boxShadow: "0 0 0 2px #1B3D6F, 0 4px 18px rgba(27,61,111,0.5), inset 0 1px 0 rgba(255,255,255,0.10)",
+            borderRadius: 6, color: "#FFFFFF", fontFamily: "'Times New Roman', serif",
+            fontWeight: 700, fontSize: 14, letterSpacing: 3, padding: "14px", cursor: "pointer",
+            boxSizing: "border-box", textTransform: "uppercase", textAlign: "center",
+            transition: "all 0.2s ease", textShadow: "0 1px 2px rgba(0,0,0,0.4)",
+            pointerEvents: "none",
+          }}>📋 LIST MY SERVICE</button>
         </a>
 
         <Rule />
